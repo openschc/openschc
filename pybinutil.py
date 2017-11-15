@@ -23,6 +23,10 @@ def int_to_bitstring(n, nbits, lsb0=True):
     if nbits is 5 and lsb0 is True, then it's gonna be "00111".
     if lsb0 is False, then its' gonna be "01110".
     '''
+    if lsb0:
+        return zfill(bin(n)[2:], nbits)
+    else:
+        return rzfill(bin(n)[2:], nbits)
 
 def bitset(ba, pos, val=None):
     '''
@@ -79,7 +83,10 @@ def bitget(ba, pos, val=None):
         from the position.
 
         if the type is int, this gets a series of value of the bits
-        from the position and return the integer of the value.
+        from the position and return the bit string of the value.
+
+        e.g. if sbitarray is ba = "00001111",
+        bitget(ba, 2, 4) is gonna be "0011".
     '''
     p0 = pos >> 3
     p1 = pos % 8
@@ -91,7 +98,7 @@ def bitget(ba, pos, val=None):
         ret = ""
         for i in range(val):
             ret += "1" if bitget(ba, pos+i) else "0"
-        return int(ret, 2)
+        return ret
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
 
