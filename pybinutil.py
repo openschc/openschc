@@ -77,10 +77,10 @@ def bitset(ba, pos, val=None):
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
 
-def bitget(ba, pos, val=None):
+def bitget(ba, pos, val=None, integer=False):
     '''
     val: if the type of val is None, this gets a value of the bit
-        from the position.
+        from the position, and return "1" or "0".
 
         if the type is int, this gets a series of value of the bits
         from the position and return the bit string of the value.
@@ -93,14 +93,17 @@ def bitget(ba, pos, val=None):
     guard_pos = len(ba) * 8
     if val is None:
         b = zfill(bin(ba[p0])[2:], 8)
-        return 1 if b[p1] == "1" else 0
+        ret = ("1" if b[p1] == "1" else "0")
     elif type(val) is int:
         ret = ""
         for i in range(val):
-            ret += "1" if bitget(ba, pos+i) else "0"
-        return ret
+            ret += "1" if bitget(ba, pos+i, integer=integer) == "1" else "0"
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
+    #
+    if integer:
+        return int(ret, 2)
+    return ret
 
 def rzfill(s, w):
     '''
