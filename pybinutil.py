@@ -4,7 +4,7 @@ e.g. to_bitstring() means that a bytearray is converted into a bitstring.
 foo_to() meaans that a foo is converted into a bytearray.
 '''
 
-def to_bin(buf):
+def to_bit(buf):
     return [zfill(bin(i)[2:],8) for i in buf]
 
 def int_to(n, nbytes, bigendian=True):
