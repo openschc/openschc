@@ -100,7 +100,6 @@ def bitget(ba, pos, val=None, integer=False):
     '''
     p0 = pos >> 3
     p1 = pos % 8
-    guard_pos = len(ba) * 8
     if val is None:
         b = zfill(bin(ba[p0])[2:], 8)
         ret = ("1" if b[p1] == "1" else "0")
@@ -111,7 +110,7 @@ def bitget(ba, pos, val=None, integer=False):
         # construct the bit string.
         ret = ""
         for i in range(val):
-            ret += "1" if bitget(ba, pos+i, integer=integer) == "1" else "0"
+            ret += "1" if bitget(ba, pos+i) == "1" else "0"
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
     #
