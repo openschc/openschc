@@ -1,5 +1,13 @@
+'''
+to_foo() measns that a bytearray is converted into a foo.
+e.g. to_bitstring() means that a bytearray is converted into a bitstring.
+foo_to() meaans that a foo is converted into a bytearray.
+'''
 
-def int_to_bytearray(n, nbytes, bigendian=True):
+def to_bin(buf):
+    return [zfill(bin(i)[2:],8) for i in buf]
+
+def int_to(n, nbytes, bigendian=True):
     '''
     e.g. if n in hex is "123",
     if nbytes is 3 and endian is "big", then it's gonna be "000123".
@@ -9,7 +17,7 @@ def int_to_bytearray(n, nbytes, bigendian=True):
     x = [int(h[i:i+2],16) for i in range(0, len(h), 2)]
     return bytearray(x) if bigendian else bytearray(x[::-1])
 
-def bytearray_to_int(ba, reverse=False):
+def to_int(ba, reverse=False):
     n = 0
     if reverse:
         ba = ba[::-1]
@@ -17,7 +25,7 @@ def bytearray_to_int(ba, reverse=False):
         n = (n<<8) + i
     return n
 
-def int_to_bitstring(n, nbits, lsb0=True):
+def int_to_bit(n, nbits, lsb0=True):
     '''
     e.g. if n is in bit is "0111",
     if nbits is 5 and lsb0 is True, then it's gonna be "00111".
@@ -55,6 +63,8 @@ def bitset(ba, pos, val=None):
     '''
     p0 = pos >> 3
     p1 = pos % 8
+    if not (p0 < len(ba)):
+        return ba
     if val is None:
         b = zfill(bin(ba[p0])[2:], 8)
         ba[p0] = int(b[:p1] + "1" + b[p1+1:], 2)
