@@ -95,6 +95,10 @@ def bitget(ba, pos, val=None, integer=False):
         b = zfill(bin(ba[p0])[2:], 8)
         ret = ("1" if b[p1] == "1" else "0")
     elif type(val) is int:
+        # if the bit length is zero, it returns None.
+        if val == 0:
+            return None
+        # construct the bit string.
         ret = ""
         for i in range(val):
             ret += "1" if bitget(ba, pos+i, integer=integer) == "1" else "0"
