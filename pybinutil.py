@@ -7,6 +7,9 @@ foo_to() meaans that a foo is converted into a bytearray.
 def to_bit(buf):
     return [zfill(bin(i)[2:],8) for i in buf]
 
+def to_hex(buf):
+    return ["%02x"%i for i in buf]
+
 def int_to(n, nbytes, bigendian=True):
     '''
     e.g. if n in hex is "123",
