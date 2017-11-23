@@ -70,6 +70,8 @@ def send_client_trigger(s):
 context = schc_fragment.schc_context(0)
 dfg = schc_fragment.schc_defragment_factory(debug=True)
 
+opt.timeout_all_1 = 2
+
 while True:
     s.setblocking(True)
 
@@ -89,9 +91,10 @@ while True:
             print("sent ack.", pybinutil.to_hex(buf))
             s.sendto(buf, client)
         elif ret == schc_fragment.SCHC_DEFRAG_GOT_ALL1:
-            print("finished, but waiting something.", pybinutil.to_hex(buf))
+            print("received." % (pybinutil.to_hex(buf))
+            print("finished, but waiting something in %d seconds." % opt.timeout_all_1)
             s.sendto(buf, client)
-            s.settimeout(10) # XXX be option
+            s.settimeout(opt.timeout_all_1) # XXX it should be done in the factory.
         elif ret == schc_fragment.SCHC_DEFRAG_ACK:
             print("sending ack")
             s.sendto(buf, client)
@@ -101,6 +104,7 @@ while True:
 
     except Exception as e:
         print(e)
+        print("XXX")
 
 if ret == schc_fragment.SCHC_DEFRAG_WAIT1:
     print("done.")
