@@ -559,6 +559,7 @@ class schc_defragment_window:
             if self.is_rx_ok():
                 # don't change the state here. i.e. GOT_ALL0 or GOT_ALL1
                 return self.state.get(), self.make_ack(fgh)
+            print("XXX got all-1, but don't know whether all fragments are received.")
             return SCHC_DEFRAG_CONT, None
         else:
             # in other case.
