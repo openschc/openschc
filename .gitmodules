@@ -1,0 +1,3 @@
+[submodule "pybinutil"]
+	path = pybinutil
+	url = http://github.com/tanupoo/pybinutil.git
