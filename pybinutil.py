@@ -10,6 +10,17 @@ def to_bit(buf):
 def to_hex(buf):
     return ["%02x"%i for i in buf]
 
+def find_bit(n, bit_len):
+    '''
+    find a bit from left.
+    return the number where the bit set,
+    and the number where the bit is turned off.
+    '''
+    for i in range(bit_len):
+        x = 2**(bit_len-i-1)
+        if n & x:
+            return i, n - x
+
 def int_to(n, nbytes, bigendian=True):
     '''
     e.g. if n in hex is "123",
