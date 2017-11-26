@@ -6,8 +6,14 @@ from __future__ import print_function
 import sys
 import argparse
 from socket import *
-import schc_fragment
+import schc_fragment_receiver as sfr
 from pybinutil import *
+
+debug_level = 0
+
+def debug_print(*argv):
+    if debug_level:
+        print("DEBUG: ", argv)
 
 def parse_args():
     p = argparse.ArgumentParser(description="this is example.",
@@ -46,6 +52,7 @@ def parse_args():
 main
 '''
 opt = parse_args()
+debug_level = opt.debug_level
 
 server = (opt.server_address, opt.server_port)
 print("server:", server)
@@ -67,13 +74,13 @@ def send_client_trigger(s):
 # send_client_trigger(s)
 
 #
-context = schc_fragment.schc_context(0)
-dfg = schc_fragment.schc_defragment_factory(debug=True)
+context = sfr.schc_context(0)
+factory = sfr.schc_defragment_factory(logger=debug_print)
 
 opt.timeout_all_1 = 2
 
+s.settimeout(None)
 while True:
-    s.setblocking(True)
 
     print("waiting...")
     try:
@@ -84,18 +91,18 @@ while True:
         print("received:", pybinutil.to_hex(rx_data), "from", client)
 
         # trying to defrag
-        ret, buf = dfg.defrag(context, rx_data)
-        if ret == schc_fragment.SCHC_DEFRAG_CONT:
+        ret, buf = factory.defrag(context, rx_data)
+        if ret == sfr.SCHC_DEFRAG_CONT:
             print("not yet")
-        elif ret == schc_fragment.SCHC_DEFRAG_GOT_ALL0:
+        elif ret == sfr.SCHC_DEFRAG_GOT_ALL0:
             print("sent ack.", pybinutil.to_hex(buf))
             s.sendto(buf, client)
-        elif ret == schc_fragment.SCHC_DEFRAG_GOT_ALL1:
-            print("received." % (pybinutil.to_hex(buf))
+        elif ret == sfr.SCHC_DEFRAG_GOT_ALL1:
+            print("received." % (pybinutil.to_hex(buf)))
             print("finished, but waiting something in %d seconds." % opt.timeout_all_1)
             s.sendto(buf, client)
             s.settimeout(opt.timeout_all_1) # XXX it should be done in the factory.
-        elif ret == schc_fragment.SCHC_DEFRAG_ACK:
+        elif ret == sfr.SCHC_DEFRAG_ACK:
             print("sending ack")
             s.sendto(buf, client)
             print("sent: ", pybinutil.to_hex(buf))
@@ -103,9 +110,9 @@ while True:
             print("DEBUG:", ret, buf)
 
     except Exception as e:
-        print(e)
-        print("XXX")
+        print("XXX", e)
+        #print("XXX timeout [%s]" % dir(e))
 
-if ret == schc_fragment.SCHC_DEFRAG_WAIT1:
+if ret == sfr.SCHC_DEFRAG_WAIT1:
     print("done.")
     pybinutil.to_hex(buf)
