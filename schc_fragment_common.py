@@ -112,7 +112,7 @@ class schc_fragment_holder:
     rid = None
 
     def __init__(self, context, recvbuf=None, rule=None, dtag=None, fgh=None,
-                 ack=False):
+                 ack=False, logger=default_logger):
         '''
         context: context instance.
         recvbuf: buffer received.
