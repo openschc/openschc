@@ -25,6 +25,9 @@ def parse_args():
         help="specify the ip address of the server to be bind. default is any.")
     p.add_argument("--port", action="store", dest="conf_file", default="",
         help="specify the configuration file.")
+    p.add_argument("--timeout-all-1", action="store", dest="timeout_all_1",
+        type=int, default=3,
+        help="specify the configuration file.")
     #p.add_argument("-O", action="store", dest="out_file", default="-",
     #    help="specify a output file, default is stdout.")
     p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
@@ -76,8 +79,6 @@ def send_client_trigger(s):
 #
 context = sfr.schc_context(0)
 factory = sfr.schc_defragment_factory(logger=debug_print)
-
-opt.timeout_all_1 = 2
 
 s.settimeout(None)
 while True:
