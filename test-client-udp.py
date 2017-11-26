@@ -6,9 +6,15 @@ from __future__ import print_function
 import sys
 import argparse
 from socket import *
-import schc_fragment
+import schc_fragment_sender as sfs
 import time
 from pybinutil import *
+
+debug_level = 0
+
+def debug_print(*argv):
+    if debug_level:
+        print("DEBUG: ", argv)
 
 def parse_args():
     p = argparse.ArgumentParser(description="this is SCHC example.",
@@ -52,6 +58,7 @@ def parse_args():
 main code
 '''
 opt = parse_args()
+debug_level = opt.debug_level
 
 server = (opt.server_address, opt.server_port)
 print("server:", server)
@@ -71,10 +78,9 @@ message = "Hello, this is a fragmentation test of SCHC."
 fgp_size = opt.fgp_size
 
 # fragment instance
-context = schc_fragment.schc_context(0)
-fg = schc_fragment.schc_fragment(context, opt.rule_id, debug=True)
-fg.setbuf(message)
-
+context = sfs.schc_context(0)
+factory = sfs.schc_fragment_factory(context, opt.rule_id, logger=debug_print)
+factory.setbuf(message)
 
 while True:
 
@@ -82,15 +88,15 @@ while True:
     # WAIT_ACK: send it and wait for the ack.
     # DONE: dont need to send it.
     # ERROR: error happened.
-    tx_ret, tx_data, = fg.next_fragment(fgp_size)
+    tx_ret, tx_data, = factory.next_fragment(fgp_size)
 
     # whole fragments have been sent and all the ack has been received.
-    if tx_ret == schc_fragment.SCHC_FRAG_DONE:
+    if tx_ret == sfs.SCHC_FRAG_DONE:
         print("done.")
         break
 
     # error!
-    if tx_ret == schc_fragment.SCHC_FRAG_ERROR:
+    if tx_ret == sfs.SCHC_FRAG_ERROR:
         raise AssertionError("something wrong in fragmentation.")
         break
 
@@ -103,7 +109,7 @@ while True:
         continue
 
     # CONT
-    if tx_ret == schc_fragment.SCHC_FRAG_CONT:
+    if tx_ret == sfs.SCHC_FRAG_CONT:
         # need to rest fragmentation.
         time.sleep (opt.interval)
         continue
@@ -118,7 +124,7 @@ while True:
             rx_data = bytearray([ord(rx_data[i]) for i in range(len(rx_data))])
         print("received:", pybinutil.to_hex(rx_data), "from", peer)
 
-        ack_ok = fg.is_ack_ok(rx_data)
+        ack_ok = factory.is_ack_ok(rx_data)
         if ack_ok:
             continue
     except Exception as e:
