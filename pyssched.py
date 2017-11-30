@@ -8,7 +8,7 @@ from collections import namedtuple
 
 Event = namedtuple('Event', 'time, priority, action, argument')
 
-class simple_sched:
+class pyssched:
 
     def __init__(self, timefunc=time.time):
         '''
@@ -94,32 +94,4 @@ class simple_sched:
         # the actual order they would be retrieved.
         events = self._queue[:]
         return map(heapq.heappop, [events]*len(events))
-
-'''
-test code
-'''
-if __name__ == "__main__" :
-    import sys
-    import random
-
-    def print_time(tag):
-        sys.stdout.write("timer=%s delta=%f\n" % (tag, time.time() - t0))
-
-    t0 = time.time()
-    s = simple_sched()
-
-    n = 0
-
-    while True:
-        timer = s.execute()
-        sys.stdout.write("timer=%f" % timer)
-
-        t = random.randint(0, 3)
-        if t:
-            s.enter(t, 1, print_time, ("%d"%n,))
-            n += 1
-
-        sys.stdout.write("queue len=%d" % len(s.queue))
-
-        time.sleep(timer)
 
