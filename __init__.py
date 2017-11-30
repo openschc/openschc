@@ -1,2 +1,2 @@
-__all__ = [ "simple_sched" ]
+__all__ = [ "pyssched" ]
 
