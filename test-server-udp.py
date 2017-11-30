@@ -32,24 +32,22 @@ def parse_args():
     p = argparse.ArgumentParser(description="this is example.",
                                 epilog="this is the tail story.")
     p.add_argument("server_port", metavar="PORT", type=int,
-        help="specify the port number in the server.")
+                   help="specify the port number in the server.")
     p.add_argument("--address", action="store", dest="server_address",
-        default="",
-        help="specify the ip address of the server to be bind. default is any.")
-    p.add_argument("--port", action="store", dest="conf_file", default="",
-        help="specify the configuration file.")
+                   default="",
+                   help="specify the ip address of the server to be bind. default is any.")
+    p.add_argument("--port", action="store", dest="conf_file",
+                   default="", help="specify the configuration file.")
     p.add_argument("--timeout", action="store", dest="timeout",
-        type=int, default=3,
-        help="specify the number of the timeout.")
-    p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
-        help="enable verbose mode.")
-    p.add_argument("-d", action="append_const", dest="_f_debug", default=[],
-        const=1, help="increase debug mode.")
+                   type=int, default=3, help="specify the number of the timeout.")
+    p.add_argument("-v", action="store_true", dest="f_verbose",
+                   default=False, help="enable verbose mode.")
+    p.add_argument("-d", action="append_const", dest="_f_debug",
+                   default=[], const=1, help="increase debug mode.")
     p.add_argument("--verbose", action="store_true", dest="f_verbose",
-        default=False, help="enable verbose mode.")
+                   default=False, help="enable verbose mode.")
     p.add_argument("--debug", action="store", dest="_debug_level",
-        type=int, default=-1,
-        help="specify a debug level.")
+                   type=int, default=-1, help="specify a debug level.")
     p.add_argument("--version", action="version", version="%(prog)s 1.0")
 
     args = p.parse_args()
