@@ -41,7 +41,7 @@ class schc_fragment_factory:
         self.C = context
         self.R = schc_rule(context, rid)
         self.logger = logger
-        self.logger("max_fcn =", self.R.max_fcn,
+        self.logger(1, "max_fcn =", self.R.max_fcn,
                     "bitmap_size =", self.R.bitmap_size)
 
     def __init_window(self):
@@ -110,7 +110,7 @@ class schc_fragment_factory:
             #     bit: 0 1 6
             #     fcn: 6 5 7
             p, self.missing = pybinutil.find_bit(self.missing, self.R.bitmap_size)
-            self.logger("retransmitting.", "fpg_list=", self.fpg_list.keys(), "p=", p,
+            self.logger(1, "retransmitting.", "fpg_list=", self.fpg_list.keys(), "p=", p,
                         "missing=", pybinutil.int_to_bit(self.missing,self.R.bitmap_size))
             if p == self.R.max_fcn:
                 if self.state.get() == SCHC_FRAG_MISSING_ALL0:
@@ -160,7 +160,7 @@ class schc_fragment_factory:
         self.fgh.set_fcn(self.fcn)
         #
         if self.R.mode == SCHC_MODE_NO_ACK:
-            self.logger("fcn =", self.fcn, "pos =", self.pos,
+            self.logger(1, "fcn =", self.fcn, "pos =", self.pos,
                         "size =", fgp_size)
         else:
             # in window mode, needs to maintain the local bitmap.
@@ -170,7 +170,7 @@ class schc_fragment_factory:
                 self.bitmap |= 1
             else:
                 self.bitmap |= 1<<self.fcn
-            self.logger("fcn =", self.fcn, "pos =", self.pos,
+            self.logger(1, "fcn =", self.fcn, "pos =", self.pos,
                         "size =", fgp_size, "win =", self.win,
                         "bitmap =",
                         pybinutil.int_to_bit(self.bitmap,self.R.bitmap_size))
@@ -195,9 +195,9 @@ class schc_fragment_factory:
         self.missing = self.bitmap & ~fgh.bitmap
         # save the local bitmap for retransmission
         self.missing_prev = self.missing
-        self.logger("sent    :", pybinutil.int_to_bit(self.bitmap,self.R.bitmap_size))
-        self.logger("received:", pybinutil.int_to_bit(fgh.bitmap,self.R.bitmap_size))
-        self.logger("missing :", pybinutil.int_to_bit(self.missing,self.R.bitmap_size))
+        self.logger(1, "sent    :", pybinutil.int_to_bit(self.bitmap,self.R.bitmap_size))
+        self.logger(1, "received:", pybinutil.int_to_bit(fgh.bitmap,self.R.bitmap_size))
+        self.logger(1, "missing :", pybinutil.int_to_bit(self.missing,self.R.bitmap_size))
         if self.missing:
             # set new bitmap for new retransmission.
             if self.state.get() == SCHC_FRAG_SENT_ALL0:

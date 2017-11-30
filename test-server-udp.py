@@ -8,12 +8,25 @@ import argparse
 from socket import *
 import schc_fragment_receiver as sfr
 from pybinutil import *
+from simple_sched import *
 
 debug_level = 0
 
 def debug_print(*argv):
-    if debug_level:
-        print("DEBUG: ", argv)
+    level = argv[0]
+    if debug_level >= level:
+        print("DEBUG: ", argv[1:])
+
+# just send a message to trigger the lorawan network server.
+def send_client_trigger(s):
+    msg = "Hey!"
+    try:
+        s.settimeout(1)
+        s.sendto(msg, server)
+    except Exception as e:
+        debug_print(1, "ERROR: ", e)
+        exit(0)
+    debug_print(1, "sent: ", msg)
 
 def parse_args():
     p = argparse.ArgumentParser(description="this is example.",
@@ -25,11 +38,9 @@ def parse_args():
         help="specify the ip address of the server to be bind. default is any.")
     p.add_argument("--port", action="store", dest="conf_file", default="",
         help="specify the configuration file.")
-    p.add_argument("--timeout-all-1", action="store", dest="timeout_all_1",
+    p.add_argument("--timeout", action="store", dest="timeout",
         type=int, default=3,
-        help="specify the configuration file.")
-    #p.add_argument("-O", action="store", dest="out_file", default="-",
-    #    help="specify a output file, default is stdout.")
+        help="specify the number of the timeout.")
     p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
         help="enable verbose mode.")
     p.add_argument("-d", action="append_const", dest="_f_debug", default=[],
@@ -57,63 +68,65 @@ main
 opt = parse_args()
 debug_level = opt.debug_level
 
+# set up the server
 server = (opt.server_address, opt.server_port)
-print("server:", server)
+debug_print(1, "server:", server)
 
 s = socket(AF_INET, SOCK_DGRAM)
 s.bind(server)
 
-# just send a message to trigger the lorawan network server.
-def send_client_trigger(s):
-    msg = "Hey!"
-    try:
-        s.settimeout(1)
-        s.sendto(msg, server)
-    except Exception as e:
-        print("ERROR: ", e)
-        exit(0)
-    print("sent: ", msg)
-
+# call the client trigger if this server is running on the end node.
 # send_client_trigger(s)
 
 #
+sched = simple_sched.simple_sched()
 context = sfr.schc_context(0)
-factory = sfr.schc_defragment_factory(logger=debug_print)
+factory = sfr.schc_defragment_factory(scheduler=sched, logger=debug_print)
 
-s.settimeout(None)
 while True:
 
-    print("waiting...")
+    # execute scheduler and get the number for timeout..
+    timer = sched.execute()
+    if not timer:
+        s.setblocking(True)
+    else:
+        s.settimeout(timer)
+
+    # find a message for which a sender has sent all-1.
+    for i in factory.dig():
+        debug_print(1, "defragmented message: [%s]" % i)
+
     try:
+        #
+        # if timeout happens recvfrom() here, go to exception.
+        #
         rx_data, client = s.recvfrom(128)
         # for py2, py3 compatibility
         if type(rx_data) == str:
             rx_data = bytearray([ord(rx_data[i]) for i in range(len(rx_data))])
-        print("received:", pybinutil.to_hex(rx_data), "from", client)
+        debug_print(1, "received:", pybinutil.to_hex(rx_data), "from", client)
 
         # trying to defrag
-        ret, buf = factory.defrag(context, rx_data)
+        ret, data = factory.defrag(context, rx_data)
         if ret == sfr.SCHC_DEFRAG_CONT:
-            print("not yet")
+            pass
         elif ret == sfr.SCHC_DEFRAG_GOT_ALL0:
-            print("sent ack.", pybinutil.to_hex(buf))
-            s.sendto(buf, client)
+            debug_print(1, "sent ack.", pybinutil.to_hex(data))
+            s.sendto(data, client)
+        elif ret == sfr.SCHC_DEFRAG_DONE:
+            debug_print(1, "finished.")
+            debug_print(1, data)
         elif ret == sfr.SCHC_DEFRAG_GOT_ALL1:
-            print("received." % (pybinutil.to_hex(buf)))
-            print("finished, but waiting something in %d seconds." % opt.timeout_all_1)
-            s.sendto(buf, client)
-            s.settimeout(opt.timeout_all_1) # XXX it should be done in the factory.
-        elif ret == sfr.SCHC_DEFRAG_ACK:
-            print("sending ack")
-            s.sendto(buf, client)
-            print("sent: ", pybinutil.to_hex(buf))
+            debug_print(1, "received." % pybinutil.to_hex(data))
+            s.sendto(data, client)
+            debug_print(1, "finished, but waiting something in %d seconds." %
+                        opt.timeout)
         else:
-            print("DEBUG:", ret, buf)
+            debug_print(1, "DEBUG:", ret, buf)
 
     except Exception as e:
-        print("XXX", e)
-        #print("XXX timeout [%s]" % dir(e))
+        if "timeout" in repr(e):
+            debug_print(1, "timed out")
+        else:
+            debug_print(1, "Exception: [%s]" % repr(e))
 
-if ret == sfr.SCHC_DEFRAG_WAIT1:
-    print("done.")
-    pybinutil.to_hex(buf)

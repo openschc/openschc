@@ -298,11 +298,11 @@ class schc_state_holder:
     def set(self, new_state):
         self.state_prev = self.state
         self.state = new_state
-        self.logger("state: ", self.state_prev, "->", self.state)
+        self.logger(1, "state: ", self.state_prev, "->", self.state)
         return self.state
 
     def back(self):
-        self.logger("state: ", self.state, "->", self.state_prev)
+        self.logger(1, "state: ", self.state, "->", self.state_prev)
         self.state = self.state_prev
         self.state_prev = None
         return self.state

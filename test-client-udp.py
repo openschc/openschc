@@ -9,12 +9,14 @@ from socket import *
 import schc_fragment_sender as sfs
 import time
 from pybinutil import *
+from random import choice
 
 debug_level = 0
 
 def debug_print(*argv):
-    if debug_level:
-        print("DEBUG: ", argv)
+    level = argv[0]
+    if debug_level >= level:
+        print("DEBUG: ", argv[1:])
 
 def parse_args():
     p = argparse.ArgumentParser(description="this is SCHC example.",
@@ -33,6 +35,8 @@ def parse_args():
         help="specify the payload size in the fragment. default is 4.")
     p.add_argument("--rid", action="store", dest="rule_id", type=int, default=0,
         help="specify the rule id.  default is 0")
+    p.add_argument("--loss-random", action="store_true", dest="loss_random",
+        help="enable to test for losing a fragment randomly.")
     p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
         help="enable verbose mode.")
     p.add_argument("-d", action="append_const", dest="_f_debug", default=[],
@@ -61,7 +65,7 @@ opt = parse_args()
 debug_level = opt.debug_level
 
 server = (opt.server_address, opt.server_port)
-print("server:", server)
+debug_print(1, "server:", server)
 
 s = socket(AF_INET, SOCK_DGRAM)
 #s.setblocking(True)
@@ -92,7 +96,7 @@ while True:
 
     # whole fragments have been sent and all the ack has been received.
     if tx_ret == sfs.SCHC_FRAG_DONE:
-        print("done.")
+        debug_print(1, "done.")
         break
 
     # error!
@@ -100,12 +104,17 @@ while True:
         raise AssertionError("something wrong in fragmentation.")
         break
 
-    print("fragment", pybinutil.to_hex(tx_data))
+    if opt.loss_random and choice([True, False]):
+        debug_print(1, "drop fragment", pybinutil.to_hex(tx_data))
+        continue
+
+    debug_print(1, "fragment", pybinutil.to_hex(tx_data))
+
     try:
         s.sendto(tx_data, server)
     except Exception as e:
-        print(e)
-        print("timeout in sending")
+        debug_print(1, e)
+        debug_print(1, "timeout in sending")
         continue
 
     # CONT
@@ -116,18 +125,18 @@ while True:
 
     # WAIT_ACK
     # a part of or whole fragments have been sent and wait for the ack.
-    print("waiting an ack", tx_ret)
+    debug_print(1, "waiting an ack", tx_ret)
     try:
         rx_data, peer = s.recvfrom(128)
         # for py2, py3 compatibility
         if type(rx_data) == str:
             rx_data = bytearray([ord(rx_data[i]) for i in range(len(rx_data))])
-        print("received:", pybinutil.to_hex(rx_data), "from", peer)
+        debug_print(1, "received:", pybinutil.to_hex(rx_data), "from", peer)
 
         ack_ok = factory.is_ack_ok(rx_data)
         if ack_ok:
             continue
     except Exception as e:
-        print(e)
-        print("timeout in receive")
+        debug_print(1, e)
+        debug_print(1, "timeout in receive")
 
