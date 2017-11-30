@@ -1,3 +1,6 @@
 [submodule "pybinutil"]
 	path = pybinutil
 	url = http://github.com/tanupoo/pybinutil.git
+[submodule "simple_sched"]
+	path = simple_sched
+	url = http://github.com/tanupoo/simple_sched.git
