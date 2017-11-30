@@ -8,7 +8,7 @@ import argparse
 from socket import *
 import schc_fragment_receiver as sfr
 from pybinutil import *
-from simple_sched import *
+from pyssched import *
 
 debug_level = 0
 
@@ -77,7 +77,7 @@ s.bind(server)
 # send_client_trigger(s)
 
 #
-sched = simple_sched.simple_sched()
+sched = pyssched.pyssched()
 context = sfr.schc_context(0)
 factory = sfr.schc_defragment_factory(scheduler=sched, logger=debug_print)
 
