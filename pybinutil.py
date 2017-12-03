@@ -5,6 +5,9 @@ foo_to() meaans that a foo is converted into a bytearray.
 '''
 
 def to_bit(buf):
+    '''
+    convert bytearray() into a continuous bit string without leading "0b".
+    '''
     return [zfill(bin(i)[2:],8) for i in buf]
 
 def to_hex(buf):
@@ -14,7 +17,7 @@ def find_bit(n, bit_len):
     '''
     find a bit from left.
     return the number where the bit set,
-    and the number where the bit is turned off.
+    and return the number where the bit is turned off.
     '''
     for i in range(bit_len):
         x = 2**(bit_len-i-1)
@@ -23,6 +26,7 @@ def find_bit(n, bit_len):
 
 def int_to(n, nbytes, bigendian=True):
     '''
+    convert integer into bytearray().
     e.g. if n in hex is "123",
     if nbytes is 3 and endian is "big", then it's gonna be "000123".
     if endian is not "big", then it's gonna be "230100".
@@ -143,4 +147,17 @@ def zfill(s, w):
     pycom doesn't support str.zfill()
     '''
     return "".join(["0" for i in range(w-len(s))]) + s
+
+def bitcount(n, nbytes, zero=False):
+    '''
+    count the number of bits of 1.
+    if zero is True, it counts 0.
+    '''
+    b = "0" if zero else "1"
+    bs = int_to_bit(n, nbytes)
+    nb = 0
+    for i in range(len(bs)):
+        if bs[i] == b:
+            nb += 1
+    return nb
 
