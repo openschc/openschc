@@ -13,17 +13,6 @@ def to_bit(buf):
 def to_hex(buf):
     return ["%02x"%i for i in buf]
 
-def find_bit(n, bit_len):
-    '''
-    find a bit from left.
-    return the number where the bit set,
-    and return the number where the bit is turned off.
-    '''
-    for i in range(bit_len):
-        x = 2**(bit_len-i-1)
-        if n & x:
-            return i, n - x
-
 def int_to(n, nbytes, bigendian=True):
     '''
     convert integer into bytearray().
@@ -148,7 +137,18 @@ def zfill(s, w):
     '''
     return "".join(["0" for i in range(w-len(s))]) + s
 
-def bitcount(n, nbytes, zero=False):
+def bit_find(n, bit_len):
+    '''
+    find a bit from left.
+    return the number where the bit set,
+    and return the number where the bit is turned off.
+    '''
+    for i in range(bit_len):
+        x = 2**(bit_len-i-1)
+        if n & x:
+            return i, n - x
+
+def bit_count(n, nbytes, zero=False):
     '''
     count the number of bits of 1.
     if zero is True, it counts 0.
