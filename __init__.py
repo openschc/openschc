@@ -1,2 +1,3 @@
-__all__ = [ "pyssched" ]
+from .pyssched import *
+
 

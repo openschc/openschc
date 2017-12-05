@@ -8,7 +8,18 @@ from collections import namedtuple
 
 Event = namedtuple('Event', 'time, priority, action, argument')
 
-class pyssched:
+'''
+## Queue length
+
+in Python2, self._queue is list.
+in Python3, self._queue is map.
+
+Therefore, you should do like below to get the size of the queue.
+
+    len(list(self.queue))
+'''
+
+class ssched:
 
     def __init__(self, timefunc=time.time):
         '''

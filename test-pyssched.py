@@ -1,25 +1,25 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from __future__ import print_function
 
-import sys
 import random
 import time
-from pyssched import *
+
+try:
+    from pyssched import pyssched as ps
+except:
+    import pyssched as ps
 
 def print_time(tag):
     print("called: n=%s delta=%f" % (tag, time.time() - t0))
 
 t0 = time.time()
-s = pyssched()
+s = ps.ssched()
 
 n = 0
 
 while True:
 
-    if len(s.queue):
-        print("sched queue len=%d" % len(s.queue))
+    if not s.empty():
+        print("sched queue len=%d" % len(list(s.queue)))
     timer = s.execute()
 
     t = random.choice([0, 2, 3])
