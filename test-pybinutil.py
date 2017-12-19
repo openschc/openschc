@@ -131,6 +131,19 @@ for i in range(17):
     bi.bit_set(ba0, i, "110")
     print(" ", by.to_bit(ba0))
 
+# extending
+print("- extending: bit_set(True)")
+for i in range(17):
+    ba0 = bytearray(1)
+    bi.bit_set(ba0, i, extend=True)
+    print(" ", by.to_bit(ba0))
+
+print("- extending: 110")
+for i in range(17):
+    ba0 = bytearray(2)
+    bi.bit_set(ba0, i, "110", extend=True)
+    print(" ", by.to_bit(ba0))
+
 print("## int_to_bit()")
 n = [ 0, 1,
      32768,     # 0x8000

@@ -25,7 +25,7 @@ def zfill(s, w):
     '''
     return "".join(["0" for i in range(w-len(s))]) + s
 
-def bit_set(ba, pos, val=None):
+def bit_set(ba, pos, val=None, extend=False):
     '''
     set a bit or a set of bits at the position in the bytearray.
     the position of the most left bit is 0.
@@ -53,11 +53,24 @@ def bit_set(ba, pos, val=None):
             ba = bytearray(2)
             bit_set(ba, 6, "1111")
             bit_set(ba, 6, 15)
+
+    extend:
+        if True, it extends the size of ba when the position is over the size.
     '''
     p0 = pos >> 3
     p1 = pos % 8
-    if not (p0 < len(ba)):
+    if extend == True:
+        # extend the buffer if needed.
+        bit_len = 1
+        if type(val) is str:
+            bit_len = len(val)
+        ext_len = (((pos+bit_len+7)&(~7))>>3) - len(ba)
+        if ext_len > 0:
+            ba.extend([0 for i in range(ext_len)])
+    elif not (p0 < len(ba)):
+        # just return if the buffer size is shoter than the position
         return ba
+    #
     if val is None:
         b = zfill(bin(ba[p0])[2:], 8)
         ba[p0] = int(b[:p1] + "1" + b[p1+1:], 2)
@@ -69,7 +82,7 @@ def bit_set(ba, pos, val=None):
     elif type(val) is int:
         return bit_set(ba, pos, bin(val)[2:])
     elif type(val) is str:
-        guard_pos = len(ba) * 8
+        guard_pos = len(ba) << 3
         for i in val:
             ba = bit_set(ba, pos, (False if i == "0" else True))
             pos += 1
