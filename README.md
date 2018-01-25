@@ -26,7 +26,6 @@ or
     cd schc-fragment
     git submodule update --init --recursive
 
-
 ## fragment sender
 
            |      
@@ -52,7 +51,7 @@ or
     
                         Figure 6: Fragment format.
 
-### State machine
+## Fragment State Machine in the fragment sender
 
 - WINDOW mode
 
@@ -334,4 +333,79 @@ the format transmitted is going to be below.
      Format: [ Rule ID | DTag |W|C|  Bitmap  ]
        Size:  2         3      1 1 1
     Content:  11        110    0 0 0
+
+## Usage
+
+You need two consoles.
+
+One is for the sender.
+
+    ./test-client-udp.py 127.0.0.1 9999
+
+The other is for the receiver.
+
+    ./test-server-udp.py 9999 -dd 
+
+The -dd option would be useful for you first trial.
+
+### test-client
+
+    usage: test-client-udp.py [-h] [-I MSG_FILE] [--interval INTERVAL]
+                              [--l2-size L2_SIZE] [--rid RULE_ID]
+                              [--loss-list LOSS_LIST] [--loss-rate LOSS_RATE]
+                              [--loss-random] [-v] [-d] [--verbose]
+                              [--debug DEBUG_LEVEL] [--version]
+                              SERVER PORT
+    
+    this is SCHC example.
+    
+    positional arguments:
+      SERVER                specify the ip address of the server.
+      PORT                  specify the port number in the server.
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -I MSG_FILE           specify the file name including the message, default
+                            is stdin.
+      --interval INTERVAL   specify the interval for each sending.
+      --l2-size L2_SIZE     specify the payload size of L2. default is 6.
+      --rid RULE_ID         specify the rule id. default is 1
+      --loss-list LOSS_LIST
+                            specify the index numbers to be lost for test. e.g.
+                            --loss-list=3,8 means the 3rd and 8th packets are
+                            going to be lost.
+      --loss-rate LOSS_RATE
+                            specify the rate of the packet loss. e.g. --loss-
+                            rate=0.2 means 20% to be dropped.
+      --loss-random         enable to lose a fragment randomly for test.
+      -v                    enable verbose mode.
+      -d                    increase debug mode.
+      --verbose             enable verbose mode.
+      --debug DEBUG_LEVEL   specify a debug level.
+      --version             show program's version number and exit
+
+### test-receiver
+
+    usage: test-server-udp.py [-h] [--address SERVER_ADDRESS] [--port CONF_FILE]
+                              [--timeout TIMEOUT] [-v] [-d] [--verbose]
+                              [--debug _DEBUG_LEVEL] [--version]
+                              PORT
+    
+    positional arguments:
+      PORT                  specify the port number in the server.
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      --address SERVER_ADDRESS
+                            specify the ip address of the server to be bind.
+                            default is any.
+      --port CONF_FILE      specify the configuration file.
+      --timeout TIMEOUT     specify the number of the timeout.
+      -v                    enable verbose mode.
+      -d                    increase debug mode.
+      --verbose             enable verbose mode.
+      --debug _DEBUG_LEVEL  specify a debug level.
+      --version             show program's version number and exit
+
+
 
