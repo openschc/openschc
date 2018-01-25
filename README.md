@@ -39,20 +39,20 @@ or
            |
            V
       Lower Layer
-
+    
       +--- ... --+-------------- ... --------------+-----------+--...--+
       |  Rule ID |Compressed Hdr Fields information|  payload  |padding|
       +--- ... --+-------------- ... --------------+-----------+--...--+
-
+    
                  Figure 4: LPWAN Compressed Format Packet
-
+    
          +-----------------+-----------------------+---------+
          | Fragment Header |   Fragment payload    | padding |
          +-----------------+-----------------------+---------+
-
+    
                         Figure 6: Fragment format.
 
-### state machine
+### State machine
 
 - WINDOW mode
 
@@ -102,8 +102,6 @@ sender sent.
                 '-------->-------+->-+--> SEND_ACK1 --+---> DONE
                                      |                | 
                                      '-<- CONT_ALL1 --' 
-
-    RECV_ACK1
 
 XXX When the fragment receiver (FR) sends an ack to the fragent sender (FS) ?
 XXX it should only happen immediately after FR receives all-x fragment ?
