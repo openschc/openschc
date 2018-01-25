@@ -1,25 +1,34 @@
 
-from pybinutil import *
-from schc_fragment_common import *
+import pybinutil as pb
+from schc_param import *
+import schc_fragment_state as sfs
+import schc_fragment_holder as sfh
+import mic_crc32
 
-'''
-XXX TBD
+STATE_ERROR = -1
+STATE_INIT = 0
+STATE_CONT = 2
+STATE_SEND_ACK0 = 3
+STATE_CONT_ALL0 = 4
+STATE_SEND_ACK1 = 5
+STATE_CONT_ALL1 = 6
+STATE_DONE = 9
 
-state for finishing in the last window..
-'''
-SCHC_DEFRAG_ERROR = -1
-SCHC_DEFRAG_INIT = 0
-SCHC_DEFRAG_CONT = 2
-SCHC_DEFRAG_GOT_ALL0 = 3
-SCHC_DEFRAG_MISSING_ALL0 = 4
-SCHC_DEFRAG_GOT_ALL1 = 5
-SCHC_DEFRAG_MISSING_ALL1 = 6
-SCHC_DEFRAG_DONE = 9
+state_dict = {
+    "ERROR": STATE_ERROR,
+    "INIT": STATE_INIT,
+    "CONT": STATE_CONT,
+    "SEND_ACK0": STATE_SEND_ACK0,
+    "CONT_ALL0": STATE_CONT_ALL0,
+    "SEND_ACK1": STATE_SEND_ACK1,
+    "CONT_ALL1": STATE_CONT_ALL1,
+    "DONE": STATE_DONE,
+    }
 
-SCHC_DEFRAG_MSG_INIT = 0
-SCHC_DEFRAG_MSG_CONT = 1
-SCHC_DEFRAG_MSG_DONE = 2
-SCHC_DEFRAG_MSG_DEAD = 3
+STATE_MSG_INIT = 0
+STATE_MSG_CONT = 1
+STATE_MSG_DONE = 2
+STATE_MSG_DEAD = 3
 
 def default_logger(*arg):
     pass
@@ -27,7 +36,7 @@ def default_logger(*arg):
 def default_scheduler(*arg):
     pass
 
-class schc_defragment_window:
+class defragment_window:
     '''
     in NO_ACK mode: in case of fcn = 0, multiple fragments may exist.
     furthermore, this implementation allows to have more than 1 bit fcn.
@@ -37,19 +46,18 @@ class schc_defragment_window:
 
     def __init__(self, fgh, logger=default_logger):
         self.logger = logger
-        self.C = fgh.C
         self.R = fgh.R
         self.win = fgh.win
         self.bitmap = 0
-        self.state = schc_state_holder(state=SCHC_DEFRAG_INIT,
-                                       logger=self.logger)
+        self.mic = None
+        self.win_state = sfs.fragment_state(state_dict, logger=self.logger)
+        self.win_state.set(STATE_INIT)
         # fragement_list is a dict because FCN is not always sequentially decremented.
         self.fragment_list = {}
         # below list is used to hold the fragments in NO_ACK because FCN is always zero.
         self.fragment_list_no_ack = []
 
     def add(self, fgh):
-        self.logger(1, fgh.dump())
         if fgh.R.mode == SCHC_MODE_NO_ACK:
             return self.add_no_ack(fgh)
         #
@@ -64,33 +72,44 @@ class schc_defragment_window:
             self.bitmap |= 1
         else:
             self.bitmap |= 1<<fgh.fcn
-        self.logger(1, "bitmap=", pybinutil.int_to_bit(self.bitmap,
-                                                    self.R.bitmap_size))
+        self.logger(1, "bitmap=", pb.int_to_bit(self.bitmap,
+                                                self.R.bitmap_size))
         #
+        # assuming that, in each window except the last one,
+        # the bitmap must be filled up by the fragments that sender sends.
         if fgh.fcn == self.R.fcn_all_0:
+            # immediately after receiving the all-0
             if fgh.R.mode == SCHC_MODE_WIN_ACK_ON_ERROR:
-                if self.is_rx_ok():
-                    return self.state.set(SCHC_DEFRAG_CONT)
-            return self.state.set(SCHC_DEFRAG_GOT_ALL0)
-        elif fgh.fcn == self.R.fcn_all_1:
-            return self.state.set(SCHC_DEFRAG_GOT_ALL1)
-        elif self.state.get() in [SCHC_DEFRAG_GOT_ALL0, SCHC_DEFRAG_GOT_ALL1]:
+                # if all the fragments in a window is received, all bits in
+                # the internal bitmap are on. i.e. equal to (2**fcn_size)-1
+                # if so, skip to send the ack, otherwise send an ack.
+                if self.bitmap == self.R.fcn_all_1:
+                    return self.win_state.set(STATE_CONT)
+            #
+            return self.win_state.set(STATE_SEND_ACK0)
+        elif self.win_state.get() in [STATE_SEND_ACK0, STATE_CONT_ALL0]:
             # check whether all fragments in a window are received during
             # retransmission by the sender.
-            #
-            # XXX
-            # assuming that, in each window except the last one,
-            # the bitmap must be filled up by the fragments that sender sends.
-            if self.is_rx_ok():
-                # don't change the state here. i.e. GOT_ALL0 or GOT_ALL1
-                return self.state.get()
-            self.logger(1, "WARN: XXX got all-1, but don't know whether all fragments are received.")
-            return SCHC_DEFRAG_CONT
+            if self.is_all_0_ok():
+                return self.win_state.set(STATE_SEND_ACK0)
+            else:
+                return self.win_state.set(STATE_CONT_ALL0)
+        elif fgh.fcn == self.R.fcn_all_1:
+            # immediately after receiving the all-1
+            return self.win_state.set(STATE_SEND_ACK1)
+        elif self.win_state.get() in [STATE_SEND_ACK1, STATE_CONT_ALL1]:
+            # check whether all fragments in the last window are received during
+            # retransmission by the sender.
+            if self.is_all_1_ok():
+                return self.win_state.set(STATE_SEND_ACK1)
+            else:
+                self.logger(1, "WARN: XXX got all-1, but don't know whether all fragments are received.")
+                return self.win_state.set(STATE_CONT_ALL1)
         else:
             # in other case.
-            return self.state.set(SCHC_DEFRAG_CONT)
+            return self.win_state.set(STATE_CONT)
 
-    def add_no_ack(fgh):
+    def add_no_ack(self, fgh):
         # NO-ACK mode
         #
         #     return the tuple of (ret, callback, tuple-of-args)
@@ -105,141 +124,167 @@ class schc_defragment_window:
         # in this case, reusing a number except of 0 is not allowed.
         if fgh.fcn == self.R.fcn_all_0:
             # if all-0, simply add it into the tail of the list.
-            fragment_list_no_ack.append(fgh.payload)
+            self.fragment_list_no_ack.append(fgh.payload)
         else:
             # if othere case, replace it.
             self.fragment_list[fgh.fcn] = fgh.payload
         #
         if fgh.fcn == self.R.fcn_all_1:
-            return self.state.set(SCHC_DEFRAG_DONE)
-        return self.state.set(SCHC_DEFRAG_CONT)
+            return self.win_state.set(STATE_SEND_ACK1)
+        return self.win_state.set(STATE_CONT)
 
     def assemble(self):
         '''
         return a part of the message assembled in this window.
-        NOTE: FCN order would be, 6 5 4 0 or 6 5 4 7.
+        NOTE: e.g. FCN order would be, 6 5 4 0 or 6 5 4 7 in case of N=3.
         '''
         if self.R.mode == SCHC_MODE_NO_ACK:
-            a = "".join([i for i in self.fragment_list_no_ack])
+            a = b"".join([i for i in self.fragment_list_no_ack])
             return a + self.__assemble()
-        # except NO_ACK
-        return self.__assemble()
+        else:
+            return self.__assemble()
 
     def __assemble(self):
-        self.logger(1, "assembling win =", self.win)
+        self.logger(1, "assembling ")
+        if self.R.mode != SCHC_MODE_NO_ACK:
+            self.logger(1, "  win =", self.win)
         for i in sorted(self.fragment_list.items(), reverse=True,
-                               key=(lambda kv:(0 if kv[0]==self.R.fcn_all_1 else
-                                               kv[0]))):
-            self.logger(1, "fcn =", i[0], "fragment =", i[1].decode())
+                        key=(lambda kv:
+                             (0 if kv[0]==self.R.fcn_all_1 else kv[0]))):
+            self.logger(2, "fcn =", i[0], "fragment =",
+                        i[1].decode(encoding="utf-8"))
         #
-        return "".join([i[1].decode() for i in
+        return b"".join([i[1] for i in
                         sorted(self.fragment_list.items(), reverse=True,
                                key=(lambda kv:(0 if kv[0]==self.R.fcn_all_1 else
                                                kv[0])))])
 
-    def is_rx_ok(self):
-        self.logger(1, "checking RX bitmap local=",
-                    pybinutil.int_to_bit(self.bitmap, self.R.bitmap_size))
+    def is_all_0_ok(self):
+        self.logger(1, "checking if all-0 is ok, local bitmap=",
+                    pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.bitmap == self.R.bitmap_all_1:
             return True
         return False
 
-    def make_ack(self, fgh):
-        self.ack_hdr = schc_fragment_holder(self.C, fgh=fgh, logger=self.logger)
-        self.ack_hdr.set_bitmap(self.bitmap)
-        # XXX need padding
-        # XXX when bitmap can be cleared.
-        #self.bitmap = 0
-        return self.ack_hdr.buf
+    def is_all_1_ok(self):
+        self.logger(1, "checking all-1 is ok, packets=%d local bitmap=%s" % (
+                    self.mic, pb.int_to_bit(self.bitmap, self.R.bitmap_size)))
+        if pb.bit_count(self.bitmap, self.R.bitmap_size) == self.mic:
+            return True
+        # otherwise
+        return False
+
+    def make_ack0(self, fgh):
+        if self.win_state.get() != STATE_SEND_ACK0:
+            raise AssertionError("ERROR: must not come into make_ack0().")
+        # only the case immediately after receiving the all-0,
+        # i.e. state == SEND_ALL1 and prev_state == CONT/INIT.
+        if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+            return None
+        else:
+            return sfh.frag_receiver_tx_all0_ack(self.R, fgh.dtag, win=fgh.win,
+                                                 bitmap=self.bitmap)
+
+    def make_ack1(self, fgh, cbit=None):
+        if self.win_state.get() != STATE_SEND_ACK1:
+            raise AssertionError("ERROR: must not come into make_ack1().")
+        # only the case immediately after receiving the all-1,
+        # i.e. state == SEND_ACK1 and prev_state == CONT/INIT
+        if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+            return None
+        else:
+            return sfh.frag_receiver_tx_all1_ack(self.R, fgh.dtag, win=fgh.win,
+                                                 cbit=cbit, bitmap=self.bitmap)
 
     def kill(self):
-        # XXX others ?
+        # XXX others should be set None ?
         fragment_list = None
-        fragment_list_no_ack = None
+        self.fragment_list_no_ack = None
 
-class schc_defragment_message:
+class defragment_message:
     '''
     defragment fragments into a message
     '''
-    def __init__(self, fgh, scheduler=default_scheduler, timeout=5, logger=default_logger):
-        self.R = fgh.R
-        self.fgh = fgh
-        self.dtag = fgh.dtag
+    def __init__(self, R, dtag, scheduler=default_scheduler, timeout=5,
+                 logger=default_logger):
+        self.R = R
+        self.dtag = dtag
         self.scheduler = scheduler
         self.timeout = timeout
         self.logger = logger
         self.win_list = []
         self.win = 0
-        self.state = SCHC_DEFRAG_MSG_INIT
+        self.msg_state = STATE_MSG_INIT
         self.ev = None
 
     def add(self, fgh):
         '''
-        return state and an ack message
+        return the message state and an buffer.
         '''
-        if self.state == SCHC_DEFRAG_MSG_DEAD:
-            raise AssertionError("ERROR: must not come in if the state is dead.")
+        if self.msg_state == STATE_MSG_DEAD:
+            raise AssertionError("ERROR: must not come in if the message state is dead.")
         #
         if len(self.win_list) == 0 or self.win_list[-1].win != fgh.win:
             self.logger(1, "new window has been created. win =", fgh.win)
-            k = schc_defragment_window(fgh, logger=self.logger)
+            k = defragment_window(fgh, logger=self.logger)
             self.win_list.append(k)
-            #self.win_list.append(schc_defragment_window(fgh, logger=self.logger))
         #
         w = self.win_list[-1]
         ret = w.add(fgh)
         #
         if self.ev:
-            self.logger(2, "canceling ev=.", self.ev)
+            self.logger(3, "canceling ev=.", self.ev)
             self.scheduler.cancel(self.ev)
             self.ev = None
         #
-        if ret == SCHC_DEFRAG_CONT:
-            self.state = SCHC_DEFRAG_MSG_CONT
+        if ret in [STATE_CONT, STATE_CONT_ALL0, STATE_CONT_ALL1]:
             self.ev = self.scheduler.enter(self.timeout, 1, self.kill, (None,))
-            self.logger(2, "scheduling kill dtag=", self.dtag, "ev=", self.ev)
+            self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
-        elif ret == SCHC_DEFRAG_GOT_ALL0:
-            self.state = SCHC_DEFRAG_MSG_CONT
+        elif ret == STATE_SEND_ACK0:
             self.ev = self.scheduler.enter(self.timeout, 1, self.kill, (None,))
-            self.logger(2, "scheduling kill dtag=", self.dtag, "ev=", self.ev)
-            return ret, w.make_ack(fgh)
-        elif ret == SCHC_DEFRAG_DONE:
-            # XXX if self.R.mode == SCHC_MODE_NO_ACK:
-            # state will be into DEAD in assemble()
-            return ret, self.assemble((None,))
-        elif ret == SCHC_DEFRAG_GOT_ALL1:
-            # XXX if self.R.mode != SCHC_MODE_NO_ACK:
-            # state will be into DONE when finish() will is called.
-            self.ev = self.scheduler.enter(self.timeout, 1, self.finish,
-                                           (None,))
-            self.logger(2, "scheduling finish dtag=", self.dtag, "ev=", self.ev)
-            return ret, w.make_ack(fgh)
+            self.logger(3, "scheduling kill 2 dtag=", self.dtag, "ev=", self.ev)
+            return ret, w.make_ack0(fgh)
+        elif ret == STATE_DONE:
+            # msg_state will be into DEAD in assemble()
+            return ret, self.assemble(kill=True)
+        elif ret == STATE_SEND_ACK1:
+            # check MIC
+            self.mic, mic_size = self.R.C.mic_func.get_mic(self.assemble(kill=False))
+            if fgh.mic == self.mic:
+                self.logger(1, "mic is ok")
+                cbit = 1
+                # msg_state will be into DONE when finish() will is called.
+                self.ev = self.scheduler.enter(self.timeout, 1, self.finish, (None,))
+                self.logger(3, "scheduling finish dtag=", self.dtag, "ev=", self.ev)
+                return ret, w.make_ack1(fgh, cbit=1)
+            else:
+                return ret, w.make_ack1(fgh, cbit=0)
         else:
-            raise AssertionError("ERROR: must not come in with unknown state %d"
-                                 % (ret))
+            raise AssertionError("ERROR: must not come in with unknown message state %d" % (ret))
 
-    def assemble(self, args):
+    def assemble(self, kill=False):
         '''
         assuming that no event is scheduled when assemble() is called.
         '''
-        message = "".join([i.assemble() for i in self.win_list])
-        self.kill()
+        message = b"".join([i.assemble() for i in self.win_list])
+        if kill == True:
+            self.kill()
         return message
 
-    def finish(self, args):
+    def finish(self, *args):
         self.ev = None
-        self.state = SCHC_DEFRAG_MSG_DONE
+        self.msg_state = STATE_MSG_DONE
 
-    def kill(self):
+    def kill(self, *args):
         self.ev = None
         for i in self.win_list:
             i.kill()
-        self.state = SCHC_DEFRAG_MSG_DEAD
+        self.msg_state = STATE_MSG_DEAD
         self.win_list = None
         # XXX others ?
 
-class schc_defragment_factory:
+class defragment_factory:
     '''
                         win_list
                            :
@@ -256,45 +301,47 @@ class schc_defragment_factory:
           ## NO_ACK
                      +-- dtag --+-- fcn[0] - frag - frag - ...
     '''
-    def __init__(self, scheduler=default_scheduler, timeout=5, logger=default_logger):
+    def __init__(self, scheduler=default_scheduler, timeout=5,
+                 logger=default_logger):
         self.logger = logger
         self.scheduler = scheduler
         self.timeout = timeout
         self.msg_list = {}
 
-    def defrag(self, context, recvbuf):
+    def defrag(self, C, recvbuf):
         '''
-        context: context instance
+        C: context instance
         recvbuf: bytearray received
         '''
-        fgh = schc_fragment_holder(context, recvbuf=recvbuf,
-                                   logger=self.logger)
+        fgh = sfh.frag_receiver_rx(recvbuf, C)
         # search the list for the fragment.
-        # XXX dtag is the unique key ?
-        # XXX Q. same dtag can be used in the different messages in same time ?
+        # assuming that dtag is the unique key for each originalipv6 packet
+        # before fragmented..
         m = self.msg_list.get(fgh.dtag)
         # destruct the message holder if dead
-        if m and m.state == SCHC_DEFRAG_MSG_DEAD:
+        if m and m.msg_state == STATE_MSG_DEAD:
             self.logger(1, "kill the old message holder for dtag =", fgh.dtag)
             m = None
         # create a message holder
         if not m:
-            m = schc_defragment_message(fgh, scheduler=self.scheduler,
-                                        timeout=self.timeout,
-                                        logger=self.logger)
+            m = defragment_message(fgh.R, fgh.dtag, scheduler=self.scheduler,
+                                   timeout=self.timeout, logger=self.logger)
             self.msg_list[fgh.dtag] = m
         #
-        return m.add(fgh)
+        rx_ret, tx_obj = m.add(fgh)
+        return rx_ret, fgh, tx_obj
 
     def dig(self):
         '''
         dig the message whose state is DONE.
+        here, only non-NO_ACK mode is dealt.
+        if NO_ACK mode, the message assembled has been returned to the
+        application.
         '''
         ret = []
-        for k, v in self.msg_list.items():
-            if v.state == SCHC_DEFRAG_MSG_DONE and v.R.mode != SCHC_MODE_NO_ACK:
-                # if NO_ACK mode, assuming that the message assembled has been returned.
-                ret.append(v.assemble(True))
-                self.logger(1, "digged dtag = %s" % v.dtag)
+        for k, m in self.msg_list.items():
+            if m.msg_state == STATE_MSG_DONE and m.R.mode != SCHC_MODE_NO_ACK:
+                ret.append(m.assemble(kill=True))
+                self.logger(1, "digged dtag = %s" % m.dtag)
         return ret
 

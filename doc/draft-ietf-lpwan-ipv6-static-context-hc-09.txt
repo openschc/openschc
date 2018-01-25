@@ -1,5 +1,5 @@
 
-
+# COMM: SCHC header compression, SCHC compression should be considered.
 
 
 lpwan Working Group                                          A. Minaburo
@@ -195,6 +195,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    The SCHC header compression mechanism is independent of the specific
    LPWAN technology over which it will be used.
+
+# COMM: SCHC header compression = static context header compression header compression sounds strange.
 
    LPWAN technologies are also characterized, among others, by a very
    reduced data unit and/or payload size [I-D.ietf-lpwan-overview].
@@ -437,6 +439,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    packet values.  When a value is known by both ends, it is not
    necessary to send it through the LPWAN network.
 
+# the length of Rule ID field may be zero.
+# COMM: s/Rule id/Rule ID/
+
    The context contains a list of rules (cf.  Figure 3).  Each Rule
    contains itself a list of fields descriptions composed of a field
    identifier (FID), a field length (FL), a field position (FP), a
@@ -547,6 +552,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    SCHC C/D needs to combine the Rule ID with the Dev L2 identifier to
    find the appropriate Rule.
 
+# COMM: different Rule IDs in the same IPv6 datagram can be used.  correct ?
+
 4.3.  Packet processing
 
    The compression/decompression process follows several steps:
@@ -602,6 +609,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
       If after using SCHC compression and adding the payload to the L2
       frame the datagram is not multiple of 8 bits, padding may be used.
+
+# COMM: SCHC compression sounds strange. s/SCHC compression/the compression/
 
       +--- ... --+-------------- ... --------------+-----------+--...--+
       |  Rule ID |Compressed Hdr Fields information|  payload  |padding|
@@ -805,6 +814,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    mechanism is not used and the packet is sent.  Otherwise, the
    datagram SHALL be broken into fragments.
 
+# COMM: SCHC header compression
+
    LPWAN technologies impose some strict limitations on traffic, (e.g.)
    devices are sleeping most of the time and may receive data during a
    short period of time after transmission to preserve battery.  To
@@ -822,6 +833,13 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    performing reassembly.  This assumption allows to reduce complexity
    and overhead of the fragmentation mechanism.
 
+# COMM: s/a the star/a star/
+# COMM: data unit reordering would happen between Radio Gateways and NGW.
+# COMM: How about just removing the following statement ?
+# COMM:    "LPWAN networks typically follow a
+# COMM:    the star topology, and therefore data unit reordering is not expected
+# COMM:    in such networks."
+
 5.2.  Functionalities
 
    This subsection describes the different fields in the fragmentation
@@ -829,6 +847,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    the tools that are used to enable the fragmentation functionalities
    defined in this document, and the different reliability options
    supported.
+
+# COMM: here, SCHC fragment header and the R bit should be described.
 
    o  Rule ID.  The Rule ID is present in the fragment header and in the
       ACK header format.  The Rule ID in a fragment header is used to
@@ -846,6 +866,11 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       also allows to interleave non-fragmented IPv6 datagrams with
       fragments that carry a larger IPv6 datagram.  The Rule ID in an
       ACK allows to identify that the message is an ACK.
+
+# COMM: what does it mean by this statement ?
+# COMM:     "The Rule ID in the fragmentation header
+# COMM:     also allows to interleave non-fragmented IPv6 datagrams with
+# COMM:     fragments that carry a larger IPv6 datagram."
 
    o  Fragment Compressed Number (FCN).  The FCN is included in all
       fragments.  This field can be understood as a truncated, efficient
@@ -903,6 +928,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       whose reception is being positively or negatively acknowledged by
       the ACK.
 
+# COMM: W is a 1-bit field.  multiple bits are not allowed ?
+
    o  Message Integrity Check (MIC).  This field, which has a size of M
       bits, is computed by the sender over the complete packet (i.e. a
       SCHC compressed or an uncompressed IPv6 packet) before
@@ -912,6 +939,10 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       recommended as the default algorithm for computing the MIC.
       Nevertheless, other algorithm MAY be mandated in the corresponding
       technology documents (e.g. technology-specific profiles).
+
+# MIC is computed before fragmentation.
+# can be compressed by the SCHC compression.
+# CRC32 (0xEDB88320) is recommended.
 
    o  C (MIC checked): C is a 1-bit field.  This field is used in the
       ACK format packets to report the outcome of the MIC check, i.e.
@@ -1085,6 +1116,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
                         Figure 6: Fragment format.
 
+# COMM: the relationship betwen figure 6 and 4 should be described whole the packet including a Rule ID depicted in the figure 4 will be fragmented and each fragment will be put into the fragment payload ?
+
    In the No ACK option, fragments except the last one SHALL contain the
    format as defined in Figure 7.  The total size of the fragment header
    is R bits.
@@ -1102,6 +1135,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    In any of the Window mode options, fragments except the last one
    SHALL contain the fragmentation format as defined in Figure 8.  The
    total size of the fragment header in this format is R bits.  .
+
+# COMM: s/  .$//
 
                 <------------ R ---------->
                           <--T--> 1 <--N-->
@@ -1123,6 +1158,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
 5.4.2.  ACK format
+
+# COMM: Padding is not needed for ACK ?
 
    The format of an ACK that acknowledges a window that is not the last
    one (denoted as ALL-0 window) is shown in Figure 9.
@@ -1153,10 +1190,13 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    +---- ... --+-... -+-+-+------- ... -------+
                              C
 
+# COMM: C ?
 
                Figure 10: Format of an ACK for All-1 windows
 
 5.4.3.  All-1 and All-0 formats
+
+# COMM: the format descriptions should be in order of sender and receiver for readability.
 
    The All-0 format is used for the last fragment of a window that is
    not the last window of the packet.
@@ -1202,6 +1242,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
    Figure 13: All-1 Fragment Format for the Last Fragment, No ACK option
+
+# COMM: the last fragment of No ACK option in Figure 13 should be placed before 5.4.3 for readability.
 
    In any of the Window modes, the last fragment of an IPv6 datagram
    SHALL contain a fragment header that conforms to the format shown in
@@ -1252,13 +1294,25 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    The All-1 Abort and the ACK abort messages have the following
    formats.
 
+# COMM: clearly describe the content of FCN in the All-1 Abort.
+# COMM: the length of R is assumed to be byte boundary in the figure 16. however, is is not always to be.
+# COMM: how you can distinguish the frame whether it is normal frame or All-1 abort frame ?
+# COMM: what is the Abort message format to abort the sender transmission in No ACK mode.
+
+# When the sender needs to abort
+# the transmission it will use the All-1 Abort format, this fragment
+# is not acked.
+
    <------ byte boundary ------><--- 1 byte --->
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC & no payload)
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 
-
                        Figure 16: All-1 Abort format
+
+# When the receiver needs to abort the on-going
+# fragmented packet transmission, it uses the ACK Abort format
+# packet with all the bits set to 1.
 
     <------ byte boundary -----><--- 1 byte --->
 
@@ -1640,6 +1694,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
         +---- ... --+-... -+-+-+-+
         |---- byte boundary -----|
 
+# COMM: what is the last bit, in which the content is zero. padding ?
 
                Figure 19: Bitmap transmitted fragment format
 
@@ -1658,6 +1713,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
    |--- byte boundary ----| 1 byte next |
 
+# COMM: why the byte boundary is shifted ?
 
         Figure 20: Example of a Bitmap before transmission, and the
         transmitted one, in any window except the last one, for N=3
@@ -1776,6 +1832,10 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 6.  Padding management
 
+# COMM: the value of the padding must be zero.
+
+# COMM: SCHC header means SCHC fragment header ?
+
    SCHC header, either for compression, fragmentation or acknowledgment
    does not preserve byte alignment.  Since most of the LPWAN network
    technologies payload is expressed in an integer number of bytes; the
@@ -1787,6 +1847,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    SCHC header is not aligned on a byte boundary, but its size in bits
    is given by the rule.
 
+# the size of the SCHC fragment header is given by the rule.
+
+# COMM: is it allowed to add padding between SCHC fragment header and payload to align the byte boundary so as to easily put and take the payload ?
 
 
 Minaburo, et al.          Expires June 25, 2018                [Page 32]
@@ -2670,6 +2733,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
              |-----W=1, CFN=31----->|MIC checked =>
              |<------ACK, W=1-------|no Bitmap
            (End)
+
+# COMM: put a correct name of this figure.
 
 Appendix C.  Fragmentation State Machines
 

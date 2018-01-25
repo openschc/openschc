@@ -6,16 +6,13 @@ from __future__ import print_function
 import sys
 import argparse
 from socket import *
+import pybinutil as pb
+import pyssched as ps
+import traceback
+from schc_param import *
+import schc_context
 import schc_fragment_receiver as sfr
-from pybinutil import *
-from pyssched import *
-
-debug_level = 0
-
-def debug_print(*argv):
-    level = argv[0]
-    if debug_level >= level:
-        print("DEBUG: ", argv[1:])
+from debug_print import *
 
 # just send a message to trigger the lorawan network server.
 def send_client_trigger(s):
@@ -64,7 +61,7 @@ def parse_args():
 main
 '''
 opt = parse_args()
-debug_level = opt.debug_level
+debug_set_level(opt.debug_level)
 
 # set up the server
 server = (opt.server_address, opt.server_port)
@@ -77,9 +74,9 @@ s.bind(server)
 # send_client_trigger(s)
 
 #
-sched = pyssched.pyssched()
-context = sfr.schc_context(0)
-factory = sfr.schc_defragment_factory(scheduler=sched, logger=debug_print)
+sched = ps.ssched()
+context = schc_context.schc_context(0)
+factory = sfr.defragment_factory(scheduler=sched, logger=debug_print)
 
 while True:
 
@@ -98,33 +95,39 @@ while True:
         #
         # if timeout happens recvfrom() here, go to exception.
         #
-        rx_data, client = s.recvfrom(128)
-        # for py2, py3 compatibility
-        if type(rx_data) == str:
-            rx_data = bytearray([ord(rx_data[i]) for i in range(len(rx_data))])
-        debug_print(1, "received:", pybinutil.to_hex(rx_data), "from", client)
-
-        # trying to defrag
-        ret, data = factory.defrag(context, rx_data)
-        if ret == sfr.SCHC_DEFRAG_CONT:
+        rx_data, peer = s.recvfrom(DEFAULT_RECV_BUFSIZE)
+        debug_print(1, "message from:", peer)
+        #
+        # XXX here, should find a context for the peer.
+        #
+        ret, rx_obj, tx_obj = factory.defrag(context, rx_data)
+        debug_print(1, "parsed:", rx_obj.dump())
+        debug_print(2, "hex   :", rx_obj.full_dump())
+        #
+        if ret in [sfr.STATE_CONT, sfr.STATE_CONT_ALL0, sfr.STATE_CONT_ALL1]:
             pass
-        elif ret == sfr.SCHC_DEFRAG_GOT_ALL0:
-            debug_print(1, "sent ack.", pybinutil.to_hex(data))
-            s.sendto(data, client)
-        elif ret == sfr.SCHC_DEFRAG_DONE:
+        elif ret == sfr.STATE_SEND_ACK0:
+            debug_print(1, "ack for all-0.")
+            debug_print(1, "sent  :", tx_obj.dump())
+            debug_print(2, "packet:", tx_obj.full_dump())
+            s.sendto(tx_obj.packet, peer)
+        elif ret == sfr.STATE_DONE:
             debug_print(1, "finished.")
-            debug_print(1, data)
-        elif ret == sfr.SCHC_DEFRAG_GOT_ALL1:
-            debug_print(1, "received." % pybinutil.to_hex(data))
-            s.sendto(data, client)
+            debug_print(1, "payload:[%s]" % tx_obj.decode())
+        elif ret == sfr.STATE_SEND_ACK1:
+            debug_print(1, "ack for all-1.")
+            debug_print(1, "sent  :", tx_obj.dump())
+            debug_print(2, "packet:", tx_obj.full_dump())
+            s.sendto(tx_obj.packet, peer)
             debug_print(1, "finished, but waiting something in %d seconds." %
                         opt.timeout)
         else:
-            debug_print(1, "DEBUG:", ret, buf)
+            debug_print(1, "ERROR:", ret, tx_obj)
 
     except Exception as e:
         if "timeout" in repr(e):
             debug_print(1, "timed out")
         else:
             debug_print(1, "Exception: [%s]" % repr(e))
+            debug_print(0, traceback.format_exc())
 

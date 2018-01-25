@@ -6,19 +6,27 @@ from __future__ import print_function
 import sys
 import argparse
 from socket import *
-import schc_fragment_sender as sfs
 import time
-from pybinutil import *
-from random import choice
+import pybinutil as pb
+import random
+from schc_param import *
+import schc_context
+import schc_fragment_sender as sfs
+from debug_print import *
 
-debug_level = 0
+def func_loss_list():
+    return (n_packet in opt.loss_list)
 
-def debug_print(*argv):
-    level = argv[0]
-    if debug_level >= level:
-        print("DEBUG: ", argv[1:])
+def func_loss_rate():
+    return (random.random() < opt.loss_rate)
+
+def func_loss_random():
+    return random.choice([True, False])
 
 def parse_args():
+    def test_1in3(v):
+        return not ((v[0] and v[1]) or (v[1] and v[2]) or (v[2] and v[0]))
+
     p = argparse.ArgumentParser(description="this is SCHC example.",
                                 epilog=".")
     p.add_argument("server_address", metavar="SERVER",
@@ -29,12 +37,18 @@ def parse_args():
                    help="specify the file name including the message, default is stdin.")
     p.add_argument("--interval", action="store", dest="interval", type=int,
                    default=1, help="specify the interval for each sending.")
-    p.add_argument("--fgp-size", action="store", dest="fgp_size", type=int,
-                   default=4, help="specify the payload size in the fragment. default is 4.")
-    p.add_argument("--rid", action="store", dest="rule_id", type=int, default=0,
-                   help="specify the rule id.  default is 0")
-    p.add_argument("--loss", action="store", metavar="LOSS_LIST", dest="_str_loss_list", default="",
-                   help="specify the index numbers to be lost for test. e.g.  --loss=3,8 means the 3rd and 8th packets are going to be lost.")
+    p.add_argument("--l2-size", action="store", dest="l2_size", type=int,
+                   default=DEFAULT_L2_SIZE,
+                   help="specify the payload size of L2. default is %d." %
+                   DEFAULT_L2_SIZE)
+    p.add_argument("--rid", action="store", dest="rule_id", type=int,
+                   default=DEFAULT_RID,
+                   help="specify the rule id.  default is %d" % DEFAULT_RID)
+    p.add_argument("--loss-list", action="store", dest="loss_list", default=None,
+                   help="specify the index numbers to be lost for test. e.g.  --loss-list=3,8 means the 3rd and 8th packets are going to be lost.")
+    p.add_argument("--loss-rate", action="store", dest="loss_rate",
+                   type=float, default=None,
+                   help="specify the rate of the packet loss. e.g.  --loss-rate=0.2 means 20%% to be dropped.")
     p.add_argument("--loss-random", action="store_true", dest="loss_random",
                    help="enable to lose a fragment randomly for test.")
     p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
@@ -55,9 +69,22 @@ def parse_args():
         args._debug_level = 0
     args.debug_level = len(args._f_debug) + args._debug_level
     #
-    args.loss_list = []
-    if args._str_loss_list:
-        args.loss_list = [int(i) for i in args._str_loss_list.split(",")]
+    # set loss options if needed.
+    #
+    if not test_1in3([args.loss_list != None, args.loss_rate != None,
+                      args.loss_random]):
+        print("ERROR: you can specify only one of the options of loss.")
+        exit(1)
+    if args.loss_list != None:
+        args.func_packet_loss = func_loss_list
+        # set loss list, overwritten.
+        args.loss_list = [int(i) for i in args.loss_list.split(",")]
+    elif args.loss_rate != None:
+        args.func_packet_loss = func_loss_rate
+    elif args.loss_random:
+        args.func_packet_loss = func_loss_random
+    else:
+        args.func_packet_loss = None
 
     return args
 
@@ -65,7 +92,7 @@ def parse_args():
 main code
 '''
 opt = parse_args()
-debug_level = opt.debug_level
+debug_set_level(opt.debug_level)
 
 server = (opt.server_address, opt.server_port)
 debug_print(1, "server:", server)
@@ -82,12 +109,15 @@ else:
 
 #message = "".join(fp.readlines())
 message = "Hello, this is a fragmentation test of SCHC."
-fgp_size = opt.fgp_size
 
 # fragment instance
-context = sfs.schc_context(0)
-factory = sfs.schc_fragment_factory(context, opt.rule_id, logger=debug_print)
-factory.setbuf(message)
+context = schc_context.schc_context(0)
+# XXX rule_id can be changed in a session ?
+factory = sfs.fragment_factory(context, opt.rule_id, logger=debug_print)
+factory.setbuf(message, dtag=1)
+
+# main loop
+debug_print(1, "L2 payload size: %s" % opt.l2_size)
 
 n_packet = 0
 
@@ -97,52 +127,50 @@ while True:
     # WAIT_ACK: send it and wait for the ack.
     # DONE: dont need to send it.
     # ERROR: error happened.
-    tx_ret, tx_data, = factory.next_fragment(fgp_size)
+    ret, tx_obj = factory.next_fragment(opt.l2_size)
     n_packet += 1
 
-    # whole fragments have been sent and all the ack has been received.
-    if tx_ret == sfs.SCHC_FRAG_DONE:
+    # error!
+    if ret == sfs.STATE_ERROR:
+        raise AssertionError("something wrong in fragmentation.")
+    elif ret == sfs.STATE_DONE:
         debug_print(1, "done.")
         break
+        # end of the main loop
 
-    # error!
-    if tx_ret == sfs.SCHC_FRAG_ERROR:
-        raise AssertionError("something wrong in fragmentation.")
-        break
-
-    if n_packet in opt.loss_list or (opt.loss_random and choice([True, False])):
-        debug_print(1, "drop packet", pybinutil.to_hex(tx_data))
+    if opt.func_packet_loss and opt.func_packet_loss() == True:
+        debug_print(1, "drop packet")
+        time.sleep(opt.interval)
         continue
 
-    debug_print(1, "packet", pybinutil.to_hex(tx_data))
+    s.sendto(tx_obj.packet, server)
+    debug_print(1, "sent  :", tx_obj.dump())
+    debug_print(2, "hex   :", tx_obj.full_dump())
 
-    try:
-        s.sendto(tx_data, server)
-    except Exception as e:
-        debug_print(1, e)
-        debug_print(1, "timeout in sending")
-        continue
+    if factory.R.mode != sfs.SCHC_MODE_NO_ACK and ret != sfs.STATE_CONT:
+        # WAIT_ACK
+        # a part of or whole fragments have been sent and wait for the ack.
+        debug_print(1, "waiting an ack.", factory.state.pprint())
+        try:
+            rx_data, peer = s.recvfrom(DEFAULT_RECV_BUFSIZE)
+            debug_print(1, "message from:", peer)
+            #
+            ret, rx_obj = factory.parse_ack(rx_data, peer)
+            debug_print(1, "parsed:", rx_obj.dump())
+            debug_print(2, "hex   :", rx_obj.full_dump())
+            #
+            if ret == sfs.STATE_DONE:
+                # finish if the ack against all1 is received.
+                debug_print(1, "done.")
+                break
+                # end of the main loop
 
-    # CONT
-    if tx_ret == sfs.SCHC_FRAG_CONT:
-        # need to rest fragmentation.
-        time.sleep (opt.interval)
-        continue
+        except Exception as e:
+            if "timeout" in repr(e):
+                debug_print(1, "timed out to wait for the ack.")
+            else:
+                debug_print(1, "Exception: [%s]" % repr(e))
+                debug_print(0, traceback.format_exc())
 
-    # WAIT_ACK
-    # a part of or whole fragments have been sent and wait for the ack.
-    debug_print(1, "waiting an ack", tx_ret)
-    try:
-        rx_data, peer = s.recvfrom(128)
-        # for py2, py3 compatibility
-        if type(rx_data) == str:
-            rx_data = bytearray([ord(rx_data[i]) for i in range(len(rx_data))])
-        debug_print(1, "received:", pybinutil.to_hex(rx_data), "from", peer)
-
-        ack_ok = factory.is_ack_ok(rx_data)
-        if ack_ok:
-            continue
-    except Exception as e:
-        debug_print(1, e)
-        debug_print(1, "timeout in receive")
+    time.sleep(opt.interval)
 
