@@ -260,6 +260,18 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    o  All-1.  Fragment format for the last frame of a packet.
 
+# COMM: All-1 is a fragment format ? is it a FCN value ?
+
+- The FCN for the last fragment in the last window is an All-1.
+- The C bit is set to 0 and the Bitmap for the All-1 window follows.
+- The All-1 and All-0 FCN values are used to control the fragmentation transmission.
+- When the last fragment of the packet is sent, an All-1 fragment is used.
+
+It seems that All-1 is not a fragment format itself.
+All-1 is the last fragment.
+e.g. all the bits of the All-1 FCN are set to 1.
+the All-1 window
+
    o  All-0 empty.  Fragment format without payload for requesting the
       Bitmap when the Retransmission Timer expires in a window that is
       not the last one for a fragmented packet transmission.
@@ -1447,7 +1459,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    been sent) fragment is sent to ask the receiver to resend its ACK.
    The window number is not changed.
 
-
+# XXX these two can be really distinguished ?
+# Format: [ Rule ID | DTag |W|  Bitmap  |P1]
+# Format: [ Rule ID | DTag |W|P1]
 
 
 
