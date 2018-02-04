@@ -93,15 +93,29 @@ sender sent.
 
 ### state machine.
 
-             +------------------------------------<------.
-             |                                           |
-             |     .-----<---.       .-<- CONT_ALL0 --.  |
-             |     |         |       |                |  |
-     INIT ->-+--+--+-> CONT -+->-+->-+--> SEND_ACK0 --+--'
-                |                |                  
-                '-------->-------+->-+--> SEND_ACK1 --+---> DONE
-                                     |                | 
-                                     '-<- CONT_ALL1 --' 
+this state is mainteined in each window.
+
+                      Pull ACK1
+                    .---->----------.
+           Got      |               |  NG
+           Msg. .-<-+- CONT_ALL0 -<-+-<-.
+                |                       |          Pull ACK0
+              .-+----- CHECK_ACK0 ------+   .----------<---.
+              |                         |   |              |  TO
+              '----------------.        +->-+-> SEND_ACK0 -+->-.
+                               |        OK                     |
+               .-<- CONT <-.   |                               |
+               |           |   | All-0                         |
+      INIT -->-+-----------+->-'                               +-> DONE
+                           |            OK                     |  
+              .----------<-' All-1      .->-+-> SEND_ACK1 -+->-'
+              |                         |   |              |  TO
+              '-+----- CHECK_ACK1 ------+   '----------<---'
+                |                       |          Pull ACK1
+            Got '-<-+- CONT_ALL1 -<-+-<-'
+            Msg.    |               |  NG
+                    '---->----------'
+                      Pull ACK1
 
 XXX When the fragment receiver (FR) sends an ack to the fragent sender (FS) ?
 XXX it should only happen immediately after FR receives all-x fragment ?
