@@ -11,8 +11,9 @@ so that this software can work on pycom.
 
 ## TODO
 
-- bitmap optimization
-- abort messaging
+- ack requesting.
+- bitmap optimization.
+- abort messaging.
 
 ## clone
 
@@ -118,6 +119,14 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
 - P1,P2: padding, must be within 7.
 - []: denoting a byte boundary.
 
+## Bitmap size
+
+N = 3
+All-1 = 7
+All-0 = 0
+FCN = [ 6, 5, 4, 3, 2, 1, 0 ]
+Bitmap Size = 7
+
 ## NO ACK mode
 
 Any packets are from the fragment sender to the fragment receiver.
@@ -173,7 +182,7 @@ The all bits of FCN is set to 0.
 
      Format: [ Rule ID | DTag |W|FCN|P1][ Payload |P2]
 
-- Request of Ack for All-0
+- Request of Ack for All-0, All-0 empty.
 
 The all bits of FCN is set to 0.
 
@@ -185,7 +194,7 @@ The all bits of FCN is set to 1.
 
      Format: [ Rule ID | DTag |W|FCN|  MIC   |P1][ Payload |P2]
 
-- All-1 for Retries format fragment also called All-1 empty
+- Requst of Ack for All-1, called All-1 empty
 
 The all bits of FCN is set to 1.
 
@@ -225,9 +234,13 @@ XXX what is the value of FCN ?
 
 ### Packets from the fragment receiver to the fragment sender.
 
-- Ack for All-0
+- Ack for All-0, some fragments have not been received.
 
     Format: [ Rule ID | DTag |W|  Bitmap  |P1]
+
+- Ack for All-0, all fragments have been received.
+
+    Format: [ Rule ID | DTag |W|P1]
 
 - Ack for All-1 when MIC was correct.
 
