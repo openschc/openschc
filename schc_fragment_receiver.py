@@ -81,9 +81,9 @@ class defragment_window:
             # immediately after receiving the all-0
             if fgh.R.mode == SCHC_MODE_WIN_ACK_ON_ERROR:
                 # if all the fragments in a window is received, all bits in
-                # the internal bitmap are on. i.e. equal to (2**fcn_size)-1
+                # the internal bitmap are on. i.e. equal to (2**bitmap_size)-1
                 # if so, skip to send the ack, otherwise send an ack.
-                if self.bitmap == self.R.fcn_all_1:
+                if self.bitmap == self.R.bitmap_all_1:
                     return self.win_state.set(STATE_CONT)
             #
             return self.win_state.set(STATE_SEND_ACK0)
@@ -160,14 +160,14 @@ class defragment_window:
                                                kv[0])))])
 
     def is_all_0_ok(self):
-        self.logger(1, "checking if all-0 is ok, local bitmap=",
+        self.logger(1, "checking all-0 fragments, local bitmap=",
                     pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.bitmap == self.R.bitmap_all_1:
             return True
         return False
 
     def is_all_1_ok(self):
-        self.logger(1, "checking all-1 is ok, packets=%d local bitmap=%s" % (
+        self.logger(1, "checking all-1 fragments, packets=%d local bitmap=%s" % (
                     self.mic, pb.int_to_bit(self.bitmap, self.R.bitmap_size)))
         if pb.bit_count(self.bitmap, self.R.bitmap_size) == self.mic:
             return True
@@ -193,8 +193,10 @@ class defragment_window:
         if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
             return None
         else:
-            return sfh.frag_receiver_tx_all1_ack(self.R, fgh.dtag, win=fgh.win,
-                                                 cbit=cbit, bitmap=self.bitmap)
+            return sfh.frag_receiver_tx_all1_ack(self.R, fgh.dtag,
+                                                 win=fgh.win, cbit=cbit,
+                                                 bitmap=(None if cbit == None
+                                                         else self.bitmap))
 
     def kill(self):
         # XXX others should be set None ?
@@ -250,15 +252,17 @@ class defragment_message:
             return ret, self.assemble(kill=True)
         elif ret == STATE_SEND_ACK1:
             # check MIC
+            self.logger(1, "mic is calculating.")
             self.mic, mic_size = self.R.C.mic_func.get_mic(self.assemble(kill=False))
             if fgh.mic == self.mic:
-                self.logger(1, "mic is ok")
+                self.logger(1, "mic is ok.")
                 cbit = 1
                 # msg_state will be into DONE when finish() will is called.
                 self.ev = self.scheduler.enter(self.timeout, 1, self.finish, (None,))
                 self.logger(3, "scheduling finish dtag=", self.dtag, "ev=", self.ev)
                 return ret, w.make_ack1(fgh, cbit=1)
             else:
+                self.logger(1, "mic is ng.")
                 return ret, w.make_ack1(fgh, cbit=0)
         else:
             raise AssertionError("ERROR: must not come in with unknown message state %d" % (ret))

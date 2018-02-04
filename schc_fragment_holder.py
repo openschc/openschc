@@ -103,6 +103,9 @@ class frag_tx(frag_holder):
         if bitmap != None and self.R.bitmap_size:
             pb.bit_set(ba, pos, pb.int_to_bit(bitmap, self.R.bitmap_size),
                        extend=True)
+        if cbit != None and self.R.cbit_size:
+            pb.bit_set(ba, pos, pb.int_to_bit(cbit, self.R.cbit_size),
+                       extend=True)
         #
         if payload != None:
             # assumed that bit_set() has extended to a byte boundary.

@@ -51,7 +51,7 @@ class fragment_factory:
         self.missing = 0
         self.missing_prev = 0
         self.fgh_list = {}
-        self.fcn = self.R.max_fcn
+        self.fcn = None
         # only use in NO_ACK mode
         self.n_frags_sent = 0
 
@@ -94,10 +94,13 @@ class fragment_factory:
         #
         if self.state.get() == STATE_SEND_ALL0:
             # it comes here when the timeout happens while waiting for the
-            # ack response from the receiver
-            # even though either all-0 was sent.
-            self.missing = self.missing_prev
-            self.state.set(STATE_RETRY_ALL0)
+            # ack response from the receiver even though either all-0 was sent.
+            if self.R.mode == SCHC_MODE_WIN_ACK_ALWAYS:
+                self.missing = self.missing_prev
+                self.state.set(STATE_RETRY_ALL0)
+            else:
+                # no action if ACK-ON-ERROR
+                pass
         elif self.state.get() == STATE_SEND_ALL1:
             # here, the case the sender sent all-1, but no response from the
             # receiver.
@@ -173,7 +176,10 @@ class fragment_factory:
                 self.win &= ((2**self.R.win_size)-1)
                 self.fcn = self.R.max_fcn
             else:
-                self.fcn -= 1
+                if self.fcn == None:
+                    self.fcn = self.R.max_fcn
+                else:
+                    self.fcn -= 1
             # in above, just set fcn.
             # then will check below if the packet is the last one.
             # if so, set fcn into all-1 at that time..
