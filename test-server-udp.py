@@ -33,10 +33,9 @@ def parse_args():
     p.add_argument("--address", action="store", dest="server_address",
                    default="",
                    help="specify the ip address of the server to be bind. default is any.")
-    p.add_argument("--port", action="store", dest="conf_file",
-                   default="", help="specify the configuration file.")
     p.add_argument("--timeout", action="store", dest="timeout",
-                   type=int, default=3, help="specify the number of the timeout.")
+                   type=int, default=DEFAULT_RECV_TIMEOUT,
+                   help="specify the number of time to wait for messages.")
     p.add_argument("-v", action="store_true", dest="f_verbose",
                    default=False, help="enable verbose mode.")
     p.add_argument("-d", action="append_const", dest="_f_debug",
@@ -104,23 +103,25 @@ while True:
         debug_print(1, "parsed:", rx_obj.dump())
         debug_print(2, "hex   :", rx_obj.full_dump())
         #
-        if ret in [sfr.STATE_CONT, sfr.STATE_CONT_ALL0, sfr.STATE_CONT_ALL1]:
+        if ret == sfr.STATE_CONT:
             pass
-        elif ret == sfr.STATE_SEND_ACK0:
+        elif ret in [sfr.STATE_SEND_ACK0, sfr.STATE_CONT_ALL0]:
             debug_print(1, "ack for all-0.")
             debug_print(1, "sent  :", tx_obj.dump())
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
-        elif ret == sfr.STATE_DONE:
-            debug_print(1, "finished.")
-            debug_print(1, "payload:[%s]" % tx_obj.decode())
-        elif ret == sfr.STATE_SEND_ACK1:
+        elif ret == sfr.STATE_WIN_DONE:
+            pass
+        elif ret in [sfr.STATE_SEND_ACK1, sfr.STATE_CONT_ALL1]:
             debug_print(1, "ack for all-1.")
             debug_print(1, "sent  :", tx_obj.dump())
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
-            debug_print(1, "finished, but waiting something in %d seconds." %
+            debug_print(1, "finished, waiting for something in %d seconds." %
                         opt.timeout)
+        elif ret == sfr.STATE_DONE:
+            debug_print(1, "finished.")
+            debug_print(1, "payload:[%s]" % tx_obj.decode())
         else:
             debug_print(1, "ERROR:", ret, tx_obj)
 

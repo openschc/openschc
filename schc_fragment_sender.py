@@ -99,7 +99,8 @@ class fragment_factory:
                 self.missing = self.missing_prev
                 self.state.set(STATE_RETRY_ALL0)
             else:
-                # no action if ACK-ON-ERROR
+                # here, for ACK-ON-ERROR
+                self.state.set(STATE_WIN_DONE)
                 pass
         elif self.state.get() == STATE_SEND_ALL1:
             # here, the case the sender sent all-1, but no response from the
@@ -252,7 +253,8 @@ class fragment_factory:
             self.win_head = self.pos
             self.__init_window()
             #
-            # if this is the last window, then set DONE into state.
+            # if this is the last window, then set it into DONE state.
+            # Note that in ACK-ON-ERROR, it will be set it into DONE later.
             if self.state.get() == STATE_SEND_ALL0:
                 return self.state.set(STATE_WIN_DONE), fgh
             elif self.state.get() == STATE_SEND_ALL1:

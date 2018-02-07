@@ -37,6 +37,9 @@ def parse_args():
                    help="specify the file name including the message, default is stdin.")
     p.add_argument("--interval", action="store", dest="interval", type=int,
                    default=1, help="specify the interval for each sending.")
+    p.add_argument("--timeout", action="store", dest="timeout",
+                   type=int, default=DEFAULT_RECV_TIMEOUT_SENDER,
+                   help="specify the number of time to wait for ACK.")
     p.add_argument("--l2-size", action="store", dest="l2_size", type=int,
                    default=DEFAULT_L2_SIZE,
                    help="specify the payload size of L2. default is %d." %
@@ -99,7 +102,7 @@ debug_print(1, "server:", server)
 
 s = socket(AF_INET, SOCK_DGRAM)
 #s.setblocking(True)
-s.settimeout(5)
+s.settimeout(opt.timeout)
 
 # create a message buffer
 if opt.msg_file == "-":

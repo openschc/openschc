@@ -93,33 +93,49 @@ sender sent.
 
 ### state machine.
 
-this state is mainteined in each window.
-
-                      Pull ACK1
-                    .---->----------.
-           Got      |               |  NG
-           Msg. .-<-+- CONT_ALL0 -<-+-<-.
-                |                       |          Pull ACK0
-              .-+----- CHECK_ACK0 ------+   .----------<---.
-              |                         |   |              |  TO
-              '----------------.        +->-+-> SEND_ACK0 -+->-.
-                               |        OK                     |
-               .-<- CONT <-.   |                               |
-               |           |   | All-0                         |
-      INIT -->-+-----------+->-'                               +-> DONE
-                           |            OK                     |  
-              .----------<-' All-1      .->-+-> SEND_ACK1 -+->-'
-              |                         |   |              |  TO
-              '-+----- CHECK_ACK1 ------+   '----------<---'
-                |                       |          Pull ACK1
-            Got '-<-+- CONT_ALL1 -<-+-<-'
-            Msg.    |               |  NG
-                    '---->----------'
-                      Pull ACK1
+The state is mainteined in each window.
 
 XXX When the fragment receiver (FR) sends an ack to the fragent sender (FS) ?
 XXX it should only happen immediately after FR receives all-x fragment ?
 XXX or, plus, whenever FR receves any fragment retransmitted ?
+
+    S: sending something
+    R: receiving something
+    T1, T2: Time out
+
+                      Pull ACK0
+                   .-->---------------.
+                   |                  |
+               .-<-R--+- CONT_ALL0 -<-S-<-.
+               |      |                   |          Pull ACK0
+               |    T1'-> FAIL         NG |   .----------<---.
+               |                          |   |              |
+           .->-+----->-- CHECK_ALL0 ----+-'   |             R|
+           |                            |     |              |  T2
+           '-------------------.     OK +--->-+-> SEND_ACK0 -+->-.
+                               |        |     S                  |
+               .-<- CONT <-.   |        |                        |
+               |           |   |All-0   |  ACK-ON-ERROR          |
+      INIT -->-+-----+-----R->-'        '--->--------------------+-> WIN_DONE
+                     |     |                                        
+      FAIL <---------' T1  |                                        
+                           |                  S                     
+           .-------------<-' All-1     OK .->-+-> SEND_ACK1 -+->---> DONE
+           |                              |   |              |  T2
+           '->-+----->-- CHECK_ALL1 ------+   |             R|
+               |                          |   |              |
+               |    T1.-> FAIL            |   '----------<---'
+               |      |                   |          Pull ACK1
+               '-<-R--+- CONT_ALL1 -<-S-<-'
+                   |                  |  NG
+                   '-->---------------'
+                      Pull ACK1
+
+In NO-ACK mode, the state transition is:
+
+            .------<--.               .-> FAIL
+            |         |               |
+    INIT ->-+-> CONT -R-> CHECK_ALL1 -+-> DONE
 
 ## Message format
 
@@ -192,27 +208,29 @@ Rule ID = 6, DTag = 2, N = 1
 
 - All-0 fragment
 
-The all bits of FCN is set to 0.
+The all bits of FCN is set to All-0.
 
      Format: [ Rule ID | DTag |W|FCN|P1][ Payload |P2]
 
 - Request of Ack for All-0, All-0 empty.
 
-The all bits of FCN is set to 0.
+The all bits of FCN is set to All-0.
 
      Format: [ Rule ID | DTag |W|FCN|P1]
 
 - All-1 fragment, the last fragment
 
-The all bits of FCN is set to 1.
+The all bits of FCN is set to All-1.
 
      Format: [ Rule ID | DTag |W|FCN|  MIC   |P1][ Payload |P2]
 
 - Requst of Ack for All-1, called All-1 empty
 
-The all bits of FCN is set to 1.
+The all bits of FCN is set to All-1.
 
      Format: [ Rule ID | DTag |W|FCN|  MIC   |P1]
+
+XXX Why is the mis required ?
 
 - All-1 Abort message to abort the transmission.
 
