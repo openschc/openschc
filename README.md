@@ -56,23 +56,32 @@ or
 
 - WINDOW mode
 
-            .-----------------------------------------------------<----.
-            |                                                          |
-            |     .-----<---.       .-<- RETRY_ALL0 -.                 |
-            |     |         |       |                |                 |
-    INIT ->-+--+--+-> CONT -+->-+->-+--> SEND_ALL0 --+->-+-> WIN_DONE -+-> DONE
-               |                |                        |
-               '-------->-------+->-+--> SEND_ALL1 --+->-'
-                                    |                | 
-                                    '-<- RETRY_ALL1 -' 
+            .----------------------------------------------------<----.
+            |                                                         |
+            |   .-----<---.          .-<- RETRY_ALL0 -.               |
+            |   |         |          |                |R              |
+            |   |         |          |                |               |
+    INIT ->-+-+-+-> CONT -S-->-+--->-+--> SEND_ALL0 --B---> WIN_DONE -'
+              |                |                      |                  
+              |--<-------------'    T1                '---> FAIL         
+              |          All-1       .---> FAIL      T1                  
+              |                      |                                 
+              '-->--+--> SEND_ALL1 --B--R--->---------> DONE
+                    |                   |  
+                    |                   | 
+                    '-<- RETRY_ALL1 -<--' 
 
 - NO-ACK mode
 
-                  .-----<---.                                        
-                  |         |                                        
-    INIT ->-+--+--+-> CONT -+->-+                         +------------+-> DONE
-               |                |                         |
-               '-------->-------+------> SEND_ALL1 ---+->-'
+                .-----<---.
+                |         |
+                |         |
+    INIT ->-+-+-+-> CONT -S-->-+
+              |                |
+              |--<-------------'
+              |          All-1
+              |
+              '-->--+--> SEND_ALL1 --------->---------> DONE
 
 ## fragment receiver
 
@@ -101,41 +110,44 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
 
     S: sending something
     R: receiving something
+    B: I/O Blocking
     T1, T2: Time out
 
-                      Pull ACK0
-                   .-->---------------.
-                   |                  |
-               .-<-R--+- CONT_ALL0 -<-S-<-.
-               |      |                   |          Pull ACK0
-               |    T1'-> FAIL         NG |   .----------<---.
-               |                          |   |              |
-           .->-+----->-- CHECK_ALL0 ----+-'   |             R|
-           |                            |     |              |  T2
-           '-------------------.     OK +--->-+-> SEND_ACK0 -+->-.
-                               |        |     S                  |
-               .-<- CONT <-.   |        |                        |
-               |           |   |All-0   |  ACK-ON-ERROR          |
-      INIT -->-+-----+-----R->-'        '--->--------------------+-> WIN_DONE
-                     |     |                                        
-      FAIL <---------' T1  |                                        
-                           |                  S                     
-           .-------------<-' All-1     OK .->-+-> SEND_ACK1 -+->---> DONE
-           |                              |   |              |  T2
-           '->-+----->-- CHECK_ALL1 ------+   |             R|
-               |                          |   |              |
-               |    T1.-> FAIL            |   '----------<---'
-               |      |                   |          Pull ACK1
-               '-<-R--+- CONT_ALL1 -<-S-<-'
-                   |                  |  NG
-                   '-->---------------'
-                      Pull ACK1
+                    Pull ACK0
+                 .-->---------------.
+                 |                  |
+             .-<-R--B- CONT_ALL0 -<-S-<-.
+             |      |                   |          Pull ACK0
+             |    T1'-> FAIL         NG |   .----------<---.
+             |                          |   |              |
+         .->-+----->-- CHECK_ALL0 ----+-'   |             R|
+         |                            |     |              |  T2
+         '-------------------.     OK +--->-+-> SEND_ACK0 -B->-.
+                             |        |     S                  |
+             .-<- CONT <-.   |        |                        |
+             |           |   |All-0   |  ACK-ON-ERROR          |
+    INIT -->-+-----B-----R->-'        '--->--------------------+-> WIN_DONE
+                   |     |                                        
+        FAIL <-----' T1  |                                        
+                         |                  S                     
+         .-------------<-' All-1     OK .->-+-> SEND_ACK1 -B->---> DONE
+         |                              |   |              |  T2
+         '->-+----->-- CHECK_ALL1 ------+   |             R|
+             |                          |   |              |
+             |    T1.-> FAIL            |   '----------<---'
+             |      |                   |          Pull ACK1
+             '-<-R--B- CONT_ALL1 -<-S-<-'
+                 |                  |  NG
+                 '-->---------------'
+                    Pull ACK1
 
 In NO-ACK mode, the state transition is:
 
-            .------<--.               .-> FAIL
-            |         |               |
-    INIT ->-+-> CONT -R-> CHECK_ALL1 -+-> DONE
+             .-<- CONT <-.         
+             |           |
+    INIT -->-+-----B-----R------->---> CHECK_ALL1 --+-> DONE
+                   |       All-1
+        FAIL <-----' T1
 
 ## Message format
 
