@@ -45,8 +45,9 @@ def parse_args():
                    help="specify the payload size of L2. default is %d." %
                    DEFAULT_L2_SIZE)
     p.add_argument("--rid", action="store", dest="rule_id", type=int,
-                   default=DEFAULT_RID,
-                   help="specify the rule id.  default is %d" % DEFAULT_RID)
+                   default=DEFAULT_FRAGMENT_RID,
+                   help="specify the rule id.  default is %d" %
+                   DEFAULT_FRAGMENT_RID)
     p.add_argument("--loss-list", action="store", dest="loss_list", default=None,
                    help="specify the index numbers to be lost for test. e.g.  --loss-list=3,8 means the 3rd and 8th packets are going to be lost.")
     p.add_argument("--loss-rate", action="store", dest="loss_rate",
@@ -150,7 +151,7 @@ while True:
     debug_print(1, "sent  :", tx_obj.dump())
     debug_print(2, "hex   :", tx_obj.full_dump())
 
-    if factory.R.mode != sfs.SCHC_MODE_NO_ACK and ret != sfs.STATE_CONT:
+    if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE_CONT:
         # WAIT_ACK
         # a part of or whole fragments have been sent and wait for the ack.
         debug_print(1, "waiting an ack.", factory.state.pprint())

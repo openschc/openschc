@@ -64,7 +64,7 @@ class defragment_window:
         self.fragment_list_no_ack = []
 
     def add(self, fgh):
-        if fgh.R.mode == SCHC_MODE_NO_ACK:
+        if fgh.R.mode == SCHC_MODE.NO_ACK:
             return self.__add_no_ack_mode(fgh)
         else:
             return self.__add_win_mode(fgh)
@@ -166,7 +166,7 @@ class defragment_window:
         return a part of the message assembled in this window.
         NOTE: e.g. FCN order would be, 6 5 4 0 or 6 5 4 7 in case of N=3.
         '''
-        if self.R.mode == SCHC_MODE_NO_ACK:
+        if self.R.mode == SCHC_MODE.NO_ACK:
             a = b"".join([i for i in self.fragment_list_no_ack])
             return a + self.__assemble()
         else:
@@ -174,7 +174,7 @@ class defragment_window:
 
     def __assemble(self):
         self.logger(1, "assembling ")
-        if self.R.mode != SCHC_MODE_NO_ACK:
+        if self.R.mode != SCHC_MODE.NO_ACK:
             self.logger(1, "  win =", self.win)
         for i in sorted(self.fragment_list.items(), reverse=True,
                         key=(lambda kv:
@@ -266,7 +266,7 @@ class defragment_message:
             return ret, None
         elif ret == STATE_CHECK_ALL0:
             ack_payload = None
-            if fgh.R.mode == SCHC_MODE_WIN_ACK_ON_ERROR:
+            if fgh.R.mode == SCHC_MODE.WIN_ACK_ON_ERROR:
                 # if all the fragments in a window is received, all bits in
                 # the internal bitmap are on. i.e. equal to (2**bitmap_size)-1
                 # if so, skip to send the ack, otherwise send an ack.
@@ -391,7 +391,7 @@ class defragment_factory:
         '''
         ret = []
         for k, m in self.msg_list.items():
-            if m.msg_state == STATE_MSG_DONE and m.R.mode != SCHC_MODE_NO_ACK:
+            if m.msg_state == STATE_MSG_DONE and m.R.mode != SCHC_MODE.NO_ACK:
                 ret.append(m.assemble(kill=True))
                 self.logger(1, "digged dtag = %s" % m.dtag)
         return ret

@@ -40,7 +40,7 @@ class fragment_factory:
         self.R = schc_rule.schc_rule(C, rid)
         self.logger = logger
         #
-        self.logger(1, "mode = {:d}".format(self.R.mode))
+        self.logger(1, "mode={0:s}".format(self.R.mode.name))
         self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.mic_size}".format(self.R.C.rid_size, self=self.R))
 
     def __init_window(self):
@@ -87,7 +87,7 @@ class fragment_factory:
         '''
         l2_size: the caller can specify the size of the payload anytime.
         '''
-        if self.R.mode == SCHC_MODE_NO_ACK and self.state.get() == STATE_SEND_ALL1:
+        if self.R.mode == SCHC_MODE.NO_ACK and self.state.get() == STATE_SEND_ALL1:
             # no more fragments to be sent
             return self.state.set(STATE_DONE), None
 
@@ -95,7 +95,7 @@ class fragment_factory:
         if self.state.get() == STATE_SEND_ALL0:
             # it comes here when the timeout happens while waiting for the
             # ack response from the receiver even though either all-0 was sent.
-            if self.R.mode == SCHC_MODE_WIN_ACK_ALWAYS:
+            if self.R.mode == SCHC_MODE.WIN_ACK_ALWAYS:
                 self.missing = self.missing_prev
                 self.state.set(STATE_RETRY_ALL0)
             else:
@@ -114,7 +114,7 @@ class fragment_factory:
             # if there are any missing fragments,
             # the sender only needs to send missed fragments.
             # doesn't need to send all-0/all1.
-            if self.R.mode == SCHC_MODE_NO_ACK:
+            if self.R.mode == SCHC_MODE.NO_ACK:
                 raise AssertionError("no-ack mode must not come here in next_fragment().")
             # e.g. N=3, Max FCN = 7
             #   all-0
@@ -150,7 +150,7 @@ class fragment_factory:
         # defragment for transmitting.
         #
         fgp_size = l2_size  # default size of the fragment payload
-        if self.R.mode == SCHC_MODE_NO_ACK:
+        if self.R.mode == SCHC_MODE.NO_ACK:
             if self.pos + l2_size < len(self.srcbuf):
                 self.fcn = 0
                 fgh = sfh.frag_sender_tx(self.R, self.dtag,
@@ -212,7 +212,7 @@ class fragment_factory:
             return self.state.get(), fgh
 
     def parse_ack(self, recvbuf, peer):
-        if self.R.mode == SCHC_MODE_NO_ACK:
+        if self.R.mode == SCHC_MODE.NO_ACK:
             raise AssertionError("parse_ack() must not be called in NO-ACK mode.")
         #
         # XXX here, must check the peer expected.
