@@ -75,7 +75,7 @@ class defragment_window:
         '''
         f = self.fragment_list.setdefault(fgh.fcn, {})
         if f:
-            self.logger(1, "got a FCN which is received before. replaced it.")
+            self.logger(1, "got a FCN which was received before. replaced it.")
         # add new fragment for the assembling
         self.fragment_list[fgh.fcn] = fgh.payload
         #
@@ -139,6 +139,7 @@ class defragment_window:
         '''
         in NO-ACK, the value of the FCN is either 0 or 1.
         therefore, if all-0, simply add it into the tail of the list.
+        XXX it cannot detect whether the messages have been reordered or not.
         '''
         if self.win_state.get() in [STATE_INIT, STATE_CONT]:
             if fgh.fcn == self.R.fcn_all_1:
@@ -166,42 +167,39 @@ class defragment_window:
         return a part of the message assembled in this window.
         NOTE: e.g. FCN order would be, 6 5 4 0 or 6 5 4 7 in case of N=3.
         '''
+        self.logger(1, "assembling ")
         if self.R.mode == SCHC_MODE.NO_ACK:
-            a = b"".join([i for i in self.fragment_list_no_ack])
-            return a + self.__assemble()
+            a = []
+            for i in self.fragment_list_no_ack:
+                self.logger(2, "fcn =", 0, "fragment =", i)
+                a.append(i)
+            return b"".join(a) + self.__assemble()
         else:
             return self.__assemble()
 
     def __assemble(self):
-        self.logger(1, "assembling ")
         if self.R.mode != SCHC_MODE.NO_ACK:
             self.logger(1, "  win =", self.win)
+        a = []
         for i in sorted(self.fragment_list.items(), reverse=True,
                         key=(lambda kv:
                              (0 if kv[0]==self.R.fcn_all_1 else kv[0]))):
-            self.logger(2, "fcn =", i[0], "fragment =",
-                        i[1].decode(encoding="utf-8"))
-        #
-        return b"".join([i[1] for i in
-                        sorted(self.fragment_list.items(), reverse=True,
-                               key=(lambda kv:(0 if kv[0]==self.R.fcn_all_1 else
-                                               kv[0])))])
+            self.logger(2, "fcn =", i[0], "fragment =", i)
+            if i[1]:
+                a.append(i[1])
+        return b"".join(a)
 
     def all_fragments_received(self):
         self.logger(1, "checking all-0 fragments, local bitmap=",
                     pb.int_to_bit(self.bitmap, self.R.bitmap_size))
-        if self.bitmap == self.R.bitmap_all_1:
-            return True
-        return False
+        return self.bitmap == self.R.bitmap_all_1
 
     def make_ack0(self, fgh):
         if self.win_state.get() != STATE_CHECK_ALL0:
             raise AssertionError("ERROR: must not come into make_ack0().")
-        # make it only the case immediately after receiving the all-0.
-        # otherwise, it does nothing.
-        # i.e. prev_state == CONT or INIT.
-        if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
-            return None
+        # XXX should it be make an ack only immediately after received all-0.
+        #if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+        #    return None
         else:
             return sfh.frag_receiver_tx_all0_ack(self.R, fgh.dtag, win=fgh.win,
                                                  bitmap=self.bitmap)
@@ -209,10 +207,9 @@ class defragment_window:
     def make_ack1(self, fgh, cbit=None):
         if self.win_state.get() != STATE_CHECK_ALL1:
             raise AssertionError("ERROR: must not come into make_ack1().")
-        # only the case immediately after receiving the all-1,
-        # i.e. state == CHECK_ALL1 and prev_state == CONT/INIT
-        if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
-            return None
+        # XXX should it be make an ack only immediately after received all-1.
+        #if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+        #    return None
         else:
             return sfh.frag_receiver_tx_all1_ack(self.R, fgh.dtag,
                                                  win=fgh.win, cbit=cbit,
@@ -228,12 +225,12 @@ class defragment_message:
     '''
     defragment fragments into a message
     '''
-    def __init__(self, R, dtag, scheduler=default_scheduler, timeout=5,
+    def __init__(self, R, dtag, scheduler=default_scheduler, timer=5,
                  logger=default_logger):
         self.R = R
         self.dtag = dtag
         self.scheduler = scheduler
-        self.timeout = timeout
+        self.timer = timer
         self.logger = logger
         self.win_list = []
         self.win = 0
@@ -261,27 +258,28 @@ class defragment_message:
             self.ev = None
         #
         if ret in [STATE_CONT, STATE_CONT_ALL0, STATE_CONT_ALL1]:
-            self.ev = self.scheduler.enter(self.timeout, 1, self.kill, (None,))
+            self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
             self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
         elif ret == STATE_CHECK_ALL0:
             ack_payload = None
-            if fgh.R.mode == SCHC_MODE.WIN_ACK_ON_ERROR:
+            if fgh.R.mode == SCHC_MODE.ACK_ON_ERROR:
                 # if all the fragments in a window is received, all bits in
                 # the internal bitmap are on. i.e. equal to (2**bitmap_size)-1
                 # if so, skip to send the ack, otherwise send an ack.
                 if w.all_fragments_received():
                     ret = w.win_state.set(STATE_WIN_DONE)
                 else:
+                    ack_payload = w.make_ack0(fgh)
                     ret = w.win_state.set(STATE_CONT_ALL0)
             else:
+                ack_payload = w.make_ack0(fgh)
                 if w.all_fragments_received():
-                    ack_payload = w.make_ack0(fgh)
                     ret = w.win_state.set(STATE_SEND_ACK0)
                 else:
                     ret = w.win_state.set(STATE_CONT_ALL0)
             #
-            self.ev = self.scheduler.enter(self.timeout, 1, self.kill, (None,))
+            self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
             self.logger(3, "scheduling kill 2 dtag=", self.dtag, "ev=", self.ev)
             return ret, ack_payload
         elif ret == STATE_CHECK_ALL1:
@@ -289,14 +287,23 @@ class defragment_message:
             # XXX is there the case when the MIC is okey but any fragments have
             # not received ?
             if self.mic_matched(fgh):
-                # msg_state will be into DONE when finish() will be called.
-                self.ev = self.scheduler.enter(self.timeout, 1, self.finish, (None,))
-                self.logger(3, "scheduling finish dtag=", self.dtag, "ev=", self.ev)
-                ack_payload = w.make_ack1(fgh, cbit=1)
-                return w.win_state.set(STATE_SEND_ACK1), ack_payload
+                if self.R.mode == SCHC_MODE.NO_ACK:
+                    self.finish()
+                    return w.win_state.set(STATE_DONE), None
+                else:
+                    # msg_state will be into DONE when finish() will be called.
+                    self.ev = self.scheduler.enter(self.timer, 1,
+                                                   self.finish, (None,))
+                    self.logger(3, "scheduling finish dtag=",
+                                self.dtag, "ev=", self.ev)
+                    # Note it makes the ack payload before change the state.
+                    ack_payload = w.make_ack1(fgh, cbit=1)
+                    return (w.win_state.set(STATE_SEND_ACK1), ack_payload)
+                            
             else:
+                # Note it makes the ack payload before change the state.
                 ack_payload = w.make_ack1(fgh, cbit=0)
-                return w.win_state.set(STATE_CONT_ALL1), ack_payload
+                return (w.win_state.set(STATE_CONT_ALL1), ack_payload)
         elif ret == STATE_DONE:
             # msg_state will be into DEAD in assemble()
             raise AssertionError("must not com here for STATE_DONE")
@@ -339,7 +346,7 @@ class defragment_factory:
     '''
                         win_list
                            :
-          msg_list         :       fragment_list
+          msg_list         :       fragment_list { fcn:payload }
               :            :         :
               :            :         :
               -------+-- dtag --+-- win -+- fcn - frag 
@@ -352,11 +359,11 @@ class defragment_factory:
           ## NO_ACK
                      +-- dtag --+-- fcn[0] - frag - frag - ...
     '''
-    def __init__(self, scheduler=default_scheduler, timeout=5,
+    def __init__(self, scheduler=default_scheduler, timer=5,
                  logger=default_logger):
         self.logger = logger
         self.scheduler = scheduler
-        self.timeout = timeout
+        self.timer = timer
         self.msg_list = {}
 
     def defrag(self, C, recvbuf):
@@ -376,7 +383,7 @@ class defragment_factory:
         # create a message holder
         if not m:
             m = defragment_message(fgh.R, fgh.dtag, scheduler=self.scheduler,
-                                   timeout=self.timeout, logger=self.logger)
+                                   timer=self.timer, logger=self.logger)
             self.msg_list[fgh.dtag] = m
         #
         rx_ret, tx_obj = m.add(fgh)
@@ -391,7 +398,7 @@ class defragment_factory:
         '''
         ret = []
         for k, m in self.msg_list.items():
-            if m.msg_state == STATE_MSG_DONE and m.R.mode != SCHC_MODE.NO_ACK:
+            if m.msg_state == STATE_MSG_DONE:
                 ret.append(m.assemble(kill=True))
                 self.logger(1, "digged dtag = %s" % m.dtag)
         return ret

@@ -30,6 +30,13 @@ state_dict = {
 def default_logger(*arg):
     pass
 
+def rdu8(a):
+    '''
+    a: a size in bit.
+    return a size in byte.
+    '''
+    return ((a+7)&(~7))>>3
+
 class fragment_factory:
 
     def __init__(self, C, rid, logger=default_logger):
@@ -69,7 +76,7 @@ class fragment_factory:
         '''
         if type(srcbuf) == str:
             self.srcbuf = bytearray(srcbuf, encoding="utf-8")
-        elif type(srcbuf) == bytearray or type(srcbuf) == bytes:
+        elif type(srcbuf) in [bytearray, bytes]:
             self.srcbuf = bytearray(recvbuf)
         else:
             raise TypeError("srcbuf must be str, bytes or bytearray.")
@@ -77,16 +84,33 @@ class fragment_factory:
         self.win_head = 0
         self.pos = 0
         self.dtag = dtag
-        self.mic, mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
+        self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
         self.win = 0
         self.__init_window()
         self.state = sfs.fragment_state(state_dict, logger=self.logger)
         self.state.set(STATE_INIT)
 
+    def get_payload_base_size(self, l2_size):
+        h = self.R.C.rid_size + self.R.dtag_size + self.R.fcn_size
+        max_pyld_size = rdu8(l2_size*8 - h)
+        min_pyld_size = rdu8(l2_size*8 - h - self.mic_size)
+        if max_pyld_size < 1:
+            raise AssertionError("L2 size is too small than header. hdr=%d L2=%d" % (h, l2_size*8))
+        if min_pyld_size < 1:
+            raise AssertionError("L2 size is too small for mic. hdr+mic=%d L2=%d" % (h+self.mic_size, l2_size*8))
+        return max_pyld_size, min_pyld_size
+
     def next_fragment(self, l2_size):
         '''
         l2_size: the caller can specify the size of the payload anytime.
+
+        XXX Note that it doesn't care the l2_size in retransmitting.
+        if the size is changed in that case,
+        the packet will not be changed as it was.  needs to be improved.
         '''
+        # compute the max/min payload size.
+        max_pyld_size, min_pyld_size = self.get_payload_base_size(l2_size)
+        #
         if self.R.mode == SCHC_MODE.NO_ACK and self.state.get() == STATE_SEND_ALL1:
             # no more fragments to be sent
             return self.state.set(STATE_DONE), None
@@ -95,7 +119,7 @@ class fragment_factory:
         if self.state.get() == STATE_SEND_ALL0:
             # it comes here when the timeout happens while waiting for the
             # ack response from the receiver even though either all-0 was sent.
-            if self.R.mode == SCHC_MODE.WIN_ACK_ALWAYS:
+            if self.R.mode == SCHC_MODE.ACK_ALWAYS:
                 self.missing = self.missing_prev
                 self.state.set(STATE_RETRY_ALL0)
             else:
@@ -149,25 +173,29 @@ class fragment_factory:
         #
         # defragment for transmitting.
         #
-        fgp_size = l2_size  # default size of the fragment payload
+        rest_size = len(self.srcbuf) - self.pos
         if self.R.mode == SCHC_MODE.NO_ACK:
-            if self.pos + l2_size < len(self.srcbuf):
+            if rest_size > min_pyld_size:
+                if rest_size >= max_pyld_size:
+                    pyld_size = max_pyld_size
+                else:
+                    pyld_size = rest_size
                 self.fcn = 0
-                fgh = sfh.frag_sender_tx(self.R, self.dtag,
-                                fcn=self.fcn,
-                                payload=self.srcbuf[self.pos:self.pos+fgp_size])
-                self.state.set(STATE_CONT)
+                mic = None
+                state = STATE_CONT
             else:
                 # this is the last fragment.
-                fgp_size = len(self.srcbuf) - self.pos
+                pyld_size = rest_size
                 self.fcn = 1
-                fgh = sfh.frag_sender_tx(self.R, self.dtag,
-                                fcn=self.fcn, mic=self.mic,
-                                payload=self.srcbuf[self.pos:self.pos+fgp_size])
-                self.state.set(STATE_SEND_ALL1)
+                mic = self.mic
+                state = STATE_SEND_ALL1
             #
+            fgh = sfh.frag_sender_tx(self.R, self.dtag,
+                            fcn=self.fcn, mic=mic,
+                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
+            self.state.set(state)
             self.n_frags_sent += 1
-            self.pos += fgp_size
+            self.pos += pyld_size
             return self.state.get(), fgh
         else:
             if self.state.get() == STATE_WIN_DONE:
@@ -184,23 +212,27 @@ class fragment_factory:
             # in above, just set fcn.
             # then will check below if the packet is the last one.
             # if so, set fcn into all-1 at that time..
-            if self.pos + l2_size < len(self.srcbuf):
+            if rest_size > min_pyld_size:
                 self.bitmap |= 1<<self.fcn
+                if rest_size >= max_pyld_size:
+                    pyld_size = max_pyld_size
+                else:
+                    pyld_size = rest_size
                 fgh = sfh.frag_sender_tx(self.R, self.dtag,
                             win=self.win, fcn=self.fcn,
-                            payload=self.srcbuf[self.pos:self.pos+fgp_size])
+                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
                 if self.fcn == self.R.fcn_all_0:
                     self.state.set(STATE_SEND_ALL0)
                 else:
                     self.state.set(STATE_CONT)
             else:
                 # this is the last window.
-                fgp_size = len(self.srcbuf) - self.pos
-                self.fcn = self.R.fcn_all_1
                 self.bitmap |= 1
+                pyld_size = rest_size
+                self.fcn = self.R.fcn_all_1
                 fgh = sfh.frag_sender_tx(self.R, self.dtag,
                             win=self.win, fcn=self.fcn, mic=self.mic,
-                            payload=self.srcbuf[self.pos:self.pos+fgp_size])
+                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
                 self.state.set(STATE_SEND_ALL1)
             #
             # save the local bitmap for retransmission
@@ -208,7 +240,7 @@ class fragment_factory:
             self.missing_prev = self.bitmap
             # store the packet for the future retransmission.
             self.fgh_list[self.fcn] = fgh
-            self.pos += fgp_size
+            self.pos += pyld_size
             return self.state.get(), fgh
 
     def parse_ack(self, recvbuf, peer):

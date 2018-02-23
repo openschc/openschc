@@ -34,11 +34,11 @@ def parse_args():
     p.add_argument("server_port", metavar="PORT", type=int,
                    help="specify the port number in the server.")
     p.add_argument("-I", action="store", dest="msg_file", default="-",
-                   help="specify the file name including the message, default is stdin.")
+                   help="NOTYET, specify the file name containing the message, default is stdin.")
     p.add_argument("--interval", action="store", dest="interval", type=int,
                    default=1, help="specify the interval for each sending.")
     p.add_argument("--timeout", action="store", dest="timeout",
-                   type=int, default=DEFAULT_RECV_TIMEOUT_SENDER,
+                   type=int, default=DEFAULT_TIMER_T2,
                    help="specify the number of time to wait for ACK.")
     p.add_argument("--l2-size", action="store", dest="l2_size", type=int,
                    default=DEFAULT_L2_SIZE,
@@ -143,13 +143,11 @@ while True:
         # end of the main loop
 
     if opt.func_packet_loss and opt.func_packet_loss() == True:
-        debug_print(1, "drop packet")
-        time.sleep(opt.interval)
-        continue
-
-    s.sendto(tx_obj.packet, server)
-    debug_print(1, "sent  :", tx_obj.dump())
-    debug_print(2, "hex   :", tx_obj.full_dump())
+        debug_print(1, "packet dropped.")
+    else:
+        s.sendto(tx_obj.packet, server)
+        debug_print(1, "sent  :", tx_obj.dump())
+        debug_print(2, "hex   :", tx_obj.full_dump())
 
     if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE_CONT:
         # WAIT_ACK

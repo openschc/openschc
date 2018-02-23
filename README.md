@@ -54,6 +54,16 @@ or
 
 ## Fragment State Machine in the fragment sender
 
+    S: sending something
+    R: receiving something
+    B: I/O Blocking
+    T1: Timer in CONT* state. a message from the sender is expected to arrive within the span.
+    T2: Timer in SEND_ALL* state. an ack message from the receiver is expected to arrive within the span.
+    T3: Timer in SEND_ACK* state. a message from the sender is expected to arrive within the span.
+
+    T2 and T3 are recomended to be more than double of T1
+    in order to wait for a round-trip flow.  i.e. T1 < 2*T2 =< T3 =< T2
+
 - WINDOW mode
 
             .----------------------------------------------------<----.
@@ -63,13 +73,15 @@ or
             |   |         |          |                |               |
     INIT ->-+-+-+-> CONT -S-->-+--->-+--> SEND_ALL0 --B---> WIN_DONE -'
               |                |                      |                  
-              |--<-------------'    T1                '---> FAIL         
-              |          All-1       .---> FAIL      T1                  
+              |--<-------------'    T2                '---> FAIL         
+              |          All-1       .---> FAIL      T2                  
               |                      |                                 
               '-->--+--> SEND_ALL1 --B--R--->---------> DONE
                     |                   |  
                     |                   | 
                     '-<- RETRY_ALL1 -<--' 
+
+XXX should it send a all-0 when it finishes to send all packets of the retranmission every time ?
 
 - NO-ACK mode
 
@@ -108,11 +120,6 @@ XXX When the fragment receiver (FR) sends an ack to the fragent sender (FS) ?
 XXX it should only happen immediately after FR receives all-x fragment ?
 XXX or, plus, whenever FR receves any fragment retransmitted ?
 
-    S: sending something
-    R: receiving something
-    B: I/O Blocking
-    T1, T2: Time out
-
                     Pull ACK0
                  .-->---------------.
                  |                  |
@@ -121,7 +128,7 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
              |    T1'-> FAIL         NG |   .----------<---.
              |                          |   |              |
          .->-+----->-- CHECK_ALL0 ----+-'   |             R|
-         |                            |     |              |  T2
+         |                            |     |              |  T3
          '-------------------.     OK +--->-+-> SEND_ACK0 -B->-.
                              |        |     S                  |
              .-<- CONT <-.   |        |                        |
@@ -131,7 +138,7 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
         FAIL <-----' T1  |                                        
                          |                  S                     
          .-------------<-' All-1     OK .->-+-> SEND_ACK1 -B->---> DONE
-         |                              |   |              |  T2
+         |                              |   |              |  T3
          '->-+----->-- CHECK_ALL1 ------+   |             R|
              |                          |   |              |
              |    T1.-> FAIL            |   '----------<---'
@@ -181,6 +188,8 @@ No packets are from the fragment receiver.
 - the last fragment
 
      Format: [ Rule ID | DTag |FCN|   MIC  |P1][    Payload     |P2]
+
+XXX is it allowed that the sender sends a last fragent with no payload ?
 
 - Abort message to abort the transmission.
 

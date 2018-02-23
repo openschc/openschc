@@ -158,7 +158,7 @@ class frag_rx(frag_holder):
     def set_recvbuf(self, recvbuf):
         if type(recvbuf) == str:
             self.packet = bytearray(recvbuf, encoding="utf-8")
-        elif type(recvbuf) == bytearray or type(recvbuf) == bytes:
+        elif type(recvbuf) in [bytearray, bytes]:
             self.packet = bytearray(recvbuf)
         else:
             raise TypeError("recvbuf must be str, bytes or bytearray.")

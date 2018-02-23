@@ -33,8 +33,11 @@ def parse_args():
     p.add_argument("--address", action="store", dest="server_address",
                    default="",
                    help="specify the ip address of the server to be bind. default is any.")
-    p.add_argument("--timeout", action="store", dest="timeout",
-                   type=int, default=DEFAULT_RECV_TIMEOUT,
+    p.add_argument("--timer", action="store", dest="timer_t1",
+                   type=int, default=DEFAULT_TIMER_T1,
+                   help="specify the number of time to wait for messages.")
+    p.add_argument("--timer-t3", action="store", dest="timer_t3",
+                   type=int, default=2*DEFAULT_TIMER_T1,
                    help="specify the number of time to wait for messages.")
     p.add_argument("-v", action="store_true", dest="f_verbose",
                    default=False, help="enable verbose mode.")
@@ -75,7 +78,8 @@ s.bind(server)
 #
 sched = ps.ssched()
 context = schc_context.schc_context(0)
-factory = sfr.defragment_factory(scheduler=sched, logger=debug_print)
+factory = sfr.defragment_factory(scheduler=sched, timer=opt.timer_t1,
+                                 logger=debug_print)
 
 while True:
 
@@ -118,10 +122,10 @@ while True:
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
             debug_print(1, "finished, waiting for something in %d seconds." %
-                        opt.timeout)
+                        opt.timeout_t3)
         elif ret == sfr.STATE_DONE:
             debug_print(1, "finished.")
-            debug_print(1, "payload:[%s]" % tx_obj.decode())
+            #debug_print(1, "payload:[%s]" % tx_obj.decode())
         else:
             debug_print(1, "ERROR:", ret, tx_obj)
 

@@ -87,9 +87,9 @@ class schc_rule:
         if self.R["mode"] == "no-ack":
             self.mode = SCHC_MODE.NO_ACK
         elif self.R["mode"] == "ack-always":
-            self.mode = SCHC_MODE.WIN_ACK_ALWAYS
+            self.mode = SCHC_MODE.ACK_ALWAYS
         elif self.R["mode"] == "ack-on-error":
-            self.mode = SCHC_MODE.WIN_ACK_ON_ERROR
+            self.mode = SCHC_MODE.ACK_ON_ERROR
         else:
             raise ValueError("invalid mode=%s" % self.R["mode"])
 
