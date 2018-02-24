@@ -1,35 +1,25 @@
-
 import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 import mic_crc32
+from enum import Enum, unique, auto
 
-STATE_FAIL = -1
-STATE_INIT = 0
-STATE_CONT = 2
-STATE_CHECK_ALL0 = 3
-STATE_CONT_ALL0 = 4
-STATE_SEND_ACK0 = 5
-STATE_CHECK_ALL1 = 6
-STATE_CONT_ALL1 = 7
-STATE_SEND_ACK1 = 8
-STATE_WIN_DONE = 98
-STATE_DONE = 99
+@unique
+class SCHC_RECEIVER_STATE(Enum):
+    FAIL = -1
+    INIT = auto()
+    CONT = auto()
+    CHECK_ALL0 = auto()
+    CONT_ALL0 = auto()
+    SEND_ACK0 = auto()
+    CHECK_ALL1 = auto()
+    CONT_ALL1 = auto()
+    SEND_ACK1 = auto()
+    WIN_DONE = auto()
+    DONE = auto()
 
-state_dict = {
-    "FAIL": STATE_FAIL,
-    "INIT": STATE_INIT,
-    "CONT": STATE_CONT,
-    "CHECK_ALL0": STATE_CHECK_ALL0,
-    "CONT_ALL0": STATE_CONT_ALL0,
-    "SEND_ACK0": STATE_SEND_ACK0,
-    "CHECK_ALL1": STATE_CHECK_ALL1,
-    "CONT_ALL1": STATE_CONT_ALL1,
-    "SEND_ACK1": STATE_SEND_ACK1,
-    "WIN_DONE": STATE_WIN_DONE,
-    "DONE": STATE_DONE,
-    }
+STATE = SCHC_RECEIVER_STATE
 
 STATE_MSG_INIT = 0
 STATE_MSG_CONT = 1
@@ -56,8 +46,8 @@ class defragment_window:
         self.win = fgh.win
         self.bitmap = 0
         self.mic = None
-        self.win_state = sfs.fragment_state(state_dict, logger=self.logger)
-        self.win_state.set(STATE_INIT)
+        self.win_state = sfs.fragment_state(STATE, logger=self.logger)
+        self.win_state.set(STATE.INIT)
         # fragement_list is a dict because FCN is not always sequentially decremented.
         self.fragment_list = {}
         # below list is used to hold the fragments in NO_ACK because FCN is always zero.
@@ -88,16 +78,16 @@ class defragment_window:
         #
         # assuming that, in each window except the last one,
         # the bitmap must be filled up by the fragments that sender sends.
-        if self.win_state.get() in [STATE_INIT, STATE_CONT]:
+        if self.win_state.get() in [STATE.INIT, STATE.CONT]:
             if fgh.fcn == self.R.fcn_all_0:
                 # immediately after receiving the all-0
-                return self.win_state.set(STATE_CHECK_ALL0)
+                return self.win_state.set(STATE.CHECK_ALL0)
             elif fgh.fcn == self.R.fcn_all_1:
                 # immediately after receiving the all-1
-                return self.win_state.set(STATE_CHECK_ALL1)
+                return self.win_state.set(STATE.CHECK_ALL1)
             else:
-                return self.win_state.set(STATE_CONT)
-        elif self.win_state.get() == STATE_CONT_ALL0:
+                return self.win_state.set(STATE.CONT)
+        elif self.win_state.get() == STATE.CONT_ALL0:
             if fgh.fcn == self.R.fcn_all_0 and fgh.payload == None:
                 # this is a request of Ack for All-0
                 print("XXX Resending of Ack for All-0 not implemented yet.")
@@ -105,8 +95,8 @@ class defragment_window:
             else:
                 # alwas check whether all fragments in a window are received
                 # during retransmission by the sender.
-                return self.win_state.set(STATE_CHECK_ALL0)
-        elif self.win_state.get() == STATE_SEND_ACK0:
+                return self.win_state.set(STATE.CHECK_ALL0)
+        elif self.win_state.get() == STATE.SEND_ACK0:
             if fgh.fcn == self.R.fcn_all_0 and fgh.payload == None:
                 # this is a request of Ack for All-0
                 print("XXX Resending of Ack for All-0 not implemented yet.")
@@ -114,7 +104,7 @@ class defragment_window:
             else:
                 # XXX
                 self.logger(1, "XXX ignore in SEND_ACK0", fgh.dump())
-        elif self.win_state.get() == STATE_CONT_ALL1:
+        elif self.win_state.get() == STATE.CONT_ALL1:
             if fgh.fcn == self.R.fcn_all_1 and fgh.payload == None:
                 # this is a request of Ack for All-1
                 print("XXX Resending of Ack for All-1 not implemented yet.")
@@ -122,8 +112,8 @@ class defragment_window:
             else:
                 # check whether all fragments in the last window are received
                 # during retransmission by the sender.
-                return self.win_state.set(STATE_CHECK_ALL1)
-        elif self.win_state.get() == STATE_SEND_ACK1:
+                return self.win_state.set(STATE.CHECK_ALL1)
+        elif self.win_state.get() == STATE.SEND_ACK1:
             if fgh.fcn == self.R.fcn_all_1 and fgh.payload == None:
                 # this is a request of Ack for All-1
                 print("XXX Resending of Ack for All-1 not implemented yet.")
@@ -141,15 +131,15 @@ class defragment_window:
         therefore, if all-0, simply add it into the tail of the list.
         XXX it cannot detect whether the messages have been reordered or not.
         '''
-        if self.win_state.get() in [STATE_INIT, STATE_CONT]:
+        if self.win_state.get() in [STATE.INIT, STATE.CONT]:
             if fgh.fcn == self.R.fcn_all_1:
                 # immediately after receiving the all-1
                 self.fragment_list[fgh.fcn] = fgh.payload
-                return self.win_state.set(STATE_CHECK_ALL1)
+                return self.win_state.set(STATE.CHECK_ALL1)
             else:
                 # e.g. fgh.fcn == self.R.fcn_all_0
                 self.fragment_list_no_ack.append(fgh.payload)
-                return self.win_state.set(STATE_CONT)
+                return self.win_state.set(STATE.CONT)
         else:
             # in other case.
             raise ValueError("invalid state=%s", self.win_state.pprint())
@@ -195,20 +185,20 @@ class defragment_window:
         return self.bitmap == self.R.bitmap_all_1
 
     def make_ack0(self, fgh):
-        if self.win_state.get() != STATE_CHECK_ALL0:
+        if self.win_state.get() != STATE.CHECK_ALL0:
             raise AssertionError("ERROR: must not come into make_ack0().")
         # XXX should it be make an ack only immediately after received all-0.
-        #if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+        #if self.win_state.get_prev() not in [STATE.CONT, STATE.INIT]:
         #    return None
         else:
             return sfh.frag_receiver_tx_all0_ack(self.R, fgh.dtag, win=fgh.win,
                                                  bitmap=self.bitmap)
 
     def make_ack1(self, fgh, cbit=None):
-        if self.win_state.get() != STATE_CHECK_ALL1:
+        if self.win_state.get() != STATE.CHECK_ALL1:
             raise AssertionError("ERROR: must not come into make_ack1().")
         # XXX should it be make an ack only immediately after received all-1.
-        #if self.win_state.get_prev() not in [STATE_CONT, STATE_INIT]:
+        #if self.win_state.get_prev() not in [STATE.CONT, STATE.INIT]:
         #    return None
         else:
             return sfh.frag_receiver_tx_all1_ack(self.R, fgh.dtag,
@@ -257,39 +247,39 @@ class defragment_message:
             self.scheduler.cancel(self.ev)
             self.ev = None
         #
-        if ret in [STATE_CONT, STATE_CONT_ALL0, STATE_CONT_ALL1]:
+        if ret in [STATE.CONT, STATE.CONT_ALL0, STATE.CONT_ALL1]:
             self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
             self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
-        elif ret == STATE_CHECK_ALL0:
+        elif ret == STATE.CHECK_ALL0:
             ack_payload = None
             if fgh.R.mode == SCHC_MODE.ACK_ON_ERROR:
                 # if all the fragments in a window is received, all bits in
                 # the internal bitmap are on. i.e. equal to (2**bitmap_size)-1
                 # if so, skip to send the ack, otherwise send an ack.
                 if w.all_fragments_received():
-                    ret = w.win_state.set(STATE_WIN_DONE)
+                    ret = w.win_state.set(STATE.WIN_DONE)
                 else:
                     ack_payload = w.make_ack0(fgh)
-                    ret = w.win_state.set(STATE_CONT_ALL0)
+                    ret = w.win_state.set(STATE.CONT_ALL0)
             else:
                 ack_payload = w.make_ack0(fgh)
                 if w.all_fragments_received():
-                    ret = w.win_state.set(STATE_SEND_ACK0)
+                    ret = w.win_state.set(STATE.SEND_ACK0)
                 else:
-                    ret = w.win_state.set(STATE_CONT_ALL0)
+                    ret = w.win_state.set(STATE.CONT_ALL0)
             #
             self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
             self.logger(3, "scheduling kill 2 dtag=", self.dtag, "ev=", self.ev)
             return ret, ack_payload
-        elif ret == STATE_CHECK_ALL1:
+        elif ret == STATE.CHECK_ALL1:
             # check MIC
             # XXX is there the case when the MIC is okey but any fragments have
             # not received ?
             if self.mic_matched(fgh):
                 if self.R.mode == SCHC_MODE.NO_ACK:
                     self.finish()
-                    return w.win_state.set(STATE_DONE), None
+                    return w.win_state.set(STATE.DONE), None
                 else:
                     # msg_state will be into DONE when finish() will be called.
                     self.ev = self.scheduler.enter(self.timer, 1,
@@ -298,15 +288,15 @@ class defragment_message:
                                 self.dtag, "ev=", self.ev)
                     # Note it makes the ack payload before change the state.
                     ack_payload = w.make_ack1(fgh, cbit=1)
-                    return (w.win_state.set(STATE_SEND_ACK1), ack_payload)
+                    return (w.win_state.set(STATE.SEND_ACK1), ack_payload)
                             
             else:
                 # Note it makes the ack payload before change the state.
                 ack_payload = w.make_ack1(fgh, cbit=0)
-                return (w.win_state.set(STATE_CONT_ALL1), ack_payload)
-        elif ret == STATE_DONE:
+                return (w.win_state.set(STATE.CONT_ALL1), ack_payload)
+        elif ret == STATE.DONE:
             # msg_state will be into DEAD in assemble()
-            raise AssertionError("must not com here for STATE_DONE")
+            raise AssertionError("must not com here for STATE.DONE")
             #return ret, self.assemble(kill=True)
         else:
             raise AssertionError("ERROR: must not come in with unknown message state %d" % (ret))

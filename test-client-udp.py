@@ -135,9 +135,9 @@ while True:
     n_packet += 1
 
     # error!
-    if ret == sfs.STATE_ERROR:
+    if ret == sfs.STATE.FAIL:
         raise AssertionError("something wrong in fragmentation.")
-    elif ret == sfs.STATE_DONE:
+    elif ret == sfs.STATE.DONE:
         debug_print(1, "done.")
         break
         # end of the main loop
@@ -149,7 +149,7 @@ while True:
         debug_print(1, "sent  :", tx_obj.dump())
         debug_print(2, "hex   :", tx_obj.full_dump())
 
-    if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE_CONT:
+    if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE.CONT:
         # WAIT_ACK
         # a part of or whole fragments have been sent and wait for the ack.
         debug_print(1, "waiting an ack.", factory.state.pprint())
@@ -161,7 +161,7 @@ while True:
             debug_print(1, "parsed:", rx_obj.dump())
             debug_print(2, "hex   :", rx_obj.full_dump())
             #
-            if ret == sfs.STATE_DONE:
+            if ret == sfs.STATE.DONE:
                 # finish if the ack against all1 is received.
                 debug_print(1, "done.")
                 break

@@ -1,31 +1,23 @@
-
 import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 import schc_rule
+from enum import Enum, unique, auto
 
-STATE_ERROR = -1
-STATE_INIT = 0
-STATE_CONT = 2
-STATE_SEND_ALL0 = 3
-STATE_RETRY_ALL0 = 4
-STATE_WIN_DONE = 5
-STATE_SEND_ALL1 = 6
-STATE_RETRY_ALL1 = 7
-STATE_DONE = 9
+@unique
+class SCHC_SENDER_STATE(Enum):
+    FAIL = -1
+    INIT = auto()
+    CONT = auto()
+    SEND_ALL0 = auto()
+    RETRY_ALL0 = auto()
+    WIN_DONE = auto()
+    SEND_ALL1 = auto()
+    RETRY_ALL1 = auto()
+    DONE = auto()
 
-state_dict = {
-    "ERROR": STATE_ERROR,
-    "INIT": STATE_INIT,
-    "CONT": STATE_CONT,
-    "SEND_ALL0": STATE_SEND_ALL0,
-    "RETRY_ALL0": STATE_RETRY_ALL0,
-    "WIN_DONE": STATE_WIN_DONE,
-    "SEND_ALL1": STATE_SEND_ALL1,
-    "RETRY_ALL1": STATE_RETRY_ALL1,
-    "DONE": STATE_DONE,
-    }
+STATE = SCHC_SENDER_STATE
 
 def default_logger(*arg):
     pass
@@ -87,8 +79,8 @@ class fragment_factory:
         self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
         self.win = 0
         self.__init_window()
-        self.state = sfs.fragment_state(state_dict, logger=self.logger)
-        self.state.set(STATE_INIT)
+        self.state = sfs.fragment_state(STATE, logger=self.logger)
+        self.state.set(STATE.INIT)
 
     def get_payload_base_size(self, l2_size):
         h = self.R.C.rid_size + self.R.dtag_size + self.R.fcn_size
@@ -111,28 +103,28 @@ class fragment_factory:
         # compute the max/min payload size.
         max_pyld_size, min_pyld_size = self.get_payload_base_size(l2_size)
         #
-        if self.R.mode == SCHC_MODE.NO_ACK and self.state.get() == STATE_SEND_ALL1:
+        if self.R.mode == SCHC_MODE.NO_ACK and self.state.get() == STATE.SEND_ALL1:
             # no more fragments to be sent
-            return self.state.set(STATE_DONE), None
+            return self.state.set(STATE.DONE), None
 
         #
-        if self.state.get() == STATE_SEND_ALL0:
+        if self.state.get() == STATE.SEND_ALL0:
             # it comes here when the timeout happens while waiting for the
             # ack response from the receiver even though either all-0 was sent.
             if self.R.mode == SCHC_MODE.ACK_ALWAYS:
                 self.missing = self.missing_prev
-                self.state.set(STATE_RETRY_ALL0)
+                self.state.set(STATE.RETRY_ALL0)
             else:
                 # here, for ACK-ON-ERROR
-                self.state.set(STATE_WIN_DONE)
+                self.state.set(STATE.WIN_DONE)
                 pass
-        elif self.state.get() == STATE_SEND_ALL1:
+        elif self.state.get() == STATE.SEND_ALL1:
             # here, the case the sender sent all-1, but no response from the
             # receiver.
             self.missing = self.missing_prev
-            self.state.set(STATE_RETRY_ALL1)
+            self.state.set(STATE.RETRY_ALL1)
         #
-        if self.state.get() in [STATE_RETRY_ALL0, STATE_RETRY_ALL1]:
+        if self.state.get() in [STATE.RETRY_ALL0, STATE.RETRY_ALL1]:
             if self.missing == 0:
                 raise AssertionError("fault state in missing == 0")
             # if there are any missing fragments,
@@ -155,7 +147,7 @@ class fragment_factory:
                 raise AssertionError("in missing check, p must be from 1 to %d"
                                      % self.R.max_fcn)
             if p == self.R.max_fcn:
-                if self.state.get() == STATE_RETRY_ALL0:
+                if self.state.get() == STATE.RETRY_ALL0:
                     fgh = self.fgh_list[self.R.fcn_all_0]
                 else:
                     # i.e. SCHC_FRAG_RETRY_ALL1
@@ -169,7 +161,7 @@ class fragment_factory:
             # in others, return CONT,
             # however don't need to change the state.
             # i.e RETRY_ALL0 or RETRY_ALL1.
-            return STATE_CONT, fgh
+            return STATE.CONT, fgh
         #
         # defragment for transmitting.
         #
@@ -182,13 +174,13 @@ class fragment_factory:
                     pyld_size = rest_size
                 self.fcn = 0
                 mic = None
-                state = STATE_CONT
+                state = STATE.CONT
             else:
                 # this is the last fragment.
                 pyld_size = rest_size
                 self.fcn = 1
                 mic = self.mic
-                state = STATE_SEND_ALL1
+                state = STATE.SEND_ALL1
             #
             fgh = sfh.frag_sender_tx(self.R, self.dtag,
                             fcn=self.fcn, mic=mic,
@@ -198,7 +190,7 @@ class fragment_factory:
             self.pos += pyld_size
             return self.state.get(), fgh
         else:
-            if self.state.get() == STATE_WIN_DONE:
+            if self.state.get() == STATE.WIN_DONE:
                 # try to support more than 1 bit wide window
                 # though the bit size is 1 in the draft 7.
                 self.win += 1
@@ -222,9 +214,9 @@ class fragment_factory:
                             win=self.win, fcn=self.fcn,
                             payload=self.srcbuf[self.pos:self.pos+pyld_size])
                 if self.fcn == self.R.fcn_all_0:
-                    self.state.set(STATE_SEND_ALL0)
+                    self.state.set(STATE.SEND_ALL0)
                 else:
-                    self.state.set(STATE_CONT)
+                    self.state.set(STATE.CONT)
             else:
                 # this is the last window.
                 self.bitmap |= 1
@@ -233,7 +225,7 @@ class fragment_factory:
                 fgh = sfh.frag_sender_tx(self.R, self.dtag,
                             win=self.win, fcn=self.fcn, mic=self.mic,
                             payload=self.srcbuf[self.pos:self.pos+pyld_size])
-                self.state.set(STATE_SEND_ALL1)
+                self.state.set(STATE.SEND_ALL1)
             #
             # save the local bitmap for retransmission
             # this is for the case when the receiver will not respond.
@@ -249,10 +241,10 @@ class fragment_factory:
         #
         # XXX here, must check the peer expected.
         #
-        if self.state.get() == STATE_SEND_ALL0:
+        if self.state.get() == STATE.SEND_ALL0:
             fgh = sfh.frag_sender_rx_all0_ack(recvbuf, self.R,
                                               self.dtag, self.win)
-        elif self.state.get() == STATE_SEND_ALL1:
+        elif self.state.get() == STATE.SEND_ALL1:
             fgh = sfh.frag_sender_rx_all1_ack(recvbuf, self.R,
                                               self.dtag, self.win)
         else:
@@ -273,10 +265,10 @@ class fragment_factory:
             self.logger(1, "missing  :", pb.int_to_bit(self.missing,self.R.bitmap_size))
         #
         if self.missing:
-            if self.state.get() == STATE_SEND_ALL0:
-                return self.state.set(STATE_RETRY_ALL0), fgh
-            elif self.state.get() == STATE_SEND_ALL1:
-                return self.state.set(STATE_RETRY_ALL1), fgh
+            if self.state.get() == STATE.SEND_ALL0:
+                return self.state.set(STATE.RETRY_ALL0), fgh
+            elif self.state.get() == STATE.SEND_ALL1:
+                return self.state.set(STATE.RETRY_ALL1), fgh
         else:
             #
             # The receiver looks to have all fragments that the sender sent.
@@ -287,8 +279,8 @@ class fragment_factory:
             #
             # if this is the last window, then set it into DONE state.
             # Note that in ACK-ON-ERROR, it will be set it into DONE later.
-            if self.state.get() == STATE_SEND_ALL0:
-                return self.state.set(STATE_WIN_DONE), fgh
-            elif self.state.get() == STATE_SEND_ALL1:
-                return self.state.set(STATE_DONE), fgh
+            if self.state.get() == STATE.SEND_ALL0:
+                return self.state.set(STATE.WIN_DONE), fgh
+            elif self.state.get() == STATE.SEND_ALL1:
+                return self.state.set(STATE.DONE), fgh
 

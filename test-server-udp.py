@@ -107,23 +107,23 @@ while True:
         debug_print(1, "parsed:", rx_obj.dump())
         debug_print(2, "hex   :", rx_obj.full_dump())
         #
-        if ret == sfr.STATE_CONT:
+        if ret == sfr.STATE.CONT:
             pass
-        elif ret in [sfr.STATE_SEND_ACK0, sfr.STATE_CONT_ALL0]:
+        elif ret in [sfr.STATE.SEND_ACK0, sfr.STATE.CONT_ALL0]:
             debug_print(1, "ack for all-0.")
             debug_print(1, "sent  :", tx_obj.dump())
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
-        elif ret == sfr.STATE_WIN_DONE:
+        elif ret == sfr.STATE.WIN_DONE:
             pass
-        elif ret in [sfr.STATE_SEND_ACK1, sfr.STATE_CONT_ALL1]:
+        elif ret in [sfr.STATE.SEND_ACK1, sfr.STATE.CONT_ALL1]:
             debug_print(1, "ack for all-1.")
             debug_print(1, "sent  :", tx_obj.dump())
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
             debug_print(1, "finished, waiting for something in %d seconds." %
                         opt.timeout_t3)
-        elif ret == sfr.STATE_DONE:
+        elif ret == sfr.STATE.DONE:
             debug_print(1, "finished.")
             #debug_print(1, "payload:[%s]" % tx_obj.decode())
         else:
