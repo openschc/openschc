@@ -61,6 +61,7 @@ or
     T2: Timer in SEND_ALL* state. an ack message from the receiver is expected to arrive within the span.
     T3: Timer in SEND_ACK* state. a message from the sender is expected to arrive within the span.
 
+    If the link is not stable, T1 should be bigger than you excepted.
     T2 and T3 are recomended to be more than double of T1
     in order to wait for a round-trip flow.  i.e. T1 < 2*T2 =< T3 =< T2
 

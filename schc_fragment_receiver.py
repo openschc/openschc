@@ -86,8 +86,12 @@ class defragment_window:
             elif fgh.fcn == self.R.fcn_all_1:
                 # immediately after receiving the all-1
                 return self.win_state.set(STATE.CHECK_ALL1)
-            else:
+            elif self.win_state.get() == STATE.INIT:
+                # fnc is neigher all-0 nor all-1, if it's first fragment.
                 return self.win_state.set(STATE.CONT)
+            else:
+                # otherwise,
+                return STATE.CONT
         elif self.win_state.get() == STATE.CONT_ALL0:
             if fgh.fcn == self.R.fcn_all_0 and fgh.payload == None:
                 # this is a request of Ack for All-0
@@ -234,6 +238,15 @@ class defragment_message:
         '''
         if self.msg_state == _STATE_MSG_DEAD:
             raise AssertionError("ERROR: must not come in if the message state is dead.")
+        # check the message whether it is the first fragment of this session.
+        if self.msg_state == _STATE_MSG_INIT:
+            if fgh.win == 0 and fgh.fcn == self.R.max_fcn:
+                self.msg_state = _STATE_MSG_CONT
+            else:
+                self.kill()
+                return (STATE.ABORT,
+                        sfh.frag_receiver_tx_abort(self.R, fgh.dtag,
+                                                   win=fgh.win))
         #
         if len(self.win_list) == 0 or self.win_list[-1].win != fgh.win:
             self.logger(1, "new window has been created. win =", fgh.win)
@@ -300,7 +313,7 @@ class defragment_message:
             raise AssertionError("must not com here for STATE.DONE")
             #return ret, self.assemble(kill=True)
         else:
-            raise AssertionError("ERROR: must not come in with unknown message state %d" % (ret))
+            raise AssertionError("ERROR: must not come in with unknown message state %s" % (ret.name))
 
     def mic_matched(self, fgh):
         self.logger(1, "calculating mic.")

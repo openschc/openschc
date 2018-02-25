@@ -109,6 +109,10 @@ while True:
         #
         if ret == sfr.STATE.CONT:
             pass
+        elif ret == sfr.STATE.ABORT:
+            debug_print(1, "abort.")
+            debug_print(1, "sent  :", tx_obj.dump())
+            s.sendto(tx_obj.packet, peer)
         elif ret in [sfr.STATE.SEND_ACK0, sfr.STATE.CONT_ALL0]:
             debug_print(1, "ack for all-0.")
             debug_print(1, "sent  :", tx_obj.dump())

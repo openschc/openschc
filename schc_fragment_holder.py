@@ -76,10 +76,12 @@ class frag_tx(frag_holder):
     parent class for sending message.
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
-                  cbit=None, payload=None):
+                  cbit=None, abort=False, payload=None):
         #
         ba = bytearray()
         pos = 0
+        #
+        # basic fields.
         if self.R.rid != None and self.R.C.rid_size:
             pb.bit_set(ba, 0, pb.int_to_bit(self.R.rid, self.R.C.rid_size),
                        extend=True)
@@ -88,6 +90,8 @@ class frag_tx(frag_holder):
             pb.bit_set(ba, pos, pb.int_to_bit(dtag, self.R.dtag_size),
                        extend=True)
             pos += self.R.dtag_size
+        #
+        # extension fields.
         if win != None and self.R.win_size:
             pb.bit_set(ba, pos, pb.int_to_bit(win, self.R.win_size),
                        extend=True)
@@ -106,11 +110,15 @@ class frag_tx(frag_holder):
         if cbit != None and self.R.cbit_size:
             pb.bit_set(ba, pos, pb.int_to_bit(cbit, self.R.cbit_size),
                        extend=True)
+        if abort == True:
+            pb.bit_set(ba, pos, pb.int_to_bit(0xff, 8),
+                       extend=True)
         #
         if payload != None:
             # assumed that bit_set() has extended to a byte boundary.
             ba += payload
         #
+        # the abort field is implicit, is not needed to set into the parameter.
         self.set_param(self.R.rid, dtag, win, fcn, mic, bitmap, cbit, payload)
         self.packet = ba
 
@@ -148,6 +156,17 @@ class frag_receiver_tx_all1_ack(frag_tx):
         self.init_param()
         self.R = R
         self.make_frag(dtag, win=win, cbit=cbit, bitmap=bitmap)
+
+class frag_receiver_tx_abort(frag_tx):
+
+    '''
+    for the fragment receiver, to make an abort message.
+        Format: [ Rule ID | DTag |W|0xFF|P1]
+    '''
+    def __init__(self, R, dtag, win=None, cbit=None, bitmap=None):
+        self.init_param()
+        self.R = R
+        self.make_frag(dtag, win=win, abort=True)
 
 class frag_rx(frag_holder):
 
