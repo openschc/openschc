@@ -7,8 +7,8 @@ from enum import Enum, unique, auto
 
 @unique
 class SCHC_RECEIVER_STATE(Enum):
-    FAIL = -1
-    ABORT = -2
+    FAIL = auto()
+    ABORT = auto()
     INIT = auto()
     CONT = auto()
     CHECK_ALL0 = auto()
@@ -234,14 +234,6 @@ class defragment_message:
         '''
         if self.msg_state == _STATE_MSG_DEAD:
             raise AssertionError("ERROR: must not come in if the message state is dead.")
-        # check the message whether it is the first fragment of this session.
-        if self.msg_state == _STATE_MSG_INIT:
-            if fgh.win == 0 and fgh.fcn == self.R.max_fcn:
-                self.msg_state == _STATE_MSG_CONT
-            else:
-                self.kill(self, *args):
-                # XXX reply a abort message.
-                return STATE.ABORT, abort_payload
         #
         if len(self.win_list) == 0 or self.win_list[-1].win != fgh.win:
             self.logger(1, "new window has been created. win =", fgh.win)
