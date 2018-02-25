@@ -156,6 +156,23 @@ In NO-ACK mode, the state transition is:
                    |       All-1
         FAIL <-----' T1
 
+## Abort Policy
+
+the fragment receiver receives:
+
+- a message of which the MIC is not matched third times.
+- a message which is not of the maximum value of FCN. i.e. (2**fcn_size)-2.
+
+## FCN value and other significant values
+
+for example,
+
+    N = 3
+    All-1 = 7
+    All-0 = 0
+    FCN = [ 6, 5, 4, 3, 2, 1, 0 ]
+    Bitmap Size = 7
+
 ## Message format
 
 - Rule ID:
@@ -168,18 +185,14 @@ In NO-ACK mode, the state transition is:
 - P1,P2: padding, must be within 7.
 - []: denoting a byte boundary.
 
-## Bitmap size
-
-N = 3
-All-1 = 7
-All-0 = 0
-FCN = [ 6, 5, 4, 3, 2, 1, 0 ]
-Bitmap Size = 7
+Note that P1 should be 0, When you want to conform to the draft-09.
 
 ## NO ACK mode
 
 Any packets are from the fragment sender to the fragment receiver.
 No packets are from the fragment receiver.
+
+XXX the receiver should send an abort message anytime even when NO ACK mode.
 
 - the fragments except the last one
 
@@ -190,6 +203,7 @@ No packets are from the fragment receiver.
      Format: [ Rule ID | DTag |FCN|   MIC  |P1][    Payload     |P2]
 
 XXX is it allowed that the sender sends a last fragent with no payload ?
+XXX ==> assuming yes.
 
 - Abort message to abort the transmission.
 
@@ -245,13 +259,17 @@ The all bits of FCN is set to All-1.
 
      Format: [ Rule ID | DTag |W|FCN|  MIC   |P1][ Payload |P2]
 
+XXX is it allowed that the payload is empty ?
+XXX ==> assuming yes.
+
 - Requst of Ack for All-1, called All-1 empty
 
 The all bits of FCN is set to All-1.
 
      Format: [ Rule ID | DTag |W|FCN|  MIC   |P1]
 
-XXX Why is the mis required ?
+XXX Why is the mic required ?
+XXX ==> because it is a same message of All-1 that the payload is empty.
 
 - All-1 Abort message to abort the transmission.
 
@@ -289,11 +307,11 @@ XXX what is the value of FCN ?
 
 - Ack for All-0, some fragments have not been received.
 
-    Format: [ Rule ID | DTag |W|  Bitmap  |P1]
+     Format: [ Rule ID | DTag |W|  Bitmap  |P1]
 
 - Ack for All-0, all fragments have been received.
 
-    Format: [ Rule ID | DTag |W|P1]
+     Format: [ Rule ID | DTag |W|P1]
 
 - Ack for All-1 when MIC was correct.
 
