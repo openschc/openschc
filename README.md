@@ -13,9 +13,8 @@ so that this software can work on pycom.
 
 - ack requesting.
 - bitmap optimization.
-- abort messaging.
 
-## clone
+## cloning
 
 some modules are included.  therefore, you need to clone recursively.
 
@@ -157,6 +156,10 @@ In NO-ACK mode, the state transition is:
                    |       All-1
         FAIL <-----' T1
 
+## Abort message
+
+- abort messaging.
+
 ## Abort Policy
 
 the fragment receiver receives:
@@ -191,7 +194,7 @@ Note that P1 should be 0, When you want to conform to the draft-09.
 ## NO ACK mode
 
 Any packets are from the fragment sender to the fragment receiver.
-No packets are from the fragment receiver.
+No packets are from the fragment receiver except of the abort message.
 
 XXX the receiver should send an abort message anytime even when NO ACK mode.
 
@@ -208,9 +211,15 @@ XXX ==> assuming yes.
 
 - Abort message to abort the transmission.
 
-XXX not defined in draft-09.
+XXX draft-09 only defines for the win modes.
 
      Format: [ Rule ID | DTag |FCN|   FF   |P1]
+
+- Abort message for the receiver to abort the transmission.
+
+XXX draft-09 only defines for the win modes.
+
+     Format: [ Rule ID | DTag |1..1|   FF   |P1]
 
 ### Example message of NO ACK mode
 
@@ -232,7 +241,7 @@ Rule ID = 6, DTag = 2, N = 1
 
      Format: [ Rule ID | DTag |FCN|   FF   |P1]
        Size:  3         3      1   8        1    = 16 bits
-    Content:  110       010    0   11111111 0
+    Content:  110       010    1   11111111 0
 
 ## Window mode
 
@@ -274,9 +283,14 @@ XXX ==> because it is a same message of All-1 that the payload is empty.
 
 - All-1 Abort message to abort the transmission.
 
-XXX what is the value of FCN ?
-
      Format: [ Rule ID | DTag |W|FCN|  FF    |P1]
+
+XXX what is the value of FCN ?
+XXX draft-09 assumes the size of Rule ID, DTag, W, FCN is aligned
+XXX to the byte boundary.
+
+xXX how about this, in which W-bit is just reveresed.
+XXX Format: [ Rule ID | DTag |W|P1]
 
 ### Example message from the fragment sender
 
