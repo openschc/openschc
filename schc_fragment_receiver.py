@@ -8,6 +8,7 @@ from enum import Enum, unique, auto
 @unique
 class SCHC_RECEIVER_STATE(Enum):
     FAIL = -1
+    ABORT = -2
     INIT = auto()
     CONT = auto()
     CHECK_ALL0 = auto()
@@ -21,9 +22,10 @@ class SCHC_RECEIVER_STATE(Enum):
 
 STATE = SCHC_RECEIVER_STATE
 
-__STATE_MSG_INIT = 0
-__STATE_MSG_DONE = 2
-__STATE_MSG_DEAD = 3
+_STATE_MSG_INIT = 0
+_STATE_MSG_CONT = 1
+_STATE_MSG_DONE = 2
+_STATE_MSG_DEAD = 3
 
 def default_logger(*arg):
     pass
@@ -223,15 +225,23 @@ class defragment_message:
         self.logger = logger
         self.win_list = []
         self.win = 0
-        self.msg_state = __STATE_MSG_INIT
+        self.msg_state = _STATE_MSG_INIT
         self.ev = None
 
     def add(self, fgh):
         '''
         return the message state and an buffer.
         '''
-        if self.msg_state == __STATE_MSG_DEAD:
+        if self.msg_state == _STATE_MSG_DEAD:
             raise AssertionError("ERROR: must not come in if the message state is dead.")
+        # check the message whether it is the first fragment of this session.
+        if self.msg_state == _STATE_MSG_INIT:
+            if fgh.win == 0 and fgh.fcn == self.R.max_fcn:
+                self.msg_state == _STATE_MSG_CONT
+            else:
+                self.kill(self, *args):
+                # XXX reply a abort message.
+                return STATE.ABORT, abort_payload
         #
         if len(self.win_list) == 0 or self.win_list[-1].win != fgh.win:
             self.logger(1, "new window has been created. win =", fgh.win)
@@ -321,13 +331,13 @@ class defragment_message:
 
     def finish(self, *args):
         self.ev = None
-        self.msg_state = __STATE_MSG_DONE
+        self.msg_state = _STATE_MSG_DONE
 
     def kill(self, *args):
         self.ev = None
         for i in self.win_list:
             i.kill()
-        self.msg_state = __STATE_MSG_DEAD
+        self.msg_state = _STATE_MSG_DEAD
         self.win_list = None
         # XXX others ?
 
@@ -366,7 +376,7 @@ class defragment_factory:
         # before fragmented..
         m = self.msg_list.get(fgh.dtag)
         # destruct the message holder if dead
-        if m and m.msg_state == __STATE_MSG_DEAD:
+        if m and m.msg_state == _STATE_MSG_DEAD:
             self.logger(1, "kill the old message holder for dtag =", fgh.dtag)
             m = None
         # create a message holder
@@ -387,7 +397,7 @@ class defragment_factory:
         '''
         ret = []
         for k, m in self.msg_list.items():
-            if m.msg_state == __STATE_MSG_DONE:
+            if m.msg_state == _STATE_MSG_DONE:
                 ret.append(m.assemble(kill=True))
                 self.logger(1, "digged dtag = %s" % m.dtag)
         return ret
