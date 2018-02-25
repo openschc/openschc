@@ -187,7 +187,12 @@ class defragment_window:
     def all_fragments_received(self):
         self.logger(1, "checking all-0 fragments, local bitmap=",
                     pb.int_to_bit(self.bitmap, self.R.bitmap_size))
-        return self.bitmap == self.R.bitmap_all_1
+        if self.bitmap == self.R.bitmap_all_1:
+            self.logger(1, "received all fragments.")
+            return True
+        else:
+            self.logger(1, "not received all fragments.")
+            return False
 
     def make_ack0(self, fgh):
         if self.win_state.get() != STATE.CHECK_ALL0:
