@@ -56,13 +56,15 @@ or
     S: sending something
     R: receiving something
     B: I/O Blocking
-    T1: Timer in CONT* state. a message from the sender is expected to arrive within the span.
-    T2: Timer in SEND_ALL* state. an ack message from the receiver is expected to arrive within the span.
-    T3: Timer in SEND_ACK* state. a message from the sender is expected to arrive within the span.
+    T1: Timer of CONT* state in the fragment receiver.
+    T2: Timer of SEND_ALL* state in the fragment sender.
+    T3: Timer of CONT_ALL* state in the fragment receiver.
+    T4: Timer of SEND_ACK* state in the fragment receiver.
 
     If the link is not stable, T1 should be bigger than you excepted.
-    T2 and T3 are recomended to be more than double of T1
-    in order to wait for a round-trip flow.  i.e. T1 < 2*T2 =< T3 =< T2
+    T2, T3 and T4 are recomended to be more than double of T1.
+    This is because these are round-trip flow.
+    i.e. T1 < 2*T1 =< T2 =< T3 =< T4
 
 - WINDOW mode
 
@@ -82,6 +84,7 @@ or
                     '-<- RETRY_ALL1 -<--' 
 
 XXX should it send a all-0 when it finishes to send all packets of the retranmission every time ?
+XXX ==> assuming No.  it will send ALL0 or ALL0 empty after retransmiting.
 
 - NO-ACK mode
 
@@ -112,7 +115,19 @@ the receiver only sends a bitmap which is recorded the fact
 sequentially that the receiver received a fragment that the
 sender sent.
 
-### state machine.
+### the state of the message holder
+
+    INIT --> CONT --> DONE --> DYING --> DEAD
+
+      INIT: initial state.
+      CONT: receiving the fragments.
+      DONE: finised to receive the fragments. ready to show the message.
+     DYING: waiting for the response from the sender.
+            once the message is showed at DONE state,
+            the stae is changed into DYING.
+      DEAD: ready to purge the holder.
+
+### state machine of the receiver.
 
 The state is mainteined in each window.
 
@@ -125,10 +140,10 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
                  |                  |
              .-<-R--B- CONT_ALL0 -<-S-<-.
              |      |                   |          Pull ACK0
-             |    T1'-> FAIL         NG |   .----------<---.
+             |    T3'-> FAIL         NG |   .----------<---.
              |                          |   |              |
          .->-+----->-- CHECK_ALL0 ----+-'   |             R|
-         |                            |     |              |  T3
+         |                            |     |              |  T4
          '-------------------.     OK +--->-+-> SEND_ACK0 -B->-.
                              |        |     S                  |
              .-<- CONT <-.   |        |                        |
@@ -138,10 +153,10 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
         FAIL <-----' T1  |                                        
                          |                  S                     
          .-------------<-' All-1     OK .->-+-> SEND_ACK1 -B->---> DONE
-         |                              |   |              |  T3
+         |                              |   |              |  T4
          '->-+----->-- CHECK_ALL1 ------+   |             R|
              |                          |   |              |
-             |    T1.-> FAIL            |   '----------<---'
+             |    T3.-> FAIL            |   '----------<---'
              |      |                   |          Pull ACK1
              '-<-R--B- CONT_ALL1 -<-S-<-'
                  |                  |  NG
@@ -158,7 +173,7 @@ In NO-ACK mode, the state transition is:
 
 ## Abort message
 
-- abort messaging.
+XXX draft-09 doesn't define well.
 
 ## Abort Policy
 
