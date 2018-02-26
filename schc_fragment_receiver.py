@@ -22,10 +22,15 @@ class SCHC_RECEIVER_STATE(Enum):
 
 STATE = SCHC_RECEIVER_STATE
 
-_STATE_MSG_INIT = 0
-_STATE_MSG_CONT = 1
-_STATE_MSG_DONE = 2
-_STATE_MSG_DEAD = 3
+@unique
+class SCHC_RECEIVER_MSG_STATE(Enum):
+    INIT = auto()
+    CONT = auto()
+    DONE = auto()
+    DYING = auto()
+    DEAD = auto()
+
+STATE_MSG = SCHC_RECEIVER_MSG_STATE
 
 def default_logger(*arg):
     pass
@@ -93,14 +98,11 @@ class defragment_window:
                 # otherwise,
                 return STATE.CONT
         elif self.win_state.get() == STATE.CONT_ALL0:
-            if fgh.fcn == self.R.fcn_all_0 and fgh.payload == None:
-                # this is a request of Ack for All-0
-                print("XXX Resending of Ack for All-0 not implemented yet.")
-                pass
-            else:
-                # alwas check whether all fragments in a window are received
-                # during retransmission by the sender.
+            if fgh.fcn == self.R.fcn_all_0:
+                # same as the CONT_ALL1 state.
                 return self.win_state.set(STATE.CHECK_ALL0)
+            else:
+                return self.win_state.get()
         elif self.win_state.get() == STATE.SEND_ACK0:
             if fgh.fcn == self.R.fcn_all_0 and fgh.payload == None:
                 # this is a request of Ack for All-0
@@ -110,22 +112,22 @@ class defragment_window:
                 # XXX
                 self.logger(1, "XXX ignore in SEND_ACK0", fgh.dump())
         elif self.win_state.get() == STATE.CONT_ALL1:
-            if fgh.fcn == self.R.fcn_all_1 and fgh.payload == None:
-                # this is a request of Ack for All-1
-                print("XXX Resending of Ack for All-1 not implemented yet.")
-                pass
-            else:
-                # check whether all fragments in the last window are received
-                # during retransmission by the sender.
+            if fgh.fcn == self.R.fcn_all_1:
+                # It doesn't need to check the payload size (i.e. ALL-1 empty).
+                # It just changes the state into CHECK_ALL1 anyway
+                # if the message is of ALL-1 at CONT_ALL1 state.
                 return self.win_state.set(STATE.CHECK_ALL1)
+            else:
+                # don't change the state before it gets any ALL-1 message.
+                return self.win_state.get()
         elif self.win_state.get() == STATE.SEND_ACK1:
             if fgh.fcn == self.R.fcn_all_1 and fgh.payload == None:
                 # this is a request of Ack for All-1
                 print("XXX Resending of Ack for All-1 not implemented yet.")
                 pass
             else:
-                # XXX
-                self.logger(1, "XXX ignore in SEND_ACK1", fgh.dump())
+                self.logger(1, "ignore the message in SEND_ACK1", fgh.dump())
+                return STATE.FAIL
         else:
             # in other case.
             raise ValueError("invalid state=%s", self.win_state.pprint())
@@ -216,39 +218,39 @@ class defragment_window:
                                                  bitmap=(None if cbit == None
                                                          else self.bitmap))
 
-    def kill(self):
+    def purge(self):
         # XXX others should be set None ?
-        fragment_list = None
-        self.fragment_list_no_ack = None
+        del(self.fragment_list)
+        del(self.fragment_list_no_ack)
 
 class defragment_message:
     '''
     defragment fragments into a message
     '''
     def __init__(self, R, dtag, scheduler=default_scheduler, timer=5,
-                 logger=default_logger):
+                 timer_t3=10, logger=default_logger):
         self.R = R
         self.dtag = dtag
         self.scheduler = scheduler
         self.timer = timer
+        self.timer_t3 = timer_t3
         self.logger = logger
         self.win_list = []
         self.win = 0
-        self.msg_state = _STATE_MSG_INIT
+        self.msg_state = STATE_MSG.INIT
         self.ev = None
 
     def add(self, fgh):
         '''
         return the message state and an buffer.
         '''
-        if self.msg_state == _STATE_MSG_DEAD:
+        if self.msg_state == STATE_MSG.DEAD:
             raise AssertionError("ERROR: must not come in if the message state is dead.")
         # check the message whether it is the first fragment of this session.
-        if self.msg_state == _STATE_MSG_INIT:
+        if fgh.R.mode != SCHC_MODE.NO_ACK and self.msg_state == STATE_MSG.INIT:
             if fgh.win == 0 and fgh.fcn == self.R.max_fcn:
-                self.msg_state = _STATE_MSG_CONT
+                self.msg_state = STATE_MSG.CONT
             else:
-                self.kill()
                 return (STATE.ABORT,
                         sfh.frag_receiver_tx_abort(self.R, fgh.dtag,
                                                    win=fgh.win))
@@ -267,8 +269,8 @@ class defragment_message:
             self.ev = None
         #
         if ret in [STATE.CONT, STATE.CONT_ALL0, STATE.CONT_ALL1]:
-            self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
-            self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
+            self.ev = self.scheduler.enter(self.timer, 1, self.purge, (True,))
+            self.logger(3, "scheduling purge 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
         elif ret == STATE.CHECK_ALL0:
             ack_payload = None
@@ -288,8 +290,9 @@ class defragment_message:
                 else:
                     ret = w.win_state.set(STATE.CONT_ALL0)
             #
-            self.ev = self.scheduler.enter(self.timer, 1, self.kill, (None,))
-            self.logger(3, "scheduling kill 2 dtag=", self.dtag, "ev=", self.ev)
+            self.ev = self.scheduler.enter(self.timer, 1, self.purge, (True,))
+            self.logger(3, "scheduling purge 2 dtag=", self.dtag, "ev=", self.ev)
+            # ack_payload is going to be None if the state is WIN_DONE.
             return ret, ack_payload
         elif ret == STATE.CHECK_ALL1:
             # check MIC
@@ -300,29 +303,28 @@ class defragment_message:
                     self.finish()
                     return w.win_state.set(STATE.DONE), None
                 else:
-                    # msg_state will be into DONE when finish() will be called.
-                    self.ev = self.scheduler.enter(self.timer, 1,
-                                                   self.finish, (None,))
-                    self.logger(3, "scheduling finish dtag=",
+                    self.finish()
+                    self.ev = self.scheduler.enter(self.timer_t3, 1,
+                                                   self.purge, (True,))
+                    self.logger(3, "scheduling purge 3 dtag=",
                                 self.dtag, "ev=", self.ev)
-                    # Note it makes the ack payload before change the state.
+                    # it has to make the ack payload before change the state.
                     ack_payload = w.make_ack1(fgh, cbit=1)
                     return (w.win_state.set(STATE.SEND_ACK1), ack_payload)
-                            
             else:
-                # Note it makes the ack payload before change the state.
+                # it has to make the ack payload before change the state.
                 ack_payload = w.make_ack1(fgh, cbit=0)
                 return (w.win_state.set(STATE.CONT_ALL1), ack_payload)
         elif ret == STATE.DONE:
-            # msg_state will be into DEAD in assemble()
             raise AssertionError("must not com here for STATE.DONE")
-            #return ret, self.assemble(kill=True)
+        elif ret == STATE.FAIL:
+            return ret, None
         else:
             raise AssertionError("ERROR: must not come in with unknown message state %s" % (ret.name))
 
     def mic_matched(self, fgh):
         self.logger(1, "calculating mic.")
-        self.mic, mic_size = self.R.C.mic_func.get_mic(self.assemble(kill=False))
+        self.mic, mic_size = self.R.C.mic_func.get_mic(self.assemble())
         if fgh.mic == self.mic:
             self.logger(1, "mic is matched.")
             return True
@@ -330,25 +332,35 @@ class defragment_message:
             self.logger(1, "mic is NOT matched.")
             return False
 
-    def assemble(self, kill=False):
+    def assemble(self):
         '''
         assuming that no event is scheduled when assemble() is called.
         '''
         message = b"".join([i.assemble() for i in self.win_list])
-        if kill == True:
-            self.kill()
         return message
 
     def finish(self, *args):
-        self.ev = None
-        self.msg_state = _STATE_MSG_DONE
+        self.msg_state = STATE_MSG.DONE
 
     def kill(self, *args):
+        self.msg_state = STATE_MSG.DYING
+
+    def purge(self, *args):
+        '''
+        args: (ev, ): ev is True means purge is called from an event.
+        '''
+        #if self.msg_state != STATE_MSG.DYING:
+        #    self.logger(1, "WARNING: this message hasn't been showed.", self)
+        if args[0] == False and self.ev:
+            self.logger(3, "schedule cancelled dtag=",
+                                self.dtag, "ev=", self.ev)
+            self.scheduler.cancel(self.ev)
         self.ev = None
-        for i in self.win_list:
-            i.kill()
-        self.msg_state = _STATE_MSG_DEAD
-        self.win_list = None
+        if hasattr(self, "win_list"):
+            for i in self.win_list:
+                i.purge()
+            del(self.win_list)
+        self.msg_state = STATE_MSG.DEAD
         # XXX others ?
 
 class defragment_factory:
@@ -368,11 +380,12 @@ class defragment_factory:
           ## NO_ACK
                      +-- dtag --+-- fcn[0] - frag - frag - ...
     '''
-    def __init__(self, scheduler=default_scheduler, timer=5,
+    def __init__(self, scheduler=default_scheduler, timer=5, timer_t3=10,
                  logger=default_logger):
         self.logger = logger
         self.scheduler = scheduler
         self.timer = timer
+        self.timer_t3 = timer_t3
         self.msg_list = {}
 
     def defrag(self, C, recvbuf):
@@ -386,29 +399,57 @@ class defragment_factory:
         # before fragmented..
         m = self.msg_list.get(fgh.dtag)
         # destruct the message holder if dead
-        if m and m.msg_state == _STATE_MSG_DEAD:
-            self.logger(1, "kill the old message holder for dtag =", fgh.dtag)
-            m = None
+        if m:
+            if m.R.mode == SCHC_MODE.NO_ACK:
+                if m.msg_state in [STATE_MSG.DEAD, STATE_MSG.DYING]:
+                    self.logger(1, "remove the old message holder for dtag =",
+                                fgh.dtag)
+                    m = None
+            else:
+                if m.msg_state == STATE_MSG.DEAD:
+                    self.logger(1, "remove the old message holder for dtag =",
+                                fgh.dtag)
+                    m = None
+                elif m.msg_state in [STATE_MSG.DONE, STATE_MSG.DYING]:
+                    # later check whether it is a ALL-1 empty.
+                    pass
         # create a message holder
         if not m:
             m = defragment_message(fgh.R, fgh.dtag, scheduler=self.scheduler,
-                                   timer=self.timer, logger=self.logger)
+                                   timer=self.timer, timer_t3=self.timer_t3,
+                                   logger=self.logger)
             self.msg_list[fgh.dtag] = m
         #
         rx_ret, tx_obj = m.add(fgh)
+        if rx_ret == STATE.FAIL:
+            # assumeing any message have been showed, just ignore it.
+            m.purge((False,))
+        elif rx_ret == STATE.ABORT:
+            m.purge((False,))
+        #
         return rx_ret, fgh, tx_obj
 
     def dig(self):
         '''
-        dig the message whose state is DONE.
-        here, only non-NO_ACK mode is dealt.
-        if NO_ACK mode, the message assembled has been returned to the
-        application.
+        dig the messages.
+        if the state of the message is DONE, assemble and put to the return.
+        if the state of the message is DYING, purge it.
         '''
+        self.logger(3, "digging list size =", len(self.msg_list.items()))
         ret = []
+        purge_list = []
         for k, m in self.msg_list.items():
-            if m.msg_state == _STATE_MSG_DONE:
-                ret.append(m.assemble(kill=True))
-                self.logger(1, "digged dtag = %s" % m.dtag)
+            if m.msg_state == STATE_MSG.DONE:
+                ret.append(m.assemble())
+                self.logger(1, "digged dtag =", m.dtag)
+                m.kill()
+            #
+            if m.msg_state == STATE_MSG.DEAD:
+                m.purge((False,))
+                purge_list.append(k)
+        #
+        for i in purge_list:
+            self.logger(1, "deleted dtag =", i)
+            self.msg_list.pop(i)
+        #
         return ret
-
