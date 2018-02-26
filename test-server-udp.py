@@ -79,7 +79,7 @@ s.bind(server)
 sched = ps.ssched()
 context = schc_context.schc_context(0)
 factory = sfr.defragment_factory(scheduler=sched, timer=opt.timer_t1,
-                                 logger=debug_print)
+                                 timer_t3=opt.timer_t3, logger=debug_print)
 
 while True:
 
@@ -126,16 +126,15 @@ while True:
             debug_print(2, "packet:", tx_obj.full_dump())
             s.sendto(tx_obj.packet, peer)
             debug_print(1, "finished, waiting for something in %d seconds." %
-                        opt.timeout_t3)
+                        opt.timer_t3)
         elif ret == sfr.STATE.DONE:
             debug_print(1, "finished.")
-            #debug_print(1, "payload:[%s]" % tx_obj.decode())
         else:
             debug_print(1, "ERROR:", ret, tx_obj)
 
     except Exception as e:
         if "timeout" in repr(e):
-            debug_print(1, "timed out")
+            debug_print(1, "timed out:", repr(e))
         else:
             debug_print(1, "Exception: [%s]" % repr(e))
             debug_print(0, traceback.format_exc())
