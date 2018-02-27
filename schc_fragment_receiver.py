@@ -219,13 +219,14 @@ class defragment_message:
     '''
     defragment fragments into a message
     '''
-    def __init__(self, R, dtag, scheduler=default_scheduler, timer=5,
-                 timer_t3=10, logger=default_logger):
+    def __init__(self, R, dtag, scheduler=default_scheduler, timer_t1=5,
+                 timer_t4=10, timer_t5=15, logger=default_logger):
         self.R = R
         self.dtag = dtag
         self.scheduler = scheduler
-        self.timer = timer
-        self.timer_t3 = timer_t3
+        self.timer_t1 = timer_t1
+        self.timer_t4 = timer_t4
+        self.timer_t5 = timer_t5
         self.logger = logger
         self.win_list = []
         self.win = 0
@@ -261,7 +262,7 @@ class defragment_message:
             self.ev = None
         #
         if ret in [STATE.CONT, STATE.CONT_ALL0, STATE.CONT_ALL1]:
-            self.ev = self.scheduler.enter(self.timer, 1, self.purge, (True,))
+            self.ev = self.scheduler.enter(self.timer_t1, 1, self.purge, (True,))
             self.logger(3, "scheduling purge 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
         elif ret == STATE.SEND_ACK0:
@@ -279,15 +280,20 @@ class defragment_message:
                 else:
                     self.ack_payload = w.make_ack0(fgh)
                     ret = w.win_state.set(STATE.CONT_ALL0)
+                #
+                timer = self.timer_t5
             else:
                 self.ack_payload = w.make_ack0(fgh)
                 if w.all_fragments_received():
                     ret = w.win_state.set(STATE.SEND_ACK0)
                 else:
                     ret = w.win_state.set(STATE.CONT_ALL0)
+                #
+                timer = self.timer_t1
             #
-            self.ev = self.scheduler.enter(self.timer, 1, self.purge, (True,))
-            self.logger(3, "scheduling purge 2 dtag=", self.dtag, "ev=", self.ev)
+            self.ev = self.scheduler.enter(timer, 1, self.purge, (True,))
+            self.logger(3, "scheduling purge 2 dtag=", self.dtag,
+                        "ev=", self.ev)
             # ack_payload is going to be None if the state is WIN_DONE.
             return ret, self.ack_payload
         elif ret == STATE.SEND_ACK1:
@@ -305,7 +311,7 @@ class defragment_message:
                     return w.win_state.set(STATE.DONE), None
                 else:
                     self.finish()
-                    self.ev = self.scheduler.enter(self.timer_t3, 1,
+                    self.ev = self.scheduler.enter(self.timer_t4, 1,
                                                    self.purge, (True,))
                     self.logger(3, "scheduling purge 3 dtag=",
                                 self.dtag, "ev=", self.ev)
@@ -381,12 +387,14 @@ class defragment_factory:
           ## NO_ACK
                      +-- dtag --+-- fcn[0] - frag - frag - ...
     '''
-    def __init__(self, scheduler=default_scheduler, timer=5, timer_t3=10,
-                 logger=default_logger):
+    def __init__(self, scheduler=default_scheduler, timer_t1=5, timer_t3=10,
+                 timer_t4=10, timer_t5=15, logger=default_logger):
         self.logger = logger
         self.scheduler = scheduler
-        self.timer = timer
+        self.timer_t1 = timer_t1
         self.timer_t3 = timer_t3
+        self.timer_t4 = timer_t4
+        self.timer_t5 = timer_t5
         self.msg_list = {}
 
     def defrag(self, C, recvbuf):
@@ -417,7 +425,8 @@ class defragment_factory:
         # create a message holder
         if not m:
             m = defragment_message(fgh.R, fgh.dtag, scheduler=self.scheduler,
-                                   timer=self.timer, timer_t3=self.timer_t3,
+                                   timer_t1=self.timer_t1,
+                                   timer_t4=self.timer_t4,
                                    logger=self.logger)
             self.msg_list[fgh.dtag] = m
         #
