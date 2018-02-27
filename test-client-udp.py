@@ -23,6 +23,77 @@ def func_loss_rate():
 def func_loss_random():
     return random.choice([True, False])
 
+def schc_sender(msg):
+    debug_print(2, "message:", bytes(msg, encoding="utf-8"))
+    # fragment instance
+    context = schc_context.schc_context(0)
+    # XXX rule_id can be changed in a session ?
+    
+    # check if the L2 size is enough to put the message.
+    if opt.l2_size >= len(msg):
+        debug_print(1, "no need to fragment this message.")
+        return
+    
+    # prepare fragmenting
+    factory = sfs.fragment_factory(context, opt.rule_id, logger=debug_print)
+    factory.setbuf(msg, dtag=opt.dtag)
+    
+    # main loop
+    debug_print(1, "L2 payload size: %s" % opt.l2_size)
+    
+    n_packet = 0
+    
+    while True:
+    
+        # CONT: send it and get next fragment.
+        # WAIT_ACK: send it and wait for the ack.
+        # DONE: dont need to send it.
+        # ERROR: error happened.
+        ret, tx_obj = factory.next_fragment(opt.l2_size)
+        n_packet += 1
+    
+        # error!
+        if ret == sfs.STATE.FAIL:
+            raise AssertionError("something wrong in fragmentation.")
+        elif ret == sfs.STATE.DONE:
+            debug_print(1, "done.")
+            break
+            # end of the main loop
+    
+        if opt.func_packet_loss and opt.func_packet_loss() == True:
+            debug_print(1, "packet dropped.")
+        else:
+            s.sendto(tx_obj.packet, server)
+            debug_print(1, "sent  :", tx_obj.dump())
+            debug_print(2, "hex   :", tx_obj.full_dump())
+    
+        if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE.CONT:
+            # WAIT_ACK
+            # a part of or whole fragments have been sent and wait for the ack.
+            debug_print(1, "waiting an ack.", factory.state.pprint())
+            try:
+                rx_data, peer = s.recvfrom(DEFAULT_RECV_BUFSIZE)
+                debug_print(1, "message from:", peer)
+                #
+                ret, rx_obj = factory.parse_ack(rx_data, peer)
+                debug_print(1, "parsed:", rx_obj.dump())
+                debug_print(2, "hex   :", rx_obj.full_dump())
+                #
+                if ret == sfs.STATE.DONE:
+                    # finish if the ack against all1 is received.
+                    debug_print(1, "done.")
+                    break
+                    # end of the main loop
+    
+            except Exception as e:
+                if "timeout" in repr(e):
+                    debug_print(1, "timed out to wait for the ack.")
+                else:
+                    debug_print(1, "Exception: [%s]" % repr(e))
+                    debug_print(0, traceback.format_exc())
+    
+        time.sleep(opt.interval)
+
 def parse_args():
     def test_1in3(v):
         return not ((v[0] and v[1]) or (v[1] and v[2]) or (v[2] and v[0]))
@@ -35,7 +106,9 @@ def parse_args():
     p.add_argument("server_port", metavar="PORT", type=int,
                    help="specify the port number in the server.")
     p.add_argument("-I", action="store", dest="msg_file", default="-",
-                   help="NOTYET, specify the file name containing the message, default is stdin.")
+                   help="specify the file name containing the message, default is stdin.")
+    p.add_argument("--read-each-line", action="store_true", dest="read_each_line",
+                   help="enable to read each line, not a whole message at once.")
     p.add_argument("--interval", action="store", dest="interval", type=int,
                    default=1, help="specify the interval for each sending.")
     p.add_argument("--timeout", action="store", dest="timeout",
@@ -108,72 +181,14 @@ s.settimeout(opt.timeout)
 
 # create a message buffer
 if opt.msg_file == "-":
-    fp = sys.stdin
+    stream = sys.stdin
 else:
-    fp = open(opt.msg_file)
+    stream = open(opt.msg_file)
 
-#message = "".join(fp.readlines())
-message = "Hello, this is a fragmentation test of SCHC."
-
-# fragment instance
-context = schc_context.schc_context(0)
-# XXX rule_id can be changed in a session ?
-factory = sfs.fragment_factory(context, opt.rule_id, logger=debug_print)
-factory.setbuf(message, dtag=opt.dtag)
-
-# main loop
-debug_print(1, "L2 payload size: %s" % opt.l2_size)
-
-n_packet = 0
-
-while True:
-
-    # CONT: send it and get next fragment.
-    # WAIT_ACK: send it and wait for the ack.
-    # DONE: dont need to send it.
-    # ERROR: error happened.
-    ret, tx_obj = factory.next_fragment(opt.l2_size)
-    n_packet += 1
-
-    # error!
-    if ret == sfs.STATE.FAIL:
-        raise AssertionError("something wrong in fragmentation.")
-    elif ret == sfs.STATE.DONE:
-        debug_print(1, "done.")
-        break
-        # end of the main loop
-
-    if opt.func_packet_loss and opt.func_packet_loss() == True:
-        debug_print(1, "packet dropped.")
+with stream as fp:
+    if opt.read_each_line:
+        for line in fp:
+            schc_sender(line)
     else:
-        s.sendto(tx_obj.packet, server)
-        debug_print(1, "sent  :", tx_obj.dump())
-        debug_print(2, "hex   :", tx_obj.full_dump())
-
-    if factory.R.mode != SCHC_MODE.NO_ACK and ret != sfs.STATE.CONT:
-        # WAIT_ACK
-        # a part of or whole fragments have been sent and wait for the ack.
-        debug_print(1, "waiting an ack.", factory.state.pprint())
-        try:
-            rx_data, peer = s.recvfrom(DEFAULT_RECV_BUFSIZE)
-            debug_print(1, "message from:", peer)
-            #
-            ret, rx_obj = factory.parse_ack(rx_data, peer)
-            debug_print(1, "parsed:", rx_obj.dump())
-            debug_print(2, "hex   :", rx_obj.full_dump())
-            #
-            if ret == sfs.STATE.DONE:
-                # finish if the ack against all1 is received.
-                debug_print(1, "done.")
-                break
-                # end of the main loop
-
-        except Exception as e:
-            if "timeout" in repr(e):
-                debug_print(1, "timed out to wait for the ack.")
-            else:
-                debug_print(1, "Exception: [%s]" % repr(e))
-                debug_print(0, traceback.format_exc())
-
-    time.sleep(opt.interval)
+        schc_sender("".join(fp.readlines()))
 
