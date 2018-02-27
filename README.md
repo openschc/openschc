@@ -60,11 +60,14 @@ or
     T2: Timer of SEND_ALL* state in the fragment sender.
     T3: Timer of CONT_ALL* state in the fragment receiver.
     T4: Timer of SEND_ACK* state in the fragment receiver.
+    T5: Timer to wait for the next fragment from the sender
+        after WIN_DONE in the fragment receiver.
 
     If the link is not stable, T1 should be bigger than you excepted.
     T2, T3 and T4 are recomended to be more than double of T1.
     This is because these are round-trip flow.
-    i.e. T1 < 2*T1 =< T2 =< T3 =< T4
+    T5 is recommended to be bigger than T2.
+    i.e. 2*T1 =< T2 =< T3 =< T4 < T5
 
 - WINDOW mode
 
