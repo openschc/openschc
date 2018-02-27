@@ -122,7 +122,7 @@ class defragment_window:
                 return self.win_state.get()
         else:
             # in other case.
-            raise ValueError("invalid state=%s", self.win_state.pprint())
+            raise ValueError("invalid state=%s" % self.win_state.pprint())
 
     def __add_no_ack_mode(self, fgh):
         '''
@@ -141,7 +141,7 @@ class defragment_window:
                 return self.win_state.set(STATE.CONT)
         else:
             # in other case.
-            raise ValueError("invalid state=%s", self.win_state.pprint())
+            raise ValueError("invalid state=%s" % self.win_state.pprint())
         # XXX NO-ACK mode, if FCN is not a counter,
         # it can not be detected whether the sequence of the packets
         # is held or not.
