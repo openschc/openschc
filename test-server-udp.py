@@ -37,7 +37,13 @@ def parse_args():
                    type=int, default=DEFAULT_TIMER_T1,
                    help="specify the number of time to wait for messages.")
     p.add_argument("--timer-t3", action="store", dest="timer_t3",
-                   type=int, default=2*DEFAULT_TIMER_T1,
+                   type=int, default=DEFAULT_TIMER_T3,
+                   help="specify the number of time to wait for messages.")
+    p.add_argument("--timer-t4", action="store", dest="timer_t4",
+                   type=int, default=DEFAULT_TIMER_T4,
+                   help="specify the number of time to wait for messages.")
+    p.add_argument("--timer-t5", action="store", dest="timer_t5",
+                   type=int, default=DEFAULT_TIMER_T5,
                    help="specify the number of time to wait for messages.")
     p.add_argument("-v", action="store_true", dest="f_verbose",
                    default=False, help="enable verbose mode.")
@@ -78,8 +84,11 @@ s.bind(server)
 #
 sched = ps.ssched()
 context = schc_context.schc_context(0)
-factory = sfr.defragment_factory(scheduler=sched, timer=opt.timer_t1,
-                                 timer_t3=opt.timer_t3, logger=debug_print)
+factory = sfr.defragment_factory(scheduler=sched, timer_t1=opt.timer_t1,
+                                 timer_t3=opt.timer_t3,
+                                 timer_t4=opt.timer_t4,
+                                 timer_t5=opt.timer_t5,
+                                 logger=debug_print)
 
 while True:
 
