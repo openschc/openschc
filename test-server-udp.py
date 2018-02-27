@@ -26,8 +26,9 @@ def send_client_trigger(s):
     debug_print(1, "sent: ", msg)
 
 def parse_args():
-    p = argparse.ArgumentParser(description="this is example.",
-                                epilog="this is the tail story.")
+    p = argparse.ArgumentParser(
+            description="a sample code for the fragment receiver.",
+            epilog="")
     p.add_argument("server_port", metavar="PORT", type=int,
                    help="specify the port number in the server.")
     p.add_argument("--address", action="store", dest="server_address",

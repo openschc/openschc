@@ -27,8 +27,9 @@ def parse_args():
     def test_1in3(v):
         return not ((v[0] and v[1]) or (v[1] and v[2]) or (v[2] and v[0]))
 
-    p = argparse.ArgumentParser(description="this is SCHC example.",
-                                epilog=".")
+    p = argparse.ArgumentParser(
+            description="a sample code for the fragment sender.",
+            epilog="")
     p.add_argument("server_address", metavar="SERVER",
                    help="specify the ip address of the server.")
     p.add_argument("server_port", metavar="PORT", type=int,
