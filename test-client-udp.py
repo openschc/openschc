@@ -48,6 +48,10 @@ def parse_args():
                    default=DEFAULT_FRAGMENT_RID,
                    help="specify the rule id.  default is %d" %
                    DEFAULT_FRAGMENT_RID)
+    p.add_argument("--dtag", action="store", dest="dtag", type=int,
+                   default=DEFAULT_FRAGMENT_RID,
+                   help="specify the DTag.  default is %d" %
+                   DEFAULT_FRAGMENT_DTAG)
     p.add_argument("--loss-list", action="store", dest="loss_list", default=None,
                    help="specify the index numbers to be lost for test. e.g.  --loss-list=3,8 means the 3rd and 8th packets are going to be lost.")
     p.add_argument("--loss-rate", action="store", dest="loss_rate",
@@ -118,7 +122,7 @@ message = "Hello, this is a fragmentation test of SCHC."
 context = schc_context.schc_context(0)
 # XXX rule_id can be changed in a session ?
 factory = sfs.fragment_factory(context, opt.rule_id, logger=debug_print)
-factory.setbuf(message, dtag=1)
+factory.setbuf(message, dtag=opt.dtag)
 
 # main loop
 debug_print(1, "L2 payload size: %s" % opt.l2_size)

@@ -36,6 +36,9 @@ class frag_holder():
         self.bitmap = bitmap
         self.cbit = cbit
         self.payload = payload
+        # check the field size.
+        if dtag > (2**self.R.dtag_size) - 1:
+            raise ValueError("dtag is too big than the field size.")
 
     def dump(self):
         x = ""
