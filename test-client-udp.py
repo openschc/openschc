@@ -60,12 +60,8 @@ def parse_args():
                    help="specify the rate of the packet loss. e.g.  --loss-rate=0.2 means 20%% to be dropped.")
     p.add_argument("--loss-random", action="store_true", dest="loss_random",
                    help="enable to lose a fragment randomly for test.")
-    p.add_argument("-v", action="store_true", dest="f_verbose", default=False,
-                   help="enable verbose mode.")
     p.add_argument("-d", action="append_const", dest="_f_debug", default=[],
                    const=1, help="increase debug mode.")
-    p.add_argument("--verbose", action="store_true", dest="f_verbose",
-                   default=False, help="enable verbose mode.")
     p.add_argument("--debug", action="store", metavar="DEBUG_LEVEL", dest="_debug_level",
                    type=int, default=-1, help="specify a debug level.")
     p.add_argument("--version", action="version", version="%(prog)s 1.0")

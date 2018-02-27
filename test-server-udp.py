@@ -46,12 +46,8 @@ def parse_args():
     p.add_argument("--timer-t5", action="store", dest="timer_t5",
                    type=int, default=DEFAULT_TIMER_T5,
                    help="specify the number of time to wait for messages.")
-    p.add_argument("-v", action="store_true", dest="f_verbose",
-                   default=False, help="enable verbose mode.")
     p.add_argument("-d", action="append_const", dest="_f_debug",
                    default=[], const=1, help="increase debug mode.")
-    p.add_argument("--verbose", action="store_true", dest="f_verbose",
-                   default=False, help="enable verbose mode.")
     p.add_argument("--debug", action="store", dest="_debug_level",
                    type=int, default=-1, help="specify a debug level.")
     p.add_argument("--version", action="version", version="%(prog)s 1.0")
