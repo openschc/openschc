@@ -125,8 +125,21 @@ class fragment_factory:
             self.state.set(STATE.RETRY_ALL1)
         #
         if self.state.get() in [STATE.RETRY_ALL0, STATE.RETRY_ALL1]:
+            # if all the missing fragments has been sent, resend the empty ALL.
             if self.missing == 0:
-                raise AssertionError("fault state in missing == 0")
+                # set the state into the previous one.
+                self.state.back()
+                if self.state.get() == STATE.SEND_ALL0:
+                    fgh = sfh.frag_sender_tx(self.R, self.dtag, win=self.win,
+                                             fcn=self.R.fcn_all_0)
+                elif self.state.get() == STATE.SEND_ALL1:
+                    fgh = sfh.frag_sender_tx(self.R, self.dtag, win=self.win,
+                                             fcn=self.R.fcn_all_1, mic=self.mic)
+                else:
+                    AssertionError("invalid state in retransmission %s" %
+                                   self.state.get())
+                #
+                return self.state.get(), fgh
             # if there are any missing fragments,
             # the sender only needs to send missed fragments.
             # doesn't need to send all-0/all1.
@@ -154,12 +167,8 @@ class fragment_factory:
                     fgh = self.fgh_list[self.R.fcn_all_1]
             else:
                 fgh = self.fgh_list[self.R.max_fcn - p]
-            # the state should be set to the previous one
-            # after retransmitting all the missing fragments.
-            if self.missing == 0:
-                return self.state.back(), fgh
             # in others, return CONT,
-            # however don't need to change the state.
+            # however don't need to change the internal state.
             # i.e RETRY_ALL0 or RETRY_ALL1.
             return STATE.CONT, fgh
         #

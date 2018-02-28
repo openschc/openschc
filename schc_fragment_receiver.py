@@ -12,11 +12,13 @@ class SCHC_RECEIVER_STATE(Enum):
     INIT = auto()
     CONT = auto()
     CHECK_ALL0 = auto()
+    ALL0_OK = auto()
+    ALL0_NG = auto()
     CONT_ALL0 = auto()
-    SEND_ACK0 = auto()
     CHECK_ALL1 = auto()
+    ALL1_OK = auto()
+    ALL1_NG = auto()
     CONT_ALL1 = auto()
-    SEND_ACK1 = auto()
     WIN_DONE = auto()
     DONE = auto()
 
@@ -26,6 +28,7 @@ STATE = SCHC_RECEIVER_STATE
 class SCHC_RECEIVER_MSG_STATE(Enum):
     INIT = auto()
     CONT = auto()
+    CHECKING = auto()
     COLLECTED = auto()
     SERVED = auto()
     DEAD = auto()
@@ -70,8 +73,20 @@ class defragment_window:
         except NO_ACK mode
         '''
         f = self.fragment_list.setdefault(fgh.fcn, {})
-        if f:
-            self.logger(1, "got a FCN which was received before. replaced it.")
+        # empty ALL0 or ALL1 only be acceptable with duplicate FCN.
+        if len(f):
+            if (fgh.payload == None and
+                (self.win_state.get() == STATE.CONT_ALL0 and
+                 fgh.fcn == self.R.fcn_all_0)):
+                return self.win_state.set(STATE.CHECK_ALL0)
+            elif (fgh.payload == None and
+                  (self.win_state.get() == STATE.CONT_ALL1 and
+                 fgh.fcn == self.R.fcn_all_1)):
+                return self.win_state.set(STATE.CHECK_ALL1)
+            else:
+                self.logger(1, "ERROR: got a FCN which was received before.",
+                            self.win_state.get(), self.win, fgh.fcn)
+                return STATE.FAIL
         # add new fragment for the assembling
         self.fragment_list[fgh.fcn] = fgh.payload
         #
@@ -97,25 +112,29 @@ class defragment_window:
             else:
                 # otherwise,
                 return STATE.CONT
-        elif self.win_state.get() == STATE.CONT_ALL0:
+        elif self.win_state.get() in [STATE.ALL0_NG, STATE.CONT_ALL0]:
             # same as the CONT_ALL1 state.
             if fgh.fcn == self.R.fcn_all_0:
                 return self.win_state.set(STATE.CHECK_ALL0)
+            elif self.win_state.get() == STATE.ALL0_NG:
+                return self.win_state.set(STATE.CONT_ALL0)
             else:
-                return self.win_state.get()
-        elif self.win_state.get() == STATE.SEND_ACK0:
+                return STATE.CONT_ALL0
+        elif self.win_state.get() == STATE.ALL0_OK:
             # same as the CONT_ALL1 state.
             if fgh.fcn == self.R.fcn_all_0:
                 return self.win_state.get()
-        elif self.win_state.get() == STATE.CONT_ALL1:
+        elif self.win_state.get() in [STATE.ALL1_NG, STATE.CONT_ALL1]:
             # It doesn't need to check the payload size (i.e. ALL-1 empty).
-            # It just changes the state into CHECK_ALL1 anyway
-            # if the message is of ALL-1 at CONT_ALL1 state.
-            # don't change the state before it gets any ALL-1 message.
+            # If ALL-1 message is received at CONT_ALL1 state,
+            # it just changes the state into CHECK_ALL1 anyway
+            # doesn't change the state before it gets any ALL-1 message.
             if fgh.fcn == self.R.fcn_all_1:
                 return self.win_state.set(STATE.CHECK_ALL1)
+            elif self.win_state.get() == STATE.ALL1_NG:
+                return self.win_state.set(STATE.CONT_ALL1)
             else:
-                return self.win_state.get()
+                return STATE.CONT_ALL1
         elif self.win_state.get() == STATE.SEND_ACK1:
             # same as the CONT_ALL1 state.
             if fgh.fcn == self.R.fcn_all_1:
@@ -220,11 +239,12 @@ class defragment_message:
     defragment fragments into a message
     '''
     def __init__(self, R, dtag, scheduler=default_scheduler, timer_t1=5,
-                 timer_t4=10, timer_t5=15, logger=default_logger):
+                 timer_t3=10, timer_t4=10, timer_t5=15, logger=default_logger):
         self.R = R
         self.dtag = dtag
         self.scheduler = scheduler
         self.timer_t1 = timer_t1
+        self.timer_t3 = timer_t3
         self.timer_t4 = timer_t4
         self.timer_t5 = timer_t5
         self.logger = logger
@@ -247,6 +267,12 @@ class defragment_message:
                 return (STATE.ABORT,
                         sfh.frag_receiver_tx_abort(self.R, fgh.dtag,
                                                    win=fgh.win))
+        # once the state moves into CHECKING or later,
+        # new win must not be received.
+        if (len(self.win_list) != 0 and self.win_list[-1].win != fgh.win):
+            if self.msg_state not in [STATE_MSG.INIT, STATE_MSG.CONT]:
+                self.logger(1, "ERROR: new win is not allowed in CHECK state.")
+                return (STATE.FAIL, None)
         #
         if len(self.win_list) == 0 or self.win_list[-1].win != fgh.win:
             self.logger(1, "new window has been created. win =", fgh.win)
@@ -262,12 +288,18 @@ class defragment_message:
             self.ev = None
         #
         if ret in [STATE.CONT, STATE.CONT_ALL0, STATE.CONT_ALL1]:
-            self.ev = self.scheduler.enter(self.timer_t1, 1, self.kill, (None,))
-            self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
+            if ret == STATE.CONT:
+                timer = self.timer_t1
+            else:
+                timer = self.timer_t3
+            #
+            self.ev = self.scheduler.enter(timer, 1, self.kill, (None,))
+            self.logger(3, "scheduling kill %s dtag=%d" % (ret, self.dtag),
+                        "ev=", self.ev)
             return ret, None
-        elif ret == STATE.SEND_ACK0:
+        elif ret in [STATE.ALL0_OK, STATE.ALL1_OK]:
             if self.ack_payload == None:
-                raise AssertionError("ack_payload hasn't been set.")
+                raise AssertionError("ack_payload hasn't been set in %s." % ret)
             return ret, self.ack_payload
         elif ret == STATE.CHECK_ALL0:
             self.ack_payload = None
@@ -276,52 +308,59 @@ class defragment_message:
                 # the internal bitmap are on. i.e. equal to (2**bitmap_size)-1
                 # if so, skip to send the ack, otherwise send an ack.
                 if w.all_fragments_received():
+                    # change the state just for the logging. 
+                    w.win_state.set(STATE.ALL0_OK)
                     ret = w.win_state.set(STATE.WIN_DONE)
+                    timer = self.timer_t4
                 else:
                     self.ack_payload = w.make_ack0(fgh)
-                    ret = w.win_state.set(STATE.CONT_ALL0)
-                #
-                timer = self.timer_t5
+                    ret = w.win_state.set(STATE.ALL0_NG)
+                    timer = self.timer_t3
             else:
                 self.ack_payload = w.make_ack0(fgh)
                 if w.all_fragments_received():
-                    ret = w.win_state.set(STATE.SEND_ACK0)
+                    ret = w.win_state.set(STATE.ALL0_OK)
                 else:
-                    ret = w.win_state.set(STATE.CONT_ALL0)
+                    ret = w.win_state.set(STATE.ALL0_NG)
                 #
-                timer = self.timer_t1
+                timer = self.timer_t3
             #
             self.ev = self.scheduler.enter(timer, 1, self.kill, (None,))
-            self.logger(3, "scheduling kill 2 dtag=", self.dtag,
+            self.logger(3, "scheduling kill %s dtag=%d" % (ret, self.dtag),
                         "ev=", self.ev)
             # ack_payload is going to be None if the state is WIN_DONE.
             return ret, self.ack_payload
-        elif ret == STATE.SEND_ACK1:
-            if self.ack_payload == None:
-                raise AssertionError("ack_payload hasn't been set.")
-            return ret, self.ack_payload
         elif ret == STATE.CHECK_ALL1:
+            self.msg_state = STATE_MSG.CHECKING
             # check MIC
             # XXX is there the case when the MIC is okey but any fragments have
             # not received ?
             self.ack_payload = None
-            if self.mic_matched(fgh):
-                if self.R.mode == SCHC_MODE.NO_ACK:
+            if self.R.mode == SCHC_MODE.NO_ACK:
+                if self.mic_matched(fgh):
+                    # change the state just for the logging. 
+                    w.win_state.set(STATE.ALL1_OK), None
                     self.collected()
                     return w.win_state.set(STATE.DONE), None
                 else:
+                    # change the state just for the logging. 
+                    w.win_state.set(STATE.ALL1_NG), None
+                    self.kill()
+                    return STATE.FAIL, "MIC is not matched."
+            else:
+                if self.mic_matched(fgh):
                     self.collected()
                     self.ev = self.scheduler.enter(self.timer_t4, 1,
-                                                   self.kill, (None,))
-                    self.logger(3, "scheduling kill 3 dtag=",
-                                self.dtag, "ev=", self.ev)
+                                                    self.kill, (None,))
+                    self.logger(3, "scheduling kill %s dtag=%d" % (ret,
+                                self.dtag), "ev=", self.ev)
                     # it has to make the ack payload before change the state.
                     self.ack_payload = w.make_ack1(fgh, cbit=1)
-                    return (w.win_state.set(STATE.SEND_ACK1), self.ack_payload)
-            else:
-                # it has to make the ack payload before change the state.
-                self.ack_payload = w.make_ack1(fgh, cbit=0)
-                return (w.win_state.set(STATE.CONT_ALL1), self.ack_payload)
+                    return (w.win_state.set(STATE.ALL1_OK), self.ack_payload)
+                else:
+                    # it has to make the ack payload before change the state.
+                    self.ack_payload = w.make_ack1(fgh, cbit=0)
+                    return (w.win_state.set(STATE.ALL1_NG), self.ack_payload)
         elif ret == STATE.DONE:
             raise AssertionError("must not com here for STATE.DONE")
         elif ret == STATE.FAIL:
@@ -423,14 +462,13 @@ class defragment_factory:
                     self.logger(1, "remove the old message holder for dtag =",
                                 fgh.dtag)
                     m = None
-                elif m.is_collected() or m.is_served():
-                    # later check whether it is a ALL-1 empty.
-                    pass
         # create a message holder
         if not m:
             m = defragment_message(fgh.R, fgh.dtag, scheduler=self.scheduler,
                                    timer_t1=self.timer_t1,
+                                   timer_t3=self.timer_t3,
                                    timer_t4=self.timer_t4,
+                                   timer_t5=self.timer_t5,
                                    logger=self.logger)
             self.msg_list[fgh.dtag] = m
         #

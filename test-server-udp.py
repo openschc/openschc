@@ -113,30 +113,30 @@ while True:
         debug_print(1, "parsed:", rx_obj.dump())
         debug_print(2, "hex   :", rx_obj.full_dump())
         #
-        if ret == sfr.STATE.CONT:
+        if ret in [sfr.STATE.CONT, sfr.STATE.CONT_ALL0, sfr.STATE.CONT_ALL1]:
             pass
         elif ret == sfr.STATE.ABORT:
             debug_print(1, "abort.")
             debug_print(1, "sent  :", tx_obj.dump())
             s.sendto(tx_obj.packet, peer)
-        elif ret in [sfr.STATE.SEND_ACK0, sfr.STATE.CONT_ALL0]:
-            debug_print(1, "ack for all-0.")
-            debug_print(1, "sent  :", tx_obj.dump())
-            debug_print(2, "packet:", tx_obj.full_dump())
-            s.sendto(tx_obj.packet, peer)
-        elif ret == sfr.STATE.WIN_DONE:
-            pass
-        elif ret in [sfr.STATE.SEND_ACK1, sfr.STATE.CONT_ALL1]:
-            debug_print(1, "ack for all-1.")
-            debug_print(1, "sent  :", tx_obj.dump())
-            debug_print(2, "packet:", tx_obj.full_dump())
-            s.sendto(tx_obj.packet, peer)
-            debug_print(1, "finished, waiting for something in %d seconds." %
+        elif ret in [sfr.STATE.ALL0_OK, sfr.STATE.ALL0_NG]:
+            if tx_obj:
+                debug_print(1, "sening ack for all-0.", tx_obj.dump())
+                debug_print(2, "packet:", tx_obj.full_dump())
+                s.sendto(tx_obj.packet, peer)
+        elif ret in [sfr.STATE.ALL1_OK, sfr.STATE.ALL1_NG]:
+            if tx_obj:
+                debug_print(1, "sending ack for all-1.", tx_obj.dump())
+                debug_print(2, "packet:", tx_obj.full_dump())
+                s.sendto(tx_obj.packet, peer)
+            if ret == sfr.STATE.ALL1_OK:
+                debug_print(1, "finished")
+                debug_print(1, "waiting for something in %d seconds." %
                         opt.timer_t3)
         elif ret == sfr.STATE.DONE:
             debug_print(1, "finished.")
         else:
-            debug_print(1, ret, tx_obj)
+            debug_print(1, ret, ":", tx_obj)
 
     except Exception as e:
         if "timeout" in repr(e):
