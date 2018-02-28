@@ -41,6 +41,7 @@ def schc_sender(msg):
     # main loop
     debug_print(1, "L2 payload size: %s" % opt.l2_size)
     
+    global n_packet
     n_packet = 0
     
     while True:
