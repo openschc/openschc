@@ -4,6 +4,7 @@ import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 import schc_rule
 from enum import Enum, unique, auto
+from random import randint
 
 @unique
 class SCHC_SENDER_STATE(Enum):
@@ -57,6 +58,7 @@ class fragment_factory:
     def setbuf(self, srcbuf, dtag=None):
         '''
         srcbuf: holder of the data to be sent.
+        dtag: dtag number. taken randomly if None.
         win_head: indicating the head of current window.
                  it is held until the bitmap check is completed.
         pos: indicating the head of the data to be sent.
@@ -76,6 +78,8 @@ class fragment_factory:
         self.win_head = 0
         self.pos = 0
         self.dtag = dtag
+        if self.dtag == None:
+            self.dtag = randint(0, (2**self.R.dtag_size)-1)
         self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
         self.win = 0
         self.__init_window()

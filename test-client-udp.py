@@ -123,10 +123,8 @@ def parse_args():
                    default=DEFAULT_FRAGMENT_RID,
                    help="specify the rule id.  default is %d" %
                    DEFAULT_FRAGMENT_RID)
-    p.add_argument("--dtag", action="store", dest="dtag", type=int,
-                   default=DEFAULT_FRAGMENT_RID,
-                   help="specify the DTag.  default is %d" %
-                   DEFAULT_FRAGMENT_DTAG)
+    p.add_argument("--dtag", action="store", dest="_dtag",
+                   help="specify the DTag.  default is random.")
     p.add_argument("--loss-list", action="store", dest="loss_list", default=None,
                    help="specify the index numbers to be lost for test. e.g.  --loss-list=3,8 means the 3rd and 8th packets are going to be lost.")
     p.add_argument("--loss-rate", action="store", dest="loss_rate",
@@ -164,6 +162,16 @@ def parse_args():
         args.func_packet_loss = func_loss_random
     else:
         args.func_packet_loss = None
+    #
+    # fix DTag
+    if args._dtag == None:
+        args.dtag = None
+    else:
+        try:
+            args.dtag = int(args._dtag)
+        except ValueError:
+            print("ERROR: dtag must be a number if you specify it.")
+            exit(1)
 
     return args
 
