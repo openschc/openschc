@@ -26,8 +26,8 @@ STATE = SCHC_RECEIVER_STATE
 class SCHC_RECEIVER_MSG_STATE(Enum):
     INIT = auto()
     CONT = auto()
-    DONE = auto()
-    DYING = auto()
+    COLLECTED = auto()
+    SERVED = auto()
     DEAD = auto()
 
 STATE_MSG = SCHC_RECEIVER_MSG_STATE
@@ -262,8 +262,8 @@ class defragment_message:
             self.ev = None
         #
         if ret in [STATE.CONT, STATE.CONT_ALL0, STATE.CONT_ALL1]:
-            self.ev = self.scheduler.enter(self.timer_t1, 1, self.purge, (True,))
-            self.logger(3, "scheduling purge 1 dtag=", self.dtag, "ev=", self.ev)
+            self.ev = self.scheduler.enter(self.timer_t1, 1, self.kill, (None,))
+            self.logger(3, "scheduling kill 1 dtag=", self.dtag, "ev=", self.ev)
             return ret, None
         elif ret == STATE.SEND_ACK0:
             if self.ack_payload == None:
@@ -291,8 +291,8 @@ class defragment_message:
                 #
                 timer = self.timer_t1
             #
-            self.ev = self.scheduler.enter(timer, 1, self.purge, (True,))
-            self.logger(3, "scheduling purge 2 dtag=", self.dtag,
+            self.ev = self.scheduler.enter(timer, 1, self.kill, (None,))
+            self.logger(3, "scheduling kill 2 dtag=", self.dtag,
                         "ev=", self.ev)
             # ack_payload is going to be None if the state is WIN_DONE.
             return ret, self.ack_payload
@@ -307,13 +307,13 @@ class defragment_message:
             self.ack_payload = None
             if self.mic_matched(fgh):
                 if self.R.mode == SCHC_MODE.NO_ACK:
-                    self.finish()
+                    self.collected()
                     return w.win_state.set(STATE.DONE), None
                 else:
-                    self.finish()
+                    self.collected()
                     self.ev = self.scheduler.enter(self.timer_t4, 1,
-                                                   self.purge, (True,))
-                    self.logger(3, "scheduling purge 3 dtag=",
+                                                   self.kill, (None,))
+                    self.logger(3, "scheduling kill 3 dtag=",
                                 self.dtag, "ev=", self.ev)
                     # it has to make the ack payload before change the state.
                     self.ack_payload = w.make_ack1(fgh, cbit=1)
@@ -346,28 +346,32 @@ class defragment_message:
         message = b"".join([i.assemble() for i in self.win_list])
         return message
 
-    def finish(self, *args):
-        self.msg_state = STATE_MSG.DONE
+    def collected(self):
+        self.msg_state = STATE_MSG.COLLECTED
+
+    def is_collected(self):
+        return self.msg_state == STATE_MSG.COLLECTED
+
+    def served(self):
+        self.msg_state = STATE_MSG.SERVED
+
+    def is_served(self):
+        return self.msg_state == STATE_MSG.SERVED
 
     def kill(self, *args):
-        self.msg_state = STATE_MSG.DYING
+        self.msg_state = STATE_MSG.DEAD
 
-    def purge(self, *args):
-        '''
-        args: (ev, ): ev is True means purge is called from an event.
-        '''
-        #if self.msg_state != STATE_MSG.DYING:
-        #    self.logger(1, "WARNING: this message hasn't been showed.", self)
-        if args[0] == False and self.ev:
-            self.logger(3, "schedule cancelled dtag=",
-                                self.dtag, "ev=", self.ev)
-            self.scheduler.cancel(self.ev)
+    def is_dead(self):
+        return self.msg_state == STATE_MSG.DEAD
+
+    def purge(self):
+        if not self.is_dead():
+            raise AssertionError("invalid state, message should not be purged.")
         self.ev = None
         if hasattr(self, "win_list"):
             for i in self.win_list:
                 i.purge()
             del(self.win_list)
-        self.msg_state = STATE_MSG.DEAD
         # XXX others ?
 
 class defragment_factory:
@@ -410,16 +414,16 @@ class defragment_factory:
         # destruct the message holder if dead
         if m:
             if m.R.mode == SCHC_MODE.NO_ACK:
-                if m.msg_state in [STATE_MSG.DEAD, STATE_MSG.DYING]:
+                if m.is_dead() or m.is_served():
                     self.logger(1, "remove the old message holder for dtag =",
                                 fgh.dtag)
                     m = None
             else:
-                if m.msg_state == STATE_MSG.DEAD:
+                if m.is_dead():
                     self.logger(1, "remove the old message holder for dtag =",
                                 fgh.dtag)
                     m = None
-                elif m.msg_state in [STATE_MSG.DONE, STATE_MSG.DYING]:
+                elif m.is_collected() or m.is_served():
                     # later check whether it is a ALL-1 empty.
                     pass
         # create a message holder
@@ -433,29 +437,30 @@ class defragment_factory:
         rx_ret, tx_obj = m.add(fgh)
         if rx_ret == STATE.FAIL:
             # assumeing any message have been showed, just ignore it.
-            m.purge((False,))
+            m.kill()
         elif rx_ret == STATE.ABORT:
-            m.purge((False,))
+            m.kill()
         #
         return rx_ret, fgh, tx_obj
 
     def dig(self):
         '''
         dig the messages.
-        if the state of the message is DONE, assemble and put to the return.
-        if the state of the message is DYING, purge it.
+        if the state of the message is COLLECTED, assemble the fragments
+        and put to the return.
+        if the state of the message is DEAD, purge it.
         '''
         self.logger(3, "digging list size =", len(self.msg_list.items()))
         ret = []
         purge_list = []
         for k, m in self.msg_list.items():
-            if m.msg_state == STATE_MSG.DONE:
+            if m.is_collected():
                 ret.append(m.assemble())
                 self.logger(1, "digged dtag =", m.dtag)
-                m.kill()
+                m.served()
             #
-            if m.msg_state == STATE_MSG.DEAD:
-                m.purge((False,))
+            if m.is_dead():
+                m.purge()
                 purge_list.append(k)
         #
         for i in purge_list:
