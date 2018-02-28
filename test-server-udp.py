@@ -136,7 +136,7 @@ while True:
         elif ret == sfr.STATE.DONE:
             debug_print(1, "finished.")
         else:
-            debug_print(1, "ERROR:", ret, tx_obj)
+            debug_print(1, ret, tx_obj)
 
     except Exception as e:
         if "timeout" in repr(e):
