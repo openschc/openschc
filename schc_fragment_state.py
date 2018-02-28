@@ -51,6 +51,7 @@ if __name__ == "__main__" :
         C = auto()
         Z = -1
     state = SCHC_MODE
+    print("%s"%state.A)
     s = fragment_state(state, logger=print)
     s.set(state.A)
     s.set(state.B)
