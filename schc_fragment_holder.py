@@ -58,12 +58,12 @@ class frag_holder():
             x += ("mic:%s" % pb.int_to_bit(self.mic, self.R.mic_size))
             x += ("(0x%s)" % "".join(["%02x"%((self.mic>>i)&0xff)
                                      for i in [24,16,8,0]]))
-        if self.bitmap != None:
-            if len(x) != 0: x += " "
-            x += ("bitmap:%s" % pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.cbit != None:
             if len(x) != 0: x += " "
             x += ("cbit:%d" % self.cbit)
+        if self.bitmap != None:
+            if len(x) != 0: x += " "
+            x += ("bitmap:%s" % pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.payload != None:
             if len(x) != 0: x += " "
             x += ("payload:%s" % " ".join(["%02x"%i for i in self.payload]))
@@ -107,12 +107,14 @@ class frag_tx(frag_holder):
             pb.bit_set(ba, pos, pb.int_to_bit(mic, self.R.mic_size),
                        extend=True)
             pos += self.R.mic_size
-        if bitmap != None and self.R.bitmap_size:
-            pb.bit_set(ba, pos, pb.int_to_bit(bitmap, self.R.bitmap_size),
-                       extend=True)
         if cbit != None and self.R.cbit_size:
             pb.bit_set(ba, pos, pb.int_to_bit(cbit, self.R.cbit_size),
                        extend=True)
+            pos += self.R.cbit_size
+        if bitmap != None and self.R.bitmap_size:
+            pb.bit_set(ba, pos, pb.int_to_bit(bitmap, self.R.bitmap_size),
+                       extend=True)
+            pos += self.R.bitmap_size
         if abort == True:
             pb.bit_set(ba, pos, pb.int_to_bit(0xff, 8),
                        extend=True)
@@ -224,7 +226,7 @@ class frag_rx(frag_holder):
         if self.R.win_size:
             win = pb.bit_get(self.packet, pos, self.R.win_size, integer=True)
             if exp_win != None and win != exp_win:
-                raise ValueError("win unexpected.")
+                raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
         return self.R.win_size
 
