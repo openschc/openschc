@@ -114,15 +114,16 @@ XXX it should only happen immediately after FR receives all-x fragment ?
 XXX or, plus, whenever FR receves any fragment retransmitted ?
 
                     
-             .-->---------------.
+             .-->- CONT_ALL0 ->-.
              |                  |  ACK
-         .-<-R--B-- CONT_ALL0 <-+-<-S-<-.
-         |      |                       |
-         |    T3'-> FAIL             NG |
+         .-<-R----B-----------<-+-<-S-<-.
+         |        |                     |
+         |      T3'-> FAIL          ALL0_NG
          |                              |          Pull ACK0
     .-->-+----->-- CHECK_ALL0 --------+-'   .----------<---.
     |                                 |     |              |
-    |                              OK |     |              |T4
+    |                             ALL0_OK   |              |
+    |                                 |     |              |T4
     '------------------------.        +--->-S-> SEND_ACK0 -B->-.
                              |        |    ACK                 |
              .-<- CONT <-.   |        |                        |
@@ -131,24 +132,25 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
                    |     |                                        
         FAIL <-----' T1  |                                        
                          |                 ACK
-    .------------------<-' All-1        .->-S-> SEND_ACK1 -B->---> DONE
-    |                                OK |   |              |T4
-    |                                   |   |              |
-    '-->-+----->-- CHECK_ALL1 ----------+   '----------<---'
+    .------------------<-' All-1      .--->-S-> SEND_ACK1 -B-----> DONE
+    |                                 |     |              |T4
+    |                             ALL1_OK   |              |
+    |                                 |     |              |
+    '-->-+----->-- CHECK_ALL1 --------+-+   '----------<---'
          |                              |          Pull ACK1
-         |    T3.-> FAIL             NG |   
-         |      |                       |   
-         '-<-R--B-- CONT_ALL1 <-+-<-S-<-'
+         |       T3.-> FAIL         ALL1_NG   
+         |         |                    |   
+         '-<-R-----B----------<-+-<-S-<-'
              |                  |  ACK
-             '-->---------------'
+             '-->- CONT_ALL1 ->-'
 
 In NO-ACK mode, the state transition is:
 
-             .-<- CONT <-.         
+             .-<- CONT <-.
              |           |
-    INIT -->-+-----B-----R------->---> CHECK_ALL1 --+-> DONE
-                   |       All-1
-        FAIL <-----' T1
+    INIT -->-+-----B-----R------> CHECK_ALL1 --+-> ALL1_OK --> DONE
+                   |      All-1                |
+        FAIL <-----' T1                        '-> ALL1_NG --> FAIL
 
 - CONT_ALL0 and CONT_ALL1
 
