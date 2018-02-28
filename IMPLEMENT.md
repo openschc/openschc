@@ -46,20 +46,22 @@ Implementation memo
 
 - WINDOW mode
 
-            .----------------------------------------------------<----.
-            |                                                         |
-            |   .-----<---.          .-<- RETRY_ALL0 -.               |
-            |   |         |          |                |R              |
-            |   |         |          |                |               |
-    INIT ->-+-+-+-> CONT -S-->-+--->-+--> SEND_ALL0 --B---> WIN_DONE -'
-              |                |                      |                  
-              |--<-------------'    T2                '---> FAIL         
-              |          All-1       .---> FAIL      T2                  
-              |                      |                                 
-              '-->--+--> SEND_ALL1 --B--R--->---------> DONE
-                    |                   |  
-                    |                   | 
-                    '-<- RETRY_ALL1 -<--' 
+            .----<------------------------------------------------------.
+            |                                                           |
+            |                      .-------->--------.                  |
+            |                      |                 |                  |
+            |   .------<---.       S-<- RETRY_ALL0 <-+-<-.              |
+            |   |          |       |                     |              |
+    INIT ->-+-+-+-> CONT --S->-+->-+--> SEND_ALL0 ---B---R--> WIN_DONE -'
+              |                |                     |                  
+              |--<-------------'                   T2'---> FAIL         
+              |          All-1      T2.---> FAIL   
+              |                       |                                 
+              '-->--+--> SEND_ALL1 ---B----R--->------> DONE
+                    |                      |  
+                    S-<- RETRY_ALL1 -<-+-<-' 
+                    |                  |
+                    '---------->-------'
 
 XXX should it send a all-0 when it finishes to send all packets of the retranmission every time ?
 XXX ==> assuming No.  it will send ALL0 or ALL0 empty after retransmiting.
@@ -95,15 +97,14 @@ sender sent.
 
 ### the state of the message holder
 
-    INIT --> CONT --> DONE --> DYING --> DEAD
+    INIT --> CONT --> CHECKING --> COLLECTED --> SERVED --> DEAD
 
-      INIT: initial state.
-      CONT: receiving the fragments.
-      DONE: finised to receive the fragments. ready to show the message.
-     DYING: waiting for the response from the sender.
-            once the message is showed at DONE state,
-            the stae is changed into DYING.
-      DEAD: ready to purge the holder.
+    INIT     : initial state.
+    CONT     : receiving the fragments.
+    CHECKING : received ALL-1 fragment.
+    COLLECTED: finised to receive the fragments. ready to show the message.
+    SERVED   : showed the message, : waiting for the response from the sender.
+    DEAD     : ready to purge the holder.
 
 ### state machine of the receiver.
 
@@ -119,25 +120,25 @@ XXX or, plus, whenever FR receves any fragment retransmitted ?
          .-<-R----B-----------<-+-<-S-<-.
          |        |                     |
          |      T3'-> FAIL          ALL0_NG
-         |                              |          Pull ACK0
-    .-->-+----->-- CHECK_ALL0 --------+-'   .----------<---.
+         |                              |             empty ACK0
+    .-->-+----->-- CHECK_ALL0 --------+-'   .----------<---R
     |                                 |     |              |
     |                             ALL0_OK   |              |
     |                                 |     |              |T4
-    '------------------------.        +--->-S-> SEND_ACK0 -B->-.
+    '------------------------.        +--->-S---------->---B->-.
                              |        |    ACK                 |
              .-<- CONT <-.   |        |                        |
              |           |   |All-0   |  ACK-ON-ERROR          |
     INIT -->-+-----B-----R->-'        '--->--------------------+-> WIN_DONE
                    |     |                                        
-        FAIL <-----' T1  |                                        
+        FAIL <-----' T1  |                                           T5
                          |                 ACK
     .------------------<-' All-1      .--->-S-> SEND_ACK1 -B-----> DONE
     |                                 |     |              |T4
     |                             ALL1_OK   |              |
     |                                 |     |              |
-    '-->-+----->-- CHECK_ALL1 --------+-+   '----------<---'
-         |                              |          Pull ACK1
+    '-->-+----->-- CHECK_ALL1 --------+-+   '----------<---R
+         |                              |             empty ACK1
          |       T3.-> FAIL         ALL1_NG   
          |         |                    |   
          '-<-R-----B----------<-+-<-S-<-'
@@ -151,6 +152,10 @@ In NO-ACK mode, the state transition is:
     INIT -->-+-----B-----R------> CHECK_ALL1 --+-> ALL1_OK --> DONE
                    |      All-1                |
         FAIL <-----' T1                        '-> ALL1_NG --> FAIL
+
+- CHECK_ALL0 and CHECK_ALL1
+
+check the MIC and set the ACK payload.  Then, if the MIC is correct, the state will be changed into ALL0_OK (or ALL1_OK in CHECK_ALL1)
 
 - CONT_ALL0 and CONT_ALL1
 
