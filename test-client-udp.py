@@ -10,9 +10,9 @@ import time
 import pybinutil as pb
 import random
 from schc_param import *
-import schc_context
 import schc_fragment_sender as sfs
 from debug_print import *
+from schc_fragment_ruledb import schc_fragment_ruledb
 
 def func_loss_list():
     return (n_packet in opt.loss_list)
@@ -25,9 +25,7 @@ def func_loss_random():
 
 def schc_sender(msg):
     debug_print(2, "message:", bytes(msg, encoding="utf-8"))
-    # fragment instance
-    context = schc_context.schc_context(0)
-    # XXX rule_id can be changed in a session ?
+    # XXX assuming that the rule_id is not changed in a session.
     
     # check if the L2 size is enough to put the message.
     if opt.l2_size >= len(msg):
@@ -35,7 +33,7 @@ def schc_sender(msg):
         return
     
     # prepare fragmenting
-    factory = sfs.fragment_factory(context, opt.rule_id, logger=debug_print)
+    factory = sfs.fragment_factory(frr, logger=debug_print)
     factory.setbuf(msg, dtag=opt.dtag)
     
     # main loop
@@ -119,10 +117,18 @@ def parse_args():
                    default=DEFAULT_L2_SIZE,
                    help="specify the payload size of L2. default is %d." %
                    DEFAULT_L2_SIZE)
+    '''
     p.add_argument("--rid", action="store", dest="rule_id", type=int,
                    default=DEFAULT_FRAGMENT_RID,
                    help="specify the rule id.  default is %d" %
                    DEFAULT_FRAGMENT_RID)
+    '''
+    p.add_argument("--context-file", action="store", dest="context_file",
+                   required=True,
+                   help="specify the file name containing a context.")
+    p.add_argument("--rule-file", action="store", dest="rule_file",
+                   required=True,
+                   help="specify the file name containing a rule.")
     p.add_argument("--dtag", action="store", dest="_dtag",
                    help="specify the DTag.  default is random.")
     p.add_argument("--loss-list", action="store", dest="loss_list", default=None,
@@ -180,6 +186,11 @@ main code
 '''
 opt = parse_args()
 debug_set_level(opt.debug_level)
+
+frdb = schc_fragment_ruledb()
+cid = frdb.load_context_json_file(opt.context_file)
+rid = frdb.load_json_file(cid, opt.rule_file)
+frr = frdb.get_runtime_rule(cid, rid)
 
 server = (opt.server_address, opt.server_port)
 debug_print(1, "server:", server)

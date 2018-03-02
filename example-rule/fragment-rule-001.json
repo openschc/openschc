@@ -1,0 +1,10 @@
+{
+    "FRAG_RULE": {
+        "RID": 1,
+        "MODE": "NO-ACK",
+        "DTAG_SIZE": 3,
+        "FCN_SIZE": 1,
+        "DEFAULT_DTAG": 1
+    }
+}
+

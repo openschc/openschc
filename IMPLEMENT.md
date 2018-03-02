@@ -1,6 +1,11 @@
 Implementation memo
 ===================
 
+## NOTE
+
+Rule ID (RID) and the length of this field must be negotiated
+between the nodes in out-of-band before they start communication.
+
 ## fragment sender
 
            |      
@@ -41,8 +46,9 @@ Implementation memo
     If the link is not stable, T1 should be bigger than you excepted.
     T2, T3 and T4 are recomended to be more than double of T1.
     This is because these are round-trip flow.
-    T5 is recommended to be bigger than T2.
-    i.e. 2*T1 =< T2 =< T3 =< T4 < T5
+    T4 is recommended to be a bit bigger than T3.
+    T5 is recommended to be bigger than T3.
+    i.e. 2*T1 =< T2 =< T3 < T4 <= T5
 
 - WINDOW mode
 

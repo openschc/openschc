@@ -2,6 +2,7 @@ import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
+from schc_fragment_ruledb import schc_fragment_ruledb
 import mic_crc32
 from enum import Enum, unique, auto
 
@@ -310,26 +311,26 @@ class defragment_message:
                 if w.all_fragments_received():
                     # change the state just for the logging. 
                     w.win_state.set(STATE.ALL0_OK)
-                    ret = w.win_state.set(STATE.WIN_DONE)
+                    w.win_state.set(STATE.WIN_DONE)
                     timer = self.timer_t4
                 else:
                     self.ack_payload = w.make_ack0(fgh)
-                    ret = w.win_state.set(STATE.ALL0_NG)
+                    w.win_state.set(STATE.ALL0_NG)
                     timer = self.timer_t3
             else:
                 self.ack_payload = w.make_ack0(fgh)
                 if w.all_fragments_received():
-                    ret = w.win_state.set(STATE.ALL0_OK)
+                    w.win_state.set(STATE.ALL0_OK)
+                    timer = self.timer_t4
                 else:
-                    ret = w.win_state.set(STATE.ALL0_NG)
-                #
-                timer = self.timer_t3
+                    w.win_state.set(STATE.ALL0_NG)
+                    timer = self.timer_t3
             #
             self.ev = self.scheduler.enter(timer, 1, self.kill, (None,))
             self.logger(3, "scheduling kill %s dtag=%d" % (ret, self.dtag),
                         "ev=", self.ev)
             # ack_payload is going to be None if the state is WIN_DONE.
-            return ret, self.ack_payload
+            return w.win_state.get(), self.ack_payload
         elif ret == STATE.CHECK_ALL1:
             self.msg_state = STATE_MSG.CHECKING
             # check MIC
@@ -350,17 +351,20 @@ class defragment_message:
             else:
                 if self.mic_matched(fgh):
                     self.collected()
-                    self.ev = self.scheduler.enter(self.timer_t4, 1,
-                                                    self.kill, (None,))
-                    self.logger(3, "scheduling kill %s dtag=%d" % (ret,
-                                self.dtag), "ev=", self.ev)
                     # it has to make the ack payload before change the state.
                     self.ack_payload = w.make_ack1(fgh, cbit=1)
-                    return (w.win_state.set(STATE.ALL1_OK), self.ack_payload)
+                    timer = self.timer_t4
+                    w.win_state.set(STATE.ALL1_OK)
                 else:
                     # it has to make the ack payload before change the state.
                     self.ack_payload = w.make_ack1(fgh, cbit=0)
-                    return (w.win_state.set(STATE.ALL1_NG), self.ack_payload)
+                    timer = self.timer_t3
+                    w.win_state.set(STATE.ALL1_NG)
+                #
+                self.ev = self.scheduler.enter(timer, 1, self.kill, (None,))
+                self.logger(3, "scheduling kill %s dtag=%d" % (ret, self.dtag),
+                            "ev=", self.ev)
+                return w.win_state.get(), self.ack_payload
         elif ret == STATE.DONE:
             raise AssertionError("must not com here for STATE.DONE")
         elif ret == STATE.FAIL:
@@ -430,7 +434,8 @@ class defragment_factory:
           ## NO_ACK
                      +-- dtag --+-- fcn[0] - frag - frag - ...
     '''
-    def __init__(self, scheduler=default_scheduler, timer_t1=5, timer_t3=10,
+    def __init__(self, scheduler=default_scheduler,
+                 timer_t1=5, timer_t3=10,
                  timer_t4=10, timer_t5=15, logger=default_logger):
         self.logger = logger
         self.scheduler = scheduler
@@ -439,13 +444,23 @@ class defragment_factory:
         self.timer_t4 = timer_t4
         self.timer_t5 = timer_t5
         self.msg_list = {}
+        # set fragment rule db.
+        self.frdb = schc_fragment_ruledb()
 
-    def defrag(self, C, recvbuf):
+    def set_context(self, context_file):
+        return self.frdb.load_context_json_file(context_file)
+
+    def set_rule(self, cid, rule_file):
+        return self.frdb.load_json_file(cid, rule_file)
+
+    def defrag(self, cid, recvbuf):
         '''
-        C: context instance
+        cid: context identifier
         recvbuf: bytearray received
         '''
-        fgh = sfh.frag_receiver_rx(recvbuf, C)
+        C = self.frdb.get_runtime_context(cid)
+        fgh = sfh.frag_receiver_rx(C, recvbuf)
+        fgh.finalize(self.frdb.get_runtime_rule(cid, fgh.rid))
         # search the list for the fragment.
         # assuming that dtag is the unique key for each originalipv6 packet
         # before fragmented..

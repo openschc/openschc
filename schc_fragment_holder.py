@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import pybinutil as pb
 from schc_param import *
-import schc_rule
 
 '''
 NOTE:
@@ -55,7 +54,7 @@ class frag_holder():
             x += ("fcn:%s" % pb.int_to_bit(self.fcn, self.R.fcn_size))
         if self.mic != None:
             if len(x) != 0: x += " "
-            x += ("mic:%s" % pb.int_to_bit(self.mic, self.R.mic_size))
+            x += ("mic:%s" % pb.int_to_bit(self.mic, self.R.C.mic_size))
             x += ("(0x%s)" % "".join(["%02x"%((self.mic>>i)&0xff)
                                      for i in [24,16,8,0]]))
         if self.cbit != None:
@@ -103,10 +102,10 @@ class frag_tx(frag_holder):
             pb.bit_set(ba, pos, pb.int_to_bit(fcn, self.R.fcn_size),
                        extend=True)
             pos += self.R.fcn_size
-        if mic != None and self.R.mic_size:
-            pb.bit_set(ba, pos, pb.int_to_bit(mic, self.R.mic_size),
+        if mic != None and self.R.C.mic_size:
+            pb.bit_set(ba, pos, pb.int_to_bit(mic, self.R.C.mic_size),
                        extend=True)
-            pos += self.R.mic_size
+            pos += self.R.C.mic_size
         if cbit != None and self.R.cbit_size:
             pb.bit_set(ba, pos, pb.int_to_bit(cbit, self.R.cbit_size),
                        extend=True)
@@ -260,8 +259,8 @@ class frag_rx(frag_holder):
         parse mic in the frame.
         assuming that mic_size is not zero.
         '''
-        self.mic = pb.bit_get(self.packet, pos, self.R.mic_size, integer=True)
-        return self.R.mic_size
+        self.mic = pb.bit_get(self.packet, pos, self.R.C.mic_size, integer=True)
+        return self.R.C.mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):
 
@@ -333,17 +332,19 @@ class frag_receiver_rx(frag_rx):
         Format: [ Rule ID | DTag |W|FCN|  FF    |P1]
     XXX P1 is not approved in the WG.
     '''
-    def __init__(self, recvbuf, C):
+    def __init__(self, C, recvbuf):
         '''
+        C: runtime context.
         recvbuf: buffer received in bytearray().
-        C: context instance.
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
-        pos = 0
-        pos += self.parse_rid(C)
-        self.R = schc_rule.schc_rule(C, self.rid)
-        #
+        self.__pos = 0
+        self.__pos += self.parse_rid(C)
+
+    def finalize(self, R):
+        self.R = R
+        pos = self.__pos
         pos += self.parse_dtag(pos)
         pos += self.parse_win(pos)
         pos += self.parse_fcn(pos)

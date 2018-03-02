@@ -2,7 +2,7 @@ import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
-import schc_rule
+from schc_fragment_ruledb import schc_fragment_ruledb
 from enum import Enum, unique, auto
 from random import randint
 
@@ -32,16 +32,15 @@ def rdu8(a):
 
 class fragment_factory:
 
-    def __init__(self, C, rid, logger=default_logger):
+    def __init__(self, R, logger=default_logger):
         '''
-        C: context instance.
-        rid: Rule ID.
+        R: fragment runtime rule.
         '''
-        self.R = schc_rule.schc_rule(C, rid)
+        self.R = R
         self.logger = logger
         #
         self.logger(1, "mode={0:s}".format(self.R.mode.name))
-        self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.mic_size}".format(self.R.C.rid_size, self=self.R))
+        self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.C.mic_size}".format(self.R.C.rid_size, self=self.R))
 
     def __init_window(self):
         '''

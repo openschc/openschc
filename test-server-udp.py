@@ -10,7 +10,6 @@ import pybinutil as pb
 import pyssched as ps
 import traceback
 from schc_param import *
-import schc_context
 import schc_fragment_receiver as sfr
 from debug_print import *
 
@@ -34,18 +33,22 @@ def parse_args():
     p.add_argument("--address", action="store", dest="server_address",
                    default="",
                    help="specify the ip address of the server to be bind. default is any.")
+    p.add_argument("--context-file", action="store", dest="context_file",
+                   help="specify the file name containing a context.")
+    p.add_argument("--rule-file", action="store", dest="_rule_files",
+                   help="specify the file name containing a rule.")
     p.add_argument("--timer", action="store", dest="timer_t1",
                    type=int, default=DEFAULT_TIMER_T1,
-                   help="specify the number of time to wait for messages.")
+                   help="specify the number of timer T1.")
     p.add_argument("--timer-t3", action="store", dest="timer_t3",
                    type=int, default=DEFAULT_TIMER_T3,
-                   help="specify the number of time to wait for messages.")
+                   help="specify the number of timer T3.")
     p.add_argument("--timer-t4", action="store", dest="timer_t4",
                    type=int, default=DEFAULT_TIMER_T4,
-                   help="specify the number of time to wait for messages.")
+                   help="specify the number of timer T4.")
     p.add_argument("--timer-t5", action="store", dest="timer_t5",
                    type=int, default=DEFAULT_TIMER_T5,
-                   help="specify the number of time to wait for messages.")
+                   help="specify the number of timer T5.")
     p.add_argument("-d", action="append_const", dest="_f_debug",
                    default=[], const=1, help="increase debug mode.")
     p.add_argument("--debug", action="store", dest="_debug_level",
@@ -78,14 +81,22 @@ s.bind(server)
 # call the client trigger if this server is running on the end node.
 # send_client_trigger(s)
 
+context_file = "example-rule/context-001.json"
+rule_files = [
+    "example-rule/fragment-rule-001.json",
+    "example-rule/fragment-rule-002.json",
+    "example-rule/fragment-rule-003.json"
+    ]
 #
 sched = ps.ssched()
-context = schc_context.schc_context(0)
-factory = sfr.defragment_factory(scheduler=sched, timer_t1=opt.timer_t1,
+factory = sfr.defragment_factory(scheduler=sched,
+                                 timer_t1=opt.timer_t1,
                                  timer_t3=opt.timer_t3,
                                  timer_t4=opt.timer_t4,
                                  timer_t5=opt.timer_t5,
                                  logger=debug_print)
+cid = factory.set_context(context_file)
+factory.set_rule(cid, rule_files)
 
 while True:
 
@@ -109,7 +120,7 @@ while True:
         #
         # XXX here, should find a context for the peer.
         #
-        ret, rx_obj, tx_obj = factory.defrag(context, rx_data)
+        ret, rx_obj, tx_obj = factory.defrag(cid, rx_data)
         debug_print(1, "parsed:", rx_obj.dump())
         debug_print(2, "hex   :", rx_obj.full_dump())
         #
@@ -135,6 +146,9 @@ while True:
                         opt.timer_t3)
         elif ret == sfr.STATE.DONE:
             debug_print(1, "finished.")
+        elif ret in [sfr.STATE.WIN_DONE]:
+            # ignore it
+            pass
         else:
             debug_print(1, ret, ":", tx_obj)
 
