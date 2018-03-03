@@ -63,9 +63,11 @@ class schc_ruledb:
         x = j[TAG_CONTEXT]
         self.is_defined(x, TAG_CID)
         self.is_int(x, TAG_CID)
-        self.is_int(x, TAG_RID_SIZE)
-        self.is_int(x, TAG_DEFAULT_RID)
         self.is_defined(x, TAG_MIC_FUNC)
+        if TAG_RID_SIZE in x:
+            self.is_int(x, TAG_RID_SIZE)
+        else:
+            self.is_int(x, TAG_DEFAULT_RID)
         #
         cid = x[TAG_CID]
         if self.get_context(cid):
