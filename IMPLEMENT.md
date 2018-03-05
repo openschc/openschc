@@ -3,8 +3,11 @@ Implementation memo
 
 ## NOTE
 
-Rule ID (RID) and the length of this field must be negotiated
-between the nodes in out-of-band before they start communication.
+- Rule ID (RID) and the length of this field must be negotiated
+  between the nodes in out-of-band before they start communication.
+
+- There is a padding between the SCHC fragment header and the payload.
+  This should be removed in the future.
 
 ## fragment sender
 
