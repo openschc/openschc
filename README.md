@@ -23,23 +23,24 @@ so that this software can work on pycom.
 
 ## How to get
 
-some modules are included.  therefore, you need to clone recursively.
+You have to download some modules with this software.
+Therefore, you need to clone recursively like below;
 
-    git clone --recursive git://github.com/tanupoo/schc-fragment.git
+    git clone --recursive git://github.com/tanupoo/schc-test.git
 
 or
 
-    git clone git://github.com/tanupoo/schc-fragment.git
-    cd schc-fragment
+    git clone git://github.com/tanupoo/schc-test.git
+    cd schc-test
     git submodule update --init --recursive
 
 ## Sample code
 
+The test implementations are included.
+Note that they use UDP as its transport layer.
+
 test-client-udp.py is a sample code for the fragment sender.
 test-server-udp.py is for the fragment receiver.
-These test codes use UDP as the datalink.
-
-You should prepare two consoles.
 
 You can run test-client-udp.py in the terminal window like below.
 
