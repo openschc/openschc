@@ -19,6 +19,7 @@ so that this software can work on pycom.
 
 ## TODO
 
+- the compression/decompression layer are not implemented.
 - bitmap optimization is not implemented.
 
 ## How to get
