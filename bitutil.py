@@ -99,14 +99,13 @@ def bit_get(ba, pos, val=None, integer=False):
     pos: see bit_get().
     val: if the type of val is None, it gets a value of the bit
         from the position, and return "1" or "0" in string.
-
+        if the type is a number, it gets a series of the value of the bits
+        from the position toward right and return the bit string of the value.
         if the position is greater than the length of ba, it returns None.
-        if the type is a number, this gets a series of the value of the bits
-        from the position and return the bit string of the value.
 
         e.g. if ba in bit is "00001111", bit_get(ba, 2, 4) is gonna be "0011".
 
-    integer: if True, it returns an integer of the string of the return value.
+    integer: if True, it returns an integer converted from the string taken.
     '''
     p0 = pos >> 3
     p1 = pos % 8
