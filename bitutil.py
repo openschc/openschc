@@ -27,7 +27,7 @@ def zfill(s, w):
 
 def bit_set(ba, pos, val=None, extend=False):
     '''
-    set a bit or a set of bits at the position in the bytearray.
+    set a bit or a series of bits at the position in the bytearray.
     the position of the most left bit is 0.
 
     ba: bytearray
@@ -96,6 +96,7 @@ def bit_set(ba, pos, val=None, extend=False):
 def bit_get(ba, pos, val=None, integer=False):
     '''
     get a bit at the position in the bytearray.
+    pos: see bit_get().
     val: if the type of val is None, it gets a value of the bit
         from the position, and return "1" or "0" in string.
 
