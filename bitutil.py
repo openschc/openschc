@@ -132,15 +132,19 @@ def bit_get(ba, pos, val=None, integer=False):
         return int(ret, 2)
     return ret
 
-def bit_find(n, bit_len, val=None):
+def bit_find(n, bit_len=0, val=None):
     '''
-    find a bit or a set of bits from the most left.
-    return the number where the bit set.  the position of the most left bit is 0.
-    and return the number where the bit is turned off.
-    if there is no bit set, return 0.
-    XXX not yet supported. but, if val is a bit string, it try to find the string in
-    the n.
+    find a position where a bit is on bit in n.
+    return the number of the position where the bit set.
+    and return the number that the bit found in n is turned off.
+    however, note that the significant bits is taken from the most right in n.
+    the position of the most left bit is 0.
+    if there is no bit set, return None.
+    XXX not yet supported. but, if val is a bit string,
+    it try to find the series of bits in n.
     '''
+    if not bit_len:
+        bit_len = len(bin(n)[2:])
     for i in range(bit_len):
         x = 2**(bit_len-i-1)
         if n & x:
