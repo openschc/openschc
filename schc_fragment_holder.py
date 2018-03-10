@@ -192,7 +192,7 @@ class frag_rx(frag_holder):
         exp_rid: if non-None, check the rid whether it's expected.
         '''
         if C.rid_size:
-            rid = pb.bit_get(self.packet, 0, C.rid_size, integer=True)
+            rid = pb.bit_get(self.packet, 0, C.rid_size, ret_type=int)
             if exp_rid != None and rid != exp_rid:
                 raise ValueError("rid unexpected.")
         else:
@@ -207,7 +207,7 @@ class frag_rx(frag_holder):
         exp_dtag: if non-None, check the dtag whether it is expected.
         '''
         if self.R.dtag_size:
-            dtag = pb.bit_get(self.packet, pos, self.R.dtag_size, integer=True)
+            dtag = pb.bit_get(self.packet, pos, self.R.dtag_size, ret_type=int)
             if exp_dtag != None and dtag != exp_dtag:
                 raise ValueError("dtag unexpected.")
         else:
@@ -223,7 +223,7 @@ class frag_rx(frag_holder):
         if win_size is zero, self.win is not set.
         '''
         if self.R.win_size:
-            win = pb.bit_get(self.packet, pos, self.R.win_size, integer=True)
+            win = pb.bit_get(self.packet, pos, self.R.win_size, ret_type=int)
             if exp_win != None and win != exp_win:
                 raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
@@ -234,7 +234,7 @@ class frag_rx(frag_holder):
         parse fcn in the frame.
         assuming that fcn_size is not zero.
         '''
-        self.fcn = pb.bit_get(self.packet, pos, self.R.fcn_size, integer=True)
+        self.fcn = pb.bit_get(self.packet, pos, self.R.fcn_size, ret_type=int)
         return self.R.fcn_size
 
     def parse_bitmap(self, pos):
@@ -243,7 +243,7 @@ class frag_rx(frag_holder):
         assuming that bitmap_size is not zero.
         '''
         self.bitmap = pb.bit_get(self.packet, pos, self.R.bitmap_size,
-                                 integer=True)
+                                 ret_type=int)
         return self.R.bitmap_size
 
     def parse_cbit(self, pos):
@@ -251,7 +251,7 @@ class frag_rx(frag_holder):
         parse cbit in the frame.
         assuming that cbit_size is not zero.
         '''
-        self.cbit = pb.bit_get(self.packet, pos, self.R.cbit_size, integer=True)
+        self.cbit = pb.bit_get(self.packet, pos, self.R.cbit_size, ret_type=int)
         return self.R.cbit_size
 
     def parse_mic(self, pos):
@@ -259,7 +259,7 @@ class frag_rx(frag_holder):
         parse mic in the frame.
         assuming that mic_size is not zero.
         '''
-        self.mic = pb.bit_get(self.packet, pos, self.R.C.mic_size, integer=True)
+        self.mic = pb.bit_get(self.packet, pos, self.R.C.mic_size, ret_type=int)
         return self.R.C.mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):
