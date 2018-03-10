@@ -93,7 +93,7 @@ def bit_set(ba, pos, val=None, extend=False):
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
 
-def bit_get(ba, pos, val=None, integer=False):
+def bit_get(ba, pos, val=None, ret_type=str):
     '''
     get a bit at the position in the bytearray.
     pos: see bit_get().
@@ -105,7 +105,7 @@ def bit_get(ba, pos, val=None, integer=False):
 
         e.g. if ba in bit is "00001111", bit_get(ba, 2, 4) is gonna be "0011".
 
-    integer: if True, it returns an integer converted from the string taken.
+    type: specify the type of return value.  default is str.
     '''
     p0 = pos >> 3
     p1 = pos % 8
@@ -128,9 +128,12 @@ def bit_get(ba, pos, val=None, integer=False):
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
     #
-    if integer:
+    if ret_type == int:
         return int(ret, 2)
-    return ret
+    elif ret_type == hex:
+        return hex(int(ret, 2))[2:]
+    else:
+        return ret
 
 def bit_find(n, bit_len=0, val=None):
     '''
