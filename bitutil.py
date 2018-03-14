@@ -105,7 +105,12 @@ def bit_get(ba, pos, val=None, ret_type=str):
 
         e.g. if ba in bit is "00001111", bit_get(ba, 2, 4) is gonna be "0011".
 
-    type: specify the type of return value.  default is str.
+    ret_type: specify the type of return value.
+        either 'int', 'str', 'bytes', 'hex' is available.
+        'str' means to return a binary string.
+        if the type is bytes, the bits are aligned to the left.
+        i.e. "0011" is gonna be 0x30.
+        default is str.
     '''
     p0 = pos >> 3
     p1 = pos % 8
@@ -132,6 +137,8 @@ def bit_get(ba, pos, val=None, ret_type=str):
         return int(ret, 2)
     elif ret_type == hex:
         return hex(int(ret, 2))[2:]
+    elif ret_type == bytes:
+        return bit_set(bytearray(1), 0, ret, extend=True)
     else:
         return ret
 

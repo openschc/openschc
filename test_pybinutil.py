@@ -158,7 +158,7 @@ class Test_bitutil(unittest.TestCase):
             for i, j in v:
                 self.assertEqual(bi.bit_get(ba, i, 6), j)
 
-    ## bit_set(type=int)
+    ## bit_get(type=int)
     def test_bit_get_int(self):
         # 1101 0010 0010 0000
         ba = bytearray([0xd2, 0x20])
@@ -172,7 +172,7 @@ class Test_bitutil(unittest.TestCase):
         for i, j, k in n:
             self.assertEqual(bi.bit_get(ba, i, j, ret_type=int), k)
 
-    ## bit_set(type=hex)
+    ## bit_get(type=hex)
     def test_bit_get_int(self):
         # 1101 0010 0010 0000
         ba = bytearray([0xd2, 0x20])
@@ -185,6 +185,19 @@ class Test_bitutil(unittest.TestCase):
             ]
         for i, j, k in n:
             self.assertEqual(bi.bit_get(ba, i, j, ret_type=hex), k)
+
+    ## bit_get(type=bytes)
+    def test_bit_get_bytes(self):
+        # 1111 0010 0010 0010
+        ba = bytearray([0xf2, 0x22])
+        n = [
+            ( 0, 1, bytearray([0x80])),       # 1000 0000
+            ( 1, 2, bytearray([0xc0])),       # 1100 0000
+            ( 3, 8, bytearray([0x91])),       # 1001 0001
+            ( 3,12, bytearray([0x91, 0x10])), # 1001 0001 0001
+            ]
+        for i, j, k in n:
+            self.assertEqual(bi.bit_get(ba, i, j, ret_type=bytes), k)
 
     ## bit_set()
     def test_bit_set(self):
