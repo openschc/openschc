@@ -5,7 +5,7 @@ def int_to_bit(n, nbits, lsb0=True):
     e.g. if n is in bit is "0111",
     if nbits is 5 and lsb0 is True, then it's gonna be "00111".
     if lsb0 is False, then its' gonna be "11100".
-    if nbits is less than n in bit, omit the bits.
+    if nbits is less than n in bit, omit the bits. overflow in other word.
     e.g. if n is in bit is "11110000" and nbits is 6, then it gonna be "110000".
     '''
     if lsb0:
