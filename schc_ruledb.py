@@ -23,16 +23,19 @@ class schc_runtime_context:
 
 class schc_ruledb:
     '''
-    self.ruledb = {
-        <cid>: {
-            "CID": <cid>,
-            "FRAG_RULE": {
+    cid should not be assumed as an integer.
+    e.g.
+        self.ruledb = {
+            <cid>: {
+                "CID": <cid>,
                 <rid>: {
                     "RID": <rid>,
                     ...
+                    }
                 }
                 ...
             }
+            ...
         }
     '''
 
@@ -44,6 +47,12 @@ class schc_ruledb:
     def is_defined(self, x, tag):
         if tag not in x:
             raise ValueError("ERROR: %s is not defined." % tag)
+
+    def get_runtime_context(self, cid):
+        return schc_runtime_context(self.get_context(cid))
+
+    def get_context(self, cid):
+        return self.ruledb.get(cid)
 
     def load_context_json_file(self, json_file):
         '''
@@ -60,33 +69,70 @@ class schc_ruledb:
         j = json.load(open(json_file))
         self.is_defined(j, TAG_CONTEXT)
         #
-        x = j[TAG_CONTEXT]
-        self.is_defined(x, TAG_CID)
-        self.is_int(x, TAG_CID)
-        self.is_defined(x, TAG_MIC_FUNC)
-        if TAG_RID_SIZE in x:
-            self.is_int(x, TAG_RID_SIZE)
+        context = j[TAG_CONTEXT]
+        self.is_defined(context, TAG_CID)
+        self.is_int(context, TAG_CID)
+        self.is_defined(context, TAG_MIC_FUNC)
+        if TAG_RID_SIZE in context:
+            self.is_int(context, TAG_RID_SIZE)
         else:
-            self.is_int(x, TAG_DEFAULT_RID)
+            self.is_int(context, TAG_DEFAULT_RID)
         #
-        cid = x[TAG_CID]
+        # canonicalize
+        context[TAG_MIC_FUNC] = context[TAG_MIC_FUNC].upper()
+        #
+        cid = context[TAG_CID]
         if self.get_context(cid):
             raise ValueError("ERROR: %s %d has already existed." % (TAG_CONTEXT,
                                                                     cid))
         #
-        self.ruledb[cid] = x
-        self.ruledb[cid][TAG_FRAG_RULE] = {}
+        self.ruledb[cid] = context
         return cid
 
-    def get_context(self, cid):
-        return self.ruledb.get(cid)
+    def get_rule(self, cid, rid):
+        return self.get_context(cid).get(rid)
 
-    def get_runtime_context(self, cid):
-        return schc_runtime_context(self.get_context(cid))
+    def add_rule(self, cid, rid, rule):
+        if self.get_rule(cid, rid, rule):
+            raise ValueError("ERROR: %s %d has already existed." % (TAG_RID,
+                                                                    rid))
+        self.update_rule(cid, rid, rule)
 
-    def pprint(self, cid=None, indent=4):
-        if cid == None:
+    def update_rule(self, cid, rid, rule):
+        self.get_context(cid)[rid] = rule
+
+    def delete_rule(self, cid, rid):
+        del(self.ruledb[cid][rid])
+
+    def load_json_file(self, cid, json_file):
+        '''
+        wrapper of load_json_file_one().
+        json_file is either a string of the file name or a list
+        of the file names.
+        '''
+        if isinstance(json_file, str):
+            return self.load_json_file_one(cid, json_file)
+        if isinstance(json_file, list):
+            ret = []
+            for i in json_file:
+                ret.append(self.load_json_file_one(cid, i))
+            return ret
+        else:
+            raise ValueError("ERROR: json_file is a string or list.")
+
+    def load_json_file_one(self, cid, json_file):
+        '''
+        template
+        '''
+        pass
+
+    def pprint(self, cid=None, rid=None, indent=4):
+        if cid != None and rid != None:
+            print(json.dumps(self.get_rule(cid, rid), indent=indent))
+        elif cid != None and rid == None:
+            print(json.dumps(self.get_context(cid), indent=indent))
+        elif cid == None and rid == None:
             print(json.dumps(self.ruledb, indent=indent))
         else:
-            print(json.dumps(self.get_context(cid), indent=indent))
+            ValueError("cid is not specified.")
 
