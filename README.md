@@ -40,22 +40,22 @@ or
 The test implementations are included.
 Note that they use UDP as its transport layer.
 
-test-client-udp.py is a sample code for the fragment sender.
-test-server-udp.py is for the fragment receiver.
+test-frag-client-udp.py is a sample code for the fragment sender.
+test-frag-server-udp.py is for the fragment receiver.
 
-You can run test-client-udp.py in the terminal window like below.
+You can run test-frag-client-udp.py in the terminal window like below.
 
-    ./test-client-udp.py 127.0.0.1 9999 --context-file="example-rule/context-001.json" --rule-file="example-rule/fragment-rule-002.json" --dtag=3 -I test/message.txt --l2-size=6 -dd
+    ./test-frag-client-udp.py 127.0.0.1 9999 --context-file="example-rule/context-001.json" --rule-file="example-rule/fragment-rule-002.json" --dtag=3 -I test/message.txt --l2-size=6 -dd
 
-And, you can run test-server-udp.py in another terminal window like below.
+And, you can run test-frag-server-udp.py in another terminal window like below.
 
-    ./test-server-udp.py 9999 -dd
+    ./test-frag-server-udp.py 9999 -dd
 
 You can refer to IMPLEMENT.md about the timer such T1.
 
-### test-client
+### test-frag-client
 
-    usage: test-client-udp.py [-h] [-I MSG_FILE] [--read-each-line]
+    usage: test-frag-client-udp.py [-h] [-I MSG_FILE] [--read-each-line]
                               [--interval INTERVAL] [--timeout TIMEOUT]
                               [--l2-size L2_SIZE] --context-file CONTEXT_FILE
                               --rule-file RULE_FILE [--dtag _DTAG]
@@ -95,9 +95,9 @@ You can refer to IMPLEMENT.md about the timer such T1.
       --debug DEBUG_LEVEL   specify a debug level.
       --version             show program's version number and exit
 
-### test-receiver
+### test-frag-receiver
 
-    usage: test-server-udp.py [-h] [--address SERVER_ADDRESS]
+    usage: test-frag-server-udp.py [-h] [--address SERVER_ADDRESS]
                               [--context-file CONTEXT_FILE]
                               [--rule-file _RULE_FILES] [--timer TIMER_T1]
                               [--timer-t3 TIMER_T3] [--timer-t4 TIMER_T4]
