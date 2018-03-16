@@ -50,22 +50,11 @@ class schc_fragment_ruledb(schc_ruledb):
     def __init__(self):
         self.ruledb = {}
 
-    def get_rule(self, cid, rid):
-        return self.get_context(cid)[TAG_FRAG_RULE].get(rid)
-
     def get_runtime_rule(self, cid, rid):
         return schc_runtime_fragment_rule(self.get_runtime_context(cid),
                                   self.get_rule(cid, rid))
 
-    def pprint(self, cid=None, rid=None, indent=4):
-        if cid == None and rid != None:
-            ValueError("cid is not specified.")
-        if rid != None:
-            print(json.dumps(self.get_rule(cid, rid), indent=indent))
-        else:
-            super().pprint(cid, indent=indent)
-
-    def load_json_file(self, cid, json_file):
+    def load_json_file_one(self, cid, json_file):
         '''
         e.g.
             {
@@ -74,39 +63,25 @@ class schc_fragment_ruledb(schc_ruledb):
                     "MODE": "ACK-ON-ERROR",
                     "DTAG_SIZE": 3,
                     "FCN_SIZE": 3,
-                    "MIC_FUNC": "CRC32",
                     "DEFAULT_DTAG": 1
                 }
             }
         '''
-        if isinstance(json_file, str):
-            return self.load_json_file_one(cid, json_file)
-        if isinstance(json_file, list):
-            ret = []
-            for i in json_file:
-                ret.append(self.load_json_file_one(cid, i))
-            return ret
-        else:
-            raise ValueError("ERROR: json_file is a string or list.")
-
-    def load_json_file_one(self, cid, json_file):
         j = json.load(open(json_file))
         self.is_defined(j, TAG_FRAG_RULE)
         #
-        x = j[TAG_FRAG_RULE]
-        self.is_int(x, TAG_RID)
-        self.is_defined(x, TAG_MODE)
-        self.is_int(x, TAG_DTAG_SIZE)
-        self.is_int(x, TAG_DEFAULT_DTAG)
-        self.is_int(x, TAG_FCN_SIZE)
+        rule = j[TAG_FRAG_RULE]
+        self.is_int(rule, TAG_RID)
+        self.is_defined(rule, TAG_MODE)
+        self.is_int(rule, TAG_DTAG_SIZE)
+        self.is_int(rule, TAG_DEFAULT_DTAG)
+        self.is_int(rule, TAG_FCN_SIZE)
         #
-        rid = x[TAG_RID]
-        if self.get_rule(cid, rid):
-            raise ValueError("ERROR: %s %d has already existed." % (TAG_RID,
-                                                                    rid))
+        # canonicalize
+        rule[TAG_MODE] = rule[TAG_MODE].upper()
         #
-        self.ruledb[cid][TAG_FRAG_RULE][rid] = x
-        return rid
+        self.update_rule(cid, rule[TAG_RID], rule)
+        return rule[TAG_RID]
 
 '''
 test code
@@ -115,15 +90,15 @@ if __name__ == "__main__":
     frdb = schc_fragment_ruledb()
     cid = frdb.load_context_json_file("example-rule/context-001.json")
     rid = frdb.load_json_file(cid, "example-rule/fragment-rule-001.json")
-    frdb.load_json_file(cid, ["example-rule/fragment-rule-002.json",
-                              "example-rule/fragment-rule-003.json"])
+    #frdb.load_json_file(cid, ["example-rule/fragment-rule-002.json",
+    #                          "example-rule/fragment-rule-003.json"])
     print("## pprint()")
     frdb.pprint()
-    print("## get_context(%s)" % repr(cid))
+    print("## get_context(%s)" % str(cid))
     print(frdb.get_context(cid))
-    print("## get_rule(%s, %s)" % (repr(cid), repr(rid)))
+    print("## get_rule(%s, %s)" % (str(cid), str(rid)))
     print(frdb.get_rule(cid, rid))
-    print("## pprint(cid=%s, rid=%s)" % (repr(cid), repr(rid)))
+    print("## pprint(cid=%s, rid=%s)" % (str(cid), str(rid)))
     frdb.pprint(cid=cid, rid=rid)
     #
     frdb.get_runtime_context(cid)
