@@ -1,5 +1,9 @@
-from json_keys import *
-from util import *
+try:
+    from json_keys import *
+    from util import *
+except:
+    from .json_keys import *
+    from .util import *
 
 def dissect_coap(x):
     '''

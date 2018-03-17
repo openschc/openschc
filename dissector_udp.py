@@ -1,6 +1,11 @@
-from json_keys import *
-from util import *
-from defs_L5 import dissectors_L5
+try:
+    from json_keys import *
+    from util import *
+    from defs_L5 import dissectors_L5
+except:
+    from .json_keys import *
+    from .util import *
+    from .defs_L5 import dissectors_L5
 
 def dissect_udp(x):
     '''

@@ -1,6 +1,11 @@
-from json_keys import *
-from util import *
-from defs_L3 import dissectors_L3
+try:
+    from json_keys import *
+    from util import *
+    from defs_L3 import dissectors_L3
+except:
+    from .json_keys import *
+    from .util import *
+    from .defs_L3 import dissectors_L3
 
 def dissector(x):
     '''
