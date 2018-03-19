@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import sys
 import argparse
 from binascii import a2b_hex
+from datetime import datetime
 
 try:
     from pypacket_dissector import dissector as dis
@@ -51,7 +52,7 @@ def read_stdin(filename, **kwargs):
         if verbose:
             print(dis.dump_byte(data))
         if show_sep:
-            print("----")
+            print("----", str(datetime.now()))
         ret = dis.dissector(data)
         print(dis.dump_pretty(ret))
 
