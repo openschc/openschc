@@ -1,10 +1,10 @@
 try:
-    from json_keys import *
-    from util import *
+    from _json_keys import *
+    from _util import *
     from defs_L4 import dissectors_L4
 except:
-    from .json_keys import *
-    from .util import *
+    from ._json_keys import *
+    from ._util import *
     from .defs_L4 import dissectors_L4
 
 def dissect_ipv4(x):

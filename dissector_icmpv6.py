@@ -1,9 +1,9 @@
 try:
-    from json_keys import *
-    from util import *
+    from _json_keys import *
+    from _util import *
 except:
-    from .json_keys import *
-    from .util import *
+    from ._json_keys import *
+    from ._util import *
 
 def dissect_icmpv6(x):
     '''
