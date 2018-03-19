@@ -49,8 +49,7 @@ def read_stdin(filename, verbose=False, debug=False):
         print(dis.dump_pretty(ret))
 
 def parse_args():
-    p = argparse.ArgumentParser(description="a packet dissector."
-                                epilog="")
+    p = argparse.ArgumentParser(description="a packet dissector.", epilog="")
     p.add_argument("target", metavar="TARGET", type=str,
                    help="""specify a filename containing
                    packet data.  '-' allows the stdin as the input.""")
