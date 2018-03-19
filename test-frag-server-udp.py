@@ -60,16 +60,7 @@ main
 opt = parse_args()
 debug_set_level(opt.debug_level)
 
-# set up the server
-server = (opt.server_address, opt.server_port)
-debug_print(1, "server:", server)
-
-s = socket(AF_INET, SOCK_DGRAM)
-s.bind(server)
-
-# call the client trigger if this server is running on the end node.
-# send_client_trigger(s)
-
+# set up the ruledb.
 context_file = "example-rule/context-001.json"
 rule_files = [
     "example-rule/fragment-rule-001.json",
@@ -86,6 +77,12 @@ factory = sfr.defragment_factory(scheduler=sched,
                                  logger=debug_print)
 cid = factory.set_context(context_file)
 factory.set_rule(cid, rule_files)
+
+# set up the server.
+server = (opt.server_address, opt.server_port)
+debug_print(1, "server:", server)
+s = socket(AF_INET, SOCK_DGRAM)
+s.bind(server)
 
 while True:
 
