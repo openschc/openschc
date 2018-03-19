@@ -13,17 +13,6 @@ from schc_param import *
 import schc_fragment_receiver as sfr
 from debug_print import *
 
-# just send a message to trigger the lorawan network server.
-def send_client_trigger(s):
-    msg = "Hey!"
-    try:
-        s.settimeout(1)
-        s.sendto(msg, server)
-    except Exception as e:
-        debug_print(1, "ERROR: ", e)
-        exit(0)
-    debug_print(1, "sent: ", msg)
-
 def parse_args():
     p = argparse.ArgumentParser(
             description="a sample code for the fragment receiver.",
