@@ -5,6 +5,8 @@ try:
 except:
     from ._json_keys import *
 
+DELIMITER = "00ff707970636170ff00" # b"\x00\xffpypcap\xff\x00"
+
 def dissect_hdr(hdr_elm, x):
     '''
     hdr_elm: list of the header field format in tuple
