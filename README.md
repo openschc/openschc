@@ -46,3 +46,18 @@ You can dissect data in the file you specified or stdin.
           "PAYLOAD": "48656c6c6f0a"
         "EMSG": "unsupported. L5 PORT=(50145, 9999)"
 
+## Usage
+
+    usage: packet_dissector.py [-h] [-v] [-d] TARGET
+    
+    a packet dissector.
+    
+    positional arguments:
+      TARGET      specify a filename containing packet data.
+                  '-' allows the stdin as the input.
+    
+    optional arguments:
+      -h, --help  show this help message and exit
+      -v          enable verbose mode.
+      -d          enable debug mode.
+
