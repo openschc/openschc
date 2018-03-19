@@ -24,7 +24,7 @@ def dissect_icmpv6(x):
         return this
 
     # ICMPv6 Echo Request/Reply
-    if fld[JK_ICMPV6_TYPE] == 128:
+    if fld[JK_ICMPV6_TYPE] in [128, 129]:
         fld[JK_ICMPV6_IDENT] = struct.unpack(">H", x[offset:offset+2])[0]
         offset += 2
         fld[JK_ICMPV6_SEQNO] = struct.unpack(">H", x[offset:offset+2])[0]
