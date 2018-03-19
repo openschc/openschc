@@ -9,10 +9,8 @@ import argparse
 
 try:
     from pypacket_dissector import dissector as dis
-    print("# pypacket_dissector test")
 except:
     import dissector as dis
-    print("# module test")
 
 def read_file(filename, verbose=False, debug=False):
     with open(filename) as f:
@@ -51,10 +49,10 @@ def read_stdin(filename, verbose=False, debug=False):
         print(dis.dump_pretty(ret))
 
 def parse_args():
-    p = argparse.ArgumentParser(description="a packet dissector.",
-                                epilog=".")
+    p = argparse.ArgumentParser(description="a packet dissector."
+                                epilog="")
     p.add_argument("target", metavar="TARGET", type=str,
-                   help="""specify the target is the filename containing
+                   help="""specify a filename containing
                    packet data.  '-' allows the stdin as the input.""")
     p.add_argument("-v", action="store_true", dest="f_verbose",
                    help="enable verbose mode.")
