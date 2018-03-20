@@ -886,31 +886,46 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 XXX not sure that the following 4 step for compression.
 
+length
+
    o  If the size is between 0 and 14 bytes, it is sent as a 4-bits
       integer.
 
+the size is encoded into 4-bits
+
+precede 0
+v width 4
   0 => 00000000 => 0000
  14 => 00001110 => 1110
 
    o  For values between 15 and 255, the first 4 bits sent are set to 1
       and the size is sent using 8 bits integer.
 
- 15 => 00001111 => ???
- 16 => 00010000
-255 => 11111111
+the first 4 bits are set to all 1 and next 8 bits is set the size.
 
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 16]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
+precede 4
+v width 8
+                    |..|
+ 15 => 0000 1111 => 1111 0000 1111
+ 16 => 0001 0000 => 1111 0001 0000
+  :
+254 => 1111 1110 => 1111 1111 1110
 
    o  For higher values of size, the first 12 bits are set to 1 and the
       next two bytes contain the size value as a 16 bits integer.
 
+precede 8 ??
+v width 12
+                          |.......|
+ 255 => 1111 1111      => 1111 1111 0000 1111 1111
+ 256 => 0001 0000 0000 => 1111 1111 0001 0000 0000
+  :
+4094 => 1111 1111 1110 => 1111 1111 1111 1111 1110
+
    o  If a field does not exist in the packet but in the Rule and its FL
       is variable, the size zero MUST be used.
+
+None =>         => 0000
 
 6.5.1.  not-sent CDA
 
