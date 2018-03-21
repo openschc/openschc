@@ -4,37 +4,33 @@ import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 from schc_fragment_ruledb import schc_fragment_ruledb
 import mic_crc32
-from enum import Enum, unique, auto
+import micro_enum
 
-@unique
-class SCHC_RECEIVER_STATE(Enum):
-    FAIL = auto()
-    ABORT = auto()
-    INIT = auto()
-    CONT = auto()
-    CHECK_ALL0 = auto()
-    ALL0_OK = auto()
-    ALL0_NG = auto()
-    CONT_ALL0 = auto()
-    CHECK_ALL1 = auto()
-    ALL1_OK = auto()
-    ALL1_NG = auto()
-    CONT_ALL1 = auto()
-    WIN_DONE = auto()
-    DONE = auto()
+STATE = micro_enum.enum(
+    FAIL = -1,
+    ABORT = -2,
+    INIT = 0,
+    CONT = 1,
+    CHECK_ALL0 = 14,
+    CONT_ALL0 = 15,
+    ALL0_OK = 16,
+    ALL0_NG = 17,
+    WIN_DONE = 19,
+    CHECK_ALL1 = 21,
+    ALL1_OK = 22,
+    ALL1_NG = 23,
+    CONT_ALL1 = 24,
+    DONE = 99
+    )
 
-STATE = SCHC_RECEIVER_STATE
-
-@unique
-class SCHC_RECEIVER_MSG_STATE(Enum):
-    INIT = auto()
-    CONT = auto()
-    CHECKING = auto()
-    COLLECTED = auto()
-    SERVED = auto()
-    DEAD = auto()
-
-STATE_MSG = SCHC_RECEIVER_MSG_STATE
+STATE_MSG = micro_enum.enum(
+    INIT = 0,
+    CONT = 1,
+    CHECKING = 2,
+    COLLECTED = 5,
+    SERVED = 7,
+    DEAD = 9
+    )
 
 def default_logger(*arg):
     pass

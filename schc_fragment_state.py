@@ -43,14 +43,13 @@ class fragment_state:
         return self.state_prev
 
 if __name__ == "__main__" :
-    from enum import Enum, unique, auto
-    @unique
-    class SCHC_MODE(Enum):
-        A = auto()
-        B = auto()
-        C = auto()
+    import micro_enum
+    state = micro_enum.enum(
+        A = 1,
+        B = 2,
+        C = 3,
         Z = -1
-    state = SCHC_MODE
+        )
     print("%s"%state.A)
     s = fragment_state(state, logger=print)
     s.set(state.A)

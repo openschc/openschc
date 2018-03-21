@@ -3,22 +3,20 @@ from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 from schc_fragment_ruledb import schc_fragment_ruledb
-from enum import Enum, unique, auto
+import micro_enum
 from random import randint
 
-@unique
-class SCHC_SENDER_STATE(Enum):
-    FAIL = -1
-    INIT = auto()
-    CONT = auto()
-    SEND_ALL0 = auto()
-    RETRY_ALL0 = auto()
-    WIN_DONE = auto()
-    SEND_ALL1 = auto()
-    RETRY_ALL1 = auto()
-    DONE = auto()
-
-STATE = SCHC_SENDER_STATE
+STATE = micro_enum.enum(
+    FAIL = -1,
+    INIT = 0,
+    CONT = 1,
+    SEND_ALL0 = 7,
+    RETRY_ALL0 = 8,
+    WIN_DONE = 9,
+    SEND_ALL1 = 11,
+    RETRY_ALL1 = 12,
+    DONE = 19
+    )
 
 def default_logger(*arg):
     pass
