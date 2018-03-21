@@ -15,7 +15,7 @@ To understand this implementaion detail, see IMPLEMENT.md.
 
 This software is expected to run on MicroPython.
 Only premitive python packageare is used
-so that this software can work on pycom.
+so that this software can work on the device such as LoPy.
 
 ## TODO
 
