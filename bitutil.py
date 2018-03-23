@@ -66,7 +66,10 @@ def bit_set(ba, pos, val=None, extend=False):
             bit_len = len(val)
         ext_len = (((pos+bit_len+7)&(~7))>>3) - len(ba)
         if ext_len > 0:
-            ba.extend([0 for i in range(ext_len)])
+            # micropython is required to convert the list into the bytearray.
+            # CPython doesn't require so, and converting doesn't affect.
+            #ba.extend([0 for i in range(ext_len)])
+            ba.extend(bytearray([0 for i in range(ext_len)]))
     elif not (p0 < len(ba)):
         # just return if the buffer size is shoter than the position
         return ba
