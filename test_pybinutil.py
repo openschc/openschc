@@ -172,7 +172,7 @@ class Test_bitutil(unittest.TestCase):
             self.assertEqual(bi.bit_get(ba, i, j, ret_type=int), k)
 
     ## bit_get(type=hex)
-    def test_bit_get_int(self):
+    def test_bit_get_hex(self):
         # 1101 0010 0010 0000
         ba = bytearray([0xd2, 0x20])
         n = [
