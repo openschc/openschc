@@ -62,7 +62,7 @@ def bit_set(ba, pos, val=None, extend=False):
     if extend == True:
         # extend the buffer if needed.
         bit_len = 1
-        if type(val) is str:
+        if isinstance(val, str):
             bit_len = len(val)
         ext_len = (((pos+bit_len+7)&(~7))>>3) - len(ba)
         if ext_len > 0:
@@ -75,13 +75,13 @@ def bit_set(ba, pos, val=None, extend=False):
         b = zfill(bin(ba[p0])[2:], 8)
         ba[p0] = int(b[:p1] + "1" + b[p1+1:], 2)
         return ba
-    elif type(val) is bool:
+    elif isinstance(val, bool):
         b = zfill(bin(ba[p0])[2:], 8)
         ba[p0] = int(b[:p1] + ("1" if val else "0") + b[p1+1:], 2)
         return ba
-    elif type(val) is int:
+    elif isinstance(val, int):
         return bit_set(ba, pos, bin(val)[2:])
-    elif type(val) is str:
+    elif isinstance(val, str):
         guard_pos = len(ba) << 3
         for i in val:
             ba = bit_set(ba, pos, (False if i == "0" else True))
@@ -93,12 +93,12 @@ def bit_set(ba, pos, val=None, extend=False):
     else:
         raise ValueError("invalid val, not allow %s" % (type(val)))
 
-def bit_get(ba, pos, val=None, ret_type=str):
+def bit_get(ba, pos, val=None, ret_type=bin):
     '''
     get a bit at the position in the bytearray.
     pos: see bit_get().
     val: if the type of val is None, it gets a value of the bit
-        from the position, and return "1" or "0" in string.
+        from the position, and returns either "1" or "0" in string.
         if the type is a number, it gets a series of the value of the bits
         from the position toward right and return the bit string of the value.
         if the position is greater than the length of ba, it returns None.
@@ -106,11 +106,11 @@ def bit_get(ba, pos, val=None, ret_type=str):
         e.g. if ba in bit is "00001111", bit_get(ba, 2, 4) is gonna be "0011".
 
     ret_type: specify the type of return value.
-        either 'int', 'str', 'bytes', 'hex' is available.
-        'str' means to return a binary string.
+        either 'int', 'bin', 'bytes', 'hex' is available.
+        'bin' means to return a binary string.
         if the type is bytes, the bits are aligned to the left.
         i.e. "0011" is gonna be 0x30.
-        default is str.
+        default is bin.
     '''
     p0 = pos >> 3
     p1 = pos % 8
@@ -120,7 +120,7 @@ def bit_get(ba, pos, val=None, ret_type=str):
             ret = ("1" if b[p1] == "1" else "0")
         else:
             return None
-    elif type(val) is int:
+    elif isinstance(val, int):
         # if the bit length is zero, it returns None.
         if val == 0:
             return None
@@ -139,8 +139,10 @@ def bit_get(ba, pos, val=None, ret_type=str):
         return hex(int(ret, 2))[2:]
     elif ret_type == bytes:
         return bit_set(bytearray(1), 0, ret, extend=True)
-    else:
+    elif ret_type == bin:
         return ret
+    else:
+        raise ValueError("invalid ret_type, not allow %s" % (ret_type))
 
 def bit_find(n, bit_len=0, val=None):
     '''
