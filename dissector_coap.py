@@ -11,11 +11,12 @@ def dissect_coap(x):
     or
     return { JK_PROTO:COAP, "EMSG":error-message }
     '''
-    tag_v_t_tkl = "v_t_tkl"
     hdr = (
-        (tag_v_t_tkl, "B", 0),
-        (JK_COAP_CODE, "B", 0),
-        (JK_COAP_MSGID, ">H", 0),
+        (JK_COAP_VER,        "B", 2, 0),
+        (JK_COAP_TYPE,       "B", 2, 0),
+        (JK_COAP_TOKEN_LEN,  "B", 4, 0),
+        (JK_COAP_CODE,       "B", 0, 0),
+        (JK_COAP_MSGID,     ">H", 0, 0),
     )
     this = {}
     this[JK_PROTO] = JK_COAP
@@ -23,11 +24,6 @@ def dissect_coap(x):
     if fld == None:
         this[JK_EMSG] = emsg
         return this
-
-    fld[JK_COAP_VER] = (fld[tag_v_t_tkl]>>6)&0x03
-    fld[JK_COAP_TYPE] = (fld[tag_v_t_tkl]>>4)&0x03
-    fld[JK_COAP_TOKEN_LEN] = (fld[tag_v_t_tkl])&0x07
-    del(fld[tag_v_t_tkl])
 
     if fld[JK_COAP_TOKEN_LEN] > 0:
         try:
