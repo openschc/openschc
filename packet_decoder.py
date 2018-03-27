@@ -10,18 +10,18 @@ from binascii import a2b_hex
 from datetime import datetime
 
 try:
-    from pypacket_dissector import dissector as dis
+    from pypacket_dissector import decoder as dis
 except:
-    import dissector as dis
+    import decoder as dis
 
 def read_file(filename, verbose=False, debug=False):
     with open(filename) as f:
         data = f.buffer.read()
     #
     if verbose:
-        print(dis.dissector.dump_byte(data))
+        print(dis.decoder.dump_byte(data))
     #
-    ret3 = dis.dissector(data)
+    ret3 = dis.decoder(data)
     print(dis.dump_pretty(ret3))
 
 def read_stdin(filename, **kwargs):
@@ -53,7 +53,7 @@ def read_stdin(filename, **kwargs):
             print(dis.dump_byte(data))
         if show_sep:
             print("----", str(datetime.now()))
-        ret = dis.dissector(data)
+        ret = dis.decoder(data)
         print(dis.dump_pretty(ret))
 
 def parse_args():

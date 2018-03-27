@@ -7,7 +7,7 @@ except:
     from ._util import *
     from .defs_L3 import dissectors_L3
 
-def dissector(x):
+def decoder(x):
     '''
     return (dissectors_L3)
     or

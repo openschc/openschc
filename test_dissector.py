@@ -1,10 +1,10 @@
 import unittest
 
 try:
-    from pypacket_dissector import dissector as dis
+    from pypacket_dissector import decoder as dis
     print("# pypacket_dissector test")
 except:
-    import dissector as dis
+    import decoder as dis
     print("# module test")
 
 class Test_dissector(unittest.TestCase):
@@ -18,7 +18,7 @@ class Test_dissector(unittest.TestCase):
 
     def test_x(self):
         for i in self.test_packet:
-            ret = dis.dissector(i)
+            ret = dis.decoder(i)
             #print(ret)
             print("===")
             print(dis.dump_pretty(ret))
