@@ -3,6 +3,7 @@ JK_PROTO = "PROTO"
 JK_HEADER = "HEADER"
 JK_PAYLOAD = "PAYLOAD"
 JK_EMSG = "EMSG"
+JK_SW = "_CASE"
 
 # keys for field/attribute name
 JK_IPV6 = "IPV6"

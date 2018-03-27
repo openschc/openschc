@@ -5,22 +5,23 @@ except:
     from ._json_keys import *
     from ._util import *
 
+hdr_map_coap = (
+    (JK_COAP_VER,        "B", 2, 0),
+    (JK_COAP_TYPE,       "B", 2, 0),
+    (JK_COAP_TOKEN_LEN,  "B", 4, 0),
+    (JK_COAP_CODE,       "B", 0, 0),
+    (JK_COAP_MSGID,     ">H", 0, 0),
+)
+
 def dissect_coap(x):
     '''
     return { JK_PROTO:COAP, "HEADER":fld }
     or
     return { JK_PROTO:COAP, "EMSG":error-message }
     '''
-    hdr = (
-        (JK_COAP_VER,        "B", 2, 0),
-        (JK_COAP_TYPE,       "B", 2, 0),
-        (JK_COAP_TOKEN_LEN,  "B", 4, 0),
-        (JK_COAP_CODE,       "B", 0, 0),
-        (JK_COAP_MSGID,     ">H", 0, 0),
-    )
     this = {}
     this[JK_PROTO] = JK_COAP
-    fld, offset, emsg = dissect_hdr(hdr, x)
+    fld, offset, emsg = dissect_hdr(hdr_map_coap, x)
     if fld == None:
         this[JK_EMSG] = emsg
         return this
@@ -33,9 +34,9 @@ def dissect_coap(x):
             return this
         offset += fld[JK_COAP_TOKEN_LEN]
 
-    if len(x[offset:]) > 0:
-        fld[JK_PAYLOAD] = x[offset:]
-
     this[JK_HEADER] = fld
+
+    if len(x[offset:]) > 0:
+        this[JK_PAYLOAD] = x[offset:]
 
     return this

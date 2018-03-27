@@ -7,21 +7,22 @@ except:
     from ._util import *
     from .defs_L5 import dissectors_L5
 
+hdr_map_udp = (
+    (JK_UDP_SPORT, ">H", 0),
+    (JK_UDP_DPORT, ">H", 0),
+    (JK_UDP_LEN, ">H", 0),
+    (JK_UDP_CKSUM, ">H", 0),
+)
+
 def dissect_udp(x):
     '''
     return { JK_PROTO:UDP, JK_HEADER:fld, JK_PAYLOAD:(dissectors_L5) }
     or
     return { JK_PROTO:UDP, JK_EMSG:(error-message) }
     '''
-    hdr = (
-        (JK_UDP_SPORT, ">H", 0),
-        (JK_UDP_DPORT, ">H", 0),
-        (JK_UDP_LEN, ">H", 0),
-        (JK_UDP_CKSUM, ">H", 0),
-    )
     this = {}
     this[JK_PROTO] = JK_UDP
-    fld, offset, emsg = dissect_hdr(hdr, x)
+    fld, offset, emsg = dissect_hdr(hdr_map_udp, x)
     if fld == None:
         this[JK_EMSG] = emsg
         return this

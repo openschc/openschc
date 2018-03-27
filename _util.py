@@ -11,9 +11,9 @@ except:
 
 DELIMITER = "00ff707970636170ff00" # b"\x00\xffpypcap\xff\x00"
 
-def dissect_hdr(hdr_elm, x):
+def dissect_hdr(hdr_map, x):
     '''
-    hdr_elm: list of the header field format in tuple
+    hdr_map: list of the header field format in tuple
         (name, format, bits, default)
     x: header in bytes
 
@@ -24,40 +24,68 @@ def dissect_hdr(hdr_elm, x):
     or
     return None, offset, error-message
     '''
-    hdr_flds = {}
+    hdr_ret = {}
     offset = 0
+    bit_shift = None
     fld_size_prev = 0
-    for i in hdr_elm:
+    for i in hdr_map:
         fld_name = i[0]
+        if fld_name == JK_SW:
+            if hdr_ret[i[1]] != i[2]:
+                # just skip it
+                continue
+            # otherwise
+            _hdr, _size, _emsg = dissect_hdr(i[3], x[offset:])
+            if _hdr is None:
+                return _hdr, _size, _emsg
+            offset += _size
+            hdr_ret.update(_hdr)
+            continue
+        #
         fld_fmt = i[1]
         fld_size = struct.calcsize(fld_fmt)
         fld_bits = i[2]
         if fld_bits == 0 and fld_size_prev != 0:
+            # move offset and finish the operation for a field.
             offset += fld_size_prev
             fld_size_prev = 0
+            bit_shift = None
         if len(x[offset:]) < fld_size:
             emsg = ("invalid header length, rest:%d < hdr:%d" %
                     (len(x[offset:]), fld_size))
             return None, offset, emsg
+        # get a value from the field.
         if fld_bits:
+            # the value is in bits.
             v = struct.unpack(fld_fmt, x[offset:offset+fld_size])[0]
             mask = int("1"*fld_bits,2)
-            hdr_flds[fld_name] = (v>>(8*fld_size-fld_bits))&mask
+            if bit_shift is None:
+                # init
+                bit_shift = 8*fld_size
+            bit_shift -= fld_bits
+            hdr_ret[fld_name] = (v>>bit_shift)&mask
             fld_size_prev = fld_size
             continue
         # otherwise
-        hdr_flds[fld_name] = struct.unpack(fld_fmt, x[offset:offset+fld_size])[0]
+        hdr_ret[fld_name] = struct.unpack(fld_fmt, x[offset:offset+fld_size])[0]
         offset += fld_size
     #
-    return hdr_flds, offset, None
+    return hdr_ret, offset, None
 
-class IPAddr(str):
+class IPAddr():
     def __init__(self, *args, **kwargs):
-        self.value = args[0]
-        self.addr = ipaddress.ip_address(args[0])
+        a = args[0]
+        if isinstance(a, (bytes, bytearray)):
+            # if the arg is binary, converting it into a string.
+            a = str(ipaddress.ip_address(a))
+        self.value = a
+        self.addr = ipaddress.ip_address(a)
 
     def __str__(self):
         return str(self.addr)
+
+    def __repr__(self):
+        return "'" + self.__str__() + "'"
 
     def decode(self):
         return self.addr.packed
@@ -65,42 +93,23 @@ class IPAddr(str):
     def asis(self):
         return self.value
 
-class MACAddr(str):
+class MACAddr():
     def __init__(self, *args, **kwargs):
         self.value = args[0]
         v = self.value.replace(":","").replace("-","").replace(".","")
-        self.addr = a2b_hex(v)
+        self.addr = bytearray(a2b_hex(v))
 
     def __str__(self):
         return "-".join(["%02x"%self.addr[i] for i in range(6)])
+
+    def __repr__(self):
+        return "'" + self.__str__() + "'"
 
     def decode(self):
         return self.addr
 
     def asis(self):
         return self.value
-
-def contains(tag, pkt):
-    '''
-    tag: string like "ICMPV6"
-    pkt: dissected
-    '''
-    def _contains(tag, pkt):
-        if pkt == None:
-            return False
-        if tag in pkt[JK_PROTO]:
-            return True
-        if tag in list(pkt[JK_HEADER].keys()):
-            return True
-        return _contains(tag, pkt.get(JK_PAYLOAD))
-    # main
-    if not (tag and pkt):
-        return False
-    if isinstance(tag, list):
-        for i in tag:
-            return _contains(i, pkt)
-    else:
-        return _contains(tag, pkt)
 
 def dump_byte(x):
     return "".join([ " %02x"%x[i] if i and i%4==0 else "%02x"%x[i]
@@ -109,14 +118,14 @@ def dump_byte(x):
 def _de_hook(obj):
     ret = OrderedDict()
     for k, v in obj.items():
-        if k in ["IPV4.SADDR", "IPV4.DADDR"]:
+        if k in [JK_IPV4_SADDR, JK_IPV4_DADDR]:
             ret[k] = IPAddr(v)
-        elif k in ["IPV6.SADDR", "IPV6.DADDR"]:
+        elif k in [JK_IPV6_SADDR, JK_IPV6_DADDR]:
             ret[k] = IPAddr(v)
         elif k in ["EN10MB.DMAC", "EN10MB.SMAC"]:
             ret[k] = MACAddr(v)
-        elif k == "PAYLOAD" and isinstance(v, str):
-            ret[k] = a2b_hex(v)
+        elif k == JK_PAYLOAD and isinstance(v, str):
+            ret[k] = bytearray(a2b_hex(v))
         else:
             ret[k] = v
     return ret
@@ -127,8 +136,10 @@ def _json_decode_hook(obj):
 def _json_encode_hook(obj):
     if isinstance(obj, (bytes, bytearray)):
         return "".join(["%02x"%i for i in obj])
+    elif isinstance(obj, (IPAddr,MACAddr)):
+        return str(obj)
     else:
-        return obj
+        return "TBD" + str(obj)
 
 def dump_pretty(a, indent=4, l2=None):
     if l2 is not None:
@@ -140,28 +151,3 @@ def dump_pretty(a, indent=4, l2=None):
 def load_json_packet(jo):
     return json.loads(jo, object_pairs_hook=_json_decode_hook)
 
-if __name__ == "__main__":
-    j = load_json_packet('''
-    {
-    "PROTO": "IPV6",
-    "HEADER": [
-        { "IPV6.VER": 6 },
-        { "IPV6.TC": 96 },
-        { "IPV6.FL": 694078 },
-        { "IPV6.LEN": 14 },
-        { "IPV6.NXT": 17 },
-        { "IPV6.HOP_LMT": 64 },
-        { "IPV6.SADDR": "fe80:0000:0000:0000:aebc:32ff:feba:1c9f" },
-        { "IPV6.DADDR": "fe80:0000:0000:0000:0201:c0ff:fe06:3e69" } ],
-    "PAYLOAD": {
-        "PROTO": "UDP",
-        "HEADER": [
-        { "UDP.SPORT": 50145 },
-        { "UDP.DPORT": 9999 },
-        { "UDP.LEN": 14 },
-        { "UDP.CKSUM": 63356 } ],
-        "PAYLOAD": "48656c6c6f0a" }
-    }
-    ''')
-    print(j)
-    print(dump_pretty(j))
