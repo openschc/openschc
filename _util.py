@@ -109,10 +109,6 @@ class MACAddr():
     def asis(self):
         return self.value
 
-def dump_byte(x):
-    return "".join([ " %02x"%x[i] if i and i%4==0 else "%02x"%x[i]
-                   for i in range(len(x)) ])
-
 def _de_hook(obj):
     ret = OrderedDict()
     for k, v in obj.items():
@@ -145,6 +141,10 @@ def dump_pretty(a, indent=4, l2=None):
         a = l2
     #
     return json.dumps(a, indent=indent, default=_json_encode_hook)
+
+def dump_byte(x):
+    return "".join([ " %02x"%x[i] if i and i%4==0 else "%02x"%x[i]
+                   for i in range(len(x)) ])
 
 def load_json_packet(jo):
     return json.loads(jo, object_pairs_hook=_json_decode_hook)
