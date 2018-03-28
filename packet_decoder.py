@@ -62,9 +62,9 @@ def parse_args():
                    help="""specify a filename containing
                    packet data.  '-' allows the stdin as the input.""")
     p.add_argument("--delimiter", action="store", dest="_delimiter",
-                   default=dis.DELIMITER,
+                   default="00ff707970636170ff00",
                    help='''specify a delimiter to read a series of data from the
-                   stdin. e.g. {:s}'''.format(dis.DELIMITER))
+                   stdin. e.g. "00ff707970636170ff00"''')
     p.add_argument("--noshow-sep", action="store_false", dest="show_sep",
                    help="disable to show the separator.")
     p.add_argument("-v", action="store_true", dest="f_verbose",
