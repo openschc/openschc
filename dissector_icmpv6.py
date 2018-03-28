@@ -12,6 +12,10 @@ hdr_map_icmpv6 = (
     (JK_SW, JK_ICMPV6_TYPE, 128, (
         (JK_ICMPV6_IDENT, ">H", 0, 0),
         (JK_ICMPV6_SEQNO, ">H", 0, 0),
+     )),
+    (JK_SW, JK_ICMPV6_TYPE, 129, (
+        (JK_ICMPV6_IDENT, ">H", 0, 0),
+        (JK_ICMPV6_SEQNO, ">H", 0, 0),
      ))
 )
 
