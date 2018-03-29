@@ -156,5 +156,8 @@ def dump_byte(x):
                    for i in range(len(x)) ])
 
 def load_json_packet(jo):
+    '''
+    load a packet data in json and convert it into the OrderedDict.
+    '''
     return json.loads(jo, object_pairs_hook=_json_decode_hook)
 
