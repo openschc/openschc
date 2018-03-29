@@ -135,12 +135,21 @@ def _json_encode_hook(obj):
     else:
         return "TBD" + str(obj)
 
-def dump_pretty(a, indent=4, l2=None):
+def dump_pretty(l3, indent=4, l2=None, ts=None):
+    '''
+    l3, l2: dict
+    ts: dict, i.e. {"TS": ts}
+    '''
+    obj = OrderedDict()
+    if ts:
+        obj.update(ts)
     if l2 is not None:
-        l2[JK_PAYLOAD] = a
-        a = l2
+        l2[JK_PAYLOAD] = l3
+        obj.update(l2)
+    else:
+        obj.update(l3)
     #
-    return json.dumps(a, indent=indent, default=_json_encode_hook)
+    return json.dumps(obj, indent=indent, default=_json_encode_hook)
 
 def dump_byte(x):
     return "".join([ " %02x"%x[i] if i and i%4==0 else "%02x"%x[i]
