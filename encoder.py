@@ -89,7 +89,7 @@ def encode_hdr(hdr_map, hdr_list):
     #
     return ba
 
-def encoder(jo):
+def encoder(jo, hm=encode_hdr_map):
     if isinstance(jo, (bytes, bytearray)):
         return jo
     #
@@ -100,7 +100,7 @@ def encoder(jo):
         raise ValueError("protocol is not defined.")
     if not header:
         raise ValueError("header is not defined.")
-    hdr_map = encode_hdr_map.get(proto)
+    hdr_map = hm.get(proto)
     if not hdr_map:
         raise ValueError("unknown protocol {:s}".format(proto))
     ba = encode_hdr(hdr_map, header)
