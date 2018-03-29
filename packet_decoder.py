@@ -12,8 +12,8 @@ except:
     import decoder as dis
 
 def read_file(filename, verbose=False, debug=False):
-    with open(filename) as f:
-        data = f.buffer.read()
+    with open(filename) as fd:
+        data = fd.buffer.read()
     #
     if verbose:
         print(dis.decoder.dump_byte(data))
