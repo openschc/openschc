@@ -135,7 +135,7 @@ def _json_encode_hook(obj):
     else:
         return "TBD" + str(obj)
 
-def dump_pretty(l3, indent=4, l2=None, ts=None):
+def dumps(l3, indent=4, l2=None, ts=None):
     '''
     l3, l2: dict
     ts: dict, i.e. {"TS": ts}

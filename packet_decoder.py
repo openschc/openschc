@@ -19,7 +19,7 @@ def read_file(filename, verbose=False, debug=False):
         print(dis.decoder.dump_byte(data))
     #
     ret3 = dis.decoder(data)
-    print(dis.dump_pretty(ret3))
+    print(dis.dumps(ret3, indent=4))
 
 def read_stdin(filename, **kwargs):
     delimiter = kwargs.get("delimiter", b"")
@@ -51,7 +51,7 @@ def read_stdin(filename, **kwargs):
         if show_sep:
             print("----", str(datetime.now()))
         ret = dis.decoder(data)
-        print(dis.dump_pretty(ret))
+        print(dis.dumps(ret, indent=4))
 
 def parse_args():
     p = argparse.ArgumentParser(description="a packet dissector.", epilog="")

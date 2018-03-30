@@ -21,7 +21,7 @@ class Test_dissector(unittest.TestCase):
             ret = dis.decoder(i)
             #print(ret)
             print("===")
-            print(dis.dump_pretty(ret))
+            print(dis.dumps(ret, indent=4))
 
 if __name__ == '__main__':
     unittest.main()
