@@ -4,7 +4,6 @@ import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 from schc_fragment_ruledb import schc_fragment_ruledb
 import micro_enum
-from random import randint
 
 STATE = micro_enum.enum(
     FAIL = -1,
@@ -52,10 +51,11 @@ class fragment_factory:
         # only use in NO_ACK mode
         self.n_frags_sent = 0
 
-    def setbuf(self, srcbuf, dtag=None):
+    def setbuf(self, srcbuf, dtag):
         '''
         srcbuf: holder of the data to be sent.
-        dtag: dtag number. taken randomly if None.
+        dtag: dtag number.
+
         win_head: indicating the head of current window.
                  it is held until the bitmap check is completed.
         pos: indicating the head of the data to be sent.
@@ -75,8 +75,6 @@ class fragment_factory:
         self.win_head = 0
         self.pos = 0
         self.dtag = dtag
-        if self.dtag == None:
-            self.dtag = randint(0, (2**self.R.dtag_size)-1)
         self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
         self.win = 0
         self.__init_window()
