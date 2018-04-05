@@ -68,7 +68,7 @@ class fragment_factory:
         if type(srcbuf) == str:
             self.srcbuf = bytearray(srcbuf, encoding="utf-8")
         elif type(srcbuf) in [bytearray, bytes]:
-            self.srcbuf = bytearray(recvbuf)
+            self.srcbuf = bytearray(srcbuf)
         else:
             raise TypeError("srcbuf must be str, bytes or bytearray.")
         #
