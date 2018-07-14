@@ -499,7 +499,7 @@ class defragment_factory:
         and put to the return.
         if the state of the message is DEAD, purge it.
         '''
-        self.logger(3, "digging list size =", len(self.msg_list.items()))
+        self.logger(3, "digging list size =", len(list(self.msg_list.items())))
         ret = []
         purge_list = []
         for k, m in self.msg_list.items():
