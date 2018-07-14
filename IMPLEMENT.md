@@ -9,6 +9,9 @@ Implementation memo
 - There is a padding between the SCHC fragment header and the payload.
   This should be removed in the future.
 
+- Rule ID is not changed while all fragments of a message are sent
+  to the receiver.
+
 ## fragment sender
 
            |      
