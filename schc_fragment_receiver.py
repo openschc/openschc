@@ -38,6 +38,16 @@ def default_logger(*arg):
 def default_scheduler(*arg):
     pass
 
+def join_frag_list(frag_list):
+    '''Because one cannot use b"".join([...list with bytearray...])'''
+    if len(frag_list) == 0:
+        return b""
+    else:
+        res = frag_list[0]
+        for frag in frag_list[1:]:
+            res += frag
+        return res
+
 class defragment_window:
     '''
     in NO_ACK mode: in case of fcn = 0, multiple fragments may exist.
@@ -178,7 +188,7 @@ class defragment_window:
             for i in self.fragment_list_no_ack:
                 self.logger(2, "fcn =", 0, "fragment =", i)
                 a.append(i)
-            return b"".join(a) + self.__assemble()
+            return join_frag_list(a) + self.__assemble()
         else:
             return self.__assemble()
 
@@ -192,7 +202,7 @@ class defragment_window:
             self.logger(2, "fcn =", i[0], "fragment =", i)
             if i[1]:
                 a.append(i[1])
-        return b"".join(a)
+        return join_frag_list(a)
 
     def all_fragments_received(self):
         self.logger(1, "checking all-0 fragments, local bitmap=",
@@ -382,7 +392,7 @@ class defragment_message:
         '''
         assuming that no event is scheduled when assemble() is called.
         '''
-        message = b"".join([i.assemble() for i in self.win_list])
+        message = join_frag_list([i.assemble() for i in self.win_list])
         return message
 
     def collected(self):
