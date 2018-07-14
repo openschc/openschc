@@ -1520,7 +1520,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    Note that the ACK sent in response to an All-1 fragment includes the
    C bit.  Therefore, the window size and thus the encoded Bitmap size
    need to be determined taking into account the available space in the
-   layer two frame payload, where there will be 1 bit less for an ACK
+   layer two frame payload, where there will be 2 bit less for an ACK
    sent in response to an All-1 fragment than in other ACKs.  Note that
    the maximum number of SCHC fragments of the last window is one unit
    smaller than that of the previous windows.
