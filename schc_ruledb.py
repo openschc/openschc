@@ -1,4 +1,5 @@
-import json
+try: import json
+except: import ujson as json
 from schc_ruledb_tag import *
 import mic_crc32
 
