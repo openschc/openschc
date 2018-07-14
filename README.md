@@ -21,6 +21,10 @@ This software was written on Python2 in the early phase.
 There are many codes which is not likely Python3.
 These will be fixed in the future.
 
+## Limitations
+
+- support only 1 byte as the L2 alignment.  Depends on binascii.crc32()
+
 ## TODO
 
 - the compression/decompression layer are not implemented.
