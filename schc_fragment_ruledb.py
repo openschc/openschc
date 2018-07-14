@@ -1,6 +1,7 @@
 
 from schc_param import *
-import json
+try: import json
+except: import ujson as json
 from schc_ruledb_tag import *
 from schc_ruledb import schc_ruledb
 
