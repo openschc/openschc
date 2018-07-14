@@ -1,9 +1,13 @@
+MICROPYTHON = True
+
 import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
 import schc_fragment_holder as sfh
 from schc_fragment_ruledb import schc_fragment_ruledb
 import micro_enum
+if not MICROPYTHON:
+    from random import randint
 
 STATE = micro_enum.enum(
     FAIL = -1,
@@ -87,6 +91,12 @@ class fragment_factory:
         self.win_head = 0
         self.pos = 0
         self.dtag = dtag
+        if self.dtag == None:
+            if not MICROPYTHON:
+                self.dtag = randint(0, (2**self.R.dtag_size)-1)
+            else:
+                # should use counter here
+                self.dtag = 3
         self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
         self.win = 0
         self.__init_window()
@@ -303,4 +313,3 @@ class fragment_factory:
                 return self.state.set(STATE.WIN_DONE), fgh
             elif self.state.get() == STATE.SEND_ALL1:
                 return self.state.set(STATE.DONE), fgh
-
