@@ -1,4 +1,4 @@
-import micro_enum
+#from enum import Enum, unique, auto
 
 DEFAULT_FRAGMENT_RID = 1
 DEFAULT_L2_SIZE = 8
@@ -9,8 +9,9 @@ DEFAULT_TIMER_T3 = 10
 DEFAULT_TIMER_T4 = 12
 DEFAULT_TIMER_T5 = 14
 
-SCHC_MODE = micro_enum.enum(
-    NO_ACK = 1,
-    ACK_ALWAYS = 2,
-    ACK_ON_ERROR = 3
+#class SCHC_MODE(Enum)
+class SCHC_MODE():
+    NO_ACK = 0
+    ACK_ALWAYS = 1
+    ACK_ON_ERROR = 2
     )
