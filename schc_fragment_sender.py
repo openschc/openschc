@@ -37,7 +37,19 @@ class fragment_factory:
         self.logger = logger
         #
         self.logger(1, "mode={0:s}".format(self.R.mode.name))
-        self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.C.mic_size}".format(self.R.C.rid_size, self=self.R))
+        # self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.C.mic_size}".format(self.R.C.rid_size, self=self.R))
+        info = {
+            "dtag_size": self.R.dtag_size,
+            "win_size": self.R.win_size,
+            "fcn_size": self.R.fcn_size,
+            "bitmap_size": self.R.bitmap_size,
+            "cbit_size": self.R.cbit_size,
+            "mic_size": self.R.C.mic_size
+        }
+        self.logger(1, "each field size: rid={0} dtag={dtag_size} win={win_size} fcn={fcn_size} bitmap={bitmap_size} cbit={cbit_size} mic={mic_size}".format(self.R.C.rid_size, **info))
+        #^^^ work-around micropython non-implemented:
+        # http://docs.micropython.org/en/latest/pyboard/genrst/builtin_types.html?highlight=ljust#attributes-subscr-not-implemented
+
 
     def __init_window(self):
         '''
