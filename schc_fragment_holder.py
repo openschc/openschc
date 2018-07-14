@@ -178,7 +178,7 @@ class frag_rx(frag_holder):
     '''
     def set_recvbuf(self, recvbuf):
         if type(recvbuf) == str:
-            self.packet = bytearray(recvbuf, encoding="utf-8")
+            self.packet = bytearray(recvbuf, "utf-8")
         elif type(recvbuf) in [bytearray, bytes]:
             self.packet = bytearray(recvbuf)
         else:

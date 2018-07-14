@@ -23,7 +23,7 @@ def func_loss_random():
     return random.choice([True, False])
 
 def schc_sender(msg):
-    debug_print(2, "message:", bytes(msg, encoding="utf-8"))
+    debug_print(2, "message:", bytes(msg, "utf-8"))
     # XXX assuming that the rule_id is not changed in a session.
     
     # check if the L2 size is enough to put the message.
