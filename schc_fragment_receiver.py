@@ -456,9 +456,15 @@ class defragment_factory:
     def set_context(self, context_file):
         return self.frdb.load_context_json_file(context_file)
 
+    def set_context_json_str(self, context_json_str):
+        return self.frdb.load_context_json_str(context_json_str)
+    
     def set_rule(self, cid, rule_file):
         return self.frdb.load_json_file(cid, rule_file)
 
+    def set_rule_json_str(self, cid, rule_json_str):
+        return self.frdb.load_json_str(cid, rule_json_str)
+    
     def defrag(self, cid, recvbuf):
         '''
         cid: context identifier

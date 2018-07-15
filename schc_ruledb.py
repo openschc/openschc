@@ -55,7 +55,7 @@ class schc_ruledb:
     def get_context(self, cid):
         return self.ruledb.get(cid)
 
-    def load_context_json_file(self, json_file):
+    def load_context_json_str(self, json_str):
         '''
         e.g.
             {
@@ -67,7 +67,7 @@ class schc_ruledb:
                 }
             }
         '''
-        j = json.load(open(json_file))
+        j = json.loads(json_str)
         self.is_defined(j, TAG_CONTEXT)
         #
         context = j[TAG_CONTEXT]
@@ -90,6 +90,9 @@ class schc_ruledb:
         self.ruledb[cid] = context
         return cid
 
+    def load_context_json_file(self, json_file):
+        return self.load_context_json_str(open(json_file).read())
+    
     def get_rule(self, cid, rid):
         return self.get_context(cid).get(rid)
 
@@ -121,6 +124,22 @@ class schc_ruledb:
         else:
             raise ValueError("ERROR: json_file is a string or list.")
 
+    def load_json_str(self, cid, json_str):
+        '''
+        wrapper of load_json_file_one().
+        json_file is either a string of the file name or a list
+        of the file names.
+        '''
+        if isinstance(json_str, str):
+            return self.load_json_str_one(cid, json_str)
+        if isinstance(json_str, list):
+            ret = []
+            for i in json_str:
+                ret.append(self.load_json_str_one(cid, i))
+            return ret
+        else:
+            raise ValueError("ERROR: json_file is a string or list.")
+        
     def load_json_file_one(self, cid, json_file):
         '''
         template

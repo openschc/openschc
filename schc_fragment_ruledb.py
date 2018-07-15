@@ -55,7 +55,7 @@ class schc_fragment_ruledb(schc_ruledb):
         return schc_runtime_fragment_rule(self.get_runtime_context(cid),
                                   self.get_rule(cid, rid))
 
-    def load_json_file_one(self, cid, json_file):
+    def load_json_str_one(self, cid, json_str):
         '''
         e.g.
             {
@@ -68,7 +68,7 @@ class schc_fragment_ruledb(schc_ruledb):
                 }
             }
         '''
-        j = json.load(open(json_file))
+        j = json.loads(json_str)
         self.is_defined(j, TAG_FRAG_RULE)
         #
         rule = j[TAG_FRAG_RULE]
@@ -84,6 +84,10 @@ class schc_fragment_ruledb(schc_ruledb):
         self.update_rule(cid, rule[TAG_RID], rule)
         return rule[TAG_RID]
 
+    def load_json_file_one(self, cid, json_file):
+        return self.load_json_str_one(cid, open(json_file).read())
+        
+        
 '''
 test code
 '''
