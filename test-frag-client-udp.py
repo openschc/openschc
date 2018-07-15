@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys.implementation:
-MICROPYTHON = ( ("implementation" in dir(sys)) and (sys.implementation.name == "micropython")
+#import sys.implementation
+import sys
+MICROPYTHON = ( ("implementation" in dir(sys)) and (sys.implementation.name == "micropython"))
 if not MICROPYTHON:
     import sys
     import argparse
@@ -246,7 +247,8 @@ if not MICROPYTHON:
 else:
     print("Running on embedded target, transport method is LoRaWAN")
     from network import LoRa
-    lora = LoRa(mode=LoRa.LORAWAN)
+#   lora = LoRa(mode=LoRa.LORAWAN)
+    lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.US915)
     from binascii import unhexlify
     dev_eui = unhexlify('7A AB 77 D0 31 21 08 E0'.replace(' ',''))
     app_eui = unhexlify('00 00 00 00 00 00 00 00'.replace(' ',''))
@@ -263,14 +265,16 @@ else:
     print(hex(mac[5]), end='-')
     print(hex(mac[6]), end='-')
     print(hex(mac[7]))
+
     # join a network using OTAA (Over the Air Activation)
-    lora.join(activation=LoRa.OTAA, auth=(dev_eui, app_eui, app_key), dr=2, timeout=0)
+    #lora.join(activation=LoRa.OTAA, auth=(dev_eui, app_eui, app_key), dr=2, timeout=0)
+    lora.join(activation=LoRa.OTAA, auth=(dev_eui, app_eui, app_key), timeout=0)
     # wait until the module has joined the network
     print('Attempting to join .',end='')
-    time.sleep(6)
+    time.sleep(8)
     while not lora.has_joined():
-        time.sleep(15)
-        print('...',end='')
+        time.sleep(5)
+        print('.',end='')
     print('Joined = ',lora.has_joined())
     # create a LoRa socket
     s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)

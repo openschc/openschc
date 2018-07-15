@@ -69,7 +69,8 @@ class fragment_factory:
         srcbuf |.........................
         '''
         if type(srcbuf) == str:
-            self.srcbuf = bytearray(srcbuf, "utf-8")
+#            self.srcbuf = bytearray(srcbuf, "utf-8")
+            self.srcbuf = bytearray(srcbuf)
         elif type(srcbuf) in [bytearray, bytes]:
             self.srcbuf = bytearray(recvbuf)
         else:
