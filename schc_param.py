@@ -14,4 +14,4 @@ class SCHC_MODE():
     NO_ACK = 0
     ACK_ALWAYS = 1
     ACK_ON_ERROR = 2
-    )
+
