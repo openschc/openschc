@@ -4,38 +4,47 @@ e.g. to_bitstring() means that a bytearray is converted into a bitstring.
 foo_to() meaans that a foo is converted into a bytearray.
 '''
 
+def __rjust(s, w, c="0"):
+    return "".join([c for i in range(w-len(s))]) + s
+
+def __ljust(s, w, c="0"):
+    return s + "".join([c for i in range(w-len(s))])
+
 def __zfill(s, w):
     '''
-    MicroPython doesn't support zfill.
+    MicroPython doesn't support zfill, rjust, ljust of str object.
     '''
-    return "".join(["0" for i in range(w-len(s))]) + s
+    return __rjust(s, w, c="0")
 
-def int_to(n, nbytes=None, bigendian=True):
+def int_to(n, nbytes=None, ljust=False):
     '''
     convert the integer into bytearray().
-    e.g. if n in hex is "123",
-    if nbytes is 3 and endian is "big", then it's gonna be "000123".
-    if endian is not "big", then it's gonna be "230100".
     '''
-    h = "%x" % n
-    if nbytes != None:
-        h = __zfill(h, 2*nbytes)
-    x = [int(h[i:i+2],16) for i in range(0, len(h), 2)]
-    return bytearray(x) if bigendian else bytearray(x[::-1])
+    return bit_to(bin(n)[2:], nbytes, ljust)
 
-def bit_to(b, nbytes, bigendian=True):
+def bit_to(b, nbytes=None, ljust=False):
     '''
     convert the bit string into bytearray().
+    if nbytes is None, b is put into the bytes as long as maximum.
+    if nbytes is less than the length of b, b is truncated according to the
+    boolean of ljust.
+    if ljust is True, b is aligned to the left.
     '''
-    return int_to(int(b,2), nbytes, bigendian=bigendian)
+    if nbytes is None:
+        nbytes = int(len(b)/8)+(1 if len(b)%8 else 0)
+    nbits = nbytes*8
+    if ljust:
+        b2 = b.ljust(nbits,"0")[:nbits]
+    else:
+        b2 = b.rjust(nbits,"0")[-nbits:]
+    return bytearray([int(b2[i:i+8],2) for i in range(0, nbits, 8)])
 
-def hex_to(hexstr, nbytes=None, bigendian=True):
+def hex_to(hexstr, nbytes=None, ljust=False):
     '''
     convert the hex string into bytearray().
+    see bit_to()
     '''
-    if nbytes == None:
-        nbytes = int(len(hexstr)/2) + (1 if len(hexstr)%2 else 0)
-    return int_to(int(hexstr,16), nbytes, bigendian)
+    return bit_to(bin(int(hexstr,16))[2:], nbytes, ljust)
 
 def to_int(ba, reverse=False):
     '''
