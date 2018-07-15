@@ -40,7 +40,7 @@ class fragment_factory:
         self.R = R
         self.logger = logger
         #
-        self.logger(1, "mode={0:s}".format(self.R.mode.name))
+        self.logger(1, "mode={}".format(self.R.mode))
         # self.logger(1, "each field size: rid={0} dtag={self.dtag_size} win={self.win_size} fcn={self.fcn_size} bitmap={self.bitmap_size} cbit={self.cbit_size} mic={self.C.mic_size}".format(self.R.C.rid_size, self=self.R))
         info = {
             "dtag_size": self.R.dtag_size,
