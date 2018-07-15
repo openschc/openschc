@@ -63,7 +63,7 @@ class frag_holder():
             x += ("bitmap:%s" % pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.payload != None:
             if len(x) != 0: x += " "
-            x += ("payload:%s" % " ".join(["%02x"%i for i in self.payload]))
+            x += ("payload:%s" % self.payload)
         #
         return x
 
@@ -77,6 +77,9 @@ class frag_tx(frag_holder):
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
                   cbit=None, abort=False, payload=None):
+        '''
+        payload: bit string of the SCHC fragment payload.
+        '''
         #
         ba = bytearray()
         pos = 0
@@ -119,7 +122,7 @@ class frag_tx(frag_holder):
         #
         if payload != None:
             # assumed that bit_set() has extended to a byte boundary.
-            pb.bit_set(ba, pos, "".join(pb.to_bit(payload)), extend=True)
+            pb.bit_set(ba, pos, payload, extend=True)
         #
         # the abort field is implicit, is not needed to set into the parameter.
         self.set_param(self.R.rid, dtag, win, fcn, mic, bitmap, cbit, payload)
@@ -350,9 +353,5 @@ class frag_receiver_rx(frag_rx):
         if self.fcn == self.R.fcn_all_1:
             pos += self.parse_mic(pos)
         payload_bit_len = len(self.packet)*8 - pos
-        if payload_bit_len < 8:
-            # just ignore the padding.
-            return
-        p = pb.bit_get(self.packet, pos, (payload_bit_len&(~7)))
-        self.payload = pb.bit_to(p, payload_bit_len>>3)
+        self.payload = pb.bit_get(self.packet, pos, payload_bit_len)
 

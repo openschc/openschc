@@ -19,7 +19,7 @@ class schc_runtime_context:
         else:
             raise ValueError("invalid mic func=%s" % mic_func_name)
         # set the mic size.
-        dummy, self.mic_size = self.mic_func.get_mic(b"dummy")
+        self.mic_size = self.mic_func.get_mic_size()
 
 class schc_ruledb:
     '''

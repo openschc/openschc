@@ -178,7 +178,7 @@ class defragment_window:
             for i in self.fragment_list_no_ack:
                 self.logger(2, "fcn =", 0, "fragment =", i)
                 a.append(i)
-            return b"".join(a) + self.__assemble()
+            return "".join(a) + self.__assemble()
         else:
             return self.__assemble()
 
@@ -189,10 +189,10 @@ class defragment_window:
         for i in sorted(self.fragment_list.items(), reverse=True,
                         key=(lambda kv:
                              (0 if kv[0]==self.R.fcn_all_1 else kv[0]))):
-            self.logger(2, "fcn =", i[0], "fragment =", i)
+            self.logger(2, "fcn =", i[0], "fragment =", i[1])
             if i[1]:
                 a.append(i[1])
-        return b"".join(a)
+        return "".join(a)
 
     def all_fragments_received(self):
         self.logger(1, "checking all-0 fragments, local bitmap=",
@@ -370,20 +370,21 @@ class defragment_message:
 
     def mic_matched(self, fgh):
         self.logger(1, "calculating mic.")
-        self.mic, mic_size = self.R.C.mic_func.get_mic(self.assemble())
+        self.mic = self.R.C.mic_func.get_mic(self.assemble())
         if fgh.mic == self.mic:
             self.logger(1, "mic is matched.")
             return True
         else:
-            self.logger(1, "mic is NOT matched.")
+            self.logger(1, "mic is NOT matched. received={} calculated={}".
+                        format(fgh.mic, self.mic))
             return False
 
     def assemble(self):
         '''
         assuming that no event is scheduled when assemble() is called.
         '''
-        message = b"".join([i.assemble() for i in self.win_list])
-        return message
+        return pb.bit_to("".join([i.assemble() for i in self.win_list]),
+                         ljust=True)
 
     def collected(self):
         self.msg_state = STATE_MSG.COLLECTED

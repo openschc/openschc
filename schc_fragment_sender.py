@@ -56,14 +56,61 @@ class fragment_factory:
         srcbuf: holder of the data to be sent.
         dtag: dtag number.
 
-        win_head: indicating the head of current window.
+        win_head: indicating the head position in bits of current window.
                  it is held until the bitmap check is completed.
-        pos: indicating the head of the data to be sent.
+        pos: indicating the head of the data in bits to be sent.
 
-                   win_head        pos
-                      |             |
-                      v             v
-        srcbuf |.........................
+          an L2 payload.
+          
+                 |<----------- L2 payload size ---------->|
+
+          a fragment except the last one:
+
+                 |...............|........................|
+                 |<------------->|<---------------------->|
+                     SCHC Frag.          SCHC Frag.        
+                     header              payload
+
+          the last fragment.
+
+                 |...............|.................|....|
+                 |<------------->|<--------------->|<-->|
+                     SCHC Frag.        SCHC Frag.   Padding as neede.
+                     header            payload     (for align to a byte,
+                                                    less than 8 bits)
+
+                                           next
+                       win_head   pos      pos
+                          |        |        |
+                          v        v        v
+          srcbuf |...............................|
+                 |                               |
+                 |----- total_payload_size ------|
+                 |              -->|........|<--
+                                max_payload_size
+                                         -->|........|<--
+                                         max_payload_size
+                            payload_size -->|....|<--
+                                      padding -->|...|<-- byte alignment.
+
+        ## MIC calculation:
+
+        - not include the MIC field itself.
+        - the implementation assumes that srcbuf is aligned to a byte.
+        - the implementation assumes that the MIC size is multiple of 8-bits.
+        - therefore, any padding are not needed to calculate the MIC.
+
+        e.g.
+        header size is 10 bits. MIC size is 32 bits.  message size is 40 bits.
+        
+        1. L2 size is 32 bits.
+        1st frag consists of 10 bits header + 22 bits stub of message.
+        2nd frag consists of 10 bits header + 18 bits rest of message.
+        3rd frag has only MIC of 32 bits.
+        
+        2. L2 size is 120 bits.
+        1st frag consists of 10 bits header + 40 bits message + 32 bits MIC.
+
         '''
         if type(srcbuf) == str:
             self.srcbuf = bytearray(srcbuf, "utf-8")
@@ -75,32 +122,57 @@ class fragment_factory:
         self.win_head = 0
         self.pos = 0
         self.dtag = dtag
-        self.mic, self.mic_size = self.R.C.mic_func.get_mic(self.srcbuf)
+        self.mic_size = self.R.C.mic_func.get_mic_size()
+        self.mic = None
+        self.tx_payload_list = []   # payload holder to calculate MIC.
         self.win = 0
+        self.header_size = (self.R.C.rid_size + self.R.dtag_size +
+                            self.R.win_size + self.R.fcn_size)
+        self.total_payload_size = len(self.srcbuf)*8
+        self.rest_payload_size = self.total_payload_size
         self.__init_window()
         self.state = sfs.fragment_state(STATE, logger=self.logger)
         self.state.set(STATE.INIT)
 
-    def get_payload_base_size(self, l2_size):
-        h = self.R.C.rid_size + self.R.dtag_size + self.R.fcn_size
-        max_pyld_size = rdu8(l2_size*8 - h)
-        min_pyld_size = rdu8(l2_size*8 - h - self.mic_size)
-        if max_pyld_size < 1:
-            raise AssertionError("L2 size is too small than header. hdr=%d L2=%d" % (h, l2_size*8))
-        if min_pyld_size < 1:
-            raise AssertionError("L2 size is too small for mic. hdr+mic=%d L2=%d" % (h+self.mic_size, l2_size*8))
-        return max_pyld_size, min_pyld_size
+    def append_tx_list(self, payload, mic_size=0):
+        '''
+        append the expected payload to be sent including padding.
+        if mic is not None, it is counted to get the padding length.
+        '''
+        if payload is None and mic_size == 0:
+            return
+        if payload is None:
+            pld = ""
+        else:
+            pld = payload
+        # ideally, it should be compared with the L2 word.
+        payload_size = self.header_size + len(pld) + mic_size
+        padded_payload_size = (payload_size+7)&(~7)
+        pad_size = padded_payload_size - payload_size
+        self.tx_payload_list.append(pld+"0"*pad_size)
 
     def next_fragment(self, l2_size):
         '''
-        l2_size: the caller can specify the size of the payload anytime.
+        l2_size: the size of the L2 payload in bytes.
+        Note that l2_size in this method is converted the unit in bits.
 
         XXX Note that it doesn't care the l2_size in retransmitting.
         if the size is changed in that case,
         the packet will not be changed as it was.  needs to be improved.
         '''
-        # compute the max/min payload size.
-        max_pyld_size, min_pyld_size = self.get_payload_base_size(l2_size)
+        l2_size = l2_size*8 # NOTE: converted into the unit of bits.
+        #
+        max_payload_size = l2_size - self.header_size
+        if max_payload_size <= 0:
+            raise AssertionError(
+                    "L2 size is smaller than the header. hdr={} L2={}".
+                    format(self.header_size, l2_size))
+        # the max_payload_size must be bigger than or equal to the MIC size.
+        # at least, it's ensure that the payload size is enough to put the MIC.
+        if max_payload_size < self.mic_size:
+            raise AssertionError(
+                    "L2 size is smaller than the mic size. mic={} L2={}".
+                    format(self.mic_size, l2_size))
         #
         if self.R.mode == SCHC_MODE.NO_ACK and self.state.get() == STATE.SEND_ALL1:
             # no more fragments to be sent
@@ -173,75 +245,114 @@ class fragment_factory:
         #
         # defragment for transmitting.
         #
-        rest_size = len(self.srcbuf) - self.pos
         if self.R.mode == SCHC_MODE.NO_ACK:
-            if rest_size > min_pyld_size:
-                if rest_size >= max_pyld_size:
-                    pyld_size = max_pyld_size
-                else:
-                    pyld_size = rest_size
+            margin = max_payload_size - self.rest_payload_size
+            if margin < 0:
+                pyld_size = max_payload_size
                 self.fcn = 0
-                mic = None
                 state = STATE.CONT
             else:
-                # this is the last fragment.
-                pyld_size = rest_size
-                self.fcn = 1
-                mic = self.mic
-                state = STATE.SEND_ALL1
+                # check whether there is enough size to put the MIC.
+                if margin < self.mic_size:
+                    pyld_size = self.rest_payload_size
+                    self.fcn = 0
+                    state = STATE.CONT
+                else:
+                    # this is the last fragment.
+                    # margin is equal to or bigger than mic_size.
+                    pyld_size = self.rest_payload_size
+                    self.fcn = 1
+                    self.mic = True
+                    state = STATE.SEND_ALL1
+            #
+            payload = pb.bit_get(self.srcbuf, self.pos, pyld_size)
+            if self.mic is None:
+                self.append_tx_list(payload)
+            else:
+                self.append_tx_list(payload, self.mic_size)
+                self.logger(1, "calculating mic")
+                for i in self.tx_payload_list:
+                    self.logger(2, "fragment =", i)
+                self.mic = self.R.C.mic_func.get_mic(
+                        pb.bit_to("".join(self.tx_payload_list), ljust=True))
             #
             fgh = sfh.frag_sender_tx(self.R, self.dtag,
-                            fcn=self.fcn, mic=mic,
-                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
+                            fcn=self.fcn, mic=self.mic, payload=payload)
             self.state.set(state)
             self.n_frags_sent += 1
             self.pos += pyld_size
+            self.rest_payload_size -= pyld_size
+            if self.rest_payload_size < 0:
+                raise AssertionError("rest_payload_size becomes less than 0")
             return self.state.get(), fgh
+        #
+        # from here, ACK_ALWAYS or ACK_ON_ERROR
+        #
+        if self.state.get() == STATE.WIN_DONE:
+            # try to support more than 1 bit wide window
+            # though the bit size is 1 in the draft 7.
+            self.win += 1
+            self.win &= ((2**self.R.win_size)-1)
+            self.fcn = self.R.max_fcn
         else:
-            if self.state.get() == STATE.WIN_DONE:
-                # try to support more than 1 bit wide window
-                # though the bit size is 1 in the draft 7.
-                self.win += 1
-                self.win &= ((2**self.R.win_size)-1)
+            if self.fcn == None:
                 self.fcn = self.R.max_fcn
             else:
-                if self.fcn == None:
-                    self.fcn = self.R.max_fcn
-                else:
-                    self.fcn -= 1
-            # in above, just set fcn.
-            # then will check below if the packet is the last one.
-            # if so, set fcn into all-1 at that time..
-            if rest_size > min_pyld_size:
-                self.bitmap |= 1<<self.fcn
-                if rest_size >= max_pyld_size:
-                    pyld_size = max_pyld_size
-                else:
-                    pyld_size = rest_size
-                fgh = sfh.frag_sender_tx(self.R, self.dtag,
-                            win=self.win, fcn=self.fcn,
-                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
-                if self.fcn == self.R.fcn_all_0:
-                    self.state.set(STATE.SEND_ALL0)
-                else:
-                    self.state.set(STATE.CONT)
+                self.fcn -= 1
+        # in above, just set fcn.
+        # then will check below if the packet is the last one.
+        # if so, set fcn into all-1 at that time..
+        # XXX needs to revisit and improve the logic.
+        margin = max_payload_size - self.rest_payload_size
+        if margin < 0:
+            self.bitmap |= 1<<self.fcn
+            pyld_size = max_payload_size
+            payload=pb.bit_get(self.srcbuf, self.pos, pyld_size)
+            self.append_tx_list(payload)
+            fgh = sfh.frag_sender_tx(self.R, self.dtag,
+                        win=self.win, fcn=self.fcn, payload=payload)
+            if self.fcn == self.R.fcn_all_0:
+                self.state.set(STATE.SEND_ALL0)
             else:
-                # this is the last window.
-                self.bitmap |= 1
-                pyld_size = rest_size
-                self.fcn = self.R.fcn_all_1
-                fgh = sfh.frag_sender_tx(self.R, self.dtag,
-                            win=self.win, fcn=self.fcn, mic=self.mic,
-                            payload=self.srcbuf[self.pos:self.pos+pyld_size])
-                self.state.set(STATE.SEND_ALL1)
+                self.state.set(STATE.CONT)
+        elif margin < self.mic_size:
+            self.bitmap |= 1<<self.fcn
+            pyld_size = self.rest_payload_size
+            payload=pb.bit_get(self.srcbuf, self.pos, pyld_size)
+            self.append_tx_list(payload)
+            fgh = sfh.frag_sender_tx(self.R, self.dtag,
+                        win=self.win, fcn=self.fcn, payload=payload)
+            if self.fcn == self.R.fcn_all_0:
+                self.state.set(STATE.SEND_ALL0)
+            else:
+                self.state.set(STATE.CONT)
+        else:
+            # this is the last window.
+            self.bitmap |= 1
+            pyld_size = self.rest_payload_size
+            self.fcn = self.R.fcn_all_1
+            payload=pb.bit_get(self.srcbuf, self.pos, pyld_size)
+            self.append_tx_list(payload, self.mic_size)
             #
-            # save the local bitmap for retransmission
-            # this is for the case when the receiver will not respond.
-            self.missing_prev = self.bitmap
-            # store the packet for the future retransmission.
-            self.fgh_list[self.fcn] = fgh
-            self.pos += pyld_size
-            return self.state.get(), fgh
+            self.logger(1, "calculating mic")
+            for i in self.tx_payload_list:
+                self.logger(2, "fragment =", i)
+            self.mic = self.R.C.mic_func.get_mic(
+                    pb.bit_to("".join(self.tx_payload_list), ljust=True))
+            #
+            fgh = sfh.frag_sender_tx(self.R, self.dtag,
+                        win=self.win, fcn=self.fcn, mic=self.mic,
+                        payload=payload)
+            self.state.set(STATE.SEND_ALL1)
+        #
+        # save the local bitmap for retransmission
+        # this is for the case when the receiver will not respond.
+        self.missing_prev = self.bitmap
+        # store the packet for the future retransmission.
+        self.fgh_list[self.fcn] = fgh
+        self.rest_payload_size -= pyld_size
+        self.pos += pyld_size
+        return self.state.get(), fgh
 
     def parse_ack(self, recvbuf, peer):
         if self.R.mode == SCHC_MODE.NO_ACK:
