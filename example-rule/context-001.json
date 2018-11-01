@@ -1,0 +1,8 @@
+{
+    "CONTEXT": {
+        "CID": 1,
+        "RID_SIZE": 3,
+        "DEFAULT_RID": 1,
+        "MIC_FUNC": "CRC32"
+    }
+}
