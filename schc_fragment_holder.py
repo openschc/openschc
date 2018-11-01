@@ -65,7 +65,7 @@ class frag_holder():
             x += ("bitmap:%s" % pb.int_to_bit(self.bitmap, self.R.bitmap_size))
         if self.payload != None:
             if len(x) != 0: x += " "
-            x += ("payload:%s" % " ".join(["%02x"%i for i in self.payload]))
+            x += ("payload:%s" % self.payload)
         #
         return x
 
@@ -79,6 +79,9 @@ class frag_tx(frag_holder):
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
                   cbit=None, abort=False, payload=None):
+        '''
+        payload: bit string of the SCHC fragment payload.
+        '''
         #
         ba = bytearray()
         pos = 0
@@ -117,10 +120,11 @@ class frag_tx(frag_holder):
         if abort == True:
             pb.bit_set(ba, pos, pb.int_to_bit(0xff, 8),
                        extend=True)
+            pos += 8
         #
         if payload != None:
             # assumed that bit_set() has extended to a byte boundary.
-            ba += payload
+            pb.bit_set(ba, pos, payload, extend=True)
         #
         # the abort field is implicit, is not needed to set into the parameter.
         self.set_param(self.R.rid, dtag, win, fcn, mic, bitmap, cbit, payload)
@@ -348,25 +352,8 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_dtag(pos)
         pos += self.parse_win(pos)
         pos += self.parse_fcn(pos)
-        if self.fcn == self.R.fcn_all_0:
-            next_of_p1 = ((pos+7)&(~7))>>3
-            if next_of_p1 < len(self.packet):
-                self.payload = self.packet[next_of_p1:]
-            else:
-                # all-0 empty
-                pass
-        elif self.fcn == self.R.fcn_all_1:
+        if self.fcn == self.R.fcn_all_1:
             pos += self.parse_mic(pos)
-            next_of_p1 = ((pos+7)&(~7))>>3
-            if next_of_p1 < len(self.packet):
-                self.payload = self.packet[next_of_p1:]
-            else:
-                # all-1 empty
-                pass
-        else:
-            next_of_p1 = ((pos+7)&(~7))>>3
-            if next_of_p1 < len(self.packet):
-                self.payload = self.packet[next_of_p1:]
-            else:
-                raise ValueError("unsupported format.")
+        payload_bit_len = len(self.packet)*8 - pos
+        self.payload = pb.bit_get(self.packet, pos, payload_bit_len)
 
