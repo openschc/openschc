@@ -7,8 +7,8 @@ all:
 style:
 	pycodestyle *.py
 
-all-tests: test-bitarray
+all-tests: test-bitarray test-simsched
 
 
-test-bitarray:
-	${M} test_bitarray.py
+test-bitarray: ; ${M} test_bitarray.py
+test-simsched: ; ${M} test_simsched.py
