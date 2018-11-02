@@ -1,0 +1,132 @@
+{
+    "SCHC_RULE": {
+        "RID": 1,
+        "RULE": [
+            {
+                "FID": "IPv6 version",
+                "FL": 4,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 6,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPv6 DiffServ",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPv6 Flow Label",
+                "FL": 20,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPv6 Length",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "comp-length"
+            },
+            {
+                "FID": "IPv6 Next Header",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 17,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPv6 Hop Limit",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 255,
+                "MO": "ignore",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPv6 DEVprefix",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "2001::/64", "fe80::/64" ],
+                "MO": "match-mapping",
+                "CDA": "mapping-sent",
+                "SB": 1
+            },
+            {
+                "FID": "IPv6 DEViid",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "DEViid"
+            },
+            {
+                "FID": "IPv6 APPprefix",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "2001::/64", "fe80::/64" ],
+                "MO": "match-mapping",
+                "CDA": "mapping-sent",
+                "SB": 2
+            },
+            {
+                "FID": "IPv6 APPiid",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "::1000" ],
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "UDP DEVport",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 5683,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "UDP APPport",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 5683,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "UDP Length",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "comp-length"
+            },
+            {
+            "FID": "UDP checksum",
+            "FL": 16,
+            "FP": 1,
+            "DI": "Bi",
+            "MO": "ignore",
+            "CDA": "comp-chk"
+            }
+        ]
+    }
+}
+
