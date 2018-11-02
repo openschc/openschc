@@ -1,0 +1,31 @@
+{
+    "PROTO": "EN10MB",
+    "HEADER": {
+        "EN10MB.DMAC": "acbc32ba1c9f",
+        "EN10MB.SMAC": "0025dc4060df",
+        "EN10MB.TYPE": 34525
+    },
+    "PAYLOAD": {
+        "PROTO": "IPV6",
+        "HEADER": {
+            "IPV6.VER": 6,
+            "IPV6.TC": 184,
+            "IPV6.FL": 0,
+            "IPV6.LEN": 24,
+            "IPV6.NXT": 58,
+            "IPV6.HOP_LMT": 255,
+            "IPV6.SADDR": "fe80::225:dcff:fe40:60df",
+            "IPV6.DADDR": "fe80::aebc:32ff:feba:1c9f"
+        },
+        "PAYLOAD": {
+            "PROTO": "ICMPV6",
+            "HEADER": {
+                "ICMPV6.TYPE": 136,
+                "ICMPV6.CODE": 0,
+                "ICMPV6.CKSUM": 17033
+            },
+            "PAYLOAD": "c0000000fe800000000000000225dcfffe4060df"
+        }
+    }
+}
+
