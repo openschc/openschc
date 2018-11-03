@@ -8,11 +8,25 @@ import schc
 import simsched
 import simlayer2
 
+rule = {
+    "RID": 3,
+    "mode": "ack-on-error",
+    "dtag-size": 2,
+    "window-size": 5,
+    "fcn-size": 3,
+    # MAX_WIND_FCN computed from "fcn-size"
+    "tile-size": 30,
+    "mic-algorithm": "crc32"
+}
+# XXX: make a namedtuple?
+
 # XXX: create a real class SimulNode and Simul
 def make_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
     protocol = schc.SCHCProtocol(config, scheduler, mac)
+    # protocol.rulemanager.add_rule(...) ???
+    protocol.set_frag_rule(rule)
     return mac, protocol
 
 scheduler = simsched.SimulScheduler()
