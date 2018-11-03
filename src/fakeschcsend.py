@@ -74,11 +74,14 @@ class FakeSCHCProtocolSender(schc.SCHCProtocol):
 
 
 def fake_schc_packet(config, rule, payload):
-    #packet = b""                                                           
     fragment = schc_fragment_holder.frag_sender_tx(
         R=RULE,
         dtag=DTAG, win=0, fcn=6, mic=None, bitmap=None,
         cbit=None, payload=payload)
     return fragment
 
-print(fake_schc_packet(None, None, "0"*30).dump())
+
+fake_packet = fake_schc_packet(None, None, "0"*30)
+print(fake_packet.dump())
+print(fake_packet.full_dump())
+
