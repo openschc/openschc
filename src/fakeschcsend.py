@@ -1,4 +1,5 @@
 
+from base_import import *  # used for now for differing modules in py/upy
 
 import schc
 
@@ -22,6 +23,62 @@ import schc
 # 1520   |  Rule ID  |  DTag | W |1| padding as needed                (success)
 # 1521   +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
 
+sys.path.append("schctest")
+#import
+import schc_fragment_holder
+
+#schc_fragment_holder.XXX
+
+
+RULE_ID_SIZE = 6
+DTAG_SIZE = 2
+WINDOW_SIZE = 5
+FCN_SIZE = 3
+
+# the above parameters allow having a header aligned on byte boundaries
+MAX_WIND_FCN = 6
+TILE_SIZE = 30
+
+RULE_ID = 9
+DTAG = 1
+
+# XXX:
+FCN_ALL_0 = 0
+
+class Struct:
+    pass
+
+RULE = Struct()
+RULE.rid = RULE_ID
+RULE.C = Struct()
+RULE.C.rid_size =  RULE_ID_SIZE
+RULE.dtag_size = DTAG_SIZE
+RULE.win_size = WINDOW_SIZE
+RULE.fcn_size = FCN_SIZE
+PAYLOAD_SIZE = 30
 
 class FakeSCHCProtocolSender(schc.SCHCProtocol):
-    pass
+
+    def start_sending(self):
+        #packet = b""
+        fragment = schc_fragment_holder.frag_sender_tx(
+            R=RULE,
+            dtag=DTAG, win=0, fcn=6, mic=None, bitmap=None,
+            cbit=None, payload=None)
+        #fragment.set_param(rid=, dtag=, win=, fcn=, mic=None, bitmap=None,
+        #                   cbit=None, payload=b"")
+        #fragment.init_param()
+        print("->", fragment.dump())
+        #print(fragment)
+        #self.layer2.send_packet(fragment)
+
+
+def fake_schc_packet(config, rule, payload):
+    #packet = b""                                                           
+    fragment = schc_fragment_holder.frag_sender_tx(
+        R=RULE,
+        dtag=DTAG, win=0, fcn=6, mic=None, bitmap=None,
+        cbit=None, payload=payload)
+    return fragment
+
+print(fake_schc_packet(None, None, "0"*30).dump())

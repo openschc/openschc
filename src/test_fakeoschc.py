@@ -52,6 +52,7 @@ print("mac_id:", m0.mac_id, m1.mac_id)
 def make_send_packet(protocol, packet):
     protocol.send_packet(packet)
 
-scheduler.add_event(1, make_send_packet, (p1, b"00000000"))  # XXX to change
+#scheduler.add_event(1, make_send_packet, (p1, b"00000000"))  # XXX to change
+p1.start_sending()
 
 scheduler.run()
