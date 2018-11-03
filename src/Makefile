@@ -1,8 +1,13 @@
 
 M=../../micropython/ports/unix/micropython
 
-all:
+all: default
 	@# nothing to do
+
+default: test-fakeschc
+
+test-fakeschc:
+	${M} test_fakeoschc.py
 
 style:
 	pycodestyle *.py
