@@ -1,7 +1,7 @@
 import pybinutil as pb
 from schc_param import *
 import schc_fragment_state as sfs
-import schc_fragment_holder as sfh
+import schc_fragment_message as sfh
 from schc_fragment_ruledb import schc_fragment_ruledb
 import mic_crc32
 import micro_enum
