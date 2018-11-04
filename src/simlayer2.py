@@ -9,6 +9,7 @@ class SimulLayer2:
         self.mac_id = SimulLayer2.__get_unique_mac_id()
         self.receive_function = None
         self.event_timeout = None
+        self.counter = 1
 
     def add_link(self, other):
         assert other not in self.link_list
@@ -19,6 +20,9 @@ class SimulLayer2:
 
     def send_packet(self, packet):
         # should be moved in a generic Simul class:
+        self.counter -= 1
+        if self.counter < 0:
+            return
         for other in self.link_list:
             self.scheduler.add_event(self.delay, other.event_receive_packet,
                                      (other.mac_id, packet))
