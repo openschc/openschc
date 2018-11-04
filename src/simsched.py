@@ -8,7 +8,7 @@ class SlowSimulScheduler:
     def __init__(self):
         self.queue = []
         self.clock = 0
-        self.event_id = 0
+        self.next_event_id = 0
 
     # sched.scheduler API
 
@@ -28,17 +28,32 @@ class SlowSimulScheduler:
 
     def add_event(self, rel_time, callback, args):
         assert rel_time >= 0
+        event_id = self.next_event_id
+        self.next_event_id += 1
         clock = self.get_clock()
         abs_time = clock+rel_time
-        self.queue.append((abs_time, self.event_id, callback, args))
-        self.event_id += 1
+        self.queue.append((abs_time, event_id, callback, args))
+        return event_id
+
+    def cancel_event(self, event_id):
+        for i,full_event in enumerate(self.queue):
+            if full_event[1] == event_id:
+                self.queue.pop(i)
+                return True
+        return False
+
+    def get_next_event_time(self):
+        if len(self.queue) == 0:
+            return None
+        else:
+            self.queue.sort()
+            return self.queue[0][0]
 
 
     def get_next_event_time(self):
 
 
 SimulScheduler = SlowSimulScheduler
-
 
 class SimulSchedulerOld:
     def __init__(self):

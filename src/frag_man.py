@@ -29,8 +29,9 @@ def schc_make_packet(config, rule, dtag, tiles):
     fcn_bit = bu.int_to_bit(tiles[0]["t-num"], rule["fcn-size"])
     print("DEBUG: rid:{} dtag:{} win:{} fcn:{}".format(rid_bit, dtag_bit,
                                                        win_bit, fcn_bit))
+    # micropython doesn't have a key, byteorder.
     header = int("".join([rid_bit, dtag_bit, win_bit, fcn_bit]),2).to_bytes(
-            2,byteorder="big")
+            2, "big")
     # make a payload
     payload = bytearray()
     pos = 0
@@ -38,7 +39,7 @@ def schc_make_packet(config, rule, dtag, tiles):
         bu.bit_set(payload, pos, t["tile"], extend=True)
         pos += len(t["tile"])
 
-    print("DEBUG:", payload)
+    print("DEBUG: payload:", payload)
     return header + payload
 
 # XXX need to be replaced.
@@ -64,10 +65,10 @@ class tile_list():
                     "ready_to_be_sent": False,
                 }
             self.tile_list.append(tile_obj)
-            w_num = w_num + 1
             t_num = t_num - 1
             if t_num < 0:
                 t_num = t_init_num
+                w_num += 1
         print("DEBUG: tile_list:")
         for i in self.tile_list:
             print("DEBUG:  ", i)
@@ -119,7 +120,7 @@ class fragment_sender():
             return  # end of sending frags.
         # XXX send_packet() might need a peer iid to send a fragment.
         # XXX self.layer2.send_packet(frag, peer_iid)
-        print("S: [mac%s] -> SCHC[mac:%s] %s"
+        print("DEBUG: S: [mac%s] -> SCHC[mac:%s] %s"
               % ("00self00", peer_iid, frag))
         self.layer2.send_packet(frag)
         self.tile_list.update_sent_flags()
@@ -157,7 +158,7 @@ class fragment_sender():
             return None
 
     def recv_ack(self, packet, peer_iid=None):
-        print("recv_ack:", packet)  # XXX
+        print("DEBUG: recv_ack:", packet)  # XXX
         '''
         sh = schc_sender_parse(packet)
         if sh is None:
