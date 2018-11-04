@@ -33,6 +33,10 @@ class SlowSimulScheduler:
         self.queue.append((abs_time, self.event_id, callback, args))
         self.event_id += 1
 
+
+    def get_next_event_time(self):
+
+
 SimulScheduler = SlowSimulScheduler
 
 

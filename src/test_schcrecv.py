@@ -27,7 +27,7 @@ rule = rule_from_dict(rule_as_dict)
 def make_recv_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
-    protocol = SCHCProtocolReceiver(config, scheduler, mac)
+    protocol = SCHCProtocolReceiver(config, scheduler, mac, role="receiver")
     # protocol.rulemanager.add_rule(...) ???
     protocol.set_frag_rule(rule)
     return mac, protocol
@@ -35,7 +35,7 @@ def make_recv_node(scheduler):
 def make_send_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
-    protocol = FakeSCHCProtocolSender(config, scheduler, mac)
+    protocol = FakeSCHCProtocolSender(config, scheduler, mac, role="sender")
     # protocol.rulemanager.add_rule(...) ???
     protocol.set_frag_rule(rule)
     return mac, protocol
@@ -50,10 +50,5 @@ m0.add_link(m1)
 
 print("mac_id:", m0.mac_id, m1.mac_id)
 
-def make_send_packet(protocol, packet):
-    protocol.send_packet(packet)
-
-#scheduler.add_event(1, make_send_packet, (p1, b"00000000"))  # XXX to change
 p1.start_sending()
-
 scheduler.run()
