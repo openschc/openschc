@@ -23,7 +23,8 @@ class ReassemblerAckOnError:
 
         print("parsed message:", message.__dict__, message.payload.__dict__)
 
-        #if fcn == schcmsg.get_all_1(rule):
+        #fcn = schcmsg.get_all_1(rule)
+        #print("ALL1")
 
         sys.exit(0)
 
