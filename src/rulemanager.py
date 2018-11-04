@@ -13,6 +13,8 @@ where ruleID contains the rule ID value aligned on the right and ruleLength give
 the size in bits of the ruleID. In the previous example, this corresponds to the 
 binary value 0b010.
 
+if ruleLength is not specified the value is set to 1 byte.
+
 The rule is either a compression/decompression rule or a fragmentation/reassembly
 rule.
 
@@ -23,7 +25,7 @@ For instance:
 {
   "ruleID" : 14,
   "ruleLength" : 4   # rule 0b1110
-  "fragmentation": <<<rule>>>
+  "compression": <<<rule>>>
 }
 
 where <<<rule>>> will be defined later.
@@ -32,21 +34,22 @@ where <<<rule>>> will be defined later.
   "ruleID" : 15,
   "ruleLength" : 4   # rule 0b1110
   "fragmentation": {
-      "dtagSize" : 1,
-      "windowSize": 3,
-      "FCNSize" : 3,
-      "noAck" : {},
-      "ackAlways": {},
-      "ackOnError" : {
+      "mode" : "noAck" # or "ackAlways", "ackOnError"
+      "profile" : {
+         "dtagSize" : 1, 
+         "windowSize": 3,
+         "FCNSize" : 3,
+         "maxWindFCN", 6,
          "ackBehavior": "afterAll1"
       }
   }
 }
 
-The "fragmentation" keyword is used to give fragmentation parameters and profile:
+The "fragmentation" keyword is used to give fragmentation mode and profile:
+- one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
+- Profile parameters. Default values are automaticaly added.
 - dtagSize, windowSize and FCNSize are used to define the SCHC fragmentation header
-- one and only one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
-  These keywords are used to define some specific parameters for this mode. 
+- maxWindFCN can be added if not 2^FCNSize - 2 
   For "ackOnError" the following parameter is defined:
   - "ackBehavior" defined the ack behavior, i.e. when the Ack must be spontaneously sent
     by the receiver and therefore when the sender must listen for Ack.
@@ -80,12 +83,10 @@ class RuleManager:
 
             
     def _ruleIncluded(self, r1ID, r1l, r2ID, r2l):
+        """check if a conflict exists between to ruleID (i.e. same first bits equals) """
         r1 = r1ID << (32-r1l)
         r2 = r2ID << (32-r2l)
         l  = min(r1l, r2l)
-
-#        print ("{0:33b}".format(r1))
- #       print ("{0:33b}".format(r2))
         
         for k in range (32-l, 32):
             if ((r1 & (0x01 << k)) != (r2 & (0x01 << k))):
@@ -93,11 +94,13 @@ class RuleManager:
 
         return True
 
+    def _nameRule (r):
+        return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
         
     def findRuleByID (self, rID, rIDl):
+        """ returns a rule identified by its ruleID and ruleLength, returns none otherwise """
         for r in self._db:
-            print("->", r)
-            if rIDl == r["ruleLenght"] and rID == r["ruleID"]:
+            if rIDl == r["ruleLength"] and rID == r["ruleID"]:
                 return r
             
         return None
@@ -105,29 +108,69 @@ class RuleManager:
     def add (self, rule):
         """ Check rule integrity and uniqueless and add it to the db """
 
-        if not "ruleID" in rule or not "ruleLength" in rule:
-           raise ValueError ("ruleID not defined")
+        if not "ruleID" in rule:
+           raise ValueError ("Rule ID  not defined.")
+
+        if not "ruleLength" in rule:
+            if rule["ruleID"] < 255:
+                rule["ruleLength"] = 8
+            else:
+                raise ValueError ("RuleID too large for default size on a byte")
 
         if (not "compression" in rule and not "fragmentation" in rule) or \
            ("compression" in rule and "fragmentation" in rule):
-            raise ValueError ("Invalid rule")
+            raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
         # proceed to compression check (TBD)
-
+                              
         # proceed to fragmentation check
 
         if "fragmentation" in rule:
             fragRule = rule["fragmentation"]
 
-            if not "dtagSize" in fragRule:
-                fragRule["DtagSize"] = 0
-                
-            if not "wSize" in fragRule:
-                fragRule["wSize"] = 1
-                
+            if not "mode" in fragRule:
+                raise ValueError ("{} Fragmentation mode must be specified".format(self._nameRule(rule)))
 
-            print ("->", fragRule)
-            
+            mode = fragRule["mode"]
+
+            if not mode in ("noAck", "ackAlways", "ackOnError"):
+                raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
+
+            if not "profile" in fragRule:
+                fragRule["profile"] = {}
+
+            profile = fragRule["profile"]
+                              
+            if not "dtagSize" in profile:
+                profile["dtagSize"] = 0
+                
+            if not "windowSize" in profile:
+                if  mode == "noAck":
+                    profile["windowSize"] = 0
+                elif  mode == "ackAlways":
+                    profile["windowSize"] = 1
+                elif mode == "ackOnError":
+                    profile["windowSize"] = 5
+                    
+            if not "FCNSize" in profile:
+                if mode == "noAck":
+                    profile["FCNSize"] = 1
+                elif mode == "ackAlways":
+                    profile["FCNSize"] = 3
+                elif mode == "ackOnError":
+                    profile["FCNSize"] = 3
+
+            if "maxWindFCN" in profile:
+                if profile["maxWindFCN"] > (0x01 << profile["FCNSize"]) - 2 or\
+                   profile["maxWindFCN"] < 0:
+                    raise ValueError ("{} illegal maxWindFCN".format(self._nameRule(rule)))
+            else:
+                profile["maxWindFCN"] = (0x01 << profile["FCNSize"]) - 2 
+                    
+            if mode == "ackOnError":
+                if not "ackBehavior" in profile:
+                    raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
+                    
         rID = rule["ruleID"]
         rLength = rule["ruleLength"]
 
@@ -135,31 +178,34 @@ class RuleManager:
 
         for r in self._db:
             if self._ruleIncluded(rID, rLength, r["ruleID"], r["ruleLength"]):
-                raise ValueError ("Rule {}/{} in conflict with {}/{}".format(rID, rLength, r["ruleID"], r["ruleLength"]))
+                raise ValueError ("{} in conflict with {}/{}".format(self._nameRule(rule), r["ruleID"], r["ruleLength"]))
             
 
         self._db.append(rule)
 
 if __name__ == "__main__":
-    bogusRule0 = { # bogus rule with no ruleLength
+    bogusRule0 = { # bogus rule with no frag or comp
         "ruleID": 3
         }
     rule1 = {
         "ruleID" : 7,
         "ruleLength" : 3,
-        "fragmentation" : {},
-        }
+        "fragmentation" : {
+            "mode" :"noAck"
+        },
+    }
     rule2 = {
         "ruleID" : 4,
         "ruleLength" : 3,
         "fragmentation" : {
-            "DtagSize" : 2,
-            "FCNSize": 3,
-            "AckOnError": {
+            "mode": "ackOnError",
+            "profile": {
+                "dtagSize" : 2,
+                "FCNSize": 3,
                 "ackBehavior" : "afterAll1"
             }
         },
-        }
+    }
     conflictingRule0 = {
         "ruleID" : 15,
         "ruleLength" : 4,
@@ -172,4 +218,4 @@ if __name__ == "__main__":
     RM.add(rule2)
     print (RM._db)
     #RM.add(conflictingRule0)
-    
+    print(RM.findRuleByID(4, 3))
