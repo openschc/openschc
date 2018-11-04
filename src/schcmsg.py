@@ -203,6 +203,8 @@ class frag_rx(frag_base):
     recvbuf: str, bytes, bytearray.
     '''
     def set_recvbuf(self, recvbuf):
+        self.packet = recvbuf
+        return # XXX: remove the rest
         if type(recvbuf) == str:
             self.packet = bytearray(recvbuf, encoding="utf-8")
         elif type(recvbuf) in [bytearray, bytes]:
@@ -216,7 +218,7 @@ class frag_rx(frag_base):
         exp_rule_id: if non-None, check the rule_id whether it's expected.
         '''
         if C.rule_id_size:
-            rule_id = pb.bit_get(self.packet, 0, C.rule_id_size, ret_type=int)
+            rule_id = self.packet.get_bits(C.rule_id_size)
             if exp_rule_id != None and rule_id != exp_rule_id:
                 raise ValueError("rule_id unexpected.")
         else:
@@ -231,7 +233,7 @@ class frag_rx(frag_base):
         exp_dtag: if non-None, check the dtag whether it is expected.
         '''
         if self.rule.dtag_size:
-            dtag = pb.bit_get(self.packet, pos, self.rule.dtag_size, ret_type=int)
+            dtag = self.packet.get_bits(self.rule.dtag_size)
             if exp_dtag != None and dtag != exp_dtag:
                 raise ValueError("dtag unexpected.")
         else:
@@ -247,7 +249,7 @@ class frag_rx(frag_base):
         if window_size is zero, self.win is not set.
         '''
         if self.rule.window_size:
-            win = pb.bit_get(self.packet, pos, self.rule.window_size, ret_type=int)
+            win = self.packet.get_bits(self.rule.window_size)
             if exp_win != None and win != exp_win:
                 raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
@@ -258,7 +260,7 @@ class frag_rx(frag_base):
         parse fcn in the frame.
         assuming that fcn_size is not zero.
         '''
-        self.fcn = pb.bit_get(self.packet, pos, self.rule.fcn_size, ret_type=int)
+        self.fcn = self.packet.get_bits(self.rule.fcn_size)
         return self.rule.fcn_size
 
     def parse_bitmap(self, pos):
@@ -372,8 +374,8 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_dtag(pos)
         pos += self.parse_win(pos)
         pos += self.parse_fcn(pos)
-        if self.fcn == self.rule.fcn_all_1:
+        if self.fcn == get_all_1(self.rule):
             pos += self.parse_mic(pos)
-        payload_bit_len = len(self.packet)*8 - pos
-        self.payload = pb.bit_get(self.packet, pos, payload_bit_len)
-
+        payload_bit_len = self.packet.count_bits()
+        print("AAA", self.packet.__dict__)
+        self.payload = self.packet.get_bits_as_buffer(payload_bit_len)
