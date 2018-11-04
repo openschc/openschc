@@ -30,7 +30,10 @@ class SCHC_MODE():
 # 1375          All-1 window.
 
 def get_all_1(rule):
-    return 
+    return (1<<rule.fcn_size)-1
+
+def get_max_MAX_WIN_FCN(rule):
+    return (1<<rule.fcn_size)-2
 
 #---------------------------------------------------------------------------
 

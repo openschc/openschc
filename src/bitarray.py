@@ -10,6 +10,9 @@ class FakeBitBuffer:
     def add_bits(self, bits_as_long, nb_bits):
         self.content.append((bits_as_long, nb_bits))
 
+    def add_bytes(self, raw_data):
+        self.content.append(("bytes",raw_data))
+
     def get_bits(self, nb_bits):
         bits_as_long, added_nb_bits = self.content.pop(0)
         assert nb_bits == added_nb_bits

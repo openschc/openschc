@@ -8,21 +8,22 @@ import schc
 import simsched
 import simlayer2
 from fakeschcrecv import FakeSCHCProtocolReceiver
-from fakeschcsend import FakeSCHCProtocolSender
+from fakeschcsend import FakeSCHCProtocolSender, rule_from_dict 
 
-rule = {
-    "RID": 3,
-    "mode": "ack-on-error",
+rule_as_dict = {
+    # Header format
+    "rule-id-size": 6,
     "dtag-size": 2,
     "window-size": 5,
     "fcn-size": 3,
-    # MAX_WIND_FCN computed from "fcn-size"
+    "mode": "ack-on-error",
+
     "tile-size": 30,
     "mic-algorithm": "crc32"
 }
-# XXX: make a namedtuple?
 
-# XXX: create a real class SimulNode and Simul
+rule = rule_from_dict(rule_as_dict)
+
 def make_recv_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
