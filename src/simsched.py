@@ -50,9 +50,6 @@ class SlowSimulScheduler:
             return self.queue[0][0]
 
 
-    def get_next_event_time(self):
-
-
 SimulScheduler = SlowSimulScheduler
 
 class SimulSchedulerOld:
