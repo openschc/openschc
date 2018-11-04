@@ -120,7 +120,7 @@ class fragment_sender():
             return  # end of sending frags.
         # XXX send_packet() might need a peer iid to send a fragment.
         # XXX self.layer2.send_packet(frag, peer_iid)
-        print("S: [mac%s] -> SCHC[mac:%s] %s"
+        print("DEBUG: S: [mac%s] -> SCHC[mac:%s] %s"
               % ("00self00", peer_iid, frag))
         self.layer2.send_packet(frag)
         self.tile_list.update_sent_flags()
@@ -158,7 +158,7 @@ class fragment_sender():
             return None
 
     def recv_ack(self, packet, peer_iid=None):
-        print("recv_ack:", packet)  # XXX
+        print("DEBUG: recv_ack:", packet)  # XXX
         '''
         sh = schc_sender_parse(packet)
         if sh is None:
