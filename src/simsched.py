@@ -49,6 +49,7 @@ class SlowSimulScheduler:
             self.queue.sort()
             return self.queue[0][0]
 
+
 SimulScheduler = SlowSimulScheduler
 
 class SimulSchedulerOld:
