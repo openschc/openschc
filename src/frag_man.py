@@ -39,7 +39,7 @@ def schc_make_packet(config, rule, dtag, tiles):
         bu.bit_set(payload, pos, t["tile"], extend=True)
         pos += len(t["tile"])
 
-    print("DEBUG:", payload)
+    print("DEBUG: payload:", payload)
     return header + payload
 
 # XXX need to be replaced.
