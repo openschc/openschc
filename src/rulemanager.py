@@ -119,6 +119,15 @@ class RuleManager:
         if "fragmentation" in rule:
             fragRule = rule["fragmentation"]
 
+            if not "dtagSize" in fragRule:
+                fragRule["DtagSize"] = 0
+                
+            if not "wSize" in fragRule:
+                fragRule["wSize"] = 1
+                
+
+            print ("->", fragRule)
+            
         rID = rule["ruleID"]
         rLength = rule["ruleLength"]
 
@@ -138,12 +147,18 @@ if __name__ == "__main__":
     rule1 = {
         "ruleID" : 7,
         "ruleLength" : 3,
-        "compression" : {},
+        "fragmentation" : {},
         }
     rule2 = {
         "ruleID" : 4,
         "ruleLength" : 3,
-        "compression" : {},
+        "fragmentation" : {
+            "DtagSize" : 2,
+            "FCNSize": 3,
+            "AckOnError": {
+                "ackBehavior" : "afterAll1"
+            }
+        },
         }
     conflictingRule0 = {
         "ruleID" : 15,
@@ -156,5 +171,5 @@ if __name__ == "__main__":
     RM.add(rule1)
     RM.add(rule2)
     print (RM._db)
-    RM.add(conflictingRule0)
+    #RM.add(conflictingRule0)
     
