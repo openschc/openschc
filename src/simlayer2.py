@@ -8,6 +8,7 @@ class SimulLayer2:
         self.link_list = []
         self.mac_id = SimulLayer2.__get_unique_mac_id()
         self.receive_function = None
+        self.event_timeout = None
 
     def add_link(self, other):
         assert other not in self.link_list
