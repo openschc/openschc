@@ -29,8 +29,9 @@ def schc_make_packet(config, rule, dtag, tiles):
     fcn_bit = bu.int_to_bit(tiles[0]["t-num"], rule["fcn-size"])
     print("DEBUG: rid:{} dtag:{} win:{} fcn:{}".format(rid_bit, dtag_bit,
                                                        win_bit, fcn_bit))
+    # micropython doesn't have a key, byteorder.
     header = int("".join([rid_bit, dtag_bit, win_bit, fcn_bit]),2).to_bytes(
-            2,byteorder="big")
+            2, "big")
     # make a payload
     payload = bytearray()
     pos = 0
