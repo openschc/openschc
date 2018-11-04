@@ -13,7 +13,7 @@ try:
     from collections import namedtuple
 except ImportError:
     from ucollections import namedtuple
-    
+
 # --- sched
 #sys.path.append("../../micropython-lib/heapq") # XXX (for pyssched)
 #sys.path.append("../../micropython-lib/ffilib") # XXX (for time)
@@ -26,6 +26,5 @@ except ImportError:
 
 # --- default imports
 
-from bitarray import FakeBitBuffer as BitBuffer
-
-
+#from bitarray import FakeBitBuffer as BitBuffer
+from bitarray import SlowBitBuffer as BitBuffer
