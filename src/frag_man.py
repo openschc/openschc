@@ -64,10 +64,10 @@ class tile_list():
                     "ready_to_be_sent": False,
                 }
             self.tile_list.append(tile_obj)
-            w_num = w_num + 1
             t_num = t_num - 1
             if t_num < 0:
                 t_num = t_init_num
+                w_num += 1
         print("DEBUG: tile_list:")
         for i in self.tile_list:
             print("DEBUG:  ", i)
