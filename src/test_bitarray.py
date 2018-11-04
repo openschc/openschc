@@ -8,29 +8,19 @@ def check_bitbuffer_consistency(addition_list):
     for bits, nb_bits in bits_list:
         bitbuffer.add_bits(bits, nb_bits)
 
-    print("(0)", bitbuffer)
     padding_bitsize = bitbuffer.ensure_padding()
     content = bitbuffer.get_content()
-    print("(1)", bitbuffer)
 
     bitbuffer2 = BitBuffer(content)
-    print(bitbuffer._log)
 
     for i, (bits, nb_bits) in enumerate(bits_list):
-        print("PRE", bitbuffer, nb_bits)
-        #with_sub_buffer = ((i % 2) == 0)
-        with_sub_buffer = True
+        with_sub_buffer = ((i % 2) == 0)
         if with_sub_buffer:
             sub_bitbuffer = bitbuffer2.get_bits_as_buffer(nb_bits)
-            print("->", sub_bitbuffer)
             bits2 = sub_bitbuffer.get_bits(nb_bits)
-            print("-> +", sub_bitbuffer)
         else:
             bits2 = bitbuffer2.get_bits(nb_bits)
-        print("YOW", bits, bits2)
         assert bits == bits2  # XXX: raise exception instead when wrong
-
-    print(bitbuffer._log)
 
     assert bitbuffer2.count_bits() == padding_bitsize
     assert bitbuffer2.get_bits(padding_bitsize) == 0
@@ -56,8 +46,7 @@ def test_BitBuffer():
         assert ((v+2) >> i) == 1  # no overflow
         bits_list.append((v, i))
 
-    #bits_list = [(127,7), (1,1)]
-    bits_list = bits_list[28:29]
+    #bits_list = bits_list[28:29]
     check_bitbuffer_consistency(bits_list)
 
 test_BitBuffer()

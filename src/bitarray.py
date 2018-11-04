@@ -113,14 +113,9 @@ class SlowBitBuffer:
     def get_bits_as_buffer(self, nb_bits):
         result = SlowBitBuffer()
         for bit_index in range(nb_bits):
-            print(result)
-            b = self._get_one_bit()
-            result._add_one_bit(b)
-            print("B", b)
-            #result._add_one_bit(self._get_one_bit())
-        print(result)
+            result._add_one_bit(self._get_one_bit())
         assert result.count_bits() == nb_bits
-        result.ensure_padding()
+        result.ensure_padding()  # XXX: result size can be bigger than nb_bit
         return result
 
     def _push_from_pending(self):
@@ -157,6 +152,7 @@ class SlowBitBuffer:
         return result
 
     def __repr__(self):
+        #if self._log is not None:
         return "BitBuffer({})".format(self.__dict__)
 
 #---------------------------------------------------------------------------
