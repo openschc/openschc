@@ -22,13 +22,11 @@ class ReassemblerAckOnError:
         message.finalize(self.rule)
 
         print("parsed message:", message.__dict__, message.payload.__dict__)
-
-        #fcn = schcmsg.get_all_1(rule)
-        #print("ALL1")
-
-        sys.exit(0)
-
-
+        assert message.fcn is not None
+        fcn_all_1 = schcmsg.get_fcn_all_1(self.rule)
+        if message.fcn == fcn_all_1:
+            print("ALL1 received")
+        print("---", message.fcn)
 
 #---------------------------------------------------------------------------
 
@@ -42,14 +40,20 @@ class SCHCProtocolReceiver(schc.SCHCProtocol):
         schc.SCHCProtocol.set_frag_rule(self, rule)
         self.session.rule = rule
 
-    def find_session(self, peer_piid):
+    def find_session(self, device_id):
         return self.session
 
-    def event_receiver_receive_packet(self, peer_iid, raw_packet):
-        print("schc recv [mac%s] -> SCHC[mac:%s] %s"
-              % (peer_iid, self.layer2.mac_id, raw_packet))
+    def event_receiver_receive_packet(self, device_id, raw_packet):
+        #print("schc recv [mac%s] -> SCHC[mac:%s] %s"
+        #      % (peer_iid, self.layer2.mac_id, raw_packet))
 
-        session = self.find_session(peer_iid)
+        session = self.find_session(device_id)
         session.process_packet(raw_packet)
 
 #---------------------------------------------------------------------------
+
+# TODO:
+
+
+# 2340    smaller than the preceding ones.  WINDOW_SIZE MUST be equal to
+# 2341    MAX_WIND_FCN + 1.

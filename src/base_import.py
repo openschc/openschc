@@ -28,3 +28,4 @@ except ImportError:
 
 #from bitarray import FakeBitBuffer as BitBuffer
 from bitarray import SlowBitBuffer as BitBuffer
+#from bitarray import NewBitBuffer

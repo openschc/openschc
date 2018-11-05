@@ -4,7 +4,8 @@ from base_import import *  # used for now for differing modules in py/upy
 
 def check_bitbuffer_consistency(addition_list):
     bits_list = addition_list
-    bitbuffer = BitBuffer(should_record_add=True)
+    #bitbuffer = BitBuffer(should_record_add=True)
+    bitbuffer = BitBuffer()
     for bits, nb_bits in bits_list:
         bitbuffer.add_bits(bits, nb_bits)
 
@@ -15,6 +16,7 @@ def check_bitbuffer_consistency(addition_list):
 
     for i, (bits, nb_bits) in enumerate(bits_list):
         with_sub_buffer = ((i % 2) == 0)
+        with_sub_buffer = False
         if with_sub_buffer:
             sub_bitbuffer = bitbuffer2.get_bits_as_buffer(nb_bits)
             bits2 = sub_bitbuffer.get_bits(nb_bits)
