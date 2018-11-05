@@ -43,7 +43,7 @@ class BitBuffer:
 
     def __init__(self, content=b""):
         self._content = bytearray(content)
-        self._wpos = 0  # read position
+        self._wpos = len(content)*8  # read position
         self._rpos = 0  # write position
 
     def set_bit(self, bit, position=None):
@@ -136,10 +136,6 @@ class BitBuffer:
 
     def count_bits(self):
         return self._wpos
-
-    def align(self):
-        pos = self._wpos + self._wpos%8 -1
-        self.set_bit (0, position=pos)        
 
     def display(self):
         print ("{}/{}".format(self._content, self._wpos))
