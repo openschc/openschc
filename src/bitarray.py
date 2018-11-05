@@ -88,16 +88,40 @@ class BitBuffer:
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
             
         
-
+# to be rewritten
     def add_bytes(self, raw_data, position=None):
         for raw_byte in raw_data:
             self.add_bits(raw_byte, BITS_PER_BYTE, position=position)
 
-    def get_bits(self, nb_bits):
+    def get_bits(self, nb_bits=1, position=None):
+        """ return a integer containinng nb_bits from the position"""
+
+        if self._rpos + nb_bits > self._wpos:  # go after buffer
+            raise ValueError ("data out of buffer")
+
+        if position == None:
+            value = 0x00
+        
+            for i in range(0, nb_bits):
+                value <<=1
+                byte_index = self._rpos >> 3
+                offset     = 7 - (self._rpos & 7)
+
+                bit = self._content[byte_index] & (0x01 << offset)
+            
+                if (bit != 0):
+                    value |= 0x01
+
+                self._rpos += 1
+
+            return value
+            
         bits_as_long, added_nb_bits = self.content.pop(0)
         assert nb_bits == added_nb_bits
         return bits_as_long
 
+    
+#not implemented
     def get_bits_as_buffer(self, nb_bits):
         result = FakeBitBuffer()
         while result.count_bits() < nb_bits:
@@ -109,29 +133,40 @@ class BitBuffer:
     def get_content(self):
         return self._content
 
+
     def count_bits(self):
-        result = 0
-        for value, size in self.content:
-            result += size
-        return result
+        return self._wpos
 
+    def align(self):
+        pos = self._wpos + self._wpos%8 -1
+        self.set_bit (0, position=pos)        
 
+    def display(self):
+        print ("{}/{}".format(self._content, self._wpos))
         
     
 if __name__ == "__main__":
-    print ("here")
     bb = BitBuffer()
     for i in range(0,32):
         bb.set_bit(1)
     bb.set_bit(1, position=80 )
-    print ("->", bb.get_content())
+    bb.display()
     bb.set_bit(0, position=7 )
-    print ("->", bb.get_content())
+    bb.display()
+
 
     bb.add_bits(0x01, 4)
-    print ("->", bb.get_content())
+    bb.display()
 
-    bb.add_bits(0x01, 3, position=40)
-    print ("->", bb.get_content())
+    bb.add_bits(0x01, 3, position=100)
+    bb.display()
 
-    
+
+    bb.add_bits(1, 2)
+    bb.align()
+
+    bb.display()
+
+    for i in range(0, 13):
+        print(bb.get_bits(8))
+        
