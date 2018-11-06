@@ -155,6 +155,9 @@ class SlowBitBuffer:
         #if self._log is not None:
         return "BitBuffer({})".format(self.__dict__)
 
+    def display(self):
+        print(self)
+
 #---------------------------------------------------------------------------
 
 class NewBitBuffer:
@@ -162,7 +165,7 @@ class NewBitBuffer:
 
     def __init__(self, content=b""):
         self._content = bytearray(content)
-        self._wpos = 0  # read position
+        self._wpos = len(content)*8  # read position
         self._rpos = 0  # write position
 
     def set_bit(self, bit, position=None):
@@ -207,50 +210,86 @@ class NewBitBuffer:
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
 
 
-
+# to be rewritten
     def add_bytes(self, raw_data, position=None):
         for raw_byte in raw_data:
             self.add_bits(raw_byte, BITS_PER_BYTE, position=position)
 
-    def get_bits(self, nb_bits):
-        bits_as_long, added_nb_bits = self._content.pop(0)
-        assert nb_bits == added_nb_bits
-        return bits_as_long
+    def get_bits(self, nb_bits=1, position=None):
+        """ return a integer containinng nb_bits from the position"""
 
+        if self._rpos + nb_bits > self._wpos:  # go after buffer
+            raise ValueError ("data out of buffer")
+
+        if position == None:
+            value = 0x00
+
+            for i in range(0, nb_bits):
+                value <<=1
+                byte_index = self._rpos >> 3
+                offset     = 7 - (self._rpos & 7)
+
+                bit = self._content[byte_index] & (0x01 << offset)
+
+                if (bit != 0):
+                    value |= 0x01
+
+                self._rpos += 1
+
+            return value
+
+        bits_as_long, added_nb_bits = self.content.pop(0)
+
+
+#to be optimized
     def get_bits_as_buffer(self, nb_bits):
-        result = BitBuffer()
-        while result.count_bits() < nb_bits:
-            __, next_nb_bits = self._content[0]
-            bits = self.get_bits(next_nb_bits)
-            result.add_bits(bits, next_nb_bits)
+        result = NewBitBuffer()
+        for bit_index in range(nb_bits):
+            self.add_bits(self.get_bits(1), 1)
         return result
+
+    def ensure_padding(self):
+        count = (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
+        self.add_bits(0, count)
+        return count
 
     def get_content(self):
         return self._content
 
     def count_bits(self):
-        result = 0
-        for value, size in self._content:
-            result += size
-        return result
+        return self._wpos
 
-    def ensure_padding(self):
-        pass  # In this class, this is ensured by design
+    def display(self):
+        print ("{}/{}".format(self._content, self._wpos))
+
+    def __repr__(self):
+        return "{}/{}".format(self._content, self._wpos)
+
+
+#BitBuffer = NewBitBuffer
 
 if __name__ == "__main__":
-    print ("here")
-    bb = BitBuffer()
+    bb = NewBitBuffer()
     for i in range(0,32):
         bb.set_bit(1)
     bb.set_bit(1, position=80 )
-    print ("->", bb.get_content())
+    bb.display()
     bb.set_bit(0, position=7 )
-    print ("->", bb.get_content())
+    bb.display()
+
 
     bb.add_bits(0x01, 4)
-    print ("->", bb.get_content())
+    bb.display()
 
-    bb.add_bits(0x01, 3, position=40)
-    print ("->", bb.get_content())
+    bb.add_bits(0x01, 3, position=100)
+    bb.display()
+
+    bb.add_bits(1, 2)
+    bb.ensure_padding()
+
+    bb.display()
+
+    for i in range(0, 13):
+        print(bb.get_bits(8))
 
 #---------------------------------------------------------------------------
