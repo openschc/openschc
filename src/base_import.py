@@ -27,5 +27,5 @@ except ImportError:
 # --- default imports
 
 #from bitarray import FakeBitBuffer as BitBuffer
-from bitarray import SlowBitBuffer as BitBuffer
-#from bitarray import NewBitBuffer as BitBuffer
+#from bitarray import SlowBitBuffer as BitBuffer
+from bitarray import BitBuffer as BitBuffer

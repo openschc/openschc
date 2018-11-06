@@ -94,7 +94,10 @@ class SlowBitBuffer:
             count += 1
         return count
 
-    def count_bits(self):
+    def count_remaining_bits(self):
+        return len(self.content)*BITS_PER_BYTE + self.pending_count
+
+    def count_added_bits(self):
         return len(self.content)*BITS_PER_BYTE + self.pending_count
 
     def get_bits(self, nb_bits):
@@ -114,7 +117,7 @@ class SlowBitBuffer:
         result = SlowBitBuffer()
         for bit_index in range(nb_bits):
             result._add_one_bit(self._get_one_bit())
-        assert result.count_bits() == nb_bits
+        assert result.count_added_bits() == nb_bits
         result.ensure_padding()  # XXX: result size can be bigger than nb_bit
         return result
 
@@ -160,13 +163,13 @@ class SlowBitBuffer:
 
 #---------------------------------------------------------------------------
 
-class NewBitBuffer:
+class BitBuffer:
     """BitBuffer manage a buffer bit per bit. """
 
     def __init__(self, content=b""):
         self._content = bytearray(content)
-        self._wpos = len(content)*8  # read position
-        self._rpos = 0  # write position
+        self._wpos = len(content)*8  # write position
+        self._rpos = 0  # read position
 
     def set_bit(self, bit, position=None):
         if position == None:
@@ -218,7 +221,7 @@ class NewBitBuffer:
     def get_bits(self, nb_bits=1, position=None):
         """ return a integer containinng nb_bits from the position"""
 
-        if self._rpos + nb_bits > self._wpos:  # go after buffer
+        if self._rpos + nb_bits > self._wpos:  # go after buffer # XXX: > or >=?
             raise ValueError ("data out of buffer")
 
         if position == None:
@@ -239,13 +242,15 @@ class NewBitBuffer:
             return value
 
         bits_as_long, added_nb_bits = self.content.pop(0)
+        # XXX: implement
+        raise NotImplementedError("for position != None")
 
 
 #to be optimized
     def get_bits_as_buffer(self, nb_bits):
-        result = NewBitBuffer()
+        result = BitBuffer()
         for bit_index in range(nb_bits):
-            self.add_bits(self.get_bits(1), 1)
+            result.add_bits(self.get_bits(1), 1)
         return result
 
     def ensure_padding(self):
@@ -253,10 +258,23 @@ class NewBitBuffer:
         self.add_bits(0, count)
         return count
 
-    def get_content(self):
+    def _old_get_content(self):
         return self._content
 
-    def count_bits(self):
+    def get_content(self):
+        assert self._rpos % BITS_PER_BYTE == 0
+        #nb_bits = self.count_remaining_bits()
+        #assert nb_bits % BITS_PER_BYTE == 0
+        return self._content[self._rpos // BITS_PER_BYTE:]
+
+    # Renamed because of bad ambiguity:
+    #def count_bits(self):
+    #    return self._wpos
+
+    def count_remaining_bits(self):
+        return len(self._content)*BITS_PER_BYTE - self._rpos
+
+    def count_added_bits(self):
         return self._wpos
 
     def display(self):
@@ -266,7 +284,8 @@ class NewBitBuffer:
         return "{}/{}".format(self._content, self._wpos)
 
 
-#BitBuffer = NewBitBuffer
+#BitBuffer =
+NewBitBuffer = BitBuffer
 
 if __name__ == "__main__":
     bb = NewBitBuffer()

@@ -1,6 +1,7 @@
 
 from base_import import *  # used for now for differing modules in py/upy
 
+#from bitarray import NewBitBuffer as BitBuffer
 
 def check_bitbuffer_consistency(addition_list):
     bits_list = addition_list
@@ -11,12 +12,11 @@ def check_bitbuffer_consistency(addition_list):
 
     padding_bitsize = bitbuffer.ensure_padding()
     content = bitbuffer.get_content()
-
     bitbuffer2 = BitBuffer(content)
 
     for i, (bits, nb_bits) in enumerate(addition_list):
         with_sub_buffer = ((i % 2) == 0)
-        with_sub_buffer = False
+        #with_sub_buffer = False
         if with_sub_buffer:
             sub_bitbuffer = bitbuffer2.get_bits_as_buffer(nb_bits)
             bits2 = sub_bitbuffer.get_bits(nb_bits)
@@ -24,7 +24,9 @@ def check_bitbuffer_consistency(addition_list):
             bits2 = bitbuffer2.get_bits(nb_bits)
         assert bits == bits2  # XXX: raise exception instead when wrong
 
-    assert bitbuffer2.count_bits() == padding_bitsize
+    #print(bitbuffer2)
+
+    assert bitbuffer2.count_remaining_bits() == padding_bitsize
     assert bitbuffer2.get_bits(padding_bitsize) == 0
     assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception when not
 
@@ -67,6 +69,8 @@ def test_BitBuffer():
         bits_list.append((v, i))
 
     #bits_list = bits_list[28:29]
+    check_bitbuffer_consistency(bits_list)
     check_newbitbuffer_consistency(bits_list)
+
 
 test_BitBuffer()
