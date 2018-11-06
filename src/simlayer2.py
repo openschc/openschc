@@ -39,3 +39,6 @@ class SimulLayer2:
         result = SimulLayer2.mac_id
         SimulLayer2.mac_id += 1
         return result
+
+    def get_mtu_size(self):
+        return 56   # XXX
