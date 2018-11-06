@@ -35,6 +35,9 @@ def get_all_1(rule):
 def get_max_MAX_WIN_FCN(rule):
     return (1<<rule.fcn_size)-2
 
+def get_header_size(rule):
+    return rule.rule_id_size + rule.dtag_size + rule.window_size + rule.fcn_size
+
 #---------------------------------------------------------------------------
 
 '''
@@ -250,7 +253,7 @@ class frag_rx(frag_base):
         '''
         if self.rule.window_size:
             win = self.packet.get_bits(self.rule.window_size)
-            if exp_win != None and win != exp_win:
+            if exp_win is not None and win is not exp_win:
                 raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
         return self.rule.window_size
@@ -302,6 +305,29 @@ class frag_sender_rx_all0_ack(frag_rx):
          4        15     12
          5        31     13
     '''
+    def __init__(self, recvbuf, R, dtag, exp_win=None):
+        '''
+        recvbuf: buffer received in bytearray().
+        R: rule instance.
+        '''
+        self.init_param()
+        self.set_recvbuf(recvbuf)
+        self.rule = R
+        pos = 0
+        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule.rule_id)
+        pos += self.parse_dtag(pos, exp_dtag=dtag)
+        pos += self.parse_win(pos, exp_win=exp_win)
+        # XXX the abort is not supported yet.
+        pos += self.parse_bitmap(pos)
+
+class frag_sender_rx_all1_ack(frag_rx):
+
+    '''
+    for the fragment sender to receive the all1 ack.
+        Format: [ Rule ID | DTag |W|C|P1]
+        Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
+        Format: [ Rule ID | DTag |W| All-1 |  FF  |P1]
+    '''
     def __init__(self, recvbuf, R, dtag, win):
         '''
         recvbuf: buffer received in bytearray().
@@ -315,15 +341,17 @@ class frag_sender_rx_all0_ack(frag_rx):
         pos += self.parse_dtag(pos, exp_dtag=dtag)
         pos += self.parse_win(pos, exp_win=win)
         # XXX the abort is not supported yet.
-        pos += self.parse_bitmap(pos)
+        pos += self.parse_cbit(pos)
+        if self.cbit == 0:
+            pos += self.parse_bitmap(pos)
 
-class frag_sender_rx_all1_ack(frag_rx):
+class frag_sender_rx(frag_rx):
 
     '''
-    for the fragment sender to receive the all1 ack.
-        Format: [ Rule ID | DTag |W|C|P1]
-        Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
-        Format: [ Rule ID | DTag |W| All-1 |  FF  |P1]
+    message format received by the fragment sender.
+        ACK-OK : [ Rule ID | DTag |W|C-1| Pad-0 ]
+        ACK-NG : [ Rule ID | DTag |W|C-0| Bitmap | Pad-0 ]
+        R-Abort: [ Rule ID | DTag |W|C-1| Pad-1 |
     '''
     def __init__(self, recvbuf, R, dtag, win):
         '''
