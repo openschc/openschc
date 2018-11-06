@@ -8,7 +8,7 @@ import schcmsg
 #---------------------------------------------------------------------------
 # XXX: put rule_manager
 
-Rule = namedtuple("Rule", "rule_id_size dtag_size window_size"
+Rule = namedtuple("Rule", "rule_id_size rule_id dtag_size window_size"
                   + " fcn_size mode tile_size mic_algorithm")
 
 def rule_from_dict(rule_as_dict):
@@ -48,6 +48,9 @@ class FakeSCHCProtocolSender(schc.SCHCProtocol):
 
         for i,packet in enumerate(packet_list):
             self.scheduler.add_event(2*i, self.layer2.send_packet, (packet,))
+
+    def event_receive_packet(self, peer_id, packet):
+        pass
 
 #---------------------------------------------------------------------------
 
