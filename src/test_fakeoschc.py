@@ -13,6 +13,7 @@ from fakeschcsend import FakeSCHCProtocolSender, rule_from_dict
 rule_as_dict = {
     # Header format
     "rule-id-size": 6,
+    "rule-id": 5,
     "dtag-size": 2,
     "window-size": 5,
     "fcn-size": 3,

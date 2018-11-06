@@ -13,6 +13,7 @@ from fakeschcsend import FakeSCHCProtocolSender, rule_from_dict
 rule_as_dict = {
     # Header format
     "rule-id-size": 6,
+    "rule-id": 5,
     "dtag-size": 2,
     "window-size": 5,
     "fcn-size": 3,
@@ -27,7 +28,7 @@ rule = rule_from_dict(rule_as_dict)
 def make_recv_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
-    protocol = SCHCProtocolReceiver(config, scheduler, mac, role="receiver")
+    protocol = SCHCProtocolReceiver(config, scheduler, mac)
     # protocol.rulemanager.add_rule(...) ???
     protocol.set_frag_rule(rule)
     return mac, protocol
@@ -35,7 +36,7 @@ def make_recv_node(scheduler):
 def make_send_node(scheduler):
     config = {}
     mac = simlayer2.SimulLayer2(scheduler)
-    protocol = FakeSCHCProtocolSender(config, scheduler, mac, role="sender")
+    protocol = FakeSCHCProtocolSender(config, scheduler, mac)
     # protocol.rulemanager.add_rule(...) ???
     protocol.set_frag_rule(rule)
     return mac, protocol
