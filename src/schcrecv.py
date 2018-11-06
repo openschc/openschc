@@ -45,11 +45,20 @@ class SCHCProtocolReceiver(schc.SCHCProtocol):
     def find_session(self, peer_piid):
         return self.session
 
+    def event_receive_packet(self, peer_iid, raw_packet):
+        print("schc recv [mac%s] -> SCHC[mac:%s] %s"
+              % (peer_iid, self.layer2.mac_id, raw_packet))
+
+        session = self.find_session(peer_iid)
+        session.process_packet(raw_packet)
+
+    '''
     def event_receiver_receive_packet(self, peer_iid, raw_packet):
         print("schc recv [mac%s] -> SCHC[mac:%s] %s"
               % (peer_iid, self.layer2.mac_id, raw_packet))
 
         session = self.find_session(peer_iid)
         session.process_packet(raw_packet)
+    '''
 
 #---------------------------------------------------------------------------
