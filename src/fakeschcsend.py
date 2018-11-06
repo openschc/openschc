@@ -22,6 +22,7 @@ def make_test_fragment_list(rule, rule_id, dtag, fragment_count):
     message_list = []
 
     max_fcn = schcmsg.get_max_MAX_WIN_FCN(rule)
+    fcn_all_1 = schcmsg.get_fcn_all_1(rule)
     current_fcn = max_fcn
     window_number = 0
     for fragment_idx in range(fragment_count):
@@ -35,6 +36,12 @@ def make_test_fragment_list(rule, rule_id, dtag, fragment_count):
             current_fcn -= 1
         raw_packet = message.packet.content
         message_list.append(raw_packet)
+
+    message = schcmsg.frag_sender_tx(
+        rule, rule_id=rule_id, dtag=dtag, win=window_number,
+        fcn=fcn_all_1, mic=b"\0\0\0\0", payload=one_tile)
+    raw_packet = message.packet.content
+    message_list.append(raw_packet)
 
     return message_list
 

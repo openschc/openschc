@@ -1,9 +1,7 @@
 
 from base_import import *  # used for now for differing modules in py/upy
 
-# Rule format contains the following fields:
-# "rule-id-size", "dtag-size", "window-size", "fcn-size", "mode",
-# "tile-size", "mic-algorithm"
+import bitarray
 
 # Copied from schctest/schc_param.py
 
@@ -29,14 +27,19 @@ class SCHC_MODE():
 # 1374          windows are used, the last window of a packet is called the
 # 1375          All-1 window.
 
-def get_all_1(rule):
+def get_fcn_all_1(rule):
     return (1<<rule.fcn_size)-1
 
 def get_max_MAX_WIN_FCN(rule):
     return (1<<rule.fcn_size)-2
 
+
 def get_header_size(rule):
     return rule.rule_id_size + rule.dtag_size + rule.window_size + rule.fcn_size
+
+def get_mic_size_in_bits(rule):
+    assert rule.mic_algorithm == "crc32"
+    return 32
 
 #---------------------------------------------------------------------------
 
@@ -133,8 +136,11 @@ class frag_tx(frag_base):
             buffer.add_bits(win, self.rule.window_size)
         if fcn is not None and self.rule.fcn_size is not None:
             buffer.add_bits(fcn, self.rule.fcn_size)
-        if mic != None and self.rule.C.mic_size is not None:
-            buffer.add_bits(mic, self.rule.C.mic_size)
+        if mic != None and self.rule.mic_algorithm is not None:
+            mic_size = get_mic_size_in_bits(self.rule)
+            assert mic_size % bitarray.BITS_PER_BYTE == 0
+            assert len(mic) == mic_size // 8
+            buffer.add_bytes(mic)
         if cbit != None and self.rule.cbit_size:
             buffer.add_bits(cbit, self.rule.cbit_size)
         if bitmap != None and self.rule.bitmap_size:
@@ -288,8 +294,9 @@ class frag_rx(frag_base):
         parse mic in the frame.
         assuming that mic_size is not zero.
         '''
-        self.mic = pb.bit_get(self.packet, pos, self.rule.C.mic_size, ret_type=int)
-        return self.rule.C.mic_size
+        mic_size = get_mic_size_in_bits(self.rule)
+        self.mic = self.packet.get_bits(mic_size)
+        return mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):
 
@@ -402,8 +409,7 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_dtag(pos)
         pos += self.parse_win(pos)
         pos += self.parse_fcn(pos)
-        if self.fcn == get_all_1(self.rule):
+        if self.fcn == get_fcn_all_1(self.rule):
             pos += self.parse_mic(pos)
         payload_bit_len = self.packet.count_bits()
-        print("AAA", self.packet.__dict__)
         self.payload = self.packet.get_bits_as_buffer(payload_bit_len)
