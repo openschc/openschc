@@ -11,6 +11,9 @@ from schcrecv import SCHCProtocolReceiver
 from schcsend import SCHCProtocolSender
 from fakeschcsend import rule_from_dict
 
+
+raise RuntimeError("XXX: new simul. architecture in test_newschc.py")
+
 rule_as_dict = {
     "rule-id-size": 6,
     "rule-id": 5,
