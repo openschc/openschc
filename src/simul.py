@@ -85,7 +85,8 @@ class Simul:
         for link in link_list:
             count += self.send_packet_on_link(link, packet)
         if callback != None:
-            args = callback_args+(count,)
+            #args = callback_args+(count,) # XXX need to check.
+            args = callback_args
             callback(*args)
         return count
 
