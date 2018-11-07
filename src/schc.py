@@ -70,16 +70,23 @@ class NewSCHCProtocol:
         #session = FragmentAckOnError(self, None) # XXX:hack
         session = self.fragmentation_session
         session.set_packet(packet)
-        frag = session.get_frags()
-        dev_id = self.layer2.mac_id
-        print(frag)
-        print(dev_id, frag.packet.get_content())
-        def callback(*args):
-            print("packet sent!", self.sim.get_time())
-        args = (frag.packet.get_content(), dev_id)
-        self.scheduler.add_event(0, self.layer2.send_packet, args)
-        session.update_frags_sent_flag()
+        self.send_frag()
 
+    def send_frag(self):
+        session = self.fragmentation_session
+        frag = session.get_frags()
+        if frag is None:
+            return
+        src_dev_id = self.layer2.mac_id
+        print(frag)
+        print(src_dev_id, frag.packet.get_content())
+        args = (frag.packet.get_content(), src_dev_id, None,
+                self.event_sent_frag)
+        self.scheduler.add_event(0, self.layer2.send_packet, args)
+
+    def event_sent_frag(self):
+        self.fragmentation_session.update_frags_sent_flag()
+        self.send_frag()
 
     def event_receive_from_L2(self, device_id, raw_packet):
         print("[schc] recv [L2:%s] -> SCHC[mac:%s] %s"
