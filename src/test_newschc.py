@@ -49,6 +49,7 @@ node1 = make_node(sim)
 sim.add_sym_link(node0, node1)
 
 print("mac_id:", node0.id, node1.id)
-node0.protocol.layer3.send_later(1, bytearray(range(1, 2+1)))
+#node0.protocol.layer3.send_later(1, bytearray(range(1, 2+1)))
+node0.protocol.layer3.send_later(1, bytearray(range(1, 8+1)))
 
 sim.run()
