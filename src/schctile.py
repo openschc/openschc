@@ -60,6 +60,8 @@ class TileList():
                     print("XXX invalid state, add it anyway.")
                 t["ready_to_be_sent"] = True
                 t_prev = t
+            if len(tiles) == max_tiles:
+                break
         if len(tiles) == 0:
             return None
         else:
