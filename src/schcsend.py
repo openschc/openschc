@@ -65,7 +65,7 @@ class FragmentAckOnError():
     def start_sending(self):
         self.send_frag()
 
-    def event_sent_frag(self):
+    def event_sent_frag(self, status): # status == nb actually sent (for now)
         self.update_frags_sent_flag()
         self.send_frag()
 
@@ -105,13 +105,13 @@ class FragmentAckOnError():
         if peer_iid:
             for i in self.session_list:
                 if i.peer_iid == peer_iid:
-                    return i 
+                    return i
             else:
                 return None
         else:
             # XXX
             return None
-                
+
 
 
 #---------------------------------------------------------------------------

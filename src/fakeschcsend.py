@@ -3,17 +3,7 @@ from base_import import *  # used for now for differing modules in py/upy
 
 import schc
 import schcmsg
-
-
-#---------------------------------------------------------------------------
-# XXX: put rule_manager
-
-Rule = namedtuple("Rule", "rule_id_size rule_id dtag_size window_size"
-                  + " fcn_size mode tile_size mic_algorithm")
-
-def rule_from_dict(rule_as_dict):
-    rule_as_dict = { k.replace("-","_"): v for k,v in rule_as_dict.items() }
-    return Rule(**rule_as_dict)
+from fakerulemgr import rule_from_dict
 
 #---------------------------------------------------------------------------
 

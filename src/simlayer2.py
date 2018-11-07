@@ -30,10 +30,12 @@ class SimulLayer2:
     def _send_packet_from_queue(self):
         assert not self.is_transmitting
         assert len(self.packet_queue) > 0
+
         self.is_transmitting = True
         (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
         print(transmit_callback, "AAAAAAA")
+
         self.sim.send_packet(packet, src_dev_id, dst_dev_id,
                              self._event_sent_callback, (transmit_callback,))
         #self.counter -= 1
@@ -43,11 +45,11 @@ class SimulLayer2:
         #    self.scheduler.add_event(self.delay, other.event_receive_packet,
         #                             (other.mac_id, packet))
 
-    def _event_sent_callback(self, transmit_callback):
+    def _event_sent_callback(self, transmit_callback, status):
         assert self.is_transmitting
         self.is_transmitting = False
         if transmit_callback != None:
-            transmit_callback()
+            transmit_callback(status)
 
     def event_receive_packet(self, other_mac_id, packet):
         #if self.receive_function != None:

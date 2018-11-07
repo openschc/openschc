@@ -9,8 +9,7 @@ import simsched
 import simlayer2
 from schcrecv import SCHCProtocolReceiver
 from schcsend import SCHCProtocolSender
-from fakeschcsend import rule_from_dict
-
+from fakerulemgr import rule_from_dict
 
 raise RuntimeError("XXX: new simul. architecture in test_newschc.py")
 
@@ -44,7 +43,7 @@ def make_recv_node(scheduler):
     mac = simlayer2.SimulLayer2(scheduler)
     protocol = SCHCProtocolReceiver(config, scheduler, mac)
     # protocol.rulemanager.add_rule(...) ???
-    protocol.set_frag_rule(rule)
+    protocol.rule_manager.set_frag_rule(rule)
     return mac, protocol
 
 scheduler = simsched.SimulScheduler()
