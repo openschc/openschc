@@ -50,6 +50,25 @@ class FragmentAckOnError():
         else:
             return None
 
+    def send_frag(self):
+        frag = self.get_frags()
+        if frag is None:
+            return
+        src_dev_id = self.protocol.layer2.mac_id
+        print(frag)
+        print(src_dev_id, frag.packet.get_content())
+        args = (frag.packet.get_content(), src_dev_id, None,
+                self.event_sent_frag)
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+                                          args)
+
+    def start_sending(self):
+        self.send_frag()
+
+    def event_sent_frag(self):
+        self.update_frags_sent_flag()
+        self.send_frag()
+
     def update_frags_sent_flag(self):
         self.tile_list.update_sent_flag()
 
