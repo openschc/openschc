@@ -33,7 +33,7 @@ class SimulLayer2:
         (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
         print(transmit_callback, "AAAAAAA")
-        self.sim.send_packet(packet, dst_dev_id, None,
+        self.sim.send_packet(packet, src_dev_id, dst_dev_id,
                              self._event_sent_callback, (transmit_callback,))
         #self.counter -= 1
         #if self.counter < 0:
