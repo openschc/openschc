@@ -30,6 +30,7 @@ class SimulLayer2:
     def _send_packet_from_queue(self):
         assert not self.is_transmitting
         assert len(self.packet_queue) > 0
+        self.is_transmitting = True
         (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
         print(transmit_callback, "AAAAAAA")
