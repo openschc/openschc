@@ -39,7 +39,7 @@ class FragmentAckOnError():
         get contiguous fragments to be sent.
         '''
         mtu_size = self.protocol.layer2.get_mtu_size()
-        max_tiles = ((mtu_size - schcmsg.get_header_size(self.rule)) /
+        max_tiles = int((mtu_size - schcmsg.get_header_size(self.rule)) /
                      self.rule.tile_size)
         tiles = self.tile_list.get_tiles(max_tiles)
         if tiles is not None:
