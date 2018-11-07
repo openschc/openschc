@@ -43,6 +43,9 @@ class TileList():
         for i in self.tile_list:
             print("DEBUG:  ", i)
 
+    def get_remaining_tiles(self):
+        return len(self.tile_list)
+
     def get_tiles(self, max_tiles):
         '''
         return the tiles containing the contiguous tiles in maximum
