@@ -1,19 +1,31 @@
+from base_import import *
+
 import schcmsg
-from schctest import pybinutil as bu # XXX
+from math import floor
 
 #---------------------------------------------------------------------------
 
 class TileList():
 
+    # XXX it is almost about the sender side, should be moved into schcsend.py.
+    # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet):
         t_size = rule.tile_size
         t_init_num = schcmsg.get_max_MAX_WIN_FCN(rule)
         self.tile_list = []
         w_num = 0
         t_num = t_init_num
-        for i in range(0, len(packet)*8, t_size):
-            # XXX need to use BitBuffer
-            t = bu.bit_get(packet, pos=i, val=i+t_size)
+        # make tiles
+        bb = BitBuffer(packet)
+        num_full_size_tiles = floor(bb.count_added_bits()/t_size)
+        last_tile_size = bb.count_added_bits() - t_size*num_full_size_tiles
+        assert last_tile_size >= 0
+        tiles = [ bb.get_bits_as_buffer(t_size)
+                 for _ in range(num_full_size_tiles) ]
+        if last_tile_size > 0:
+            tiles.append(bb.get_bits_as_buffer(last_tile_size))
+        # make a tile_list
+        for t in tiles:
             tile_obj = {
                     "w-num": w_num,
                     "t-num": t_num,
@@ -60,10 +72,8 @@ class TileList():
 
     @staticmethod
     def get_bytearray(tiles):
-        buf = bytearray()
-        pos = 0
+        buf = BitBuffer()
         for t in tiles:
-            bu.bit_set(buf, pos, t["tile"], extend=True)
-            pos += len(t["tile"])
-        return buf
+            buf += t["tile"]
+        return buf.get_content()
 
