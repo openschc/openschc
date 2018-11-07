@@ -40,7 +40,7 @@ def make_node(sim, extra_config={}):
 rule = rule_from_dict(rule_as_dict)
 
 simul_config = {
-    "log": False
+    "log": True
 }
 sim = simul.Simul(simul_config)
 

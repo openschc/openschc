@@ -16,11 +16,15 @@ class SimulLayer3:
         self.protocol = None
 
     def send_later(self, rel_time, packet):
+        self._log("send-later {}".format(packet))
         self.sim.scheduler.add_event(
             rel_time, self.protocol.event_receive_from_L3, (packet,))
 
     def _set_protocol(self, protocol): # called by [New]SCHCProtocol
         self.protocol = protocol
+
+    def _log(self, message):
+        self.protocol.system.log("L3", message)
 
 
 class SimulNode: # object
@@ -35,12 +39,23 @@ class SimulSCHCNode(SimulNode):
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
         self.protocol = schc.NewSCHCProtocol(
-            self.config, sim.scheduler, self.layer2, self.layer3)
+            self.config, self, self.layer2, self.layer3)
         self.id = self.layer2.mac_id
         self.sim._add_node(self)
 
     def event_receive(self, sender_id, packet):
+        self._log("recv from {}".format(sender_id))
         self.layer2.event_receive_packet(sender_id, packet)
+
+
+    def get_scheduler(self):
+        return self.sim.scheduler
+
+    def _log(self, message):
+        self.log("node", message)
+
+    def log(self, name, message):
+        self.sim.log(name, "@{} {}".format(self.layer2.mac_id, message))
 
 
 class SimulNullNode(SimulNode):
@@ -62,10 +77,13 @@ class Simul:
     def log(self, name, message): # XXX: put Soichi type of logging
         if not self.simul_config.get("log", False):
             return
-        line = "{} [{}] ".format(self.scheduler.get_time(), name) + message
+        line = "{} [{}] ".format(self.scheduler.get_clock(), name) + message
         print(line)
         if self.log_file != None:
             self.log_file.write(line+"\n")
+
+    def _log(self, message):
+        self.log("sim", message)
 
     # XXX:optimize
     def get_link_by_id(self, src_id=None, dst_id=None):
@@ -78,7 +96,7 @@ class Simul:
 
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
-        self.log("simul", "send packet {}->{}".format(src_id, dst_id))
+        self._log("send-packet {}->{}".format(src_id, dst_id))
         # if dst_id == None, it is a broadcast
         link_list = self.get_link_by_id(src_id, dst_id)
         count = 0
@@ -102,6 +120,7 @@ class Simul:
                 and to_node.id in self.node_table)
         link = Link(from_id=from_node.id, to_id=to_node.id, delay=delay)
         # XXX: check not another link there with same from_id, same to_id
+        self._log("add-link {}->{}".format(from_node.id, to_node.id))
         self.link_set.add(link)
 
     def add_sym_link(self, from_node, to_node, delay=1):
