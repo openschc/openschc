@@ -28,7 +28,7 @@ class FragmentAckOnError():
 
     def set_packet(self, packet):
         #self.rule_only_for_hackathon103 = rule # XXX this must be removed.
-        self.tile_list = TileList(self.rule, packet)
+        self.all_tiles = TileList(self.rule, packet)
         # update dtag for next
         self.dtag += 1
         if self.dtag > pow(2,self.rule.dtag_size-1):
@@ -41,12 +41,12 @@ class FragmentAckOnError():
         mtu_size = self.protocol.layer2.get_mtu_size()
         max_tiles = int((mtu_size - schcmsg.get_header_size(self.rule)) /
                      self.rule.tile_size)
-        tiles = self.tile_list.get_tiles(max_tiles)
-        if tiles is not None:
+        window_tiles = self.all_tiles.get_tiles(max_tiles)
+        if window_tiles is not None:
             return schcmsg.frag_sender_tx(
                 self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
-                win=tiles[0]["w-num"], fcn=tiles[0]["t-num"],
-                payload=TileList.get_bytearray(tiles))
+                win=window_tiles[0]["w-num"], fcn=window_tiles[0]["t-num"],
+                payload=TileList.get_bytearray(window_tiles))
         else:
             return None
 
@@ -70,7 +70,7 @@ class FragmentAckOnError():
         self.send_frag()
 
     def update_frags_sent_flag(self):
-        self.tile_list.update_sent_flag()
+        self.all_tiles.update_sent_flag()
 
     def recv_ack(self, packet, peer_iid=None):
         print("DEBUG: recv_ack:", packet)  # XXX
@@ -79,7 +79,7 @@ class FragmentAckOnError():
         print("parsed message:", message.__dict__, message.payload.__dict__)
 
         if message.cbit == 0:
-            self.tile_list.unset_sent_flag(message.win, message.bitmap)
+            self.all_tiles.unset_sent_flag(message.win, message.bitmap)
             self.send_frag()
         elif message.cbit == 1:
             #XXX
