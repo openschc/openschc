@@ -11,7 +11,7 @@ def make_test_fragment_list(rule, rule_id, dtag, fragment_count):
     one_tile = 30 * b"\0"
     message_list = []
 
-    max_fcn = schcmsg.get_max_MAX_WIN_FCN(rule)
+    max_fcn = schcmsg.get_MAX_WIND_FCN(rule)
     fcn_all_1 = schcmsg.get_fcn_all_1(rule)
     current_fcn = max_fcn
     window_number = 0

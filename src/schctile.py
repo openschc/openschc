@@ -11,7 +11,7 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet):
         t_size = rule.tile_size
-        t_init_num = schcmsg.get_max_MAX_WIN_FCN(rule)
+        t_init_num = schcmsg.get_MAX_WIND_FCN(rule)
         self.tile_list = []
         w_num = 0
         t_num = t_init_num

@@ -30,7 +30,7 @@ class SCHC_MODE():
 def get_fcn_all_1(rule):
     return (1<<rule.fcn_size)-1
 
-def get_max_MAX_WIN_FCN(rule):
+def get_MAX_WIND_FCN(rule):
     return (1<<rule.fcn_size)-2
 
 def get_max_dtag(rule):
