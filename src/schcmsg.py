@@ -33,6 +33,8 @@ def get_fcn_all_1(rule):
 def get_max_MAX_WIN_FCN(rule):
     return (1<<rule.fcn_size)-2
 
+def get_max_dtag(rule):
+    return (1<<rule.dtag_size)-1
 
 def get_header_size(rule):
     return rule.rule_id_size + rule.dtag_size + rule.window_size + rule.fcn_size
