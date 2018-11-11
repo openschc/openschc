@@ -143,8 +143,8 @@ class frag_tx(frag_base):
             assert mic_size % bitarray.BITS_PER_BYTE == 0
             assert len(mic) == mic_size // 8
             buffer.add_bytes(mic)
-        if cbit != None and self.rule.cbit_size:
-            buffer.add_bits(cbit, self.rule.cbit_size)
+        if cbit != None:
+            buffer.set_bit(cbit)
         if bitmap != None and self.rule.bitmap_size:
             buffer.add_bits(bitmap, self.rule.bitmap_size)
         if abort == True:
@@ -286,10 +286,9 @@ class frag_rx(frag_base):
     def parse_cbit(self, pos):
         '''
         parse cbit in the frame.
-        assuming that cbit_size is not zero.
         '''
-        self.cbit = pb.bit_get(self.packet, pos, self.rule.cbit_size, ret_type=int)
-        return self.rule.cbit_size
+        self.cbit = pb.bit_get(self.packet, pos, 1, ret_type=int)
+        return 1
 
     def parse_mic(self, pos):
         '''
