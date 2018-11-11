@@ -312,9 +312,10 @@ class BitBuffer:
         return "{}/{}".format(self._content, self._wpos)
 
     def __add__(self, other):
+        new_buf = self.get_bits_as_buffer(self.count_added_bits())
         for bit_index in range(other.count_added_bits()):
-            self.add_bits(other.get_bits(1), 1)
-        return self
+            new_buf.add_bits(other.get_bits(1, bit_index), 1)
+        return new_buf
 
 #BitBuffer =
 NewBitBuffer = BitBuffer
