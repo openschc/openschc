@@ -227,11 +227,11 @@ class BitBuffer:
     def get_bits(self, nb_bits=1, position=None):
         """ return a integer containinng nb_bits from the position"""
 
-        if self._rpos + nb_bits > self._wpos:  # go after buffer # XXX: > or >=?
-            raise ValueError ("data out of buffer")
+        value = 0x00
 
         if position == None:
-            value = 0x00
+            if self._rpos + nb_bits > self._wpos:  # go after buffer # XXX: > or >=?
+                raise ValueError ("data out of buffer")
 
             for i in range(0, nb_bits):
                 value <<=1
@@ -246,11 +246,21 @@ class BitBuffer:
                 self._rpos += 1
 
             return value
+        else:
+            if position + nb_bits > self._wpos:  # go after buffer
+                raise ValueError ("data out of buffer")
 
-        bits_as_long, added_nb_bits = self.content.pop(0)
-        # XXX: implement
-        raise NotImplementedError("for position != None")
+            for pos in range(position, position + nb_bits):
+                value <<=1
+                byte_index = pos >> 3
+                offset = 7 - (pos & 7)
 
+                bit = self._content[byte_index] & (0x01 << offset)
+
+                if (bit != 0):
+                    value |= 0x01
+
+            return value
 
 #to be optimized
     def get_bits_as_buffer(self, nb_bits):
