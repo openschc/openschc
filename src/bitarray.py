@@ -166,7 +166,7 @@ class SlowBitBuffer:
 class BitBuffer:
 
     def __init__(self, content=b""):
-        """BitBuffer manage a buffer bit per bit.
+        """ BitBuffer manage a buffer bit per bit.
         content: any objects which can be passed to bytes or bytearray.
         _wpos: always indicating the last next bit position for set_bit()
                without position.
@@ -178,6 +178,12 @@ class BitBuffer:
         self._rpos = 0  # read position
 
     def set_bit(self, bit, position=None):
+        """ if bit is not 0, set a bit on at the specified position.
+        Otherwise, set a bit off.
+        if position is not specified, the target bit is the bit specified by
+        _wpos, i.e. at the end of buffer, and as the result, _wpos is
+        incremented. """
+        # XXX needs to check whether it works as defined above.
         if position == None:
             byte_index = (self._wpos >> 3)
             offset = 7 - (self._wpos & 7)
@@ -207,9 +213,9 @@ class BitBuffer:
 
     def add_bits(self, bits_as_long, nb_bits, position=None):
         """ write a nb_bits less significant bits of an integer in the buffer.
-        if position is not specified, the nb_bits are added at the end of the buffer.
-        if position is specified the nb_bits are set at the buffer position. Position
-        defines the position if the most significant bit. """
+        if position is not specified, the nb_bits are added at the end of the
+        buffer.  if position is specified the nb_bits are set at the buffer
+        position. Position defines the position if the most significant bit. """
 
         if position == None:
             for i in range(nb_bits, 0, -1):
@@ -225,7 +231,10 @@ class BitBuffer:
             self.add_bits(raw_byte, BITS_PER_BYTE, position=position)
 
     def get_bits(self, nb_bits=1, position=None):
-        """ return a integer containinng nb_bits from the position"""
+        """ return an integer containinng nb_bits from the position.
+        The most left bit is 0.
+        if position is not specified, _rpos is incremented so that next
+        calling get_bits() without position automatically takes the next bit."""
 
         value = 0x00
 
