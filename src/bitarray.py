@@ -164,10 +164,15 @@ class SlowBitBuffer:
 #---------------------------------------------------------------------------
 
 class BitBuffer:
-    """BitBuffer manage a buffer bit per bit. """
 
     def __init__(self, content=b""):
-        """content: any objects which can be passed to bytes or bytearray."""
+        """BitBuffer manage a buffer bit per bit.
+        content: any objects which can be passed to bytes or bytearray.
+        _wpos: always indicating the last next bit position for set_bit()
+               without position.
+        _rpos: indicating the bit position to be read for get_bits() without
+               position.
+        """
         self._content = bytearray(content)
         self._wpos = len(content)*8  # write position
         self._rpos = 0  # read position
