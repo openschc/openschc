@@ -167,6 +167,7 @@ class BitBuffer:
     """BitBuffer manage a buffer bit per bit. """
 
     def __init__(self, content=b""):
+        """content: any objects which can be passed to bytes or bytearray."""
         self._content = bytearray(content)
         self._wpos = len(content)*8  # write position
         self._rpos = 0  # read position
