@@ -288,15 +288,12 @@ class BitBuffer:
     #    return self._wpos
 
     def count_remaining_bits(self):
-        '''
-        return the number of the significant bits.
-        '''
+        """return the number of the remaining significant bits from
+        the position of self._rpos."""
         return len(self._content)*BITS_PER_BYTE - self._rpos
 
     def count_added_bits(self):
-        '''
-        return the number of holder space of the significant bits in bits.
-        '''
+        """return the number of significant bits from the most left bit."""
         return self._wpos
 
     def display(self):
