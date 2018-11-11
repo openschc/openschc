@@ -127,7 +127,7 @@ class frag_tx(frag_base):
         buffer = BitBuffer()
         #
         # basic fields.
-        if self.rule_id is not None and self.rule.rule_id_size is not None:
+        if self.rule.rule_id is not None and self.rule.rule_id_size is not None:
             buffer.add_bits(self.rule_id, self.rule.rule_id_size)
         if dtag is not None and self.rule.dtag_size is not None:
             assert self.rule.dtag_size != None # CA: sanity check
