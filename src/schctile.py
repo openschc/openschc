@@ -10,6 +10,7 @@ class TileList():
     # XXX it is almost about the sender side, should be moved into schcsend.py.
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet):
+        self.rule = rule
         t_size = rule.tile_size
         t_init_num = schcmsg.get_MAX_WIND_FCN(rule)
         self.tile_list = []
@@ -17,10 +18,11 @@ class TileList():
         t_num = t_init_num
         # make tiles
         bb = BitBuffer(packet)
-        num_full_size_tiles = floor(bb.count_added_bits()/t_size)
-        last_tile_size = bb.count_added_bits() - t_size*num_full_size_tiles
+        num_full_size_tiles = floor(bb.count_added_bits()/rule.tile_size)
+        last_tile_size = bb.count_added_bits() - (rule.tile_size *
+                                                  num_full_size_tiles)
         assert last_tile_size >= 0
-        tiles = [ bb.get_bits_as_buffer(t_size)
+        tiles = [ bb.get_bits_as_buffer(rule.tile_size)
                  for _ in range(num_full_size_tiles) ]
         if last_tile_size > 0:
             tiles.append(bb.get_bits_as_buffer(last_tile_size))
@@ -43,14 +45,13 @@ class TileList():
         for i in self.tile_list:
             print("DEBUG:  ", i)
 
-    def get_remaining_tiles(self):
-        return len(self.tile_list)
-
-    def get_tiles(self, max_tiles):
+    def get_tiles(self, mtu_size):
         '''
-        return the tiles containing the contiguous tiles in maximum
-        within max_tiles.
+        return the tiles containing the contiguous tiles fitting in mtu_size.
+        And, remaiing nb_tiles to be sent in tile_list.
         '''
+        max_tiles = int((mtu_size - schcmsg.get_header_size(self.rule)) /
+                     self.rule.tile_size)
         tiles = []
         t_prev = None
         for i in range(len(self.tile_list)):
@@ -59,16 +60,20 @@ class TileList():
                 break
             if t["sent"] == False:
                 tiles.append(t)
-                if t["ready_to_be_sent"] == True:
-                    print("XXX invalid state, add it anyway.")
+                assert t["ready_to_be_sent"] == False
                 t["ready_to_be_sent"] = True
                 t_prev = t
             if len(tiles) == max_tiles:
                 break
         if len(tiles) == 0:
-            return None
-        else:
-            return tiles
+            return None, 0
+        # return tiles and the remaining bits
+        nb_remaining_tiles = len(
+                [ _ for _ in self.tile_list if _["ready_to_be_sent"] == False ])
+        return tiles, nb_remaining_tiles
+
+    def get_all_tiles(self):
+        return self.tile_list
 
     def update_sent_flag(self):
         for t in self.tile_list:
