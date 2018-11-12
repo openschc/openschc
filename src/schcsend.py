@@ -71,13 +71,6 @@ class FragmentAckOnError():
 #     +--------+--- -----+------- -+--------+--------+--------+------- -+
 #     |  11 bits   |    12 bits  |             33 bits                  |
 # 
-#             1         2         3        4        5        6        7
-#      01234567 012 34567 0123456 7 01234567 01234567 01234567 01234567
-#     +--------+--- -----+------- -+--------+--------+--------+--------+
-#     |   Header   |     Tile    |0|               MIC                 |
-#     +--------+--- -----+------- -+--------+--------+--------+--------+
-#     |  11 bits   |    12 bits  |             33 bits                 |
-#
     def get_mic(self):
         # XXX need to get the CORRECT padding size. see comment above.
         mic_target = TileList.get_bytearray(self.all_tiles.get_all_tiles())
