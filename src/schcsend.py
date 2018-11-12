@@ -98,7 +98,7 @@ class FragmentAckOnError():
 #   Tile #|2|1|0|2|1|0|
 #         |-----|-----|-----|
 #   Frag# |  1  |  2  |  3  |
-#  Window |  0  |  1  | ??? |
+#  Window |  0  |  1  | 1?? |
 #     FCN |  2  |  2  |ALL-1|
 # Payload |2 1 0|2 1 0| MIC |
 # 
@@ -160,6 +160,7 @@ class FragmentAckOnError():
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 self.event_sent_frag)
+        print("DEBUG: send_frag:", schc_frag.packet.get_content())
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
