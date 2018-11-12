@@ -141,9 +141,9 @@ class FragmentAckOnError():
                 return
             # make All-1 frag.
             self.mic_sent = self.get_mic()
-            win = 0
+            win = 0 # in case when there is no SCHC packet.
             if self.last_window_tiles is not None:
-                win = self.last_window_tiles[0]["w-num"]+1
+                win = self.last_window_tiles[0]["w-num"]
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
                     win=win,
