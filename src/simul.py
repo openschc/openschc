@@ -1,3 +1,4 @@
+#---------------------------------------------------------------------------
 
 from base_import import *
 from simsched import SimulScheduler as Scheduler
@@ -6,7 +7,6 @@ from simlayer2 import SimulLayer2
 import schc
 
 Link = namedtuple("Link", "from_id to_id delay")
-
 
 SimulNode = SimulLayer2
 
@@ -30,6 +30,7 @@ class SimulLayer3:
 class SimulNode: # object
     pass
 
+
 class SimulSCHCNode(SimulNode):
     def __init__(self, sim, extra_config={}):
         self.sim = sim
@@ -46,7 +47,6 @@ class SimulSCHCNode(SimulNode):
     def event_receive(self, sender_id, packet):
         self._log("recv from {}".format(sender_id))
         self.layer2.event_receive_packet(sender_id, packet)
-
 
     def get_scheduler(self):
         return self.sim.scheduler

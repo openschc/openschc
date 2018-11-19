@@ -1,4 +1,4 @@
-# C.A. 2018
+#---------------------------------------------------------------------------
 
 from base_import import *
 
@@ -32,6 +32,5 @@ class FakeRuleManager:
             raise ValueError("rule_id", rule_id)
         meta_info = {}
         return self.rule, meta_info
-
 
 #---------------------------------------------------------------------------

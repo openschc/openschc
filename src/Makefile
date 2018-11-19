@@ -4,10 +4,10 @@ M=../../micropython/ports/unix/micropython
 all: default
 	@# nothing to do
 
-default: test-fakeschc
+default: test-oschc
 
-test-fakeschc:
-	${M} test_fakeoschc.py
+test-oschc:
+	${M} test_newschc.py
 
 style:
 	pycodestyle *.py

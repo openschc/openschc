@@ -1,10 +1,9 @@
-# C.A. 2018
-
+#---------------------------------------------------------------------------
 
 from base_import import *  # used for now for differing modules in py/upy
 
-
-class SlowSimulScheduler:
+# XXX: this scheduler can be optimized by not sorting every time
+class SimulScheduler:
     def __init__(self):
         self.queue = []
         self.clock = 0
@@ -49,28 +48,4 @@ class SlowSimulScheduler:
             self.queue.sort()
             return self.queue[0][0]
 
-
-SimulScheduler = SlowSimulScheduler
-
-class SimulSchedulerOld:
-    def __init__(self):
-        #self.scheduler = sched.scheduler(self.get_clock, self._wait_delay)
-        self.scheduler = sched.ssched(self.get_clock)
-        self.clock = 0
-
-    # sched.scheduler API
-
-    def get_clock(self):
-        return self.clock
-
-    def _wait_delay(self, delay):
-        self.clock += delay
-
-    def run(self):
-        #self.scheduler.run()
-        self.scheduler.execute()
-
-    # external API
-
-    def add_event(self, rel_time, callback, args):
-        self.scheduler.enter(rel_time, 0, callback, args)
+#---------------------------------------------------------------------------

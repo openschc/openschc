@@ -1,4 +1,4 @@
-
+#---------------------------------------------------------------------------
 
 class SimulLayer2:
     mac_id = 0
@@ -38,12 +38,6 @@ class SimulLayer2:
 
         self.sim.send_packet(packet, src_dev_id, dst_dev_id,
                              self._event_sent_callback, (transmit_callback,))
-        #self.counter -= 1
-        #if self.counter < 0:
-        #    return
-        #for other in self.link_list:
-        #    self.scheduler.add_event(self.delay, other.event_receive_packet,
-        #                             (other.mac_id, packet))
 
     def _event_sent_callback(self, transmit_callback, status):
         assert self.is_transmitting
@@ -52,14 +46,6 @@ class SimulLayer2:
             transmit_callback(status)
 
     def event_receive_packet(self, other_mac_id, packet):
-        #if self.receive_function != None:
-        #    self.receive_function(other_mac_id, packet)
-        #else:
-        #    self.node.log("%s SimulLayer2: %s->%s %s ".format(
-        #        (self.scheduler.get_time(),
-        #         self.mac_id, other_mac_id, packet)))
-        # XXX: log and checks
-        #XXX
         assert self.protocol != None
         self.protocol.event_receive_from_L2(other_mac_id, packet)
 
@@ -70,3 +56,5 @@ class SimulLayer2:
 
     def get_mtu_size(self):
         return 56   # XXX
+
+#---------------------------------------------------------------------------

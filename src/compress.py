@@ -1,4 +1,4 @@
-# C. A.
+#---------------------------------------------------------------------------
 
 from base_import import *
 
@@ -12,3 +12,5 @@ class Compression:
         self.protocol.log("compress", "{}=>{},{}".format(
             repr(packet), result, meta_info))
         return BitBuffer(packet), meta_info
+
+#---------------------------------------------------------------------------

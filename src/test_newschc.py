@@ -1,6 +1,6 @@
-# C. A.
+#---------------------------------------------------------------------------
 
-# Template for schc
+# Template for schc simulation
 
 from base_import import *  # used for now for differing modules in py/upy
 
@@ -8,7 +8,9 @@ import schc
 import simsched
 import simlayer2
 import simul
-from fakeschcsend import rule_from_dict
+from fakerulemgr import rule_from_dict
+
+#---------------------------------------------------------------------------
 
 #XXX: move
 rule_as_dict = {
@@ -20,10 +22,9 @@ rule_as_dict = {
     "mode": "ack-on-error",
     "tile-size": 30,
     "mic-algorithm": "crc32",
-
-#    "rule-id": 3,
-#    "ack-mode": "ack-after-recv-all1"
 }
+
+rule = rule_from_dict(rule_as_dict)
 
 # The fragments for the 64 bits payload in this rule expected:
 #
@@ -46,14 +47,13 @@ rule_as_dict = {
 #---------------------------------------------------------------------------
 
 def make_node(sim, extra_config={}):
+    global rule
     node = simul.SimulSCHCNode(sim, extra_config)
     node.protocol.set_frag_rule(rule)
     # protocol.rulemanager.add_rule(...) ???
     return node
 
 #---------------------------------------------------------------------------
-
-rule = rule_from_dict(rule_as_dict)
 
 simul_config = {
     "log": True
@@ -65,7 +65,9 @@ node1 = make_node(sim)
 sim.add_sym_link(node0, node1)
 
 print("mac_id:", node0.id, node1.id)
-#node0.protocol.layer3.send_later(1, bytearray(range(1, 2+1)))
-node0.protocol.layer3.send_later(1, bytearray(range(1, 8+1)))
+payload = bytearray(range(1, 8+1))
+node0.protocol.layer3.send_later(1, payload)
 
 sim.run()
+
+#---------------------------------------------------------------------------
