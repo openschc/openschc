@@ -1,4 +1,4 @@
-# C.A.
+#---------------------------------------------------------------------------
 
 from base_import import *  # used for now for differing modules in py/upy
 
@@ -42,31 +42,3 @@ class ReassemblerAckOnError:
         print("---", message.fcn)
 
 #---------------------------------------------------------------------------
-
-# temporary class before merging after hackathon
-class SCHCProtocolReceiver(schc.SCHCProtocol):
-    def __init__(self, *args, **kwargs):
-        schc.SCHCProtocol.__init__(self, *args, **kwargs)
-        self.session = ReassemblerAckOnError(self, None) # XXX:hack
-
-    def set_frag_rule(self, rule): #XXX: hack
-        schc.SCHCProtocol.set_frag_rule(self, rule)
-        self.session.rule = rule
-
-    def find_session(self, device_id):
-        return self.session
-
-    def event_receive_packet(self, device_id, raw_packet):
-        #print("schc recv [mac%s] -> SCHC[mac:%s] %s"
-        #      % (device_id, self.layer2.mac_id, raw_packet))
-
-        session = self.find_session(device_id)
-        session.process_packet(raw_packet)
-
-#---------------------------------------------------------------------------
-
-# TODO:
-
-
-# 2340    smaller than the preceding ones.  WINDOW_SIZE MUST be equal to
-# 2341    MAX_WIND_FCN + 1.

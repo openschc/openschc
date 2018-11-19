@@ -43,34 +43,34 @@ class FragmentAckOnError():
 #   of the SCHC Fragment that carries the last tile.
 #
 # XXX padding bits of the last fragment for MIC calculation.
-# 
+#
 # MTU = 56 bits
 # Header size = 11 bits
 # The SCHC packet size = 9 bytes (72 bits).
 # The tile size = 30 bits.
 # The last tile size = 12 bits
 # MIC size = 32 bits
-# 
+#
 #             1         2         3        4        5        6        7
 #      01234567 012 34567 0123456 7 01234567 01234567 01234567 01234567
 #     +--------+--- -----+------- -+--------+--------+--------+--------+
 #     |   Header   |     Tile    |       Remaining space               |
 #     +--------+--- -----+------- -+--------+--------+--------+--------+
 #     |  11 bits   |    12 bits  |             33 bits                 |
-# 
+#
 # There is enough space to put MIC.
 # How to calculate MIC and where is the MIC put in the remaining space ?
-# 
+#
 # When the Receiver receives the SCHC fragment, how to know where MIC is ?
 # The receiver can not know the size of the last tile.
-# 
+#
 #             1         2         3        4        5        6         7
 #      01234567 012 34567 0123456 7 01234567 01234567 01234567 0123456 7
 #     +--------+--- -----+------- -+--------+--------+--------+------- -+
 #     |   Header   |     Tile    |                 MIC                |0|
 #     +--------+--- -----+------- -+--------+--------+--------+------- -+
 #     |  11 bits   |    12 bits  |             33 bits                  |
-# 
+#
     def get_mic(self):
         # XXX need to get the CORRECT padding size. see comment above.
         mic_target = TileList.get_bytearray(self.all_tiles.get_all_tiles())
@@ -83,10 +83,10 @@ class FragmentAckOnError():
         window_tiles, nb_remaining_tiles = self.all_tiles.get_tiles(mtu_size)
 # XXX
 # what is the window number for the ALL-1 MIC ?
-# 
+#
 # e.g. N = 2 bits.
 # ## 6 tiles. 3 tiles in each fragment.
-# 
+#
 # Window #|  0  |  1  |
 #   Tile #|2|1|0|2|1|0|
 #         |-----|-----|-----|
@@ -94,9 +94,9 @@ class FragmentAckOnError():
 #  Window |  0  |  1  | 1?? |
 #     FCN |  2  |  2  |ALL-1|
 # Payload |2 1 0|2 1 0| MIC |
-# 
+#
 # ## 5 tiles. 3 tiles in 1st frag., 2 tiles in 2nd frag.
-# 
+#
 # Window# |  0  | 1 |
 #   Tile# |2|1|0|2|1|
 #         |-----|---|-------|
@@ -104,9 +104,9 @@ class FragmentAckOnError():
 #       W | 0   | 1 |  1??? |
 #     FCN |2    |2  | ALL-1 |
 # Payload |2 1 0|2 1|  MIC  |
-# 
+#
 # ## 5 tiles. 2 tiles in 1st/2nd frag., MIC and the last tile in 3rd frag.
-# 
+#
 # Window# |  0  | 1 |       |
 #   Tile# |2|1|0|2|1|       |
 #         |---|---|---------|
@@ -206,61 +206,5 @@ class FragmentAckOnError():
         else:
             # XXX
             return None
-
-
-
-#---------------------------------------------------------------------------
-
-# temporary class before merging after hackathon
-class SCHCProtocolSender(schc.SCHCProtocol):
-    '''
-    assuming that there is only one session to be handled.
-    '''
-    def __init__(self, *args, **kwargs):
-        schc.SCHCProtocol.__init__(self, *args, **kwargs)
-        self.session = FragmentAckOnError(self, None) # XXX:hack
-
-    def set_frag_rule(self, rule): #XXX: hack
-        schc.SCHCProtocol.set_frag_rule(self, rule)
-        self.session.rule = rule
-
-    def send_packet(self, packet, peer_iid=None):
-        # Should do:
-        # - compression
-        # - fragmentation
-        # (and sending packets)
-        #compression_rule = XXX
-        #self.compression_manager.compress(compression_rule)
-        packet = packet[:]  # Null compression
-
-        # XXX:TODO select the rule
-        self.session.set_packet(packet)
-        self.scheduler.add_event(0, self.session.start_sending, tuple())
-        '''
-        if not self.rule["ack-after-recv-all1"]:
-            self.event_timeout = self.scheduler.add_event(
-                    3, self.recv_ack_timeout, None)
-        '''
-
-    '''
-    def recv_ack_timeout(self):
-        # XXX check the retry counter.
-        if self.retry_coounter > self.rule["retry-counter"]:
-            print("DEBUG: stop sending due to limit the retry counter.")
-            # XXX send_sender_abort()
-            return
-        self.send_frag(self.peer_iid)
-    '''
-
-    def event_receive_packet(self, peer_id, raw_packet):
-        '''
-        if self.session.is_ack_timeout():
-            print("DEBUG: ack timeout. XXX send sender-abort.")
-            return
-        '''
-        print("DEBUG: S<R: [mac%s] -> SCHC[mac:%s] %s"
-              % (self.layer2.iid, peer_id, packet))
-        self.session.process_packet(raw_packet)
-        self.session.recv_ack(packet, peer_iid=self.layer2.iid)
 
 #---------------------------------------------------------------------------

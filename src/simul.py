@@ -20,7 +20,7 @@ class SimulLayer3:
         self.sim.scheduler.add_event(
             rel_time, self.protocol.event_receive_from_L3, (packet,))
 
-    def _set_protocol(self, protocol): # called by [New]SCHCProtocol
+    def _set_protocol(self, protocol): # called by SCHCProtocol
         self.protocol = protocol
 
     def _log(self, message):
@@ -38,7 +38,7 @@ class SimulSCHCNode(SimulNode):
 
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
-        self.protocol = schc.NewSCHCProtocol(
+        self.protocol = schc.SCHCProtocol(
             self.config, self, self.layer2, self.layer3)
         self.id = self.layer2.mac_id
         self.sim._add_node(self)

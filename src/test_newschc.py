@@ -8,8 +8,6 @@ import schc
 import simsched
 import simlayer2
 import simul
-from schcrecv import SCHCProtocolReceiver
-from schcsend import SCHCProtocolSender
 from fakeschcsend import rule_from_dict
 
 #XXX: move
