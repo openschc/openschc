@@ -6,14 +6,14 @@ from base_import import *  # used for now for differing modules in py/upy
 #import rulemanager
 from fakerulemgr import FakeRuleManager as RuleManager
 import compress
-import warnings
+#import warnings
 
 class SCHCProtocol:
     """This class is the entry point for the openschc
     (in this current form, object composition is used)"""
     #def __init__(self, config, scheduler, schc_layer2, role="sender"):
     def __init__(self, config, scheduler, schc_layer2):
-        warnings.warn("XXX: use NewSCHCProtocol")
+        raise NotImplementedError("XXX: use NewSCHCProtocol")
         self.config = config
         self.scheduler = scheduler
         self.layer2 = schc_layer2
