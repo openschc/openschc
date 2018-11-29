@@ -56,7 +56,8 @@ def make_node(sim, extra_config={}):
 #---------------------------------------------------------------------------
 
 simul_config = {
-    "log": True
+    "log": True,
+    "loss": { "mode": "cycle", "cycle": 2 }
 }
 sim = simul.Simul(simul_config)
 

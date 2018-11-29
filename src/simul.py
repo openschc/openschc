@@ -3,6 +3,7 @@
 from base_import import *
 from simsched import SimulScheduler as Scheduler
 from simlayer2 import SimulLayer2
+from cond_true import ConditionalTrue
 
 import schc
 
@@ -70,6 +71,8 @@ class Simul:
         self.event_id = 0
         self.scheduler = Scheduler()
         self.log_file = None
+        self.frame_loss = ConditionalTrue(
+                **self.simul_config.get("loss", {"mode":"cycle"}))
 
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")
@@ -96,12 +99,17 @@ class Simul:
 
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
-        self._log("send-packet {}->{}".format(src_id, dst_id))
-        # if dst_id == None, it is a broadcast
-        link_list = self.get_link_by_id(src_id, dst_id)
-        count = 0
-        for link in link_list:
-            count += self.send_packet_on_link(link, packet)
+        if not self.frame_loss.check():
+            self._log("send-packet {}->{}".format(src_id, dst_id))
+            # if dst_id == None, it is a broadcast
+            link_list = self.get_link_by_id(src_id, dst_id)
+            count = 0
+            for link in link_list:
+                count += self.send_packet_on_link(link, packet)
+        else:
+            self._log("packet was lost {}->{}".format(src_id, dst_id))
+            count = 0
+        #
         if callback != None:
             args = callback_args+(count,) # XXX need to check. - CA:
             # [CA] the 'count' is now passed as 'status' in:
