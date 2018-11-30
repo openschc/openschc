@@ -26,7 +26,7 @@ def roundup(v, w=8):
 
 #---------------------------------------------------------------------------
 
-class FragmentAckOnError():
+class FragmentBase():
     def __init__(self, protocol, rule, profile=None):
         self.protocol = protocol
         self.rule = rule
@@ -36,6 +36,82 @@ class FragmentAckOnError():
         self.retry_counter = 0
         self.mic_sent = None
 
+    def get_mic(self, extra_bits=0):
+        mic_target = self.packet + (b"\x00" * (roundup(extra_bits,
+                            self.rule.mic_word_size)//self.rule.mic_word_size))
+        mic = mic_crc32.get_mic(mic_target)
+        return mic.to_bytes(4, "big")
+
+    def start_sending(self):
+        self.send_frag()
+
+    def send_frag(self):
+        raise NotImplementedError("it is implemented at the subclass.")
+
+class FragmentNoAck(FragmentBase):
+
+    def set_packet(self, packet):
+        self.packet = packet[:]
+        self.packet_bb = BitBuffer(packet)
+        # update dtag for next
+        self.dtag += 1
+        if self.dtag > pow(2,self.rule.dtag_size-1):
+            self.dtag = 0
+
+    def send_frag(self):
+        # get contiguous tiles as many as possible fit in MTU.
+        remaining_size = (self.protocol.layer2.get_mtu_size() -
+                          schcmsg.get_header_size(self.rule))
+        if self.packet_bb.count_remaining_bits() != 0:
+            # regular frag.
+            if remaining_size > self.packet_bb.count_remaining_bits():
+                # put all remaining bits into the tile.
+                tile = self.packet_bb.get_bits_as_buffer(
+                        self.packet_bb.count_remaining_bits())
+            else:
+                # put remaining_size of bits of packet into the tile.
+                tile = self.packet_bb.get_bits_as_buffer(remaining_size)
+            fcn = 0
+            schc_frag = schcmsg.frag_sender_tx(
+                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    win=None,
+                    fcn=fcn,
+                    mic=None,
+                    payload=tile.get_content())
+            # save the last window tiles.
+            self.last_tile = tile
+            transmit_callback = self.event_sent_frag
+        else:
+            # make All-1 frag.
+            assert self.last_tile is not None
+            assert self.mic_sent is None
+            last_payload_size = (schcmsg.get_header_size(self.rule) +
+                                 self.last_tile.count_added_bits())
+            # calculate extra_bits (= packet_size - last_payload_size)
+            self.mic_sent = self.get_mic(extra_bits=(
+                    roundup(last_payload_size, self.rule.l2_word_size) -
+                    last_payload_size))
+            schc_frag = schcmsg.frag_sender_tx(
+                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    win=None,
+                    fcn=schcmsg.get_fcn_all_1(self.rule),
+                    mic=self.mic_sent)
+            transmit_callback = None
+        # send
+        src_dev_id = self.protocol.layer2.mac_id
+        args = (schc_frag.packet.get_content(), src_dev_id, None,
+                transmit_callback)
+        print("DEBUG: send_frag:", schc_frag.packet)
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+                                          args)
+
+    def event_sent_frag(self, status): # status == nb actually sent (for now)
+        self.send_frag()
+
+#---------------------------------------------------------------------------
+
+class FragmentAckOnError(FragmentBase):
+
     def set_packet(self, packet):
         #self.rule_only_for_hackathon103 = rule # XXX this must be removed.
         self.packet = packet[:]
@@ -44,12 +120,6 @@ class FragmentAckOnError():
         self.dtag += 1
         if self.dtag > pow(2,self.rule.dtag_size-1):
             self.dtag = 0
-
-    def get_mic(self, extra_bits=0):
-        mic_target = self.packet + (b"\x00" * (roundup(extra_bits,
-                            self.rule.mic_word_size)//self.rule.mic_word_size))
-        mic = mic_crc32.get_mic(mic_target)
-        return mic.to_bytes(4, "big")
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
@@ -142,9 +212,6 @@ class FragmentAckOnError():
         print("DEBUG: send_frag:", schc_frag.packet)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
-
-    def start_sending(self):
-        self.send_frag()
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         self.update_frags_sent_flag()

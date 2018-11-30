@@ -9,7 +9,9 @@ import compress
 # ---------------------------------------------------------------------------
 
 from schcrecv import ReassemblerAckOnError
+from schcrecv import ReassemblerNoAck
 from schcsend import FragmentAckOnError
+from schcsend import FragmentNoAck
 from compress import Compression
 
 class SCHCProtocol:
@@ -25,8 +27,10 @@ class SCHCProtocol:
         self.layer2._set_protocol(self)
         self.layer3._set_protocol(self)
         self.default_frag_rule = None # XXX: to be in  rule_manager
-        self.reassembly_session = ReassemblerAckOnError(self, None) # XXX
-        self.fragmentation_session = FragmentAckOnError(self, None) # XXX
+        #self.reassembly_session = ReassemblerAckOnError(self, None) # XXX
+        #self.fragmentation_session = FragmentAckOnError(self, None) # XXX
+        self.reassembly_session = ReassemblerNoAck(self, None) # XXX
+        self.fragmentation_session = FragmentNoAck(self, None) # XXX
         self.compression = compress.Compression(self)
         self.rule_manager = RuleManager()
 
