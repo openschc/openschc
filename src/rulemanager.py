@@ -58,7 +58,10 @@ The "fragmentation" keyword is used to give fragmentation mode and profile:
     - other behaviors may be defined in the future.     
 """
 
-import ustruct as struct
+try:
+    import struct
+except ImportError:
+    import ustruct as struct
 
 class RuleManager:
     """RuleManager class is used to manage Compression/Decompression and Fragmentation/
