@@ -35,7 +35,6 @@ class FragmentAckOnError():
         self.event_timeout = 5
         self.retry_counter = 0
         self.mic_sent = None
-        self.padding_last_window = None
 
     def set_packet(self, packet):
         #self.rule_only_for_hackathon103 = rule # XXX this must be removed.
