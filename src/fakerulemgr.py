@@ -5,7 +5,8 @@ from base_import import *
 #---------------------------------------------------------------------------
 
 Rule = namedtuple("Rule", "rule_id_size rule_id dtag_size window_size"
-                  + " fcn_size mode tile_size mic_algorithm")
+                  + " fcn_size mode tile_size mic_algorithm mic_word_size"
+                  + " l2_word_size")
 
 def rule_from_dict(rule_as_dict):
     rule_as_dict = { k.replace("-","_"): v for k,v in rule_as_dict.items() }

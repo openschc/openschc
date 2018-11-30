@@ -19,6 +19,13 @@ def rule_from_dict(rule_as_dict):
 
 #---------------------------------------------------------------------------
 
+# XXX should move it to bitarray or schcmsg.
+def roundup(v, w=8):
+    a, b = (v//w, v%w)
+    return a*w+(w if b else 0)
+
+#---------------------------------------------------------------------------
+
 class FragmentAckOnError():
     def __init__(self, protocol, rule, profile=None):
         self.protocol = protocol
@@ -32,56 +39,23 @@ class FragmentAckOnError():
 
     def set_packet(self, packet):
         #self.rule_only_for_hackathon103 = rule # XXX this must be removed.
-        self.all_tiles = TileList(self.rule, packet)
+        self.packet = packet[:]
+        self.all_tiles = TileList(self.rule, self.packet)
         # update dtag for next
         self.dtag += 1
         if self.dtag > pow(2,self.rule.dtag_size-1):
             self.dtag = 0
 
-# Draft-17:
-#   The bits on which the MIC is computed MUST be the SCHC Packet
-#   concatenated with the padding bits that are appended to the Payload
-#   of the SCHC Fragment that carries the last tile.
-#
-# XXX padding bits of the last fragment for MIC calculation.
-#
-# MTU = 56 bits
-# Header size = 11 bits
-# The SCHC packet size = 9 bytes (72 bits).
-# The tile size = 30 bits.
-# The last tile size = 12 bits
-# MIC size = 32 bits
-#
-#             1         2         3        4        5        6        7
-#      01234567 012 34567 0123456 7 01234567 01234567 01234567 01234567
-#     +--------+--- -----+------- -+--------+--------+--------+--------+
-#     |   Header   |     Tile    |       Remaining space               |
-#     +--------+--- -----+------- -+--------+--------+--------+--------+
-#     |  11 bits   |    12 bits  |             33 bits                 |
-#
-# There is enough space to put MIC.
-# How to calculate MIC and where is the MIC put in the remaining space ?
-#
-# When the Receiver receives the SCHC fragment, how to know where MIC is ?
-# The receiver can not know the size of the last tile.
-#
-#             1         2         3        4        5        6         7
-#      01234567 012 34567 0123456 7 01234567 01234567 01234567 0123456 7
-#     +--------+--- -----+------- -+--------+--------+--------+------- -+
-#     |   Header   |     Tile    |                 MIC                |0|
-#     +--------+--- -----+------- -+--------+--------+--------+------- -+
-#     |  11 bits   |    12 bits  |             33 bits                  |
-#
-    def get_mic(self):
-        # XXX need to get the CORRECT padding size. see comment above.
-        mic_target = TileList.get_bytearray(self.all_tiles.get_all_tiles())
+    def get_mic(self, extra_bits=0):
+        mic_target = self.packet + (b"\x00" * (roundup(extra_bits,
+                            self.rule.mic_word_size)//self.rule.mic_word_size))
         mic = mic_crc32.get_mic(mic_target)
         return mic.to_bytes(4, "big")
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
-        window_tiles, nb_remaining_tiles = self.all_tiles.get_tiles(mtu_size)
+        window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
 # XXX
 # what is the window number for the ALL-1 MIC ?
 #
@@ -117,15 +91,22 @@ class FragmentAckOnError():
 # Payload |2 1|0 2|1  MIC   |
         if window_tiles is not None:
             assert self.mic_sent is None
-            remaining_space = mtu_size - len(window_tiles) * self.rule.tile_size
-            if (nb_remaining_tiles == 0 and
-                remaining_space >= schcmsg.get_mic_size_in_bits(self.rule)):
-                # make All-1 frag.
-                self.mic_sent = self.get_mic()
-                fcn = schcmsg.get_fcn_all_1(self.rule)
-            else:
+            fcn = window_tiles[0]["t-num"]
+            if nb_remaining_tiles > 0:
                 # regular frag.
-                fcn = window_tiles[0]["t-num"]
+                # MIC will be sent in next.
+                pass
+            else:
+                if remaining_size >= schcmsg.get_mic_size_in_bits(self.rule):
+                    # make All-1 frag with the tiles.
+                    last_payload_size = (schcmsg.get_header_size(self.rule) +
+                                        schcmsg.get_mic_size_in_bits(self.rule) +
+                                        TileList.get_tile_size(window_tiles))
+                    # calculate extra_bits (= packet_size - last_payload_size)
+                    self.mic_sent = self.get_mic(extra_bits=(
+                            roundup(last_payload_size, self.rule.l2_word_size) -
+                            last_payload_size))
+                    fcn = schcmsg.get_fcn_all_1(self.rule)
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
@@ -135,16 +116,21 @@ class FragmentAckOnError():
             # save the last window tiles.
             self.last_window_tiles = window_tiles
         else:
-            # all tiles has been sent.
+            # only MIC will be sent since all tiles has been sent.
+            assert self.last_window_tiles is not None
             if self.mic_sent is not None:
                 # MIC has been sent already.
                 # XXX need to wait for the ACK at least.  here ?
                 return
             # make All-1 frag.
-            self.mic_sent = self.get_mic()
             win = 0 # in case when there is no SCHC packet.
-            if self.last_window_tiles is not None:
-                win = self.last_window_tiles[0]["w-num"]
+            win = self.last_window_tiles[0]["w-num"]
+            last_payload_size = (schcmsg.get_header_size(self.rule) +
+                                 TileList.get_tile_size(self.last_window_tiles))
+            # calculate extra_bits (= packet_size - last_payload_size)
+            self.mic_sent = self.get_mic(extra_bits=(
+                    roundup(last_payload_size, self.rule.l2_word_size) -
+                    last_payload_size))
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
                     win=win,
@@ -154,7 +140,7 @@ class FragmentAckOnError():
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 self.event_sent_frag)
-        print("DEBUG: send_frag:", schc_frag.packet.get_content())
+        print("DEBUG: send_frag:", schc_frag.packet)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 

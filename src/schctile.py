@@ -52,14 +52,16 @@ class TileList():
         return the tiles containing the contiguous tiles fitting in mtu_size.
         And, remaiing nb_tiles to be sent in all_tiles.
         '''
-        max_tiles = int((mtu_size - schcmsg.get_header_size(self.rule)) /
-                     self.rule.tile_size)
+        remaining_size = mtu_size - schcmsg.get_header_size(self.rule)
+        max_tiles = remaining_size // self.rule.tile_size
         tiles = []
         t_prev = None
         for i in range(len(self.all_tiles)):
             t = self.all_tiles[i]
+            '''
             if t_prev and t_prev["t-num"] + 1 < t["t-num"]:
                 break
+            '''
             if t["sent"] == False:
                 tiles.append(t)
                 assert t["ready_to_be_sent"] == False
@@ -68,11 +70,12 @@ class TileList():
             if len(tiles) == max_tiles:
                 break
         if len(tiles) == 0:
-            return None, 0
+            return None, 0, remaining_size
         # return tiles and the remaining bits
         nb_remaining_tiles = len(
                 [ _ for _ in self.all_tiles if _["ready_to_be_sent"] == False ])
-        return tiles, nb_remaining_tiles
+        remaining_size -= self.get_tile_size(tiles)
+        return tiles, nb_remaining_tiles, remaining_size
 
     def get_all_tiles(self):
         return self.all_tiles
@@ -81,6 +84,13 @@ class TileList():
         for t in self.all_tiles:
             if t["ready_to_be_sent"] == True:
                 t["sent"] = True
+
+    @staticmethod
+    def get_tile_size(tiles):
+        size = 0
+        for i in tiles:
+            size += i["tile"].count_added_bits()
+        return size
 
     @staticmethod
     def get_bytearray(tiles):
