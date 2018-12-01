@@ -173,8 +173,8 @@ class RuleManager:
             if mode == "ackOnError":
                 if not "ackBehavior" in profile:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
-                if not "tile" in profile:
-                    profile["tile"] = 64
+                if not "tileSize" in profile:
+                    profile["tileSize"] = 64
                     
         rID = rule["ruleID"]
         rLength = rule["ruleLength"]
