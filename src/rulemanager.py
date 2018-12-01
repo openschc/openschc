@@ -97,7 +97,7 @@ class RuleManager:
 
         return True
 
-    def _nameRule (r):
+    def _nameRule (self, r):
         return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
         
     def findRuleByID (self, rID, rIDl):
