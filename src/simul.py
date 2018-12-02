@@ -21,6 +21,13 @@ class SimulLayer3:
         self.sim.scheduler.add_event(
             rel_time, self.protocol.event_receive_from_L3, (packet,))
 
+    # XXX need to confirm whether this should be here or not.
+    def receive_packet(self, remote_id, local_id, raw_packet):
+        """ receive a packet from L2 and process it. """
+        self._log("recv-from {}->{} {}".format(
+            remote_id, local_id, raw_packet))
+        # XXX do more work
+
     def _set_protocol(self, protocol): # called by SCHCProtocol
         self.protocol = protocol
 
