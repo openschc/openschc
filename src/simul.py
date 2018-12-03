@@ -107,7 +107,7 @@ class Simul:
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
         if not self.frame_loss.check():
-            self._log("send-packet {}->{}".format(src_id, dst_id))
+            self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
             count = 0
