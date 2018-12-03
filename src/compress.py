@@ -14,10 +14,10 @@ class Compression:
             repr(packet), result, meta_info))
         return BitBuffer(packet), meta_info
 
-    def decompress(self, packet):
+    def decompress(self, packet_bbuf):
         # XXX do more work
         meta_info = {}
-        result = BitBuffer(packet)
+        result = bbuf[:]
         self.protocol.log("decompress", "{}=>{},{}".format(
             repr(packet), result, meta_info))
         return BitBuffer(packet), meta_info
