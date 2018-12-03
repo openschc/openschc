@@ -1,6 +1,7 @@
 #---------------------------------------------------------------------------
 
 # Template for schc simulation
+import sys
 
 from base_import import *  # used for now for differing modules in py/upy
 
@@ -8,26 +9,15 @@ import schc
 import simsched
 import simlayer2
 import simul
-from fakerulemgr import rule_from_dict
+from rulemanager import RuleManager
+
+with open("example/fragment-rule-002.json") as fd:
+    rule = json.loads(fd.read())
 
 #---------------------------------------------------------------------------
 
-#XXX: move
-rule_as_dict = {
-    "rule-id-size": 6,
-    "rule-id": 5,
-    "dtag-size": 2,
-    "window-size": 5,
-    "fcn-size": 3,
-    "mode": "ack-on-error",
-    #"tile-size": 30,
-    "tile-size": 7,
-    "mic-algorithm": "crc32",
-    "mic-word-size": 8,
-    "l2-word-size": 8,
-}
-
-rule = rule_from_dict(rule_as_dict)
+rule_manager = RuleManager()
+rule_manager.add(rule)
 
 # The fragments for the 72 bits payload in this rule expected:
 #     b'\x01\x02\x03\x04\x05\x06\x07\x08\x09'/72
@@ -77,11 +67,9 @@ rule = rule_from_dict(rule_as_dict)
 
 #---------------------------------------------------------------------------
 
-def make_node(sim, extra_config={}):
-    global rule
+def make_node(sim, rule_manager, extra_config={}):
     node = simul.SimulSCHCNode(sim, extra_config)
-    node.protocol.set_frag_rule(rule)
-    # protocol.rulemanager.add_rule(...) ???
+    node.protocol.set_rulemanager(rule_manager)
     return node
 
 #---------------------------------------------------------------------------
@@ -92,13 +80,13 @@ simul_config = {
 }
 sim = simul.Simul(simul_config)
 
-node0 = make_node(sim)
-node1 = make_node(sim)
+node0 = make_node(sim, rule_manager)
+node1 = make_node(sim, rule_manager)
 sim.add_sym_link(node0, node1)
 
 print("mac_id:", node0.id, node1.id)
 payload = bytearray(range(1, 9+1))
-node0.protocol.layer3.send_later(1, payload)
+node0.protocol.layer3.send_later(1, node1.id, payload)
 
 sim.run()
 

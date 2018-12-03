@@ -28,19 +28,22 @@ class SCHC_MODE():
 # 1375          All-1 window.
 
 def get_fcn_all_1(rule):
-    return (1<<rule.fcn_size)-1
+    return (1<<rule["FCNSize"])-1
 
 def get_MAX_WIND_FCN(rule):
-    return (1<<rule.fcn_size)-2
+    return (1<<rule["FCNSize"])-2
 
 def get_max_dtag(rule):
-    return (1<<rule.dtag_size)-1
+    return (1<<rule["dtagSize"])-1
 
-def get_header_size(rule):
-    return rule.rule_id_size + rule.dtag_size + rule.window_size + rule.fcn_size
+def get_sender_header_size(rule):
+    return rule["ruleLength"] + rule["dtagSize"] + rule.get("windowSize", 0) + rule["FCNSize"]
+
+def get_receiver_header_size(rule):
+    return rule["ruleLength"] + rule["dtagSize"] + rule.get("windowSize", 0) + 1
 
 def get_mic_size_in_bits(rule):
-    assert rule.mic_algorithm == "crc32"
+    assert rule["MICAlgorithm"] == "crc32"
     return 32
 
 #---------------------------------------------------------------------------
@@ -77,41 +80,8 @@ class frag_base():
         self.cbit = cbit
         self.payload = payload
         # check the field size.
-        if dtag > (2**self.rule.dtag_size) - 1:
+        if dtag > get_max_dtag(self.rule):
             raise ValueError("dtag is too big than the field size.")
-
-    def dump(self):
-        x = ""
-        if self.rule_id != None:
-            x += ("rule_id:%s" % pb.int_to_bit(self.rule_id, self.rule.rule_id_size))
-        if self.dtag != None:
-            if len(x) != 0: x += " "
-            x += ("dtag:%s" % pb.int_to_bit(self.dtag, self.rule.dtag_size))
-        if self.win != None:
-            if len(x) != 0: x += " "
-            x += ("w:%d" % self.win)
-        if self.fcn != None:
-            if len(x) != 0: x += " "
-            x += ("fcn:%s" % pb.int_to_bit(self.fcn, self.rule.fcn_size))
-        if self.mic != None:
-            if len(x) != 0: x += " "
-            x += ("mic:%s" % pb.int_to_bit(self.mic, self.rule.mic_size))
-            x += ("(0x%s)" % "".join(["%02x"%((self.mic>>i)&0xff)
-                                     for i in [24,16,8,0]]))
-        if self.cbit != None:
-            if len(x) != 0: x += " "
-            x += ("cbit:%d" % self.cbit)
-        if self.bitmap != None:
-            if len(x) != 0: x += " "
-            x += ("bitmap:%s" % pb.int_to_bit(self.bitmap, self.rule.bitmap_size))
-        if self.payload != None:
-            if len(x) != 0: x += " "
-            x += ("payload:%s" % self.payload)
-        #
-        return x
-
-    def full_dump(self):
-        return " ".join(["%02x"%i for i in self.packet])
 
 class frag_tx(frag_base):
 
@@ -120,25 +90,22 @@ class frag_tx(frag_base):
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
                   cbit=None, abort=False, payload=None):
-        '''
-        payload: bytearray of the SCHC fragment payload.
-        '''
         #
         buffer = BitBuffer()
         #
         # basic fields.
-        if self.rule.rule_id is not None and self.rule.rule_id_size is not None:
-            buffer.add_bits(self.rule.rule_id, self.rule.rule_id_size)
-        if dtag is not None and self.rule.dtag_size is not None:
-            assert self.rule.dtag_size != None # CA: sanity check
-            buffer.add_bits(dtag, self.rule.dtag_size)
+        if self.rule["ruleID"] is not None and self.rule["ruleLength"] is not None:
+            buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
+        if dtag is not None and self.rule["dtagSize"] is not None:
+            assert self.rule["dtagSize"] != None # CA: sanity check
+            buffer.add_bits(dtag, self.rule["dtagSize"])
         #
         # extension fields.
-        if win is not None and self.rule.window_size is not None:
-            buffer.add_bits(win, self.rule.window_size)
-        if fcn is not None and self.rule.fcn_size is not None:
-            buffer.add_bits(fcn, self.rule.fcn_size)
-        if mic != None and self.rule.mic_algorithm is not None:
+        if win is not None and self.rule.get("windowSize") is not None:
+            buffer.add_bits(win, self.rule.get["windowSize"])
+        if fcn is not None and self.rule.get("FCNSize") is not None:
+            buffer.add_bits(fcn, self.rule["FCNSize"])
+        if mic != None and self.rule.get("MICAlgorithm") is not None:
             mic_size = get_mic_size_in_bits(self.rule)
             assert mic_size % bitarray.BITS_PER_BYTE == 0
             assert len(mic) == mic_size // 8
@@ -147,14 +114,16 @@ class frag_tx(frag_base):
             buffer.set_bit(cbit)
         if bitmap != None and self.rule.bitmap_size:
             buffer.add_bits(bitmap, self.rule.bitmap_size)
+        '''
         if abort == True:
             raise RunTimeError("not refactored", "abort == True")
             pb.bit_set(ba, pos, pb.int_to_bit(0xff, 8), extend=True)
             pos += 8
+        '''
         #
         if payload != None:
             # assumed that bit_set() has extended to a byte boundary
-            buffer.add_bytes(payload)
+            buffer += payload
         #
         # the abort field is implicit, is not needed to set into the parameter.
         self.set_param(self.rule_id, dtag, win, fcn, mic, bitmap, cbit, payload)
@@ -166,12 +135,11 @@ class frag_sender_tx(frag_tx):
     for the fragment sender to send a message.
     '''
     def __init__(self, rule, rule_id, dtag, win=None, fcn=None, mic=None,
-                 bitmap=None, cbit=None, payload=None):
+                 cbit=None, payload=None):
         self.init_param()
         self.rule = rule
         self.rule_id = rule_id
-        self.make_frag(dtag, win=win, fcn=fcn, mic=mic, bitmap=bitmap,
-                       cbit=cbit, payload=payload)
+        self.make_frag(dtag, win=win, fcn=fcn, mic=mic, payload=payload)
 
 class frag_receiver_tx_all0_ack(frag_tx):
 
@@ -214,44 +182,42 @@ class frag_rx(frag_base):
     recvbuf: str, bytes, bytearray.
     '''
     def set_recvbuf(self, recvbuf):
+        assert isinstance(recvbuf, BitBuffer)
         self.packet = recvbuf
-        return # XXX: remove the rest
-        if type(recvbuf) == str:
-            self.packet = bytearray(recvbuf, encoding="utf-8")
-        elif type(recvbuf) in [bytearray, bytes]:
-            self.packet = bytearray(recvbuf)
-        else:
-            raise TypeError("recvbuf must be str, bytes or bytearray.")
 
     def parse_rule_id(self, C, exp_rule_id=None):
         '''
         parse rule_id in the frame.
         exp_rule_id: if non-None, check the rule_id whether it's expected.
         '''
-        if C.rule_id_size:
-            rule_id = self.packet.get_bits(C.rule_id_size)
+        rule_id_size = C.get("ruleLength", 0)
+        if rule_id_size != 0:
+            rule_id = self.packet.get_bits(rule_id_size)
             if exp_rule_id != None and rule_id != exp_rule_id:
                 raise ValueError("rule_id unexpected.")
         else:
-            rule_id = C.default_rule_id
+            # XXX rule_id = C.default_rule_id
+            rule_id = exp_rule_id   # XXX
         #
         self.rule_id = rule_id
-        return C.rule_id_size
+        return rule_id_size
 
     def parse_dtag(self, pos, exp_dtag=None):
         '''
         parse dtag in the frame.
         exp_dtag: if non-None, check the dtag whether it is expected.
         '''
-        if self.rule.dtag_size:
-            dtag = self.packet.get_bits(self.rule.dtag_size)
+        dtag_size = self.rule.get("dtagSize", 0)
+        if dtag_size != 0:
+            dtag = self.packet.get_bits(dtag_size)
             if exp_dtag != None and dtag != exp_dtag:
                 raise ValueError("dtag unexpected.")
         else:
-            dtag = self.rule.C.default_dtag
+            #dtag = self.rule.C.default_dtag
+            dtag = 1
         #
         self.dtag = dtag
-        return self.rule.dtag_size
+        return dtag_size
 
     def parse_win(self, pos, exp_win=None):
         '''
@@ -259,36 +225,41 @@ class frag_rx(frag_base):
         exp_win: if non-None, check the win whether it is expected.
         if window_size is zero, self.win is not set.
         '''
-        if self.rule.window_size:
-            win = self.packet.get_bits(self.rule.window_size)
+        win_size = self.rule.get("windowSize", 0)
+        if win_size != 0:
+            win = self.packet.get_bits(win_size)
             if exp_win is not None and win is not exp_win:
                 raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
-        return self.rule.window_size
+        return win_size
 
     def parse_fcn(self, pos):
         '''
         parse fcn in the frame.
         assuming that fcn_size is not zero.
         '''
-        self.fcn = self.packet.get_bits(self.rule.fcn_size)
-        return self.rule.fcn_size
+        self.fcn = self.packet.get_bits(self.rule["FCNSize"])
+        return self.rule["FCNSize"]
 
     def parse_bitmap(self, pos):
         '''
         parse bitmap in the frame.
         assuming that bitmap_size is not zero.
         '''
+        '''
         self.bitmap = pb.bit_get(self.packet, pos, self.rule.bitmap_size,
                                  ret_type=int)
         return self.rule.bitmap_size
+        '''
+        raise NotImplementedError
 
     def parse_cbit(self, pos):
         '''
         parse cbit in the frame.
-        '''
         self.cbit = pb.bit_get(self.packet, pos, 1, ret_type=int)
         return 1
+        '''
+        raise NotImplementedError
 
     def parse_mic(self, pos):
         '''
@@ -322,7 +293,7 @@ class frag_sender_rx_all0_ack(frag_rx):
         self.set_recvbuf(recvbuf)
         self.rule = R
         pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule.rule_id)
+        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
         pos += self.parse_dtag(pos, exp_dtag=dtag)
         pos += self.parse_win(pos, exp_win=exp_win)
         # XXX the abort is not supported yet.
@@ -345,7 +316,7 @@ class frag_sender_rx_all1_ack(frag_rx):
         self.set_recvbuf(recvbuf)
         self.rule = R
         pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule.rule_id)
+        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
         pos += self.parse_dtag(pos, exp_dtag=dtag)
         pos += self.parse_win(pos, exp_win=win)
         # XXX the abort is not supported yet.
@@ -370,7 +341,7 @@ class frag_sender_rx(frag_rx):
         self.set_recvbuf(recvbuf)
         self.rule = R
         pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule.rule_id)
+        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
         pos += self.parse_dtag(pos, exp_dtag=dtag)
         pos += self.parse_win(pos, exp_win=win)
         # XXX the abort is not supported yet.
@@ -395,9 +366,10 @@ class frag_receiver_rx(frag_rx):
     XXX P1 is not approved in the WG.
     '''
     def __init__(self, C, recvbuf):
+        # XXX for now, C refers to rule itself.
         '''
         C: runtime context.
-        recvbuf: buffer received in bytearray().
+        recvbuf: buffer received in BitBuffer().
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
@@ -405,6 +377,7 @@ class frag_receiver_rx(frag_rx):
         self.__pos += self.parse_rule_id(C)
 
     def finalize(self, R):
+        # XXX should be merged into __init__()
         self.rule = R
         pos = self.__pos
         pos += self.parse_dtag(pos)

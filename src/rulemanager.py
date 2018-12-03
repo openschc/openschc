@@ -2,6 +2,12 @@
 This module is used to manage rules. A rule is defined in JSON and is uniquely
 identified by a rule ID of variable length.
 
+Each key must be unique through the rule.
+Below the keys of "profile" are not allowed.
+
+    rule["compression"]["profile"]
+    rule["fragmentation"]["profile"]
+
 Each rule must contain the following information:
 
 {
@@ -9,14 +15,17 @@ Each rule must contain the following information:
   "ruleLength" : 3
 }
 
-where ruleID contains the rule ID value aligned on the right and ruleLength gives 
-the size in bits of the ruleID. In the previous example, this corresponds to the 
-binary value 0b010.
+where ruleID contains the rule ID value aligned on the right and ruleLength
+gives 
+the size in bits of the ruleID. In the previous example, this corresponds to
+the binary value 0b010.
 
 if ruleLength is not specified the value is set to 1 byte.
 
-The rule is either a compression/decompression rule or a fragmentation/reassembly
-rule.
+The rule is either a compression/decompression rule
+or a fragmentation/reassembly rule.
+In other words, either "compression" or "fragmentation" must exist.
+both keys must not exists.
 
 For C/D rules, the keyword "compression" must be defined. For F/R rules, the
 keyword "fragmentation" must be defined.
@@ -34,8 +43,8 @@ where <<<rule>>> will be defined later.
   "ruleID" : 15,
   "ruleLength" : 4   # rule 0b1110
   "fragmentation": {
-      "mode" : "noAck" # or "ackAlways", "ackOnError"
-      "profile" : {
+      "FRMode" : "noAck" # or "ackAlways", "ackOnError"
+      "FRModeProfile" : {
          "dtagSize" : 1, 
          "windowSize": 3,
          "FCNSize" : 3,
@@ -47,7 +56,7 @@ where <<<rule>>> will be defined later.
 
 The "fragmentation" keyword is used to give fragmentation mode and profile:
 - one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
-- Profile parameters. Default values are automaticaly added.
+- FRModeProfile parameters. Default values are automaticaly added.
 - dtagSize, windowSize and FCNSize are used to define the SCHC fragmentation header
 - maxWindFCN can be added if not 2^FCNSize - 2 
   For "ackOnError" the following parameter is defined:
@@ -63,6 +72,53 @@ try:
 except ImportError:
     import ustruct as struct
 
+class DictToAttrDeep:
+    def __init__(self, **entries):
+        self.__update(**entries)
+    def __update(self, **entries):
+        for k,v in entries.items():
+            if isinstance(v, dict):
+                self.__dict__[k] = DictToAttrDeep(**v)
+            else:
+                self.__dict__.update(entries)
+    def __contains__(self, t):
+        """ t in this """
+        for k,v in self.__dict__.items():
+            if k == t:
+                return True
+            if isinstance(v, DictToAttrDeep):
+                if t in v:
+                    return True
+    def __getitem__(self, t):
+        """ this[k] """
+        for k,v in self.__dict__.items():
+            if k == t:
+                return v
+            if isinstance(v, DictToAttrDeep):
+                if t in v:
+                    return v[t]
+    def get(self, k, d=None):
+        """ this.get(k) """
+        if k not in self:
+            return d
+        return self.__getitem__(k)
+    def __repr__(self):
+        return "{{{}}}".format(str(", ".join(
+                ['"{}": {}'.format(k,self.__reprx(v))
+                 for k,v in self.__dict__.items()])))
+    def __reprx(self, t):
+        if isinstance(t, str):
+            return '"{}"'.format(t)
+        elif isinstance(t, dict):
+            return "{{{}}}".format(str(", ".join(
+                    ['"{}": {}'.format(k,self.__reprx(v))
+                     for k,v in t.items()])))
+        elif isinstance(t, list):
+            return "[{}]".format(str(", ".join(
+                    ["{}".format(self.__reprx(i)) for i in t])))
+        else:
+            return repr(t)
+
 class RuleManager:
     """RuleManager class is used to manage Compression/Decompression and Fragmentation/
     Reassembly rules."""
@@ -71,15 +127,16 @@ class RuleManager:
         self._db = []    #RM database
 
 
-    def _checkRuleValue(self, rID, rLength):
-        """this function looks if bits specified in ruleID are not outside of rLength"""
+    def _checkRuleValue(self, rule_id, rule_id_length):
+        """this function looks if bits specified in ruleID are not outside of
+        rule_id_length"""
 
-        if rLength > 32:
+        if rule_id_length > 32:
             raise ValueError("Rule length should be less than 32")
 
-        r1 = rID
+        r1 = rule_id
 
-        for k in range (32, rLength, -1):
+        for k in range (32, rule_id_length, -1):
             if (0x01 << k) & r1 !=0:
                 raise ValueError("rule ID too long")
             
@@ -100,14 +157,45 @@ class RuleManager:
     def _nameRule (self, r):
         return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
         
-    def findRuleByID (self, rID, rIDl):
+    def findRuleByID (self, rule_id, rule_id_length):
         """ returns a rule identified by its ruleID and ruleLength, returns none otherwise """
         for r in self._db:
-            if rIDl == r["ruleLength"] and rID == r["ruleID"]:
+            if rule_id_length == r.ruleLength and rule_id == r.ruleID:
                 return r
-            
         return None
-    
+
+    def findRuleByRemoteID (self, remote_id):
+        """ returns a rule identified by the identifier of the communication
+        end, returns none otherwise """
+        # XXX needs to implement wildcard search or something like that.
+        for r in self._db:
+            id_db = r.get("remoteID")
+            if id_db is None:
+                continue
+            if id_db == "*":
+                return r
+            if remote_id == id_db:
+                return r
+        return None
+
+    def findRuleByPacket (self, remote_id, packet_bbuf):
+        """ returns a rule identified by the identifier of the communication
+        end AND the rule id in the packet, returns none otherwise """
+        # XXX needs to implement wildcard search or something like that.
+        for r in self._db:
+            id_db = r.get("remoteID")
+            if id_db is None:
+                continue
+            if id_db == "*":
+                rule_id = packet_bbuf.get_bits(r["ruleLength"], position=0)
+                if r["ruleID"] == rule_id:
+                    return r
+            if remote_id == id_db:
+                rule_id = packet_bbuf.get_bits(r["ruleLength"], position=0)
+                if r["ruleID"] == rule_id:
+                    return r
+        return None
+
     def add (self, rule):
         """ Check rule integrity and uniqueless and add it to the db """
 
@@ -120,6 +208,8 @@ class RuleManager:
             else:
                 raise ValueError ("RuleID too large for default size on a byte")
 
+        # XXX localID, remoteID processing
+
         if (not "compression" in rule and not "fragmentation" in rule) or \
            ("compression" in rule and "fragmentation" in rule):
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
@@ -131,18 +221,18 @@ class RuleManager:
         if "fragmentation" in rule:
             fragRule = rule["fragmentation"]
 
-            if not "mode" in fragRule:
+            if not "FRMode" in fragRule:
                 raise ValueError ("{} Fragmentation mode must be specified".format(self._nameRule(rule)))
 
-            mode = fragRule["mode"]
+            mode = fragRule["FRMode"]
 
             if not mode in ("noAck", "ackAlways", "ackOnError"):
                 raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
 
-            if not "profile" in fragRule:
-                fragRule["profile"] = {}
+            if not "FRModeProfile" in fragRule:
+                fragRule["FRModeProfile"] = {}
 
-            profile = fragRule["profile"]
+            profile = fragRule["FRModeProfile"]
                               
             if not "dtagSize" in profile:
                 profile["dtagSize"] = 0
@@ -176,17 +266,18 @@ class RuleManager:
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
                     
-        rID = rule["ruleID"]
-        rLength = rule["ruleLength"]
+        rule_id = rule["ruleID"]
+        rule_id_length = rule["ruleLength"]
 
-        self._checkRuleValue(rID, rLength)
+        self._checkRuleValue(rule_id, rule_id_length)
 
         for r in self._db:
-            if self._ruleIncluded(rID, rLength, r["ruleID"], r["ruleLength"]):
-                raise ValueError ("{} in conflict with {}/{}".format(self._nameRule(rule), r["ruleID"], r["ruleLength"]))
+            if self._ruleIncluded(rule_id, rule_id_length, r.ruleID, r.ruleLength):
+                raise ValueError ("{} in conflict with {}/{}".format(
+                        self._nameRule(rule), r.ruleID, rruleLength))
             
 
-        self._db.append(rule)
+        self._db.append(DictToAttrDeep(**rule))
 
 if __name__ == "__main__":
     bogusRule0 = { # bogus rule with no frag or comp
@@ -194,16 +285,24 @@ if __name__ == "__main__":
         }
     rule1 = {
         "ruleID" : 7,
+        #"remoteID": "e2:92:00:01",
+        "remoteID": bytearray(b"\xe2\x92\x00\x01"),
         "fragmentation" : {
-            "mode" :"noAck"
+            "FRMode" :"noAck"
         },
     }
     rule2 = {
         "ruleID" : 4,
         "ruleLength" : 3,
+        "remoteID": "*",
+        "profile": {
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8
+        },
         "fragmentation" : {
-            "mode": "ackOnError",
-            "profile": {
+            "FRMode": "ackOnError",
+            "FRModeProfile": {
                 "dtagSize" : 2,
                 "FCNSize": 3,
                 "ackBehavior" : "afterAll1"
@@ -220,6 +319,10 @@ if __name__ == "__main__":
     RM = RuleManager()
     RM.add(rule1)
     RM.add(rule2)
-    print (RM._db)
-    #RM.add(conflictingRule0)
+    print(RM._db)
+    RM.add(conflictingRule0)
     print(RM.findRuleByID(4, 3))
+    print(RM.findRuleByRemoteID(bytearray(b"\xe2\x92\x00\x01")))
+    from bitarray import BitBuffer
+    print(RM.findRuleByPacket(bytearray(b"\x00\x01\x02\x03"),
+                              BitBuffer(int("10000111",2).to_bytes(1, "big"))))

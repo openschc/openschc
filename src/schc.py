@@ -2,7 +2,6 @@
 
 from base_import import *  # used for now for differing modules in py/upy
 
-#import rulemanager
 from fakerulemgr import FakeRuleManager as RuleManager
 import compress
 
@@ -27,12 +26,8 @@ class SCHCProtocol:
         self.layer2._set_protocol(self)
         self.layer3._set_protocol(self)
         self.default_frag_rule = None # XXX: to be in  rule_manager
-        #self.reassembly_session = ReassemblerAckOnError(self, None) # XXX
-        #self.fragmentation_session = FragmentAckOnError(self, None) # XXX
-        self.reassembly_session = ReassemblerNoAck(self, None) # XXX
-        self.fragmentation_session = FragmentNoAck(self, None) # XXX
         self.compression = compress.Compression(self)
-        self.rule_manager = RuleManager()
+        self.fragment_session_list = {}
 
     def _log(self, message):
         self.log("schc", message)
@@ -40,52 +35,115 @@ class SCHCProtocol:
     def log(self, name, message):
         self.system.log(name, message)
 
-    #def find_session(self, device_id):
-    #    # XXX: to do
-    #    return self.session
+    def set_rulemanager(self, rule_manager):
+        self.rule_manager = rule_manager
 
-    def set_frag_rule(self, rule):
-        self.rule_manager.set_frag_rule(rule)
-        self.reassembly_session.rule = rule
-        self.fragmentation_session.rule = rule
-
-    def event_receive_from_L3(self, packet):
-        self._log("recv-from-L3 {}".format(packet))
+    def event_receive_from_L3(self, remote_id, raw_packet):
+        self._log("recv-from-L3 -> {} {}".format(remote_id, raw_packet))
+        packet_bbuf = BitBuffer(raw_packet)
 
         # hc-17,509-529
 
+        rule = self.rule_manager.findRuleByRemoteID(remote_id)
+        if rule is None:
+            self._log("no SCHC processing for the packet.")
+            args = (raw_packet, self.layer2.mac_id, None, None)
+            self.scheduler.add_event(0, self.layer2.send_packet, args)
+            return
+
         # [the diagram that was drawn]
-        # Compress/etc.
+        if "compression" in rule:
+            # Compress/etc.
+            # @@538-550
+            self._log("compression rule_id={}".format(rule.ruleID))
+            packet_bbuf, meta_info = self.compression.compress(packet_bbuf)
+        else:
+            self._log("no SCHC compression for the packet.")
 
-        # @@538-550
-        schc_packet_bitbuffer, meta_info = self.compression.compress(packet)
-        rule_id, rule, frag_meta_info = self.rule_manager.find_frag_rule(
-            schc_packet_bitbuffer, meta_info)
+        if "fragmentation" in rule:
+            self._log("fragmentation rule_id={}".format(rule.ruleID))
+            mode = rule.get("FRMode")
+            if mode == "noAck":
+                session = FragmentNoAck(self, rule) # XXX
+            elif mode == "ackAlwayw":
+                raise NotImplementedError(
+                        "{} is not implemented yet.".format(mode))
+            elif mode == "ackOnError":
+                session = FragmentAckOnError(self, rule) # XXX
+            else:
+                raise ValueError("invalid FRMode: {}".format(mode))
+            session.set_packet(packet_bbuf)
+            session.start_sending()
+            # self.layer2.send_packet() will be called in the session.
+        else:
+            self._log("no SCHC fragmentation for the packet.")
+            args = (packet_bbuf.get_content(), self.layer2.mac_id, None,
+                    None)
+            self.scheduler.add_event(0, self.layer2.send_packet, args)
+            return
 
-        self._log("fragmentation rule_id={}".format(rule_id))
-        #self.start_frag_session(schc_packet_bitbuffer, frag_meta_info)
-
-        #assert "mode" in self.meta_info2
-        #if "mode" == "fragmentation":
-        #
-        #elif "mode" == "reassembly":
-        #    print("XXX")
-
-        # XXX: copied from SCHCProtocolSender.send_packet()
-
-        #def start_frag_session(self, schc_packet_bitbuffer, meta_info):
-
-        #session = FragmentAckOnError(self, None) # XXX:hack
-        session = self.fragmentation_session
-        session.set_packet(packet)
-        session.start_sending()
+    def new_reassemble_session(self, bbuf, rule, remote_id, context=None):
+        #self.rule_manager.set_frag_rule(rule)
+        mode = rule.get("FRMode")
+        if mode == "noAck":
+            session = ReassemblerNoAck(self, rule, remote_id) # XXX
+        elif mode == "ackAlways":
+            raise NotImplementedError("FRMode:", mode)
+        elif mode == "ackOnError":
+            session = ReassemblerAckOnError(self, rule, remote_id) # XXX
+        else:
+            raise ValueError("FRMode:", mode)
+        session.rule = rule
+        return session
 
     def event_receive_from_L2(self, device_id, raw_packet):
         self._log("recv-from-L2 {}->{} {}".format(
             device_id, self.layer2.mac_id, raw_packet))
+        self.process_received_packet(device_id, BitBuffer(raw_packet))
 
-        #session = self.find_session(device_id)
-        session = self.reassembly_session
-        session.process_packet(raw_packet)
+    def process_received_packet(self, remote_id, packet_bbuf):
+        # remote_id needs to bind into a single context in order to map
+        # the packet into a procedure for SCHC fragment, SCHC packet.
+        # or raw IP packet.
+# XXX
+# For now, a context and rules are merged.  It needs to be separated.
+# XXX
+        rule = self.rule_manager.findRuleByPacket(remote_id, packet_bbuf)
+        if rule is None:
+            self._log("no rule found for {}".format(remote_id))
+            args = (remote_id, self.layer2.mac_id, packet_bbuf.get_content())
+            self.scheduler.add_event(0, self.layer3.receive_packet, args)
+            return
+        # if it is a SCHC fragment or a SCHC packet,
+        # the context must exist, which indicates a size of the rule id.
+
+        if "fragmentation" in rule:
+            # SCHC R.
+            # find the session for the dtag.
+            if rule["dtagSize"] > 0:
+                dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
+                                    position=rule.get("ruleLength"))
+            else:
+                dtag = None
+            session = self.fragment_session_list.get(dtag)
+            # if not exist, new session will be created.
+            if session is None:
+                session = self.new_reassemble_session(packet_bbuf,
+                                                      rule, remote_id)
+                self.fragment_session_list[dtag] = session
+            # call resembling process according to the mode.
+            # once resembling is finished, self.proccess_packet() will be
+            # called again for decompression.
+            session.process_packet(packet_bbuf, dtag)
+            return
+
+        if "compression" in rule:
+            # SCHC D.
+            packet_bbuf = self.compression.decompress(packet_bbuf)
+            args = (remote_id, self.layer2.mac_id, raw_packet)
+            self.scheduler.add_event(0, self.layer3.receive_packet, args)
+            return
+
+        raise RuntimeError("must not come here.")
 
 # ---------------------------------------------------------------------------

@@ -37,8 +37,9 @@ class FragmentBase():
         self.mic_sent = None
 
     def get_mic(self, extra_bits=0):
-        mic_target = self.packet + (b"\x00" * (roundup(extra_bits,
-                            self.rule.mic_word_size)//self.rule.mic_word_size))
+        mic_target = self.packet_bbuf.get_content()
+        mic_target += b"\x00" * (roundup(
+                extra_bits, self.rule["MICWordSize"])//self.rule["MICWordSize"])
         mic = mic_crc32.get_mic(mic_target)
         return mic.to_bytes(4, "big")
 
@@ -50,34 +51,32 @@ class FragmentBase():
 
 class FragmentNoAck(FragmentBase):
 
-    def set_packet(self, packet):
-        self.packet = packet[:]
-        self.packet_bb = BitBuffer(packet)
+    def set_packet(self, packet_bbuf):
+        self.packet_bbuf = packet_bbuf
         # update dtag for next
         self.dtag += 1
-        if self.dtag > pow(2,self.rule.dtag_size-1):
+        if self.dtag > schcmsg.get_max_dtag(self.rule):
             self.dtag = 0
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
         remaining_size = (self.protocol.layer2.get_mtu_size() -
-                          schcmsg.get_header_size(self.rule))
-        if self.packet_bb.count_remaining_bits() != 0:
+                          schcmsg.get_sender_header_size(self.rule))
+        if self.packet_bbuf.count_remaining_bits() != 0:
             # regular frag.
-            if remaining_size > self.packet_bb.count_remaining_bits():
+            if remaining_size > self.packet_bbuf.count_remaining_bits():
                 # put all remaining bits into the tile.
-                tile = self.packet_bb.get_bits_as_buffer(
-                        self.packet_bb.count_remaining_bits())
+                tile = self.packet_bbuf.get_bits_as_buffer(
+                        self.packet_bbuf.count_remaining_bits())
             else:
                 # put remaining_size of bits of packet into the tile.
-                tile = self.packet_bb.get_bits_as_buffer(remaining_size)
-            fcn = 0
+                tile = self.packet_bbuf.get_bits_as_buffer(remaining_size)
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
                     win=None,
-                    fcn=fcn,
+                    fcn=0,
                     mic=None,
-                    payload=tile.get_content())
+                    payload=tile)
             # save the last window tiles.
             self.last_tile = tile
             transmit_callback = self.event_sent_frag
@@ -85,14 +84,14 @@ class FragmentNoAck(FragmentBase):
             # make All-1 frag.
             assert self.last_tile is not None
             assert self.mic_sent is None
-            last_payload_size = (schcmsg.get_header_size(self.rule) +
+            last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
                                  self.last_tile.count_added_bits())
             # calculate extra_bits (= packet_size - last_payload_size)
             self.mic_sent = self.get_mic(extra_bits=(
-                    roundup(last_payload_size, self.rule.l2_word_size) -
+                    roundup(last_payload_size, self.rule["L2WordSize"]) -
                     last_payload_size))
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
                     win=None,
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
@@ -118,7 +117,7 @@ class FragmentAckOnError(FragmentBase):
         self.all_tiles = TileList(self.rule, self.packet)
         # update dtag for next
         self.dtag += 1
-        if self.dtag > pow(2,self.rule.dtag_size-1):
+        if self.dtag > schcmsg.get_max_dtag(self.rule):
             self.dtag = 0
 
     def send_frag(self):
@@ -168,16 +167,16 @@ class FragmentAckOnError(FragmentBase):
             else:
                 if remaining_size >= schcmsg.get_mic_size_in_bits(self.rule):
                     # make All-1 frag with the tiles.
-                    last_payload_size = (schcmsg.get_header_size(self.rule) +
+                    last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
                                         schcmsg.get_mic_size_in_bits(self.rule) +
                                         TileList.get_tile_size(window_tiles))
                     # calculate extra_bits (= packet_size - last_payload_size)
                     self.mic_sent = self.get_mic(extra_bits=(
-                            roundup(last_payload_size, self.rule.l2_word_size) -
+                            roundup(last_payload_size, self.rule["L2WordSize"]) -
                             last_payload_size))
                     fcn = schcmsg.get_fcn_all_1(self.rule)
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
                     fcn=fcn,
                     mic=self.mic_sent,
@@ -194,14 +193,14 @@ class FragmentAckOnError(FragmentBase):
             # make All-1 frag.
             win = 0 # in case when there is no SCHC packet.
             win = self.last_window_tiles[0]["w-num"]
-            last_payload_size = (schcmsg.get_header_size(self.rule) +
+            last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
                                  TileList.get_tile_size(self.last_window_tiles))
             # calculate extra_bits (= packet_size - last_payload_size)
             self.mic_sent = self.get_mic(extra_bits=(
-                    roundup(last_payload_size, self.rule.l2_word_size) -
+                    roundup(last_payload_size, self.rule["L2WordSize"]) -
                     last_payload_size))
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule.rule_id, dtag=self.dtag,
+                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
                     win=win,
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
