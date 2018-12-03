@@ -52,7 +52,7 @@ class TileList():
         return the tiles containing the contiguous tiles fitting in mtu_size.
         And, remaiing nb_tiles to be sent in all_tiles.
         '''
-        remaining_size = mtu_size - schcmsg.get_header_size(self.rule)
+        remaining_size = mtu_size - schcmsg.get_sender_header_size(self.rule)
         max_tiles = remaining_size // self.rule.tile_size
         tiles = []
         t_prev = None
