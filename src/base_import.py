@@ -10,6 +10,11 @@ except ImportError:
     import utime as time
 
 try:
+    import json
+except:
+    import ujson as json
+
+try:
     from collections import namedtuple
 except ImportError:
     from ucollections import namedtuple
