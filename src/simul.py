@@ -16,10 +16,11 @@ class SimulLayer3:
         self.sim = sim
         self.protocol = None
 
-    def send_later(self, rel_time, packet):
-        self._log("send-later {}".format(packet))
+    def send_later(self, rel_time, remote_id, raw_packet):
+        self._log("send-later -> {} {}".format(remote_id, raw_packet))
         self.sim.scheduler.add_event(
-            rel_time, self.protocol.event_receive_from_L3, (packet,))
+            rel_time, self.protocol.event_receive_from_L3,
+            (remote_id, raw_packet,))
 
     # XXX need to confirm whether this should be here or not.
     def receive_packet(self, remote_id, local_id, raw_packet):
