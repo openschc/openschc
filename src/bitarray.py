@@ -287,6 +287,7 @@ class BitBuffer:
         return self._content
 
     def get_content(self):
+        """ retur bytearray of this content aligned to the byte boundary. """
         assert self._rpos % BITS_PER_BYTE == 0
         #nb_bits = self.count_remaining_bits()
         #assert nb_bits % BITS_PER_BYTE == 0
