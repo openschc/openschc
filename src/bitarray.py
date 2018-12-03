@@ -309,6 +309,9 @@ class BitBuffer:
     def display(self):
         print ("{}/{}".format(self._content, self._wpos))
 
+    def copy(self):
+        return self.get_bits_as_buffer(self.count_added_bits())
+
     def __repr__(self):
         return "b'{}'/{}".format("".join([ "\\x{:02x}".format(i) for i in
                                        self._content ]), self._wpos)
