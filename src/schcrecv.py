@@ -9,7 +9,7 @@ from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
 
-class RessemblerBase:
+class ReassembleBase:
 
     def __init__(self, protocol, rule, remote_id, profile=None):
         self.protocol = protocol
@@ -27,7 +27,7 @@ class RessemblerBase:
 
 #---------------------------------------------------------------------------
 
-class ReassemblerNoAck(RessemblerBase):
+class ReassemblerNoAck(ReassembleBase):
 
     def process_packet(self, bbuf, dtag):
         # XXX context should be passed from the lower layer.
@@ -60,7 +60,7 @@ class ReassemblerNoAck(RessemblerBase):
 
 #---------------------------------------------------------------------------
 
-class ReassemblerAckOnError(RessemblerBase):
+class ReassemblerAckOnError(ReassembleBase):
 
     def process_packet(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
