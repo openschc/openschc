@@ -11,23 +11,26 @@ class TileList():
 
     # XXX it is almost about the sender side, should be moved into schcsend.py.
     # XXX may it be used in NO-ACK ?
-    def __init__(self, rule, packet):
+    def __init__(self, rule, packet_bbuf):
         self.rule = rule
-        t_size = rule.tile_size
+        self.t_size = rule["tileSize"]
         t_init_num = schcmsg.get_MAX_WIND_FCN(rule)
         self.all_tiles = []
         w_num = 0
         t_num = t_init_num
         # make tiles
-        bb = BitBuffer(packet)
-        num_full_size_tiles = floor(bb.count_added_bits()/rule.tile_size)
-        last_tile_size = bb.count_added_bits() - (rule.tile_size *
+        # XXX for now, the packet bitbuffer is going to be divided
+        # into the tiles, which are a set of bit buffers too.
+        # logically, it doesn't need when tileSize is well utilized.
+        bbuf = packet_bbuf.copy()
+        num_full_size_tiles = floor(bbuf.count_added_bits()/self.t_size)
+        last_tile_size = bbuf.count_added_bits() - (self.t_size *
                                                   num_full_size_tiles)
         assert last_tile_size >= 0
-        tiles = [ bb.get_bits_as_buffer(rule.tile_size)
+        tiles = [ bbuf.get_bits_as_buffer(self.t_size)
                  for _ in range(num_full_size_tiles) ]
         if last_tile_size > 0:
-            tiles.append(bb.get_bits_as_buffer(last_tile_size))
+            tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
         # make a all_tiles
         for t in tiles:
             tile_obj = {
@@ -53,7 +56,7 @@ class TileList():
         And, remaiing nb_tiles to be sent in all_tiles.
         '''
         remaining_size = mtu_size - schcmsg.get_sender_header_size(self.rule)
-        max_tiles = remaining_size // self.rule.tile_size
+        max_tiles = remaining_size // self.t_size
         tiles = []
         t_prev = None
         for i in range(len(self.all_tiles)):
@@ -93,10 +96,10 @@ class TileList():
         return size
 
     @staticmethod
-    def get_bytearray(tiles):
-        buf = BitBuffer()
+    def concat(tiles):
+        bbuf = BitBuffer()
         for t in tiles:
-            buf += t["tile"]
-        return buf.get_content()
+            bbuf += t["tile"]
+        return bbuf
 
 #---------------------------------------------------------------------------

@@ -35,7 +35,7 @@ class FragmentBase():
         if self.dtag > schcmsg.get_max_dtag(self.rule):
             self.dtag = 0
 
-    def get_mic(self, extra_bits=0):
+    def get_mic(self, extra_bits=1):
         mic_target = self.mic_base
         mic_target += b"\x00" * (roundup(
                 extra_bits, self.rule["MICWordSize"])//self.rule["MICWordSize"])
@@ -104,9 +104,9 @@ class FragmentNoAck(FragmentBase):
 
 class FragmentAckOnError(FragmentBase):
 
-    def set_packet(self, packet):
-        self.all_tiles = TileList(self.rule, self.packet)
-        super().set_packet(self, packet)
+    def set_packet(self, packet_bbuf):
+        super().set_packet(packet_bbuf)
+        self.all_tiles = TileList(self.rule, packet_bbuf)
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
@@ -168,7 +168,7 @@ class FragmentAckOnError(FragmentBase):
                     win=window_tiles[0]["w-num"],
                     fcn=fcn,
                     mic=self.mic_sent,
-                    payload=TileList.get_bytearray(window_tiles))
+                    payload=TileList.concat(window_tiles))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
         else:

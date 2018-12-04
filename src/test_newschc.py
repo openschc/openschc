@@ -11,9 +11,12 @@ import simlayer2
 import simul
 from rulemanager import RuleManager
 
+config = "example/fragment-rule-001.json"
+#config = "example/fragment-rule-002.json"
+
 #---------------------------------------------------------------------------
 
-with open("example/fragment-rule-002.json") as fd:
+with open(config) as fd:
     rule = json.loads(fd.read())
 
 rule_manager = RuleManager()

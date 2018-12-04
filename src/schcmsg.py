@@ -90,7 +90,7 @@ class frag_tx(frag_base):
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
                   cbit=None, abort=False, payload=None):
-        #
+        assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
         #
         # basic fields.
@@ -102,18 +102,18 @@ class frag_tx(frag_base):
         #
         # extension fields.
         if win is not None and self.rule.get("windowSize") is not None:
-            buffer.add_bits(win, self.rule.get["windowSize"])
+            buffer.add_bits(win, self.rule["windowSize"])
         if fcn is not None and self.rule.get("FCNSize") is not None:
             buffer.add_bits(fcn, self.rule["FCNSize"])
-        if mic != None and self.rule.get("MICAlgorithm") is not None:
+        if mic is not None and self.rule.get("MICAlgorithm") is not None:
             mic_size = get_mic_size_in_bits(self.rule)
             assert mic_size % bitarray.BITS_PER_BYTE == 0
             assert len(mic) == mic_size // 8
             buffer.add_bytes(mic)
-        if cbit != None:
+        if cbit is not None:
             buffer.set_bit(cbit)
-        if bitmap != None and self.rule.bitmap_size:
-            buffer.add_bits(bitmap, self.rule.bitmap_size)
+        #if bitmap is not None and self.rule.bitmap_size:
+        #    buffer.add_bits(bitmap, self.rule.bitmap_size)
         '''
         if abort == True:
             raise RunTimeError("not refactored", "abort == True")
@@ -121,7 +121,7 @@ class frag_tx(frag_base):
             pos += 8
         '''
         #
-        if payload != None:
+        if payload is not None:
             # assumed that bit_set() has extended to a byte boundary
             buffer += payload
         #
@@ -183,7 +183,7 @@ class frag_rx(frag_base):
     '''
     def set_recvbuf(self, recvbuf):
         assert isinstance(recvbuf, BitBuffer)
-        self.packet = recvbuf
+        self.packet_bbuf = recvbuf
 
     def parse_rule_id(self, C, exp_rule_id=None):
         '''
@@ -192,7 +192,7 @@ class frag_rx(frag_base):
         '''
         rule_id_size = C.get("ruleLength", 0)
         if rule_id_size != 0:
-            rule_id = self.packet.get_bits(rule_id_size)
+            rule_id = self.packet_bbuf.get_bits(rule_id_size)
             if exp_rule_id != None and rule_id != exp_rule_id:
                 raise ValueError("rule_id unexpected.")
         else:
@@ -209,7 +209,7 @@ class frag_rx(frag_base):
         '''
         dtag_size = self.rule.get("dtagSize", 0)
         if dtag_size != 0:
-            dtag = self.packet.get_bits(dtag_size)
+            dtag = self.packet_bbuf.get_bits(dtag_size)
             if exp_dtag != None and dtag != exp_dtag:
                 raise ValueError("dtag unexpected.")
         else:
@@ -227,7 +227,7 @@ class frag_rx(frag_base):
         '''
         win_size = self.rule.get("windowSize", 0)
         if win_size != 0:
-            win = self.packet.get_bits(win_size)
+            win = self.packet_bbuf.get_bits(win_size)
             if exp_win is not None and win is not exp_win:
                 raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
             self.win = win
@@ -238,7 +238,7 @@ class frag_rx(frag_base):
         parse fcn in the frame.
         assuming that fcn_size is not zero.
         '''
-        self.fcn = self.packet.get_bits(self.rule["FCNSize"])
+        self.fcn = self.packet_bbuf.get_bits(self.rule["FCNSize"])
         return self.rule["FCNSize"]
 
     def parse_bitmap(self, pos):
@@ -267,7 +267,7 @@ class frag_rx(frag_base):
         assuming that mic_size is not zero.
         '''
         mic_size = get_mic_size_in_bits(self.rule)
-        self.mic = self.packet.get_bits(mic_size)
+        self.mic = self.packet_bbuf.get_bits(mic_size)
         return mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):
@@ -385,4 +385,4 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_fcn(pos)
         if self.fcn == get_fcn_all_1(self.rule):
             pos += self.parse_mic(pos)
-        self.payload = self.packet.copy()
+        self.payload = self.packet_bbuf.copy()
