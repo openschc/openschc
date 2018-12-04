@@ -1,177 +1,41 @@
-#---------------------------------------------------------------------------
-# C.A. 2018
-#---------------------------------------------------------------------------
-
 BITS_PER_BYTE = 8
-
-#---------------------------------------------------------------------------
-
-class FakeBitBuffer:
-    """This is a FakeBitBuffer, that does not do actual bit formatting,
-    just logs all the bits/nb_bits pairs that have been pushed,
-    and can be used to pop them later"""
-    def __init__(self, content=[]):
-        self.content = content[:]
-
-    def add_bits(self, bits_as_long, nb_bits):
-        self.content.append((bits_as_long, nb_bits))
-
-    def add_bytes(self, raw_data):
-        for raw_byte in raw_data:
-            self.add_bits(raw_byte, BITS_PER_BYTE)
-
-    def get_bits(self, nb_bits):
-        bits_as_long, added_nb_bits = self.content.pop(0)
-        assert nb_bits == added_nb_bits
-        return bits_as_long
-
-    def get_bits_as_buffer(self, nb_bits):
-        result = FakeBitBuffer()
-        while result.count_bits() < nb_bits:
-            __, next_nb_bits = self.content[0]
-            bits = self.get_bits(next_nb_bits)
-            result.add_bits(bits, next_nb_bits)
-        return result
-
-    def get_content(self):
-        return self.content[:]
-
-    def count_bits(self):
-        result = 0
-        for value, size in self.content:
-            result += size
-        return result
-
-#---------------------------------------------------------------------------
-
-# XXX: need to optimize: add_bytes, get_bytes
-# XXX: separate adding/getting
-
-class SlowBitBuffer:
-    """This is a BitBuffer based on bytearray.
-    One can add/remove bits and bytes.
-    """
-    def __init__(self, content=None, should_record_add=False):
-        if content is not None:
-            self.content = content
-        else:
-            self.content = bytearray()
-        self.pending_bits = 0
-        self.pending_count = 0
-        if should_record_add:
-            self._log = []
-        else:
-            self._log = None
-
-    def add_bits(self, bits, nb_bits):
-        if self._log is not None:
-            self._log.append(("bits", bits, nb_bits))
-        if nb_bits == 0:
-            return
-        mask = 1<<(nb_bits-1)
-        for i in range(nb_bits):
-            assert mask != 0
-            current_bit = 1 if ((bits & mask) != 0) else 0
-            self._add_one_bit(current_bit)
-            mask = mask >> 1
-        assert mask == 0
-
-    def get_content(self):
-        if self.pending_count != 0:
-            raise RuntimeError("Unpadded content", self.pending_count)
-        return self.content[:]
-
-    def add_bytes(self, raw_data):
-        if self._log is not None:
-            self._log.append(("bytes", raw_data))
-        for raw_byte in raw_data:
-            self.add_bits(raw_byte, BITS_PER_BYTE)
-
-    def ensure_padding(self):
-        count = 0
-        while self.pending_count != 0:
-            self._add_one_bit(0)
-            count += 1
-        return count
-
-    def count_remaining_bits(self):
-        return len(self.content)*BITS_PER_BYTE + self.pending_count
-
-    def count_added_bits(self):
-        return len(self.content)*BITS_PER_BYTE + self.pending_count
-
-    def get_bits(self, nb_bits):
-        if nb_bits == 0:
-            return 0
-        mask = 1<<(nb_bits-1)
-        result = 0
-        for i in range(nb_bits):
-            assert mask != 0
-            if self._get_one_bit() == 1:
-                result |= mask
-            mask = mask >> 1
-        assert mask == 0
-        return result
-
-    def get_bits_as_buffer(self, nb_bits):
-        result = SlowBitBuffer()
-        for bit_index in range(nb_bits):
-            result._add_one_bit(self._get_one_bit())
-        assert result.count_added_bits() == nb_bits
-        result.ensure_padding()  # XXX: result size can be bigger than nb_bit
-        return result
-
-    def _push_from_pending(self):
-        assert self.pending_count == BITS_PER_BYTE
-        self.content.append(self.pending_bits)
-        self.pending_bits = 0
-        self.pending_count = 0
-
-    def _pop_to_pending(self):
-        assert self.pending_count == 0
-        self.pending_bits = self.content[0]
-        self.content = self.content[1:]
-        self.pending_count = BITS_PER_BYTE
-
-    def _add_one_bit(self, one_bit):
-        assert one_bit == 0 or one_bit == 1
-        assert self.pending_count < BITS_PER_BYTE  # invariant
-        self.pending_bits = (self.pending_bits << 1) | one_bit
-        self.pending_count += 1
-        if self.pending_count >= BITS_PER_BYTE:
-            self._push_from_pending()
-
-    def _get_one_bit(self):
-        if self.pending_count == 0:
-            self._pop_to_pending()
-        assert self.pending_count >= 1
-        mask = 1 << (self.pending_count-1)
-        if self.pending_bits & mask != 0:
-            self.pending_bits ^= mask
-            result = 1
-        else:
-            result = 0
-        self.pending_count -= 1
-        return result
-
-    def __repr__(self):
-        #if self._log is not None:
-        return "BitBuffer({})".format(self.__dict__)
-
-    def display(self):
-        print(self)
-
-#---------------------------------------------------------------------------
 
 class BitBuffer:
 
     def __init__(self, content=b""):
         """ BitBuffer manage a buffer bit per bit.
-        content: any objects which can be passed to bytes or bytearray.
+        _content: any objects which can be passed to bytes or bytearray.
         _wpos: always indicating the last next bit position for set_bit()
                without position.
         _rpos: indicating the bit position to be read for get_bits() without
-               position.
+               the argument of the position.
+
+                     _rpos      _wpos
+                       v          v
+                  bit# 01234567 01234567
+                      |--------|--------|  --> _content : bytearray()
+                       01011110 001
+                      |-----------|        --> count_added_bits() = 11
+                                  |-----|  --> count_padding_bits() = 5
+                      |-----------|        --> count_remaining_bits() = 11
+
+        once get_bits(3) is called.  the variables will change like below.
+
+                        _rpos   _wpos
+                          v       v
+                  bit# 01234567 01234567
+                      |--------|--------|
+                       01011110 001.....
+                      |-----------|        --> count_added_bits() = 11
+                                  |-----|  --> count_padding_bits() = 5
+                          |-------|        --> count_remaining_bits() = 8
+
+        XXX proposed the expecting behavior. need to be considered.
+        set_*(): _wpos() doesn't change. except when it add a bit at the tail.
+        add_*(): _wpos() doesn't change. except when it add a bit at the tail.
+        get_*(): increment _rpos()
+        copy_*(): _rpos doesn't change.
+
         """
         self._content = bytearray(content)
         self._wpos = len(content)*8  # write position
@@ -239,7 +103,8 @@ class BitBuffer:
         value = 0x00
 
         if position == None:
-            if self._rpos + nb_bits > self._wpos:  # go after buffer # XXX: > or >=?
+            if self._rpos + nb_bits > self._wpos:
+                # go after buffer # XXX: > or >=?
                 raise ValueError ("data out of buffer")
 
             for i in range(0, nb_bits):
@@ -273,13 +138,14 @@ class BitBuffer:
 
 #to be optimized
     def get_bits_as_buffer(self, nb_bits):
+        """ _rpos doest change. """
         result = BitBuffer()
         for bit_index in range(nb_bits):
             result.add_bits(self.get_bits(1), 1)
         return result
 
     def ensure_padding(self):
-        count = (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
+        count = self.count_padding_bits()
         self.add_bits(0, count)
         return count
 
@@ -287,7 +153,9 @@ class BitBuffer:
         return self._content
 
     def get_content(self):
-        """ retur bytearray of this content aligned to the byte boundary. """
+        """ return bytearray of this content aligned to the byte boundary.
+        Note that the number of bits added will be lost.
+        """
         assert self._rpos % BITS_PER_BYTE == 0
         #nb_bits = self.count_remaining_bits()
         #assert nb_bits % BITS_PER_BYTE == 0
@@ -298,9 +166,13 @@ class BitBuffer:
     #    return self._wpos
 
     def count_remaining_bits(self):
-        """return the number of the remaining significant bits from
-        the position of self._rpos."""
-        return len(self._content)*BITS_PER_BYTE - self._rpos
+        """return the number of the remaining bits from
+        the position of self._rpos to _wpos. """
+        #return len(self._content)*BITS_PER_BYTE - self._rpos
+        return self._wpos - self._rpos
+
+    def count_padding_bits(self):
+        return (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
 
     def count_added_bits(self):
         """return the number of significant bits from the most left bit."""
@@ -309,15 +181,27 @@ class BitBuffer:
     def display(self):
         print ("{}/{}".format(self._content, self._wpos))
 
-    def copy(self):
-        return self.get_bits_as_buffer(self.count_added_bits())
+    def copy(self, position=None):
+        """ return BitBuffer like get_bits_as_buffer(),
+        but _rpos doesn't change. """
+        new_buf = BitBuffer()
+        if position is None:
+            for bit_index in range(self._rpos, self._wpos):
+                new_buf.add_bits(self.get_bits(1, bit_index), 1)
+            return new_buf
+        else:
+            if self.count_added_bits() < position:
+                return new_buf
+            for bit_index in range(position, self._wpos):
+                new_buf.add_bits(self.get_bits(1, bit_index), 1)
+            return new_buf
 
     def __repr__(self):
         return "b'{}'/{}".format("".join([ "\\x{:02x}".format(i) for i in
                                        self._content ]), self._wpos)
 
     def __add__(self, other):
-        new_buf = self.get_bits_as_buffer(self.count_added_bits())
+        new_buf = self.copy()
         for bit_index in range(other.count_added_bits()):
             new_buf.add_bits(other.get_bits(1, bit_index), 1)
         return new_buf

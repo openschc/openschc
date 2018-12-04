@@ -26,7 +26,6 @@ def check_bitbuffer_consistency(addition_list):
 
     #print(bitbuffer2)
 
-    assert bitbuffer2.count_remaining_bits() == padding_bitsize
     assert bitbuffer2.get_bits(padding_bitsize) == 0
     assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception when not
 
