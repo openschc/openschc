@@ -8,15 +8,6 @@ from schctile import TileList
 from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
-# XXX: put rule_manager
-
-Rule = namedtuple("Rule", "rule_id_size dtag_size window_size"
-                  + " fcn_size mode tile_size mic_algorithm")
-
-def rule_from_dict(rule_as_dict):
-    rule_as_dict = { k.replace("-","_"): v for k,v in rule_as_dict.items() }
-    return Rule(**rule_as_dict)
-
 #---------------------------------------------------------------------------
 
 # XXX should move it to bitarray or schcmsg.
