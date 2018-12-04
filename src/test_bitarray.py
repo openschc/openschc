@@ -1,8 +1,6 @@
 
 from base_import import *  # used for now for differing modules in py/upy
 
-#from bitarray import NewBitBuffer as BitBuffer
-
 def check_bitbuffer_consistency(addition_list):
     bits_list = addition_list
     #bitbuffer = BitBuffer(should_record_add=True)

@@ -5,34 +5,32 @@ class BitBuffer:
     def __init__(self, content=b""):
         """ BitBuffer manage a buffer bit per bit.
         _content: any objects which can be passed to bytes or bytearray.
-        _wpos: always indicating the last next bit position for set_bit()
-               without position.
-        _rpos: indicating the bit position to be read for get_bits() without
-               the argument of the position.
+        _wpos: always indicating the last next bit position.
+        _rpos: indicating the bit position to be read for get_bits().
 
                      _rpos      _wpos
                        v          v
                   bit# 01234567 01234567
-                      |--------|--------|  --> _content : bytearray()
-                       01011110 001
-                      |-----------|        --> count_added_bits() = 11
-                                  |-----|  --> count_padding_bits() = 5
-                      |-----------|        --> count_remaining_bits() = 11
+                      :--------:--------:  --> _content : bytearray()
+           bits added  01011110 001
+                       |----------|        --> count_added_bits() = 11
+                                  |----|   --> count_padding_bits() = 5
+                       |----------|        --> count_remaining_bits() = 11
 
         once get_bits(3) is called.  the variables will change like below.
 
                         _rpos   _wpos
                           v       v
                   bit# 01234567 01234567
-                      |--------|--------|
+                      :--------:--------:
                        01011110 001.....
-                      |-----------|        --> count_added_bits() = 11
-                                  |-----|  --> count_padding_bits() = 5
+                       |----------|        --> count_added_bits() = 11
+                                  |----|   --> count_padding_bits() = 5
                           |-------|        --> count_remaining_bits() = 8
 
         XXX proposed the expecting behavior. need to be considered.
-        set_*(): _wpos() doesn't change. except when it add a bit at the tail.
-        add_*(): _wpos() doesn't change. except when it add a bit at the tail.
+        set_*(): _wpos doesn't change. except when it add a bit at the tail.
+        add_*(): _wpos doesn't change. except when it add a bit at the tail.
         get_*(): increment _rpos()
         copy_*(): _rpos doesn't change.
 
@@ -88,7 +86,6 @@ class BitBuffer:
             for i in range(0, nb_bits):
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
 
-
 # to be rewritten
     def add_bytes(self, raw_data, position=None):
         for raw_byte in raw_data:
@@ -138,7 +135,7 @@ class BitBuffer:
 
 #to be optimized
     def get_bits_as_buffer(self, nb_bits):
-        """ _rpos doest change. """
+        """ _rpos does change. """
         result = BitBuffer()
         for bit_index in range(nb_bits):
             result.add_bits(self.get_bits(1), 1)
@@ -153,8 +150,9 @@ class BitBuffer:
         return self._content
 
     def get_content(self):
-        """ return bytearray of this content aligned to the byte boundary.
-        Note that the number of bits added will be lost.
+        """ return a bytearray containing the remaining bits in _content aligned
+        to the byte boundary.
+        Note that the number of remaining bits will be lost.
         """
         assert self._rpos % BITS_PER_BYTE == 0
         #nb_bits = self.count_remaining_bits()
@@ -206,18 +204,14 @@ class BitBuffer:
             new_buf.add_bits(other.get_bits(1, bit_index), 1)
         return new_buf
 
-#BitBuffer =
-NewBitBuffer = BitBuffer
-
 if __name__ == "__main__":
-    bb = NewBitBuffer()
+    bb = BitBuffer()
     for i in range(0,32):
         bb.set_bit(1)
     bb.set_bit(1, position=80 )
     bb.display()
     bb.set_bit(0, position=7 )
     bb.display()
-
 
     bb.add_bits(0x01, 4)
     bb.display()
