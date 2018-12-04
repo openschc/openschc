@@ -36,11 +36,20 @@ class FragmentBase():
         self.retry_counter = 0
         self.mic_sent = None
 
+    def set_packet(self, packet_bbuf):
+        self.packet_bbuf = packet_bbuf.copy()
+        self.mic_base = packet_bbuf.get_content()[:]
+        # update dtag for next
+        self.dtag += 1
+        if self.dtag > schcmsg.get_max_dtag(self.rule):
+            self.dtag = 0
+
     def get_mic(self, extra_bits=0):
-        mic_target = self.packet_bbuf.get_content()
+        mic_target = self.mic_base
         mic_target += b"\x00" * (roundup(
                 extra_bits, self.rule["MICWordSize"])//self.rule["MICWordSize"])
         mic = mic_crc32.get_mic(mic_target)
+        print("Send MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
 
     def start_sending(self):
@@ -50,13 +59,6 @@ class FragmentBase():
         raise NotImplementedError("it is implemented at the subclass.")
 
 class FragmentNoAck(FragmentBase):
-
-    def set_packet(self, packet_bbuf):
-        self.packet_bbuf = packet_bbuf
-        # update dtag for next
-        self.dtag += 1
-        if self.dtag > schcmsg.get_max_dtag(self.rule):
-            self.dtag = 0
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
@@ -112,13 +114,8 @@ class FragmentNoAck(FragmentBase):
 class FragmentAckOnError(FragmentBase):
 
     def set_packet(self, packet):
-        #self.rule_only_for_hackathon103 = rule # XXX this must be removed.
-        self.packet = packet[:]
         self.all_tiles = TileList(self.rule, self.packet)
-        # update dtag for next
-        self.dtag += 1
-        if self.dtag > schcmsg.get_max_dtag(self.rule):
-            self.dtag = 0
+        super().set_packet(self, packet)
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.

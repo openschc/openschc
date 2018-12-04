@@ -41,8 +41,10 @@ class ReassemblerNoAck:
             schc_packet = BitBuffer()
             for i in self.tile_list:
                 schc_packet += i
-            mic_calced = mic_crc32.get_mic(schc_packet.get_content()).to_bytes(4, "big")
-            if schc_frag_message.mic == mic_calced:
+            mic_target = schc_packet.get_content()
+            mic_calced = mic_crc32.get_mic(mic_target)
+            print("Recv MIC {}, base = {}".format(mic_calced, mic_target))
+            if schc_frag_message.mic != mic_calced:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag_message.mic, mic_calced))
                 return
