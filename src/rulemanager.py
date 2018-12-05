@@ -1,58 +1,71 @@
 """"
-This module is used to manage rules. A rule is defined in JSON and is uniquely
-identified by a rule ID of variable length.
+This module is used to manage rules.
 
-Each key must be unique through the rule.
+## Rationale
+
+A rule is defined in JSON.
+
+Each key must be unique through a rule.
 Below the keys of "profile" are not allowed.
 
-    rule["compression"]["profile"]
-    rule["fragmentation"]["profile"]
+    {
+        "profile": { ... },
+        "compression": { "profile": ... }
+    }
 
+A rule is uniquely identified by the rule ID of variable length.
 Each rule must contain the following information:
 
-{
-  "ruleID" : 2,
-  "ruleLength" : 3
-}
+    {
+      "ruleID" : 2,
+      "ruleLength" : 3
+    }
 
 where ruleID contains the rule ID value aligned on the right and ruleLength
 gives 
 the size in bits of the ruleID. In the previous example, this corresponds to
 the binary value 0b010.
-
 if ruleLength is not specified the value is set to 1 byte.
 
 The rule is either a compression/decompression rule
 or a fragmentation/reassembly rule.
-In other words, either "compression" or "fragmentation" must exist.
-both keys must not exists.
-
 For C/D rules, the keyword "compression" must be defined. For F/R rules, the
 keyword "fragmentation" must be defined.
+In other words, either "compression" or "fragmentation" must exist in a rule.
+Both keys must not exists.
 
 For instance:
-{
-  "ruleID" : 14,
-  "ruleLength" : 4   # rule 0b1110
-  "compression": <<<rule>>>
-}
+
+    {
+      "ruleID" : 14,
+      "ruleLength" : 4   # rule 0b1110
+      "compression": <<<rule>>>
+    }
 
 where <<<rule>>> will be defined later.
 
-{
-  "ruleID" : 15,
-  "ruleLength" : 4   # rule 0b1110
-  "fragmentation": {
-      "FRMode" : "noAck" # or "ackAlways", "ackOnError"
-      "FRModeProfile" : {
-         "dtagSize" : 1, 
-         "windowSize": 3,
-         "FCNSize" : 3,
-         "maxWindFCN", 6,
-         "ackBehavior": "afterAll1"
+    {
+      "ruleID" : 15,
+      "ruleLength" : 4   # rule 0b1110
+      "fragmentation": {
+          "FRMode" : "noAck" # or "ackAlways", "ackOnError"
+          "FRModeProfile" : {
+             "dtagSize" : 1, 
+             "windowSize": 3,
+             "FCNSize" : 3,
+             "maxWindFCN", 6,
+             "ackBehavior": "afterAll1"
+          }
       }
-  }
-}
+    }
+
+## Compression Rule
+
+A compression rule is bidirectionnal.
+
+## Fragmentation Rule
+
+A fragmentation rule is uni directionnal.
 
 The "fragmentation" keyword is used to give fragmentation mode and profile:
 - one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
