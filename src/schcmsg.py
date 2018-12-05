@@ -30,6 +30,9 @@ class SCHC_MODE():
 def get_fcn_all_1(rule):
     return (1<<rule["FCNSize"])-1
 
+def get_win_all_1(rule):
+    return (1<<rule["windowSize"])-1
+
 def get_MAX_WIND_FCN(rule):
     return (1<<rule["FCNSize"])-2
 
@@ -202,18 +205,15 @@ class frag_rx(frag_base):
         self.rule_id = rule_id
         return rule_id_size
 
-    def parse_dtag(self, pos, exp_dtag=None):
+    def parse_dtag(self, pos):
         '''
         parse dtag in the frame.
-        exp_dtag: if non-None, check the dtag whether it is expected.
         '''
         dtag_size = self.rule.get("dtagSize", 0)
         if dtag_size != 0:
             dtag = self.packet_bbuf.get_bits(dtag_size)
-            if exp_dtag != None and dtag != exp_dtag:
-                raise ValueError("dtag unexpected.")
         else:
-            #dtag = self.rule.C.default_dtag
+            # XXX need a default dtag, or None handling.
             dtag = 1
         #
         self.dtag = dtag
@@ -256,10 +256,9 @@ class frag_rx(frag_base):
     def parse_cbit(self, pos):
         '''
         parse cbit in the frame.
-        self.cbit = pb.bit_get(self.packet, pos, 1, ret_type=int)
-        return 1
         '''
-        raise NotImplementedError
+        self.cbit = self.packet_bbuf.get_bits(1)
+        return self.cbit
 
     def parse_mic(self, pos):
         '''
@@ -294,7 +293,7 @@ class frag_sender_rx_all0_ack(frag_rx):
         self.rule = R
         pos = 0
         pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
-        pos += self.parse_dtag(pos, exp_dtag=dtag)
+        pos += self.parse_dtag(pos)
         pos += self.parse_win(pos, exp_win=exp_win)
         # XXX the abort is not supported yet.
         pos += self.parse_bitmap(pos)
@@ -317,7 +316,7 @@ class frag_sender_rx_all1_ack(frag_rx):
         self.rule = R
         pos = 0
         pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
-        pos += self.parse_dtag(pos, exp_dtag=dtag)
+        pos += self.parse_dtag(pos)
         pos += self.parse_win(pos, exp_win=win)
         # XXX the abort is not supported yet.
         pos += self.parse_cbit(pos)
@@ -332,18 +331,18 @@ class frag_sender_rx(frag_rx):
         ACK-NG : [ Rule ID | DTag |W|C-0| Bitmap | Pad-0 ]
         R-Abort: [ Rule ID | DTag |W|C-1| Pad-1 |
     '''
-    def __init__(self, recvbuf, R, dtag, win):
+    def __init__(self, rule, recvbuf):
         '''
         recvbuf: buffer received in bytearray().
-        R: rule instance.
+        rule: rule instance.
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
-        self.rule = R
+        self.rule = rule
         pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
-        pos += self.parse_dtag(pos, exp_dtag=dtag)
-        pos += self.parse_win(pos, exp_win=win)
+        pos += self.parse_rule_id(rule)
+        pos += self.parse_dtag(pos)
+        pos += self.parse_win(pos)
         # XXX the abort is not supported yet.
         pos += self.parse_cbit(pos)
         if self.cbit == 0:

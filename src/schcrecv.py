@@ -25,11 +25,15 @@ class ReassembleBase:
         mic = mic_crc32.get_mic(mic_target)
         return mic.to_bytes(4, "big")
 
+    def cancel_timer(self):
+        # XXX cancel timer registered.
+        pass
+
 #---------------------------------------------------------------------------
 
 class ReassemblerNoAck(ReassembleBase):
 
-    def process_packet(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag):
         # XXX context should be passed from the lower layer.
         # XXX and pass the context to the parser.
         schc_frag_message = schcmsg.frag_receiver_rx(self.rule, bbuf)
@@ -62,7 +66,7 @@ class ReassemblerNoAck(ReassembleBase):
 
 class ReassemblerAckOnError(ReassembleBase):
 
-    def process_packet(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         schc_frag.finalize(self.rule)
 

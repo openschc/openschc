@@ -28,6 +28,8 @@ class FragmentBase():
         self.mic_sent = None
 
     def set_packet(self, packet_bbuf):
+        """ store the packet of bitbuffer for later use,
+        return dtag for the packet """
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.get_content()[:]
         # update dtag for next
@@ -45,6 +47,10 @@ class FragmentBase():
 
     def start_sending(self):
         self.send_frag()
+
+    def cancel_timer(self):
+        # XXX cancel timer registered.
+        pass
 
     def send_frag(self):
         raise NotImplementedError("it is implemented at the subclass.")
@@ -207,44 +213,20 @@ class FragmentAckOnError(FragmentBase):
     def update_frags_sent_flag(self):
         self.all_tiles.update_sent_flag()
 
-    def recv_ack(self, packet, peer_iid=None):
-        print("DEBUG: recv_ack:", packet)  # XXX
-        message = schcmsg.frag_sender_rx(packet, self.rule, self.dtag)
+    def receive_frag(self, bbuf, dtag):
+        schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
 
-        print("parsed message:", message.__dict__, message.payload.__dict__)
-
-        if message.cbit == 0:
-            self.all_tiles.unset_sent_flag(message.win, message.bitmap)
-            self.send_frag()
-        elif message.cbit == 1:
-            #XXX
-            pass
-        else:
-            #XXX
-            pass
-
-    def recv_frag(self, packet, peer_iid=None):
-        s = self.find_session(peer_iid=peer_iid)
-        if s is None:
-            # add it as a new session.
-            # XXX rule = rulemanager.find_rule(...)
-            rule = self.rule_only_for_hackathon103
-            s = fragment_receiver(packet, peer_iid=peer_iid,
-                                  config=self.config, rule=rule,
-                                  scheduler=self.scheduler,
-                                  layer2=self.layer2)
+        if schc_frag.win == schcmsg.get_win_all_1(self.rule):
+            print("Receiver Abort rid={} dtag={}".format(
+                    self.rule.ruleID, self.dtag))
             return
-        s.recv_frag(packet)
+        if schc_frag.cbit == 1:
+            print("ACK Success rid={} dtag={}".format(
+                    self.rule.ruleID, self.dtag))
+            return
+        if schc_frag.cbit == 0:
+            print("ACK Failure rid={} dtag={}".format(
+                    self.rule.ruleID, self.dtag))
+            # XXX need to retransmission.
+            return
 
-    def find_session(self, peer_iid=None):
-        if peer_iid:
-            for i in self.session_list:
-                if i.peer_iid == peer_iid:
-                    return i
-            else:
-                return None
-        else:
-            # XXX
-            return None
-
-#---------------------------------------------------------------------------

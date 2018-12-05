@@ -13,6 +13,33 @@ from schcsend import FragmentAckOnError
 from schcsend import FragmentNoAck
 from compress import Compression
 
+class Session:
+    """ fragmentation/reassembly session manager
+    session = [
+        { "ruleID": n, "ruleLength", "dtag": n, "session": session }, ...
+        ]
+    """
+    def __init__(self, protocol):
+        self.protocol = protocol
+        self.session_list = []
+
+    def add(self, rule_id, rule_id_size, dtag, session):
+        if self.get(rule_id, rule_id_size, dtag) is not None:
+            print("ERROR: the session rid={}/{} dtag={} exists already".format(
+                    rule_id, rule_id_size, dtag))
+            return False
+        self.session_list.append({"rule_id": rule_id,
+                                  "rule_id_size": rule_id_size, "dtag": dtag,
+                                  "session": session })
+        return True
+
+    def get(self, rule_id, rule_id_size, dtag):
+        for i in self.session_list:
+            if (rule_id == i["rule_id"] and rule_id_size == i["rule_id_size"]
+                and dtag == i["dtag"]):
+                return i["session"]
+        return None
+
 class SCHCProtocol:
     """This class is the entry point for the openschc
     (in this current form, object composition is used)"""
@@ -27,7 +54,8 @@ class SCHCProtocol:
         self.layer3._set_protocol(self)
         self.default_frag_rule = None # XXX: to be in  rule_manager
         self.compression = compress.Compression(self)
-        self.fragment_session_list = {}
+        self.fragment_session = Session(self)
+        self.reassemble_session = Session(self)
 
     def _log(self, message):
         self.log("schc", message)
@@ -62,17 +90,11 @@ class SCHCProtocol:
 
         if "fragmentation" in rule:
             self._log("fragmentation rule_id={}".format(rule.ruleID))
-            mode = rule.get("FRMode")
-            if mode == "noAck":
-                session = FragmentNoAck(self, rule) # XXX
-            elif mode == "ackAlwayw":
-                raise NotImplementedError(
-                        "{} is not implemented yet.".format(mode))
-            elif mode == "ackOnError":
-                session = FragmentAckOnError(self, rule) # XXX
-            else:
-                raise ValueError("invalid FRMode: {}".format(mode))
+
+            session = self.new_fragment_session(rule, remote_id)
             session.set_packet(packet_bbuf)
+            self.fragment_session.add(rule.ruleID, rule.ruleLength,
+                                      session.dtag, session)
             session.start_sending()
             # self.layer2.send_packet() will be called in the session.
         else:
@@ -81,6 +103,19 @@ class SCHCProtocol:
                     None)
             self.scheduler.add_event(0, self.layer2.send_packet, args)
             return
+
+    def new_fragment_session(self, rule, remote_id):
+        mode = rule.get("FRMode")
+        if mode == "noAck":
+            session = FragmentNoAck(self, rule) # XXX
+        elif mode == "ackAlwayw":
+            raise NotImplementedError(
+                    "{} is not implemented yet.".format(mode))
+        elif mode == "ackOnError":
+            session = FragmentAckOnError(self, rule) # XXX
+        else:
+            raise ValueError("invalid FRMode: {}".format(mode))
+        return session
 
     def new_reassemble_session(self, bbuf, rule, remote_id, context=None):
         #self.rule_manager.set_frag_rule(rule)
@@ -93,7 +128,6 @@ class SCHCProtocol:
             session = ReassemblerAckOnError(self, rule, remote_id) # XXX
         else:
             raise ValueError("FRMode:", mode)
-        session.rule = rule
         return session
 
     def event_receive_from_L2(self, device_id, raw_packet):
@@ -125,16 +159,25 @@ class SCHCProtocol:
                                     position=rule.get("ruleLength"))
             else:
                 dtag = None
-            session = self.fragment_session_list.get(dtag)
-            # if not exist, new session will be created.
-            if session is None:
-                session = self.new_reassemble_session(packet_bbuf,
-                                                      rule, remote_id)
-                self.fragment_session_list[dtag] = session
-            # call resembling process according to the mode.
-            # once resembling is finished, self.proccess_packet() will be
-            # called again for decompression.
-            session.process_packet(packet_bbuf, dtag)
+            # find existing session from fragment or reassembly.
+            session = self.fragment_session.get(rule.ruleID,
+                                                rule.ruleLength, dtag)
+            if session is not None:
+                print("Fragmentation session found", session)
+            else:
+                session = self.reassemble_session.get(rule.ruleID,
+                                                      rule.ruleLength, dtag)
+                if session is not None:
+                    print("Reassembly session found", session)
+                else:
+                    # no session is found.  create a new reassemble session.
+                    session = self.new_reassemble_session(packet_bbuf,
+                                                          rule, remote_id)
+                    self.reassemble_session.add(rule.ruleID, rule.ruleLength,
+                                                dtag, session)
+            # XXX cancel retransmission timers.
+            session.cancel_timer()
+            session.receive_frag(packet_bbuf, dtag)
             return
 
         if "compression" in rule:
