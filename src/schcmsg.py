@@ -188,27 +188,11 @@ class frag_rx(frag_base):
         assert isinstance(recvbuf, BitBuffer)
         self.packet_bbuf = recvbuf
 
-    def parse_rule_id(self, C, exp_rule_id=None):
-        '''
-        parse rule_id in the frame.
-        exp_rule_id: if non-None, check the rule_id whether it's expected.
-        '''
-        rule_id_size = C.get("ruleLength", 0)
-        if rule_id_size != 0:
-            rule_id = self.packet_bbuf.get_bits(rule_id_size)
-            if exp_rule_id != None and rule_id != exp_rule_id:
-                raise ValueError("rule_id unexpected.")
-        else:
-            # XXX rule_id = C.default_rule_id
-            rule_id = exp_rule_id   # XXX
-        #
-        self.rule_id = rule_id
-        return rule_id_size
-
-    def parse_dtag(self, pos):
-        '''
-        parse dtag in the frame.
-        '''
+    def parse_dtag(self):
+        """ get the value of the dtag field and set it into self.dtag.
+        if dtagSize in the rule is zero, default dtag is adopted.
+        XXX need to be considered.
+        """
         dtag_size = self.rule.get("dtagSize", 0)
         if dtag_size != 0:
             dtag = self.packet_bbuf.get_bits(dtag_size)
@@ -219,18 +203,13 @@ class frag_rx(frag_base):
         self.dtag = dtag
         return dtag_size
 
-    def parse_win(self, pos, exp_win=None):
-        '''
-        parse win in the frame.
-        exp_win: if non-None, check the win whether it is expected.
-        if window_size is zero, self.win is not set.
-        '''
+    def parse_win(self):
+        """ get the value of the window field and set it into self.win.
+        if windowSize in the rule is zero, self.win is not set (None).
+        """
         win_size = self.rule.get("windowSize", 0)
         if win_size != 0:
-            win = self.packet_bbuf.get_bits(win_size)
-            if exp_win is not None and win is not exp_win:
-                raise ValueError("the value of win unexpected. win=%d expected=%d" % (win, exp_win))
-            self.win = win
+            self.win = self.packet_bbuf.get_bits(win_size)
         return win_size
 
     def parse_fcn(self, pos):
@@ -283,18 +262,17 @@ class frag_sender_rx_all0_ack(frag_rx):
          4        15     12
          5        31     13
     '''
-    def __init__(self, recvbuf, R, dtag, exp_win=None):
+    def __init__(self, recvbuf, rule, dtag, exp_win=None):
         '''
         recvbuf: buffer received in bytearray().
         R: rule instance.
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
-        self.rule = R
-        pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
-        pos += self.parse_dtag(pos)
-        pos += self.parse_win(pos, exp_win=exp_win)
+        self.rule = rule
+        pos = rule["ruleLength"]
+        pos += self.parse_dtag()
+        pos += self.parse_win()
         # XXX the abort is not supported yet.
         pos += self.parse_bitmap(pos)
 
@@ -306,18 +284,17 @@ class frag_sender_rx_all1_ack(frag_rx):
         Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
         Format: [ Rule ID | DTag |W| All-1 |  FF  |P1]
     '''
-    def __init__(self, recvbuf, R, dtag, win):
+    def __init__(self, recvbuf, rule, dtag, win):
         '''
         recvbuf: buffer received in bytearray().
         R: rule instance.
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
-        self.rule = R
-        pos = 0
-        pos += self.parse_rule_id(self.rule.C, exp_rule_id=self.rule["ruleID"])
-        pos += self.parse_dtag(pos)
-        pos += self.parse_win(pos, exp_win=win)
+        self.rule = rule
+        pos = rule["ruleLength"]
+        pos += self.parse_dtag()
+        pos += self.parse_win()
         # XXX the abort is not supported yet.
         pos += self.parse_cbit(pos)
         if self.cbit == 0:
@@ -339,10 +316,8 @@ class frag_sender_rx(frag_rx):
         self.init_param()
         self.set_recvbuf(recvbuf)
         self.rule = rule
-        pos = 0
-        pos += self.parse_rule_id(rule)
-        pos += self.parse_dtag(pos)
-        pos += self.parse_win(pos)
+        pos = rule["ruleLength"] + rule["dtagSize"]
+        pos += self.parse_win()
         # XXX the abort is not supported yet.
         pos += self.parse_cbit(pos)
         if self.cbit == 0:
@@ -364,7 +339,7 @@ class frag_receiver_rx(frag_rx):
         Format: [ Rule ID | DTag |W|FCN|  FF    |P1]
     XXX P1 is not approved in the WG.
     '''
-    def __init__(self, C, recvbuf):
+    def __init__(self, rule, recvbuf):
         # XXX for now, C refers to rule itself.
         '''
         C: runtime context.
@@ -372,15 +347,15 @@ class frag_receiver_rx(frag_rx):
         '''
         self.init_param()
         self.set_recvbuf(recvbuf)
-        self.__pos = 0
-        self.__pos += self.parse_rule_id(C)
+        self.rule = rule
+        self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
 
-    def finalize(self, R):
+    def finalize(self, rule):
         # XXX should be merged into __init__()
-        self.rule = R
-        pos = self.__pos
-        pos += self.parse_dtag(pos)
-        pos += self.parse_win(pos)
+        # XXX finaliza() is to be deleted.
+        pos = self.rule["ruleLength"]
+        pos += self.parse_dtag()
+        pos += self.parse_win()
         pos += self.parse_fcn(pos)
         if self.fcn == get_fcn_all_1(self.rule):
             pos += self.parse_mic(pos)
