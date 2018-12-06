@@ -26,6 +26,7 @@ class FragmentBase():
         self.event_timeout = 5
         self.retry_counter = 0
         self.mic_sent = None
+        self.event_id_ack_waiting = None
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -169,6 +170,8 @@ class FragmentAckOnError(FragmentBase):
                             roundup(last_payload_size, self.rule["L2WordSize"]) -
                             last_payload_size))
                     fcn = schcmsg.get_fcn_all_1(self.rule)
+                    self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+                            10, self.ack_timeout, tuple())
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
@@ -198,6 +201,8 @@ class FragmentAckOnError(FragmentBase):
                     win=win,
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
+            self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+                    10, self.ack_timeout, tuple())
         # send
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
@@ -205,6 +210,15 @@ class FragmentAckOnError(FragmentBase):
         print("send_frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
+
+    def cancel_ack_timeout(self):
+        if self.event_id_ack_waiting is None:
+            print("WARNING: event_id_ack_waiting is not set.")
+        self.protocol.scheduler.cancel_event(self.event_id_ack_waiting)
+
+    def ack_timeout(self):
+        print("ACK timeout")
+        print("retransmit or remove the session ?")
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         self.update_frags_sent_flag()
@@ -223,6 +237,7 @@ class FragmentAckOnError(FragmentBase):
         if schc_frag.cbit == 1:
             print("ACK Success rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
+            self.cancel_ack_timeout()
             return
         if schc_frag.cbit == 0:
             print("ACK Failure rid={} dtag={}".format(
