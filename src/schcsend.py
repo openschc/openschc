@@ -202,7 +202,7 @@ class FragmentAckOnError(FragmentBase):
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 self.event_sent_frag)
-        print("DEBUG: send_frag:", schc_frag.packet)
+        print("send_frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
