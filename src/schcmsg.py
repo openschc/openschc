@@ -206,7 +206,7 @@ class frag_rx(frag_base):
             self.win = self.packet_bbuf.get_bits(win_size)
         return win_size
 
-    def parse_fcn(self, pos):
+    def parse_fcn(self):
         '''
         parse fcn in the frame.
         assuming that fcn_size is not zero.
@@ -226,14 +226,14 @@ class frag_rx(frag_base):
         '''
         raise NotImplementedError
 
-    def parse_cbit(self, pos):
+    def parse_cbit(self):
         '''
         parse cbit in the frame.
         '''
         self.cbit = self.packet_bbuf.get_bits(1)
         return self.cbit
 
-    def parse_mic(self, pos):
+    def parse_mic(self):
         '''
         parse mic in the frame.
         assuming that mic_size is not zero.
@@ -290,63 +290,45 @@ class frag_sender_rx_all1_ack(frag_rx):
         pos += self.parse_dtag()
         pos += self.parse_win()
         # XXX the abort is not supported yet.
-        pos += self.parse_cbit(pos)
+        pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap(pos)
 
 class frag_sender_rx(frag_rx):
-
-    '''
-    message format received by the fragment sender.
-        ACK-OK : [ Rule ID | DTag |W|C-1| Pad-0 ]
-        ACK-NG : [ Rule ID | DTag |W|C-0| Bitmap | Pad-0 ]
-        R-Abort: [ Rule ID | DTag |W|C-1| Pad-1 |
-    '''
-    def __init__(self, rule, recvbuf):
-        '''
-        recvbuf: buffer received in bytearray().
-        rule: rule instance.
-        '''
+    """ SCHC fragment sender's class to parse the message from the receiver.
+    ACK Success: [ Rule ID | Dtag |  W  | C-1 | (P-0) ]
+    ACK Failure: [ Rule ID | Dtag |  W  | C-0 | Bitmap | (P-0) ]
+    Recv Abort : [ Rule ID | Dtag | W-1 | C-1 | (P-1) ]
+    """
+    def __init__(self, rule, packet_bbuf):
+        """ packet_bbuf: BitBuffer containing the SCHC fragment. """
         self.init_param()
-        self.set_recvbuf(recvbuf)
+        self.set_recvbuf(packet_bbuf)
         self.rule = rule
         pos = rule["ruleLength"] + rule["dtagSize"]
         pos += self.parse_win()
-        # XXX the abort is not supported yet.
-        pos += self.parse_cbit(pos)
+        pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap(pos)
 
 class frag_receiver_rx(frag_rx):
-
-    '''
-    for the fragment receiver to receive the message.
-    if FCN is All-0,
-        Format: [ Rule ID | DTag |W|FCN|P1][ Payload |P2]
-        Format: [ Rule ID | DTag |W|FCN|P1]
-    if FCN is All-1,
-        Format: [ Rule ID | DTag |W|FCN|  MIC   |P1][ Payload |P2]
-        Format: [ Rule ID | DTag |W|FCN|  MIC   |P1]
-    Otherwise,
-        Format: [ Rule ID | DTag |W|FCN|P1][ Payload |P2]
-    XXX Abort message is not supported yet.
-        Format: [ Rule ID | DTag |W|FCN|  FF    |P1]
-    XXX P1 is not approved in the WG.
-    '''
-    def __init__(self, rule, recvbuf):
-        # XXX for now, C refers to rule itself.
-        '''
-        C: runtime context.
-        recvbuf: buffer received in BitBuffer().
-        '''
+    """ SCHC fragment receiver's class to parse the message from the sender.
+    Regular    : [ Rule ID | Dtag | W | FCN        | payload | (P-0) ]
+    All-0      : [ Rule ID | Dtag | W | FCN(All-0) | payload | (P-0) ]
+    All-1      : [ Rule ID | Dtag | W | FCN(All-1) | MIC | (payload) | (P-0) ]
+    ACK REQ    : [ Rule ID | Dtag | W | FCN(All-0) | (P-0) ]
+    Send. Abort: [ Rule ID | Dtag | W | FCN(All-0) | (P-0) ]
+    """
+    def __init__(self, rule, packet_bbuf):
+        """ packet_bbuf: BitBuffer containing the SCHC fragment. """
         self.init_param()
-        self.set_recvbuf(recvbuf)
+        self.set_recvbuf(packet_bbuf)
         self.rule = rule
         self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
         pos = self.rule["ruleLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()
-        pos += self.parse_fcn(pos)
+        pos += self.parse_fcn()
         if self.fcn == get_fcn_all_1(self.rule):
-            pos += self.parse_mic(pos)
+            pos += self.parse_mic()
         self.payload = self.packet_bbuf.copy()
