@@ -51,12 +51,6 @@ def get_mic_size_in_bits(rule):
 
 #---------------------------------------------------------------------------
 
-'''
-NOTE:
-    the boundary of the fragment header is alligned to the byte boundary.
-    XXX how do I have to handle the padding ?
-'''
-
 class frag_base():
     '''
     base class for operation of message.
