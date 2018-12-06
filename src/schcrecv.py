@@ -11,9 +11,10 @@ from schctest import mic_crc32
 
 class ReassembleBase:
 
-    def __init__(self, protocol, rule, remote_id, profile=None):
+    def __init__(self, protocol, rule, dtag, remote_id, profile=None):
         self.protocol = protocol
-        self.rule = rule
+        self.rule = rule    # XXX must be immutable.
+        self.dtag = dtag    # XXX must be immutable.
         self.remote_id = remote_id
         self.profile = profile
         self.tile_list = []
@@ -39,7 +40,7 @@ class ReassemblerNoAck(ReassembleBase):
         schc_frag_message = schcmsg.frag_receiver_rx(self.rule, bbuf)
         schc_frag_message.finalize(self.rule)
 
-        print("parsed message:", schc_frag_message.__dict__,
+        print("receive_frag:", schc_frag_message.__dict__,
               schc_frag_message.payload.__dict__)
         assert schc_frag_message.fcn is not None
         self.tile_list.append(schc_frag_message.payload)
@@ -70,7 +71,7 @@ class ReassemblerAckOnError(ReassembleBase):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         schc_frag.finalize(self.rule)
 
-        print("parsed message:", schc_frag.__dict__,
+        print("receive_frag:", schc_frag.__dict__,
               schc_frag.payload.__dict__)
         assert schc_frag.fcn is not None
         # truncate the tail bits of the tile.

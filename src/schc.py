@@ -117,15 +117,15 @@ class SCHCProtocol:
             raise ValueError("invalid FRMode: {}".format(mode))
         return session
 
-    def new_reassemble_session(self, bbuf, rule, remote_id, context=None):
+    def new_reassemble_session(self, bbuf, rule, dtag, remote_id, context=None):
         #self.rule_manager.set_frag_rule(rule)
         mode = rule.get("FRMode")
         if mode == "noAck":
-            session = ReassemblerNoAck(self, rule, remote_id) # XXX
+            session = ReassemblerNoAck(self, rule, dtag, remote_id) # XXX
         elif mode == "ackAlways":
             raise NotImplementedError("FRMode:", mode)
         elif mode == "ackOnError":
-            session = ReassemblerAckOnError(self, rule, remote_id) # XXX
+            session = ReassemblerAckOnError(self, rule, dtag, remote_id) # XXX
         else:
             raise ValueError("FRMode:", mode)
         return session
@@ -172,7 +172,7 @@ class SCHCProtocol:
                 else:
                     # no session is found.  create a new reassemble session.
                     session = self.new_reassemble_session(packet_bbuf,
-                                                          rule, remote_id)
+                                                          rule, dtag, remote_id)
                     self.reassemble_session.add(rule.ruleID, rule.ruleLength,
                                                 dtag, session)
             # XXX cancel retransmission timers.
