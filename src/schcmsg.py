@@ -349,10 +349,6 @@ class frag_receiver_rx(frag_rx):
         self.set_recvbuf(recvbuf)
         self.rule = rule
         self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
-
-    def finalize(self, rule):
-        # XXX should be merged into __init__()
-        # XXX finaliza() is to be deleted.
         pos = self.rule["ruleLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()

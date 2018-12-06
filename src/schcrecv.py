@@ -38,7 +38,6 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX context should be passed from the lower layer.
         # XXX and pass the context to the parser.
         schc_frag_message = schcmsg.frag_receiver_rx(self.rule, bbuf)
-        schc_frag_message.finalize(self.rule)
 
         print("receive_frag:", schc_frag_message.__dict__,
               schc_frag_message.payload.__dict__)
@@ -69,7 +68,6 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
-        schc_frag.finalize(self.rule)
 
         print("receive_frag:", schc_frag.__dict__,
               schc_frag.payload.__dict__)
@@ -105,7 +103,6 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.dtag,
                     schc_frag.win,
                     cbit=1)
-            # XXX need finalize ?
             print("ack message:", schc_ack.packet.get_content())
             src_dev_id = self.protocol.layer2.mac_id
             args = (schc_ack.packet.get_content(), src_dev_id, None, None)
