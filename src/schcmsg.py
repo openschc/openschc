@@ -14,12 +14,6 @@ DEFAULT_TIMER_T3 = 10
 DEFAULT_TIMER_T4 = 12
 DEFAULT_TIMER_T5 = 14
 
-#class SCHC_MODE(Enum)
-class SCHC_MODE():
-    NO_ACK = 0
-    ACK_ALWAYS = 1
-    ACK_ON_ERROR = 2
-
 #---------------------------------------------------------------------------
 
 # 1372       *  The FCN value with all the bits equal to 1 (called All-1)
