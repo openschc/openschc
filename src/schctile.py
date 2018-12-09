@@ -3,7 +3,6 @@
 from base_import import *
 
 import schcmsg
-from math import floor
 
 #---------------------------------------------------------------------------
 
@@ -23,12 +22,12 @@ class TileList():
         # into the tiles, which are a set of bit buffers too.
         # logically, it doesn't need when tileSize is well utilized.
         bbuf = packet_bbuf.copy()
-        num_full_size_tiles = floor(bbuf.count_added_bits()/self.t_size)
-        last_tile_size = bbuf.count_added_bits() - (self.t_size *
-                                                  num_full_size_tiles)
+        nb_full_size_tiles, last_tile_size = (
+                bbuf.count_added_bits() // self.t_size,
+                bbuf.count_added_bits() % self.t_size)
         assert last_tile_size >= 0
         tiles = [ bbuf.get_bits_as_buffer(self.t_size)
-                 for _ in range(num_full_size_tiles) ]
+                 for _ in range(nb_full_size_tiles) ]
         if last_tile_size > 0:
             tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
         # make a all_tiles
