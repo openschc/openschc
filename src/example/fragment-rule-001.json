@@ -13,7 +13,7 @@
             "windowSize": 5,
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
-            "tileSize": 7,
+            "tileSize": 9,
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
