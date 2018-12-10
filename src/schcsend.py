@@ -119,39 +119,6 @@ class FragmentAckOnError(FragmentBase):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-# XXX
-# what is the window number for the ALL-1 MIC ?
-#
-# e.g. N = 2 bits.
-# ## 6 tiles. 3 tiles in each fragment.
-#
-# Window #|  0  |  1  |
-#   Tile #|2|1|0|2|1|0|
-#         |-----|-----|-----|
-#   Frag# |  1  |  2  |  3  |
-#  Window |  0  |  1  | 1?? |
-#     FCN |  2  |  2  |ALL-1|
-# Payload |2 1 0|2 1 0| MIC |
-#
-# ## 5 tiles. 3 tiles in 1st frag., 2 tiles in 2nd frag.
-#
-# Window# |  0  | 1 |
-#   Tile# |2|1|0|2|1|
-#         |-----|---|-------|
-#   Frag# |  1  | 2 |   3   |
-#       W | 0   | 1 |  1??? |
-#     FCN |2    |2  | ALL-1 |
-# Payload |2 1 0|2 1|  MIC  |
-#
-# ## 5 tiles. 2 tiles in 1st/2nd frag., MIC and the last tile in 3rd frag.
-#
-# Window# |  0  | 1 |       |
-#   Tile# |2|1|0|2|1|       |
-#         |---|---|---------|
-#   Frag# | 1 | 2 |    3    |
-#       W | 0 | 0 |   1???  |
-#     FCN |2  |0  |  ALL-1  |
-# Payload |2 1|0 2|1  MIC   |
         if window_tiles is not None:
             assert self.mic_sent is None
             fcn = window_tiles[0]["t-num"]
