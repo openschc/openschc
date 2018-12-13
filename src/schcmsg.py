@@ -103,8 +103,8 @@ class frag_tx(frag_base):
             buffer.add_bytes(mic)
         if cbit is not None:
             buffer.set_bit(cbit)
-        #if bitmap is not None and self.rule.bitmap_size:
-        #    buffer.add_bits(bitmap, self.rule.bitmap_size)
+        if bitmap is not None:
+            buffer += bitmap
         '''
         if abort == True:
             raise RunTimeError("not refactored", "abort == True")
