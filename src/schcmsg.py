@@ -80,7 +80,7 @@ class frag_tx(frag_base):
     parent class for sending message.
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
-                  cbit=None, abort=False, payload=None):
+                  cbit=None, payload=None):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
         #
@@ -105,18 +105,11 @@ class frag_tx(frag_base):
             buffer.set_bit(cbit)
         if bitmap is not None:
             buffer += bitmap
-        '''
-        if abort == True:
-            raise RunTimeError("not refactored", "abort == True")
-            pb.bit_set(ba, pos, pb.int_to_bit(0xff, 8), extend=True)
-            pos += 8
-        '''
         #
         if payload is not None:
             # assumed that bit_set() has extended to a byte boundary
             buffer += payload
         #
-        # the abort field is implicit, is not needed to set into the parameter.
         self.set_param(self.rule_id, dtag, win, fcn, mic, bitmap, cbit, payload)
         self.packet = buffer
 
