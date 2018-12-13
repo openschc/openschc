@@ -114,6 +114,16 @@ class FragmentAckOnError(FragmentBase):
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
         self.all_tiles = TileList(self.rule, packet_bbuf)
+        # XXX
+        # check whether the size of the last tile is less than L2 word
+        # AND the tile number is zero
+        # because draft-17 doesn't specify how to handle it.
+        a = self.all_tiles.get_all_tiles()
+        if (a[-1]["t-num"] == 0 and
+            a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
+            raise NotImplementedError("{}".format(
+                    """the size of the last tile with the tile number 0 must
+                    be equal to or greater than L2 word size."""))
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
@@ -127,12 +137,17 @@ class FragmentAckOnError(FragmentBase):
                 # MIC will be sent in next.
                 pass
             else:
-                if remaining_size >= schcmsg.get_mic_size_in_bits(self.rule):
-                    # make All-1 frag with the tiles.
+                # the All-1 fragment can carry only one tile of which the size
+                # is less than L2 word size.
+                if (len(window_tiles) == 1 and
+                    remaining_size >= schcmsg.get_mic_size_in_bits(self.rule)):
+                    # if there is enough room for MIC,
+                    # make the All-1 frag with this tile.
                     last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
                                         schcmsg.get_mic_size_in_bits(self.rule) +
                                         TileList.get_tile_size(window_tiles))
-                    # calculate extra_bits (= packet_size - last_payload_size)
+                    # calculate the significant padding bits.
+                    # (= packet_size - last_payload_size)
                     self.mic_sent = self.get_mic(extra_bits=(
                             roundup(last_payload_size, self.rule["L2WordSize"]) -
                             last_payload_size))
