@@ -4,7 +4,12 @@ class BitBuffer:
 
     def __init__(self, content=b""):
         """ BitBuffer manage a buffer bit per bit.
-        _content: any objects which can be passed to bytes or bytearray.
+        The content should be either a list or a bytearray.
+        If the content is a list, each item (0 or others) is dealt as a bit.
+        Or, the content should be any objects which can be passed to bytes
+        or bytearray.
+
+        _content: bytearray holding the bits including padding.
         _wpos: always indicating the last next bit position.
         _rpos: indicating the bit position to be read for get_bits().
 
@@ -35,9 +40,16 @@ class BitBuffer:
         copy_*(): _rpos doesn't change.
 
         """
-        self._content = bytearray(content)
-        self._wpos = len(content)*8  # write position
-        self._rpos = 0  # read position
+        if isinstance(content, list):
+            self._content = bytearray()
+            self._wpos = 0
+            self._rpos = 0
+            for i in range(len(content)):
+                self.set_bit(content[i])
+        else:
+            self._content = bytearray(content)
+            self._wpos = len(content)*8  # write position
+            self._rpos = 0  # read position
 
     def set_bit(self, bit, position=None):
         """ if bit is not 0, set a bit on at the specified position.
@@ -175,6 +187,15 @@ class BitBuffer:
     def count_added_bits(self):
         """return the number of significant bits from the most left bit."""
         return self._wpos
+
+    def to_bit_list(self, position=None):
+        """ return the content in a list of bits. """
+        bit_list = []
+        if position is None:
+            position = self._rpos
+        for i in range(position, self._wpos):
+            bit_list.append(self.get_bits(1, i))
+        return bit_list
 
     def display(self):
         print ("{}/{}".format(self._content, self._wpos))

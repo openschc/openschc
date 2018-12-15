@@ -86,7 +86,7 @@ print("""
       """)
 # the header size is 27 bits.
 # frag: 0000 0001 0000 0002 0000 0003 111
-c = BitBuffer([1, 2, 3])
+c = BitBuffer(bytearray([1,2,3]))
 c.add_bits(7, 5)
 b = a + c
 print("a =", a)
@@ -100,3 +100,11 @@ print("""
 a.display()
 print(a)
 
+print("""
+### to_bit_list()
+      """)
+a = BitBuffer([0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0])
+print(a)
+bl = a.to_bit_list()
+print(bl)
+assert bl == [0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0]
