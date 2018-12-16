@@ -200,6 +200,17 @@ class BitBuffer:
     def display(self):
         print ("{}/{}".format(self._content, self._wpos))
 
+    def allones(self, position=None):
+        """ check whether the bits from the position set all 1 or not.
+        if they are all ones, return True.  Otherwise, return False.
+        if the position is not set, it will checks from _rpos. """
+        if position is None:
+            position = self._rpos
+        for i in range(position, self._wpos):
+            if self.get_bits(1, i) == 0:
+                return False
+        return True
+
     def copy(self, position=None):
         """ return BitBuffer like get_bits_as_buffer(),
         but _rpos doesn't change. """

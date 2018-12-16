@@ -108,3 +108,13 @@ print(a)
 bl = a.to_bit_list()
 print(bl)
 assert bl == [0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0]
+
+print("""
+### allones()
+      """)
+a = BitBuffer(b"\xff\xff")
+print(a, a.allones())
+a = BitBuffer([1, 1, 1, 1])
+print(a, a.allones())
+a = BitBuffer([1, 1, 1, 1, 0])
+print(a, a.allones())
