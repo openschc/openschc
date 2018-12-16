@@ -1,78 +1,13 @@
-## Q. padding and MIC calculation
+## Q. last tile handling
 
-In draft-17,
-
-> 8.2.3.  Integrity Checking
-> 
->     Note that the concatenation of the complete SCHC Packet and the
->     potential padding bits of the last SCHC Fragment does not generally
->     constitute an integer number of bytes.  For implementers to be able
->     to use byte-oriented CRC libraries, it is RECOMMENDED that the
->     concatenation of the complete SCHC Packet and the last fragment
->     potential padding bits be zero-extended to the next byte boundary and
->     that the MIC be computed on that byte array.  A Profile MAY specify
->     another behaviour.
-
-e.g.1. L2 word is 8 bits.  The size of a tile is 9 bits.  L2 MTU is 64 bits.
-MAX_FCN is 6.  The mode is ACK-on-Error.
-
-Assumed that the size of a SCHC packet is 4 bytes such as below.
-
-          01234567 01234567 01234567 01234567
-    Data: ........ ........ ........ ........
-
-    ".": denotes a bit of either 0 or 1.
-
-The SCHC packet is gonna be separated into 4 tiles.
-
-          012345678 012345678 012345678 01234
-    Data: ......... ......... ......... .....
-
-If the size of SCHC fragment header is 10 bits.
-the size of rule ID is 3 bits.
-the size of dtag is 2 bits.
-the size of W is 2 bits.
-the size of FCN is 3 bits.
-Each fragment is gonna be:
-
-          01234567 01234567 01234567
-    Data: 00101001 100..... ...ppppp
-          rrrddwwf ff012345 670
-
-          01234567 01234567 01234567
-    Data: 00101001 01...... ...ppppp
-          rrrddwwf ff123456 701
-
-          01234567 01234567 01234567
-    Data: 00101001 00...... ...ppppp
-          rrrddwwf ff234567 012
-
-          01234567 01234567 01234567 01234567 01234567 01234567 
-    Data: 00101001 11mmmmmm mmmmmmmm mmmmmmmm mmmmmmmm mm.....s
-          rrrddwwf ff|<------------  MIC -------------->|34567
-
-    "p": a pdding bit, which must be ignored during the MIC conputation.
-    "m": represents a content of MIC.
-    "s": a significant bit of padding, which must be included
-         for the MIC calculation.
-    "r": rule ID field.
-    "d": dtag field.
-    "w": W field.
-    "f": FCN field.
-
-To calculate the MIC is required to align the byte boundary,
-the input data of the MIC calculation is gonna be:
-
-          012345678 012345678 012345678 01234567
-    Data: ......... ......... ......... .....saa
-          012345670 123456701 234567012 34567
-
-    "a": another significant bit of padding to align the byte boundary
-         for the MIC calculation.  the value is zero.
-
-e.g.2. L2 word is 8 bits.  The size of a tile is 9 bits.
+word is 8 bits.  The size of a tile is 9 bits.
 L2 MTU is 48 bits.  The size of a SCHC packet is 7 bytes.
 The mode is ACK-on-Error.
+the size of SCHC fragment header is 16 bits.
+    the size of rule ID is 6 bits.
+    the size of dtag is 3 bits.
+    the size of W is 5 bits.
+    the size of FCN is 2 bits.
 
           01234567 01234567 01234567 01234567 01234567 01234567 01234567
     Data: ........ ........ ........ ........ ........ ........ ........
@@ -81,12 +16,6 @@ The SCHC packet is gonna be separated into 7 tiles.
 
           012345678 012345678 012345678 012345678 012345678 012345678 01
     Data: ......... ......... ......... ......... ......... ......... ..
-
-If the size of SCHC fragment header is 16 bits.
-the size of rule ID is 6 bits.
-the size of dtag is 3 bits.
-the size of W is 5 bits.
-the size of FCN is 2 bits.
 
 Each fragment is gonna be:
 
@@ -98,8 +27,10 @@ Each fragment is gonna be:
     Data: 00000100 10000001 ........ ........ ........ ...ppppp
           rrrrrrdd dwwwwwff 34567012 34567012 34567012 345
 
-Because FCN=0 can not carry a tile of which the size is less than L2 word.
-The last tile is put into the next window, of which the number is 1, like below.
+Because FCN=0 can not carry a tile of which the size is less than L2 word
+AND there is no room to put the last tile in the All-1 fragment,
+the last tile has to be put into the next window,
+of which the number is 1, like below.
 
           01234567 01234567 01234567
     Data: 00000100 10000110 ..pppppp
@@ -113,6 +44,51 @@ However, from the view point of the receiver,
 it looks that the All-0 fragment was lost.
 
 How do we solve it ?
+
+## Q. window number of the last fragment
+
+L2 word is 8 bits.
+L2 MTU is 48 bits.
+The size of a tile is 32 bits.
+The mode is ACK-on-Error.
+the size of SCHC fragment header is 16 bits.
+    the size of rule ID is 6 bits.
+    the size of dtag is 3 bits.
+    the size of W is 5 bits.
+    the size of FCN is 2 bits.
+
+The size of a SCHC packet is 9 bytes (72 bits).
+The number of tiles is going to be 3.
+Each fragment is gonna be:
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000010 ........ ........ ........ ........
+          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000001 ........ ........ ........ ........
+          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
+
+          01234567 01234567 01234567
+    Data: 00000100 10000000 ........
+          rrrrrrdd dwwwwwff 01234567
+
+The question is what the window number is for the last MIC fragment ?
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000?11 mmmmmmmm mmmmmmmm mmmmmmmm mmmmmmmm
+          rrrrrrdd dwwwwwff |<------------  MIC ------------->|
+
+The flow is like below:
+
+           Sender               Receiver
+             |-----W=0, FCN=2----->|
+             |-----W=0, FCN=1----->|
+             |-----W=0, FCN=0----->|
+         (no ACK)
+             |--W=1, FCN=7 + MIC-->|
+             |<-- ACK, W=1, C=1 ---| C=1
+           (End)
 
 ## Q. content of Padding bits
 
@@ -170,6 +146,82 @@ Then, the section 8.4.2.1 Sender behavior should specify how to use the window c
 as similar to the receiver behavior.  e.g. when it's initialized.
 
 Otherwise, the least significant bit of the window number sounds strange.
+
+## padding and MIC calculation
+
+In draft-17,
+
+> 8.2.3.  Integrity Checking
+> 
+>     Note that the concatenation of the complete SCHC Packet and the
+>     potential padding bits of the last SCHC Fragment does not generally
+>     constitute an integer number of bytes.  For implementers to be able
+>     to use byte-oriented CRC libraries, it is RECOMMENDED that the
+>     concatenation of the complete SCHC Packet and the last fragment
+>     potential padding bits be zero-extended to the next byte boundary and
+>     that the MIC be computed on that byte array.  A Profile MAY specify
+>     another behaviour.
+
+e.g.1. L2 word is 8 bits.  The size of a tile is 9 bits.  L2 MTU is 64 bits.
+MAX_FCN is 6.  The mode is ACK-on-Error.
+the size of SCHC fragment header is 10 bits.
+    the size of rule ID is 3 bits.
+    the size of dtag is 2 bits.
+    the size of W is 2 bits.
+    the size of FCN is 3 bits.
+
+Each fragment is gonna be:
+
+Assumed that the size of a SCHC packet is 4 bytes such as below.
+
+          01234567 01234567 01234567 01234567
+    Data: ........ ........ ........ ........
+
+    ".": denotes a bit of either 0 or 1.
+
+The SCHC packet is gonna be separated into 4 tiles.
+
+          012345678 012345678 012345678 01234
+    Data: ......... ......... ......... .....
+
+Each fragment is gonna be:
+
+          01234567 01234567 01234567
+    Data: 00101001 100..... ...ppppp
+          rrrddwwf ff012345 670
+
+          01234567 01234567 01234567
+    Data: 00101001 01...... ...ppppp
+          rrrddwwf ff123456 701
+
+          01234567 01234567 01234567
+    Data: 00101001 00...... ...ppppp
+          rrrddwwf ff234567 012
+
+          01234567 01234567 01234567 01234567 01234567 01234567 
+    Data: 00101001 11mmmmmm mmmmmmmm mmmmmmmm mmmmmmmm mm.....s
+          rrrddwwf ff|<------------  MIC -------------->|34567
+
+    "p": a pdding bit, which must be ignored during the MIC conputation.
+    "m": represents a content of MIC.
+    "s": a significant bit of padding, which must be included
+         for the MIC calculation.
+    "r": rule ID field.
+    "d": dtag field.
+    "w": W field.
+    "f": FCN field.
+
+To calculate the MIC is required to align the byte boundary,
+the input data of the MIC calculation is gonna be:
+
+          012345678 012345678 012345678 01234567
+    Data: ......... ......... ......... .....saa
+          012345670 123456701 234567012 34567
+
+    "a": another significant bit of padding to align the byte boundary
+         for the MIC calculation.  the value is zero.
+
+No problem.
 
 ##
 
