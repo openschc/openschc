@@ -23,7 +23,6 @@ class SimulLayer2:
                     transmit_callback=None):
         self.packet_queue.append((packet, src_dev_id, dst_dev_id,
                                   transmit_callback))
-
         if not self.is_transmitting:
             self._send_packet_from_queue()
 
