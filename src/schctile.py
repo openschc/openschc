@@ -37,7 +37,6 @@ class TileList():
                     "t-num": t_num,
                     "tile": t,
                     "sent": False,
-                    "ready_to_be_sent": False,
                 }
             self.all_tiles.append(tile_obj)
             if t_num == 0:
@@ -45,9 +44,10 @@ class TileList():
                 w_num += 1
             else:
                 t_num -= 1
-        print("DEBUG: all_tiles:")
-        for i in self.all_tiles:
-            print("DEBUG:  ", i)
+        self.max_w_num = w_num
+        #print("DEBUG: all_tiles:")
+        #for i in self.all_tiles:
+        #    print("DEBUG:  ", i)
 
     def get_tiles(self, mtu_size):
         '''
@@ -66,8 +66,7 @@ class TileList():
             '''
             if t["sent"] == False:
                 tiles.append(t)
-                assert t["ready_to_be_sent"] == False
-                t["ready_to_be_sent"] = True
+                t["sent"] = True
                 t_prev = t
             if len(tiles) == max_tiles:
                 break
@@ -75,17 +74,39 @@ class TileList():
             return None, 0, remaining_size
         # return tiles and the remaining bits
         nb_remaining_tiles = len(
-                [ _ for _ in self.all_tiles if _["ready_to_be_sent"] == False ])
+                [ _ for _ in self.all_tiles if _["sent"] == False ])
         remaining_size -= self.get_tile_size(tiles)
         return tiles, nb_remaining_tiles, remaining_size
 
     def get_all_tiles(self):
         return self.all_tiles
 
-    def update_sent_flag(self):
-        for t in self.all_tiles:
-            if t["ready_to_be_sent"] == True:
-                t["sent"] = True
+    def unset_sent_flag(self, win, bit_list):
+        """ set the sent flag to False from True.
+        """
+        max_fcn = schcmsg.get_MAX_WIND_FCN(self.rule)
+        def unset_sent_flag_do(wn, tn):
+            if tn is None:
+                # special case. i.e. the last tile.
+                self.all_tiles[-1]["sent"] = False
+                return
+            # normal case.
+            for t in self.all_tiles:
+                if t["w-num"] == wn:
+                    if t["t-num"] == max_fcn - tn:
+                        t["sent"] = False
+        #
+        # XXX here should be windowSize.
+        if self.max_w_num == win:
+            # last window
+            for bi in range(len(bit_list[:-1])):
+                if bit_list[bi] == 0:
+                    unset_sent_flag_do(win, bi)
+            unset_sent_flag_do(win, None)
+        else:
+            for bi in range(len(bit_list)):
+                if bit_list[bi] == 0:
+                    unset_sent_flag_do(win, bi)
 
     @staticmethod
     def get_tile_size(tiles):

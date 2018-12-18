@@ -61,7 +61,8 @@ class frag_base():
         self.payload = None
         self.packet = None
 
-    def set_param(self, rule_id, dtag, win, fcn, mic, bitmap, cbit, payload):
+    def set_param(self, rule_id, dtag, win=None, fcn=None, mic=None,
+                  bitmap=None, cbit=None, payload=None):
         self.rule_id = rule_id
         self.dtag = dtag
         self.win = win
@@ -118,11 +119,11 @@ class frag_sender_tx(frag_tx):
     '''
     for the fragment sender to send a message.
     '''
-    def __init__(self, rule, rule_id, dtag, win=None, fcn=None, mic=None,
+    def __init__(self, rule, dtag, win=None, fcn=None, mic=None,
                  cbit=None, payload=None):
         self.init_param()
         self.rule = rule
-        self.rule_id = rule_id
+        self.rule_id = rule["ruleID"]
         self.make_frag(dtag, win=win, fcn=fcn, mic=mic, payload=payload)
 
 class frag_receiver_tx_all0_ack(frag_tx):
@@ -137,15 +138,15 @@ class frag_receiver_tx_all0_ack(frag_tx):
         self.make_frag(dtag, win=win, bitmap=bitmap)
 
 class frag_receiver_tx_all1_ack(frag_tx):
-
-    '''
+    """ make ACK message.
     for the fragment receiver, to make an all1 ack.
         Format: [ Rule ID | DTag |W|C|P1]
         Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
-    '''
-    def __init__(self, R, dtag, win=None, cbit=None, bitmap=None):
+    """
+    def __init__(self, rule, dtag, win=None, cbit=None, bitmap=None):
         self.init_param()
-        self.rule = R
+        self.rule = rule
+        self.rule_id = rule["ruleID"]
         self.make_frag(dtag, win=win, cbit=cbit, bitmap=bitmap)
 
 class frag_receiver_tx_abort(frag_tx):
@@ -201,17 +202,13 @@ class frag_rx(frag_base):
         self.fcn = self.packet_bbuf.get_bits(self.rule["FCNSize"])
         return self.rule["FCNSize"]
 
-    def parse_bitmap(self, pos):
-        '''
-        parse bitmap in the frame.
-        assuming that bitmap_size is not zero.
-        '''
-        '''
-        self.bitmap = pb.bit_get(self.packet, pos, self.rule.bitmap_size,
-                                 ret_type=int)
-        return self.rule.bitmap_size
-        '''
-        raise NotImplementedError
+    def parse_bitmap(self):
+        """ parse bitmap in the frame. """
+        bitmap_size = min(self.packet_bbuf.count_remaining_bits(),
+                          get_fcn_all_1(self.rule))
+                        # XXX replace to rule["windowSize"]
+        self.bitmap = self.packet_bbuf.get_bits_as_buffer(bitmap_size)
+        return bitmap_size
 
     def parse_cbit(self):
         '''
@@ -257,29 +254,29 @@ class frag_sender_rx_all0_ack(frag_rx):
         # XXX the abort is not supported yet.
         pos += self.parse_bitmap(pos)
 
-class frag_sender_rx_all1_ack(frag_rx):
-
-    '''
-    for the fragment sender to receive the all1 ack.
-        Format: [ Rule ID | DTag |W|C|P1]
-        Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
-        Format: [ Rule ID | DTag |W| All-1 |  FF  |P1]
-    '''
-    def __init__(self, recvbuf, rule, dtag, win):
-        '''
-        recvbuf: buffer received in bytearray().
-        R: rule instance.
-        '''
-        self.init_param()
-        self.set_recvbuf(recvbuf)
-        self.rule = rule
-        pos = rule["ruleLength"]
-        pos += self.parse_dtag()
-        pos += self.parse_win()
-        # XXX the abort is not supported yet.
-        pos += self.parse_cbit()
-        if self.cbit == 0:
-            pos += self.parse_bitmap(pos)
+#class frag_sender_rx_all1_ack(frag_rx):
+#
+#    '''
+#    for the fragment sender to receive the all1 ack.
+#        Format: [ Rule ID | DTag |W|C|P1]
+#        Format: [ Rule ID | DTag |W|C|  Bitmap  |P1]
+#        Format: [ Rule ID | DTag |W| All-1 |  FF  |P1]
+#    '''
+#    def __init__(self, recvbuf, rule, dtag, win):
+#        '''
+#        recvbuf: buffer received in bytearray().
+#        R: rule instance.
+#        '''
+#        self.init_param()
+#        self.set_recvbuf(recvbuf)
+#        self.rule = rule
+#        pos = rule["ruleLength"]
+#        pos += self.parse_dtag()
+#        pos += self.parse_win()
+#        # XXX the abort is not supported yet.
+#        pos += self.parse_cbit()
+#        if self.cbit == 0:
+#            pos += self.parse_bitmap(pos)
 
 class frag_sender_rx(frag_rx):
     """ SCHC fragment sender's class to parse the message from the receiver.
@@ -292,11 +289,13 @@ class frag_sender_rx(frag_rx):
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
-        pos = rule["ruleLength"] + rule["dtagSize"]
+        self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
+        pos = self.rule["ruleLength"]
+        pos += self.parse_dtag()
         pos += self.parse_win()
         pos += self.parse_cbit()
         if self.cbit == 0:
-            pos += self.parse_bitmap(pos)
+            pos += self.parse_bitmap()
 
 class frag_receiver_rx(frag_rx):
     """ SCHC fragment receiver's class to parse the message from the sender.

@@ -5,6 +5,7 @@ from base_import import *  # used for now for differing modules in py/upy
 import schc
 import schcmsg
 from schctile import TileList
+from schcbitmap import make_bit_list
 from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
@@ -72,7 +73,7 @@ class FragmentNoAck(FragmentBase):
                 # put remaining_size of bits of packet into the tile.
                 tile = self.packet_bbuf.get_bits_as_buffer(remaining_size)
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
+                    self.rule, dtag=self.dtag,
                     win=None,
                     fcn=0,
                     mic=None,
@@ -91,7 +92,7 @@ class FragmentNoAck(FragmentBase):
                     roundup(last_payload_size, self.rule["L2WordSize"]) -
                     last_payload_size))
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
+                    self.rule, dtag=self.dtag,
                     win=None,
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
@@ -124,72 +125,82 @@ class FragmentAckOnError(FragmentBase):
             raise NotImplementedError("{}".format(
                     """the size of the last tile with the tile number 0 must
                     be equal to or greater than L2 word size."""))
+        # make the bitmap
+        self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
+                                      self.rule["FCNSize"],
+                                      schcmsg.get_fcn_all_1(self.rule))
+        print("bit_list:", self.bit_list)
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
         if window_tiles is not None:
-            assert self.mic_sent is None
+            # even when mic is sent, it comes here in the retransmission.
             fcn = window_tiles[0]["t-num"]
-            if nb_remaining_tiles > 0:
-                # regular frag.
-                # MIC will be sent in next.
-                pass
-            else:
+            all_1 = False
+            if (nb_remaining_tiles == 0 and
+                len(window_tiles) == 1 and
+                remaining_size >= schcmsg.get_mic_size_in_bits(self.rule)):
                 # the All-1 fragment can carry only one tile of which the size
                 # is less than L2 word size.
-                if (len(window_tiles) == 1 and
-                    remaining_size >= schcmsg.get_mic_size_in_bits(self.rule)):
-                    # if there is enough room for MIC,
-                    # make the All-1 frag with this tile.
-                    last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
-                                        schcmsg.get_mic_size_in_bits(self.rule) +
-                                        TileList.get_tile_size(window_tiles))
-                    # calculate the significant padding bits.
-                    # (= packet_size - last_payload_size)
-                    self.mic_sent = self.get_mic(extra_bits=(
-                            roundup(last_payload_size, self.rule["L2WordSize"]) -
-                            last_payload_size))
-                    fcn = schcmsg.get_fcn_all_1(self.rule)
-                    self.event_id_ack_waiting = self.protocol.scheduler.add_event(
-                            10, self.ack_timeout, tuple())
+                all_1 = True
+                # make the All-1 frag with this tile.
+                last_payload_size = (
+                        schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size_in_bits(self.rule) +
+                        TileList.get_tile_size(window_tiles))
+                # calculate the significant padding bits.
+                self.mic_sent = self.get_mic(extra_bits=(
+                        roundup(last_payload_size, self.rule["L2WordSize"]) -
+                        last_payload_size))
+                self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+                        10, self.ack_timeout, tuple())
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
+                    self.rule, dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
-                    fcn=fcn,
-                    mic=self.mic_sent,
+                    fcn=schcmsg.get_fcn_all_1(self.rule) if all_1 else fcn,
+                    mic=self.mic_sent if all_1 else None,
                     payload=TileList.concat(window_tiles))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
+        elif self.mic_sent is not None:
+            # it looks that all fragments have been sent.
+            print("xxx how should i do after all fragments have been sent ?")
+            return
         else:
-            # only MIC will be sent since all tiles has been sent.
+            # Here, only MIC will be sent since all tiles has been sent.
             assert self.last_window_tiles is not None
-            if self.mic_sent is not None:
-                # MIC has been sent already.
-                # XXX need to wait for the ACK at least.  here ?
-                return
-            # make All-1 frag.
-            win = 0 # in case when there is no SCHC packet.
-            win = self.last_window_tiles[0]["w-num"]
+            # As the MTU would be changed anytime AND the size of the
+            # significant padding bits would be changed, therefore the MIC
+            # calculation may be needed again.
+            # XXX maybe it's better to check whether the size of MTU is change
+            # or not when the previous MIC was calculated..
             last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
                                  TileList.get_tile_size(self.last_window_tiles))
             # calculate extra_bits (= packet_size - last_payload_size)
             self.mic_sent = self.get_mic(extra_bits=(
                     roundup(last_payload_size, self.rule["L2WordSize"]) -
                     last_payload_size))
+            # check the win number.
+            # if the last tile number is zero, here window number has to be
+            # incremented.
+            win = self.last_window_tiles[0]["w-num"]
+            if self.last_window_tiles[0]["t-num"] == 0:
+                win += 1
             schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, rule_id=self.rule["ruleID"], dtag=self.dtag,
+                    self.rule, dtag=self.dtag,
                     win=win,
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
             self.event_id_ack_waiting = self.protocol.scheduler.add_event(
                     10, self.ack_timeout, tuple())
+
         # send
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 self.event_sent_frag)
-        print("send_frag:", schc_frag.__dict__)
+        print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
@@ -203,27 +214,36 @@ class FragmentAckOnError(FragmentBase):
         print("retransmit or remove the session ?")
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
-        self.update_frags_sent_flag()
         self.send_frag()
 
-    def update_frags_sent_flag(self):
-        self.all_tiles.update_sent_flag()
-
     def receive_frag(self, bbuf, dtag):
+        # the ack timer can be cancelled here, because it's been done whether
+        # both rule_id and dtag in the fragment are matched to this session
+        # at process_received_packet().
+        self.cancel_ack_timeout()
+        #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
-
-        if schc_frag.win == schcmsg.get_win_all_1(self.rule):
+        print("sender_rx", schc_frag.__dict__)
+        if (schc_frag.win == schcmsg.get_win_all_1(self.rule) and
+            schc_frag.cbit == 1 and
+            schc_frag.payload.allones() == True):
             print("Receiver Abort rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
             return
         if schc_frag.cbit == 1:
             print("ACK Success rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
-            self.cancel_ack_timeout()
             return
         if schc_frag.cbit == 0:
             print("ACK Failure rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
-            # XXX need to retransmission.
+            self.resend_frag(schc_frag)
             return
+
+    def resend_frag(self, schc_frag):
+        print("recv bitmap:", (schc_frag.win, schc_frag.bitmap.to_bit_list()))
+        print("sent bitmap:", (schc_frag.win, self.bit_list[schc_frag.win]))
+        self.all_tiles.unset_sent_flag(schc_frag.win,
+                                       schc_frag.bitmap.to_bit_list())
+        self.send_frag()
 

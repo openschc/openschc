@@ -34,6 +34,8 @@ def make_node(sim, rule_manager, extra_config={}):
 simul_config = {
     "log": True,
 #    "loss": { "mode": "cycle", "cycle": 2 }
+#    "loss": { "mode": "list", "count_num": [2] }
+    "loss": { "mode": "rate", "cycle": 5 }
 }
 sim = simul.Simul(simul_config)
 
@@ -42,7 +44,7 @@ node1 = make_node(sim, rule_manager)
 sim.add_sym_link(node0, node1)
 
 print("mac_id:", node0.id, node1.id)
-payload = bytearray(range(1, 9+1))
+payload = bytearray(range(1, 13+1))
 node0.protocol.layer3.send_later(1, node1.id, payload)
 
 sim.run()
