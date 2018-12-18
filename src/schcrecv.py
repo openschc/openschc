@@ -38,14 +38,14 @@ class ReassemblerNoAck(ReassembleBase):
     def receive_frag(self, bbuf, dtag):
         # XXX context should be passed from the lower layer.
         # XXX and pass the context to the parser.
-        schc_frag_message = schcmsg.frag_receiver_rx(self.rule, bbuf)
+        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
 
-        print("receive_frag:", schc_frag_message.__dict__,
-              schc_frag_message.payload.__dict__)
-        assert schc_frag_message.fcn is not None
-        self.tile_list.append(schc_frag_message.payload)
+        print("receive_frag:", schc_frag.__dict__,
+              schc_frag.payload.__dict__)
+        assert schc_frag.fcn is not None
+        self.tile_list.append(schc_frag.payload)
         fcn_all_1 = schcmsg.get_fcn_all_1(self.rule)
-        if schc_frag_message.fcn == fcn_all_1:
+        if schc_frag.fcn == fcn_all_1:
             print("ALL1 received")
             # MIC calculation
             schc_packet = BitBuffer()
@@ -54,14 +54,14 @@ class ReassemblerNoAck(ReassembleBase):
             mic_target = schc_packet.get_content()
             mic_calced = mic_crc32.get_mic(mic_target)
             print("Recv MIC {}, base = {}".format(mic_calced, mic_target))
-            if schc_frag_message.mic != mic_calced:
+            if schc_frag.mic != mic_calced:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
-                        schc_frag_message.mic, mic_calced))
+                        schc_frag.mic, mic_calced))
                 return
             # decompression
             self.protocol.process_received_packet(self.remote_id, schc_packet)
             return
-        print("---", schc_frag_message.fcn)
+        print("---", schc_frag.fcn)
 
 #---------------------------------------------------------------------------
 
