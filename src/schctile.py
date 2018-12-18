@@ -13,10 +13,10 @@ class TileList():
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
         self.t_size = rule["tileSize"]
-        t_init_num = schcmsg.get_MAX_WIND_FCN(rule)
+        self.max_fcn = schcmsg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
-        t_num = t_init_num
+        t_num = self.max_fcn
         # make tiles
         # XXX for now, the packet bitbuffer is going to be divided
         # into the tiles, which are a set of bit buffers too.
@@ -40,10 +40,15 @@ class TileList():
                 }
             self.all_tiles.append(tile_obj)
             if t_num == 0:
-                t_num = t_init_num
+                t_num = self.max_fcn
                 w_num += 1
             else:
                 t_num -= 1
+        if schcmsg.get_win_all_1(rule) < w_num:
+            # win_all_1() is assumed to be equal to the max window number.
+            raise ValueError(
+                    "ERROR: the packet size > WSize. {} > {}".format(
+                            w_num, schcmsg.get_win_all_1(rule)))
         self.max_w_num = w_num
         #print("DEBUG: all_tiles:")
         #for i in self.all_tiles:
@@ -84,7 +89,6 @@ class TileList():
     def unset_sent_flag(self, win, bit_list):
         """ set the sent flag to False from True.
         """
-        max_fcn = schcmsg.get_MAX_WIND_FCN(self.rule)
         def unset_sent_flag_do(wn, tn):
             if tn is None:
                 # special case. i.e. the last tile.
@@ -93,10 +97,9 @@ class TileList():
             # normal case.
             for t in self.all_tiles:
                 if t["w-num"] == wn:
-                    if t["t-num"] == max_fcn - tn:
+                    if t["t-num"] == self.max_fcn - tn:
                         t["sent"] = False
         #
-        # XXX here should be windowSize.
         if self.max_w_num == win:
             # last window
             for bi in range(len(bit_list[:-1])):

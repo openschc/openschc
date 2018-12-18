@@ -51,9 +51,9 @@ where <<<rule>>> will be defined later.
           "FRMode" : "noAck" # or "ackAlways", "ackOnError"
           "FRModeProfile" : {
              "dtagSize" : 1, 
-             "windowSize": 3,
+             "WSize": 3,
              "FCNSize" : 3,
-             "maxWindFCN", 6,
+             "windowSize", 7,
              "ackBehavior": "afterAll1"
           }
       }
@@ -70,8 +70,8 @@ A fragmentation rule is uni directionnal.
 The "fragmentation" keyword is used to give fragmentation mode and profile:
 - one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
 - FRModeProfile parameters. Default values are automaticaly added.
-- dtagSize, windowSize and FCNSize are used to define the SCHC fragmentation header
-- maxWindFCN can be added if not 2^FCNSize - 2 
+- dtagSize, WSize and FCNSize are used to define the SCHC fragmentation header
+- windowSize can be added if not 2^FCNSize - 1
   For "ackOnError" the following parameter is defined:
   - "ackBehavior" defined the ack behavior, i.e. when the Ack must be spontaneously sent
     by the receiver and therefore when the sender must listen for Ack.
@@ -250,13 +250,13 @@ class RuleManager:
             if not "dtagSize" in profile:
                 profile["dtagSize"] = 0
                 
-            if not "windowSize" in profile:
+            if not "WSize" in profile:
                 if  mode == "noAck":
-                    profile["windowSize"] = 0
+                    profile["WSize"] = 0
                 elif  mode == "ackAlways":
-                    profile["windowSize"] = 1
+                    profile["WSize"] = 1
                 elif mode == "ackOnError":
-                    profile["windowSize"] = 5
+                    profile["WSize"] = 5
                     
             if not "FCNSize" in profile:
                 if mode == "noAck":
@@ -266,12 +266,12 @@ class RuleManager:
                 elif mode == "ackOnError":
                     profile["FCNSize"] = 3
 
-            if "maxWindFCN" in profile:
-                if profile["maxWindFCN"] > (0x01 << profile["FCNSize"]) - 2 or\
-                   profile["maxWindFCN"] < 0:
-                    raise ValueError ("{} illegal maxWindFCN".format(self._nameRule(rule)))
+            if "windowSize" in profile:
+                if profile["windowSize"] > (0x01 << profile["FCNSize"]) - 1 or\
+                   profile["windowSize"] < 0:
+                    raise ValueError ("{} illegal windowSize".format(self._nameRule(rule)))
             else:
-                profile["maxWindFCN"] = (0x01 << profile["FCNSize"]) - 2 
+                profile["windowSize"] = (0x01 << profile["FCNSize"]) - 1
                     
             if mode == "ackOnError":
                 if not "ackBehavior" in profile:

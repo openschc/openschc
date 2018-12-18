@@ -25,19 +25,19 @@ def get_fcn_all_1(rule):
     return (1<<rule["FCNSize"])-1
 
 def get_win_all_1(rule):
-    return (1<<rule["windowSize"])-1
+    return (1<<rule["WSize"])-1
 
-def get_MAX_WIND_FCN(rule):
-    return (1<<rule["FCNSize"])-2
+def get_max_fcn(rule):
+    return rule["windowSize"]-1
 
 def get_max_dtag(rule):
     return (1<<rule["dtagSize"])-1
 
 def get_sender_header_size(rule):
-    return rule["ruleLength"] + rule["dtagSize"] + rule.get("windowSize", 0) + rule["FCNSize"]
+    return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + rule["FCNSize"]
 
 def get_receiver_header_size(rule):
-    return rule["ruleLength"] + rule["dtagSize"] + rule.get("windowSize", 0) + 1
+    return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + 1
 
 def get_mic_size_in_bits(rule):
     assert rule["MICAlgorithm"] == "crc32"
@@ -93,8 +93,8 @@ class frag_tx(frag_base):
             buffer.add_bits(dtag, self.rule["dtagSize"])
         #
         # extension fields.
-        if win is not None and self.rule.get("windowSize") is not None:
-            buffer.add_bits(win, self.rule["windowSize"])
+        if win is not None and self.rule.get("WSize") is not None:
+            buffer.add_bits(win, self.rule["WSize"])
         if fcn is not None and self.rule.get("FCNSize") is not None:
             buffer.add_bits(fcn, self.rule["FCNSize"])
         if mic is not None and self.rule.get("MICAlgorithm") is not None:
@@ -187,9 +187,9 @@ class frag_rx(frag_base):
 
     def parse_win(self):
         """ get the value of the window field and set it into self.win.
-        if windowSize in the rule is zero, self.win is not set (None).
+        if WSize in the rule is zero, self.win is not set (None).
         """
-        win_size = self.rule.get("windowSize", 0)
+        win_size = self.rule.get("WSize", 0)
         if win_size != 0:
             self.win = self.packet_bbuf.get_bits(win_size)
         return win_size
@@ -205,8 +205,7 @@ class frag_rx(frag_base):
     def parse_bitmap(self):
         """ parse bitmap in the frame. """
         bitmap_size = min(self.packet_bbuf.count_remaining_bits(),
-                          get_fcn_all_1(self.rule))
-                        # XXX replace to rule["windowSize"]
+                          get_max_fcn(self.rule))
         self.bitmap = self.packet_bbuf.get_bits_as_buffer(bitmap_size)
         return bitmap_size
 
