@@ -1,3 +1,93 @@
+
+## Notation
+
+    "p": a pdding bit, which must be ignored during the MIC conputation.
+    "m": represents a content of MIC.
+    "s": a significant bit of padding, which must be included
+         for the MIC calculation.
+    "r": rule ID field.
+    "d": dtag field.
+    "w": W field.
+    "f": FCN field.
+    "a": another significant bit of padding to align the byte boundary
+         for the MIC calculation.  the value is zero.
+
+## Q. window number of the last fragment
+
+L2 word is 8 bits.
+L2 MTU is 48 bits.
+The size of a tile is 32 bits.
+The mode is ACK-on-Error.
+the size of SCHC fragment header is 16 bits.
+    the size of rule ID is 6 bits.
+    the size of dtag is 3 bits.
+    the size of W is 5 bits.
+    the size of FCN is 2 bits.
+
+The size of a SCHC packet is 9 bytes (72 bits).
+The number of tiles is going to be 3.
+Each fragment is gonna be:
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000010 ........ ........ ........ ........
+          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000001 ........ ........ ........ ........
+          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
+
+          01234567 01234567 01234567
+    Data: 00000100 10000000 ........
+          rrrrrrdd dwwwwwff 01234567
+
+The question is what the window number is for the last MIC fragment ?
+
+          01234567 01234567 01234567 01234567 01234567 01234567
+    Data: 00000100 10000?11 mmmmmmmm mmmmmmmm mmmmmmmm mmmmmmmm
+          rrrrrrdd dwwwwwff |<------------  MIC ------------->|
+
+The flow is like below:
+
+           Sender               Receiver
+             |-----W=0, FCN=2----->|
+             |-----W=0, FCN=1----->|
+             |-----W=0, FCN=0----->|
+         (no ACK)
+             |--W=1, FCN=7 + MIC-->|
+             |<-- ACK, W=1, C=1 ---| C=1
+           (End)
+
+A.
+
+8.2.2.2 "the last window MUST contain WINDOW_SIZE tiles or less." We didn't say (forgot to say) that it must have at least one tile.
+8.4.3.1 "In an All-1 SCHC Fragment message, the sender MUST fill the W field with the window number of the last tile of the SCHC Packet."
+
+This flow should be like below:
+
+           Sender               Receiver
+             |-----W=0, FCN=2----->|
+             |-----W=0, FCN=1----->|
+             |-----W=0, FCN=0----->|
+             |--W=0, FCN=7 + MIC-->|
+             |<-- ACK, W=1, C=1 ---| C=1
+           (End)
+
+Next, if the 3rd(FCN=0) and 4th(MIC) messages are lost, could you tell me the complete flow ?
+Sorry, I forgot to say that WINDOW_SIZE is 3.
+
+           Sender               Receiver
+             |-----W=0, FCN=2----->|
+             |-----W=0, FCN=1----->|
+             |-----W=0, FCN=0---X->|
+             |--W=0, FCN=7+MIC--X->|
+             |-----W=0, FCN=0----->| ACK REQ
+             |<-- ACK, W=0, C=1 ---| C=1
+           (End)
+             |<-- ACK, W=0, C=0 ---| C=0, Bitmap: 110
+             |-----W=0, FCN=0----->|
+
+The sender doesn't know whether the MIC should be sent or not.
+
 ## Q. last tile handling
 
 word is 8 bits.  The size of a tile is 9 bits.
@@ -45,61 +135,6 @@ it looks that the All-0 fragment was lost.
 
 How do we solve it ?
 
-## Q. window number of the last fragment
-
-L2 word is 8 bits.
-L2 MTU is 48 bits.
-The size of a tile is 32 bits.
-The mode is ACK-on-Error.
-the size of SCHC fragment header is 16 bits.
-    the size of rule ID is 6 bits.
-    the size of dtag is 3 bits.
-    the size of W is 5 bits.
-    the size of FCN is 2 bits.
-
-The size of a SCHC packet is 9 bytes (72 bits).
-The number of tiles is going to be 3.
-Each fragment is gonna be:
-
-          01234567 01234567 01234567 01234567 01234567 01234567
-    Data: 00000100 10000010 ........ ........ ........ ........
-          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
-
-          01234567 01234567 01234567 01234567 01234567 01234567
-    Data: 00000100 10000001 ........ ........ ........ ........
-          rrrrrrdd dwwwwwff 01234567 01234567 01234567 01234567
-
-          01234567 01234567 01234567
-    Data: 00000100 10000000 ........
-          rrrrrrdd dwwwwwff 01234567
-
-The question is what the window number is for the last MIC fragment ?
-
-          01234567 01234567 01234567 01234567 01234567 01234567
-    Data: 00000100 10000?11 mmmmmmmm mmmmmmmm mmmmmmmm mmmmmmmm
-          rrrrrrdd dwwwwwff |<------------  MIC ------------->|
-
-The flow is like below:
-
-           Sender               Receiver
-             |-----W=0, FCN=2----->|
-             |-----W=0, FCN=1----->|
-             |-----W=0, FCN=0----->|
-         (no ACK)
-             |--W=1, FCN=7 + MIC-->|
-             |<-- ACK, W=1, C=1 ---| C=1
-           (End)
-
-## Q. content of Padding bits
-
-> 9.  Padding management
-> 
->    A Profile MAY define the value of the padding bits.  The RECOMMENDED
->    value is 0.
-
-Do you allow the value of 1 for a regular padding (i.e. except of the abort message) ?
-Since all ones has a meaning for the abort message, a regular padding should be 0 for consistency.
-
 ## Q. W field of Abort message and ACK-on-Error
 
 > 8.3.4.1.  SCHC Sender-Abort
@@ -146,6 +181,19 @@ Then, the section 8.4.2.1 Sender behavior should specify how to use the window c
 as similar to the receiver behavior.  e.g. when it's initialized.
 
 Otherwise, the least significant bit of the window number sounds strange.
+
+## content of Padding bits
+
+> 9.  Padding management
+> 
+>    A Profile MAY define the value of the padding bits.  The RECOMMENDED
+>    value is 0.
+
+Do you allow the value of 1 for a regular padding (i.e. except of the abort message) ?
+Since all ones has a meaning for the abort message, a regular padding should be 0 for consistency.
+
+A.
+it must be consistent.  The padding bit of 1 should be allowed.
 
 ## padding and MIC calculation
 
@@ -202,24 +250,12 @@ Each fragment is gonna be:
     Data: 00101001 11mmmmmm mmmmmmmm mmmmmmmm mmmmmmmm mm.....s
           rrrddwwf ff|<------------  MIC -------------->|34567
 
-    "p": a pdding bit, which must be ignored during the MIC conputation.
-    "m": represents a content of MIC.
-    "s": a significant bit of padding, which must be included
-         for the MIC calculation.
-    "r": rule ID field.
-    "d": dtag field.
-    "w": W field.
-    "f": FCN field.
-
 To calculate the MIC is required to align the byte boundary,
 the input data of the MIC calculation is gonna be:
 
           012345678 012345678 012345678 01234567
     Data: ......... ......... ......... .....saa
           012345670 123456701 234567012 34567
-
-    "a": another significant bit of padding to align the byte boundary
-         for the MIC calculation.  the value is zero.
 
 No problem.
 
