@@ -158,9 +158,6 @@ class BitBuffer:
         self.add_bits(0, count)
         return count
 
-    def _old_get_content(self):
-        return self._content
-
     def get_content(self):
         """ return a bytearray containing the remaining bits in _content aligned
         to the byte boundary.
