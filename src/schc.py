@@ -144,7 +144,8 @@ class SCHCProtocol:
 # XXX
         rule = self.rule_manager.findRuleByPacket(remote_id, packet_bbuf)
         if rule is None:
-            self._log("no rule found for {}".format(remote_id))
+            self._log("looks an IP packet as no rule found for {}".format(
+                    remote_id))
             args = (remote_id, self.layer2.mac_id, packet_bbuf.get_content())
             self.scheduler.add_event(0, self.layer3.receive_packet, args)
             return
@@ -175,6 +176,7 @@ class SCHCProtocol:
                                                           rule, dtag, remote_id)
                     self.reassemble_session.add(rule.ruleID, rule.ruleLength,
                                                 dtag, session)
+                    print("New reassembly session created", session)
             # XXX cancel retransmission timers.
             session.cancel_timer()
             session.receive_frag(packet_bbuf, dtag)
