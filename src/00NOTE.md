@@ -12,6 +12,36 @@
     "a": another significant bit of padding to align the byte boundary
          for the MIC calculation.  the value is zero.
 
+## Q. No-Ack mode and the All-1 fragment.
+
+In No-ACK mode, for example,
+
+    the size of MTU is 56 bits.
+    the size of L2 word is 8 bits.
+    The size of the SCHC fragment header is 11 bits.
+    The size of MIC is 32 bits.
+
+Assumed the size of SCHC packet is 13 bytes (104 bits).
+
+How are the 3rd and 4th fragments ?
+
+I thought that they including the 1st and 2nd are like below.
+
+    |<- header ->|<---------------- tile 1 --------------->|
+1st |  11 bits   |                 45 bits                 |
+
+    |<- header ->|<---------------- tile 2 --------------->|
+2nd |  11 bits   |                 45 bits                 |
+
+    |<- header ->|<-  tile 3 ->|<- padding ->|
+3rd |  11 bits   |   14 bits   |   7 bits    |
+
+    |<- header ->|<------   MIC   ------>|<- padding ->|
+4th |  11 bits   |        32 bits        |    5 bits   |
+
+However, the sesion of 8.4.1 describes that only the All-1 SCHC
+Fragment is padded as needed.
+
 ## Q. window number of the last fragment
 
 L2 word is 8 bits.
