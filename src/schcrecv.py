@@ -20,11 +20,10 @@ class ReassembleBase:
         self.tile_list = []
         self.mic_received = None
 
-    def get_mic(self, extra_bits=0):
-        mic_target = self.packet_bbuf.get_content()
-        mic_target += b"\x00" * (roundup(
-                extra_bits, self.rule["MICWordSize"])//self.rule["MICWordSize"])
+    def get_mic(self, mic_target, extra_bits=0):
+        assert isinstance(mic_target, bytearray)
         mic = mic_crc32.get_mic(mic_target)
+        print("Recv MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
 
     def cancel_timer(self):
@@ -40,7 +39,7 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX and pass the context to the parser.
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
 
-        print("receive_frag:", schc_frag.__dict__,
+        print("frag received:", schc_frag.__dict__,
               schc_frag.payload.__dict__)
         assert schc_frag.fcn is not None
         self.tile_list.append(schc_frag.payload)
@@ -51,9 +50,7 @@ class ReassemblerNoAck(ReassembleBase):
             schc_packet = BitBuffer()
             for i in self.tile_list:
                 schc_packet += i
-            mic_target = schc_packet.get_content()
-            mic_calced = mic_crc32.get_mic(mic_target)
-            print("Recv MIC {}, base = {}".format(mic_calced, mic_target))
+            mic_calced = self.get_mic(schc_packet.get_content())
             if schc_frag.mic != mic_calced:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
@@ -72,7 +69,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
-        print("receive_frag:", schc_frag.__dict__,
+        print("frag received:", schc_frag.__dict__,
               schc_frag.payload.__dict__)
         assert schc_frag.fcn is not None
         # append the payload to the tile list.
@@ -175,9 +172,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 i["nb_tiles"]*self.rule["tileSize"])
             schc_packet += self.tile_list[-1]["raw_tiles"]
         # get the target of MIC from the BitBuffer.
-        mic_target = schc_packet.get_content()
-        mic_calced = mic_crc32.get_mic(mic_target)
-        print("Recv MIC {}, base = {}".format(mic_calced, mic_target))
+        mic_calced = self.get_mic(schc_packet.get_content())
         return schc_packet, mic_calced
 
 #---------------------------------------------------------------------------

@@ -43,6 +43,11 @@ def get_mic_size_in_bits(rule):
     assert rule["MICAlgorithm"] == "crc32"
     return 32
 
+def roundup(v, w=8):
+    """ return the size of bits align to the w boundary. """
+    a, b = (v//w, v%w)
+    return a*w+(w if b else 0)
+
 #---------------------------------------------------------------------------
 
 class frag_base():
@@ -222,7 +227,7 @@ class frag_rx(frag_base):
         assuming that mic_size is not zero.
         '''
         mic_size = get_mic_size_in_bits(self.rule)
-        self.mic = self.packet_bbuf.get_bits(mic_size)
+        self.mic = self.packet_bbuf.get_bits_as_buffer(mic_size).get_content()
         return mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):

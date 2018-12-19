@@ -9,14 +9,6 @@ from schcbitmap import make_bit_list
 from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
-#---------------------------------------------------------------------------
-
-# XXX should move it to bitarray or schcmsg.
-def roundup(v, w=8):
-    a, b = (v//w, v%w)
-    return a*w+(w if b else 0)
-
-#---------------------------------------------------------------------------
 
 class FragmentBase():
     def __init__(self, protocol, rule, profile=None):
@@ -39,10 +31,36 @@ class FragmentBase():
         if self.dtag > schcmsg.get_max_dtag(self.rule):
             self.dtag = 0
 
-    def get_mic(self, extra_bits=1):
-        mic_target = self.mic_base
-        mic_target += b"\x00" * (roundup(
-                extra_bits, self.rule["MICWordSize"])//self.rule["MICWordSize"])
+    def get_mic(self, mic_target, last_frag_base_size,
+                penultimate_size=0):
+        assert isinstance(mic_target, bytearray)
+        # calculate the significant padding bits.
+        # 1. get the extra bits. 
+        #   |<------------ last SCHC frag ------------->|
+        #   |<- header ->|<- payload ->|<--- padding -->|
+        #                              |<- extra bits-->|
+        #                                      L2Word ->|
+        extra_bits = (schcmsg.roundup(last_frag_base_size,
+                                      self.rule["L2WordSize"]) -
+                        last_frag_base_size)
+        # 2. round up the payload of all SCHC fragments
+        #    to the MIC word size.
+        #
+        #   |<----------------- input data  ----------------->|
+        #   |<- a SCHC packet ->|<- extra bits->|<- padding ->|
+        #            MIC Word ->|                  MIC Word ->|
+        mic_target += b"\x00" * (
+                schcmsg.roundup(extra_bits, self.rule["MICWordSize"])//
+                self.rule["MICWordSize"])
+        # XXX
+        if penultimate_size != 0:
+            extra_bits = (schcmsg.roundup(penultimate_size,
+                                        self.rule["L2WordSize"]) -
+                            penultimate_size)
+            mic_target += b"\x00" * (
+                    schcmsg.roundup(extra_bits, self.rule["MICWordSize"])//
+                    self.rule["MICWordSize"])
+        #
         mic = mic_crc32.get_mic(mic_target)
         print("Send MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
@@ -59,49 +77,90 @@ class FragmentBase():
 
 class FragmentNoAck(FragmentBase):
 
+# 8.4.1.  No-ACK mode
+#
+#    fragmentation and the entity performing reassembly.  This mode
+#    supports LPWAN technologies that have a variable MTU.
+#
+#    In No-ACK mode, only the All-1 SCHC Fragment is padded as needed.
+#    The other SCHC Fragments are intrinsically aligned to L2 Words.
+#
+# 8.4.1.1.  Sender behavior
+# 
+#    Each SCHC Fragment MUST contain exactly one tile in its Payload.  The
+#    tile MUST be at least the size of an L2 Word.  The sender MUST
+#    transmit the SCHC Fragments messages in the order that the tiles
+#    appear in the SCHC Packet.  Except for the last tile of a SCHC
+#    Packet, each tile MUST be of a size that complements the SCHC
+#    Fragment Header so that the SCHC Fragment is a multiple of L2 Words
+#    without the need for padding bits.  Except for the last one, the SCHC
+#    Fragments MUST use the Regular SCHC Fragment format specified in
+#    Section 8.3.1.1.  The last SCHC Fragment MUST use the All-1 format
+#    specified in Section 8.3.1.2.
+
     def send_frag(self):
-        # get contiguous tiles as many as possible fit in MTU.
-        remaining_size = (self.protocol.layer2.get_mtu_size() -
-                          schcmsg.get_sender_header_size(self.rule))
-        if self.packet_bbuf.count_remaining_bits() != 0:
-            # regular frag.
-            if remaining_size > self.packet_bbuf.count_remaining_bits():
-                # put all remaining bits into the tile.
-                tile = self.packet_bbuf.get_bits_as_buffer(
-                        self.packet_bbuf.count_remaining_bits())
-            else:
-                # put remaining_size of bits of packet into the tile.
-                tile = self.packet_bbuf.get_bits_as_buffer(remaining_size)
-            schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, dtag=self.dtag,
-                    win=None,
-                    fcn=0,
-                    mic=None,
-                    payload=tile)
-            # save the last window tiles.
-            self.last_tile = tile
+        # XXX
+        # because No-ACK mode supports variable MTU,
+        # sender can't know the fact that it can't send all fragments
+        # before it reachs to send the last fragment (All-1).
+        #
+        #     The All-1 fragment MUST be formed like below.
+        #
+        #     | header | MIC |    last tile     |
+        #                    |<- L2 word size ->|
+        #                                       |<- L2 Word
+        #
+        #     if the size of header+MIC+tile doesn't fit the L2 Word,
+        #
+        #     | header | MIC |     last tile    |    padding    |
+        #                    |<- L2 word size ->|<- less than ->|
+        #                                         L2 word size
+        #                                                       |<- L2 Word
+        payload_size = (self.protocol.layer2.get_mtu_size() -
+                        schcmsg.get_sender_header_size(self.rule))
+        remaining_data_size = self.packet_bbuf.count_remaining_bits()
+        if remaining_data_size >= payload_size:
+            # put remaining_size of bits of packet into the tile.
+            tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
             transmit_callback = self.event_sent_frag
-        else:
-            # make All-1 frag.
-            assert self.last_tile is not None
-            assert self.mic_sent is None
-            last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
-                                 self.last_tile.count_added_bits())
-            # calculate extra_bits (= packet_size - last_payload_size)
-            self.mic_sent = self.get_mic(extra_bits=(
-                    roundup(last_payload_size, self.rule["L2WordSize"]) -
-                    last_payload_size))
-            schc_frag = schcmsg.frag_sender_tx(
-                    self.rule, dtag=self.dtag,
-                    win=None,
-                    fcn=schcmsg.get_fcn_all_1(self.rule),
-                    mic=self.mic_sent)
-            transmit_callback = None
-        # send
+            fcn=0
+            self.mic_sent=None
+        elif remaining_data_size < payload_size:
+            if remaining_data_size <= (
+                    payload_size - schcmsg.get_mic_size_in_bits(self.rule)):
+                tile = None
+                if remaining_data_size > 0:
+                    tile = self.packet_bbuf.get_bits_as_buffer(
+                            remaining_data_size)
+                # make All-1 frag.
+                assert self.mic_sent is None
+                last_frag_base_size = (
+                        schcmsg.get_sender_header_size(self.rule) +
+                        remaining_data_size)
+                self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
+                # callback doesn't need in No-ACK mode.
+                transmit_callback = None
+                fcn=schcmsg.get_fcn_all_1(self.rule)
+            else:
+                # put the size of the complements of the header to L2 Word.
+                tile_size = (remaining_data_size -
+                                (schcmsg.get_sender_header_size(self.rule) +
+                                remaining_data_size)%self.rule["L2WordSize"])
+                tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
+                transmit_callback = self.event_sent_frag
+                fcn=0
+                self.mic_sent=None
+        schc_frag = schcmsg.frag_sender_tx(
+                self.rule, dtag=self.dtag,
+                win=None,
+                fcn=fcn,
+                mic=self.mic_sent,
+                payload=tile)
+        # save the last window tiles.
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 transmit_callback)
-        print("DEBUG: send_frag:", schc_frag.packet)
+        print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
@@ -146,14 +205,11 @@ class FragmentAckOnError(FragmentBase):
                 # is less than L2 word size.
                 all_1 = True
                 # make the All-1 frag with this tile.
-                last_payload_size = (
+                last_frag_base_size = (
                         schcmsg.get_sender_header_size(self.rule) +
                         schcmsg.get_mic_size_in_bits(self.rule) +
                         TileList.get_tile_size(window_tiles))
-                # calculate the significant padding bits.
-                self.mic_sent = self.get_mic(extra_bits=(
-                        roundup(last_payload_size, self.rule["L2WordSize"]) -
-                        last_payload_size))
+                self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
                 self.event_id_ack_waiting = self.protocol.scheduler.add_event(
                         10, self.ack_timeout, tuple())
             schc_frag = schcmsg.frag_sender_tx(
@@ -176,12 +232,9 @@ class FragmentAckOnError(FragmentBase):
             # calculation may be needed again.
             # XXX maybe it's better to check whether the size of MTU is change
             # or not when the previous MIC was calculated..
-            last_payload_size = (schcmsg.get_sender_header_size(self.rule) +
-                                 TileList.get_tile_size(self.last_window_tiles))
-            # calculate extra_bits (= packet_size - last_payload_size)
-            self.mic_sent = self.get_mic(extra_bits=(
-                    roundup(last_payload_size, self.rule["L2WordSize"]) -
-                    last_payload_size))
+            last_frag_base_size = (schcmsg.get_sender_header_size(self.rule) +
+                                TileList.get_tile_size(self.last_window_tiles))
+            self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
             # check the win number.
             # if the last tile number is zero, here window number has to be
             # incremented.
