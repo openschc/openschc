@@ -23,7 +23,7 @@ def get_sender_header_size(rule):
 def get_receiver_header_size(rule):
     return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + 1
 
-def get_mic_size_in_bits(rule):
+def get_mic_size(rule):
     assert rule["MICAlgorithm"] == "crc32"
     return 32
 
@@ -87,7 +87,7 @@ class frag_tx(frag_base):
         if fcn is not None and self.rule.get("FCNSize") is not None:
             buffer.add_bits(fcn, self.rule["FCNSize"])
         if mic is not None and self.rule.get("MICAlgorithm") is not None:
-            mic_size = get_mic_size_in_bits(self.rule)
+            mic_size = get_mic_size(self.rule)
             assert mic_size % bitarray.BITS_PER_BYTE == 0
             assert len(mic) == mic_size // 8
             buffer.add_bytes(mic)
@@ -210,7 +210,7 @@ class frag_rx(frag_base):
         parse mic in the frame.
         assuming that mic_size is not zero.
         '''
-        mic_size = get_mic_size_in_bits(self.rule)
+        mic_size = get_mic_size(self.rule)
         self.mic = self.packet_bbuf.get_bits_as_buffer(mic_size).get_content()
         return mic_size
 

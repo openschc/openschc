@@ -127,7 +127,7 @@ class FragmentNoAck(FragmentBase):
             self.mic_sent=None
         elif remaining_data_size < payload_size:
             if remaining_data_size <= (
-                    payload_size - schcmsg.get_mic_size_in_bits(self.rule)):
+                    payload_size - schcmsg.get_mic_size(self.rule)):
                 tile = None
                 if remaining_data_size > 0:
                     tile = self.packet_bbuf.get_bits_as_buffer(
@@ -200,14 +200,14 @@ class FragmentAckOnError(FragmentBase):
             all_1 = False
             if (nb_remaining_tiles == 0 and
                 len(window_tiles) == 1 and
-                remaining_size >= schcmsg.get_mic_size_in_bits(self.rule)):
+                remaining_size >= schcmsg.get_mic_size(self.rule)):
                 # the All-1 fragment can carry only one tile of which the size
                 # is less than L2 word size.
                 all_1 = True
                 # make the All-1 frag with this tile.
                 last_frag_base_size = (
                         schcmsg.get_sender_header_size(self.rule) +
-                        schcmsg.get_mic_size_in_bits(self.rule) +
+                        schcmsg.get_mic_size(self.rule) +
                         TileList.get_tile_size(window_tiles))
                 self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
                 self.event_id_ack_waiting = self.protocol.scheduler.add_event(
