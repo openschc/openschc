@@ -305,4 +305,4 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_fcn()
         if self.fcn == get_fcn_all_1(self.rule):
             pos += self.parse_mic()
-        self.payload = self.packet_bbuf.copy()
+        self.payload = self.packet_bbuf.get_bits_as_buffer(self.packet_bbuf.count_remaining_bits())

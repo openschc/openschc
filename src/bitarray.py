@@ -211,23 +211,25 @@ class BitBuffer:
     def copy(self, position=None):
         """ return BitBuffer like get_bits_as_buffer(),
         but _rpos doesn't change. """
-        new_buf = BitBuffer()
+        ret = BitBuffer(self._content)
+        ret._wpos = self._wpos
         if position is None:
-            for bit_index in range(self._rpos, self._wpos):
-                new_buf.add_bits(self.get_bits(1, bit_index), 1)
-            return new_buf
+            ret._rpos = self._rpos
         else:
-            if self.count_added_bits() < position:
-                return new_buf
-            for bit_index in range(position, self._wpos):
-                new_buf.add_bits(self.get_bits(1, bit_index), 1)
-            return new_buf
+            if ret._wpos > position:
+                ret._rpos = position
+            else:
+                raise ValueError("position is too biig.")
+        return ret
 
     def __repr__(self):
         return "b'{}'/{}".format("".join([ "\\x{:02x}".format(i) for i in
                                        self._content ]), self._wpos)
 
     def __add__(self, other):
+        """ copy self._content into another BitBuffer and add other into it.
+        """
+        # XXX assumed that other is not so big.
         new_buf = self.copy()
         for bit_index in range(other.count_added_bits()):
             new_buf.add_bits(other.get_bits(1, bit_index), 1)

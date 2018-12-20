@@ -1,7 +1,7 @@
 from bitarray import BitBuffer
 
 print("""
-      ## set_bit()
+## set_bit()
       """)
 a = BitBuffer()
 a.set_bit(0)
@@ -38,19 +38,35 @@ a.add_bits(6, 3) # fcn  : 110
 print(a.get_content())
 print(a)
 # 0111 0100 1111 0000 : \x74f0
+
 assert str(a) == r"b'\x74\xf0'/13"
 
 print("""
 ## copy()
       """)
-b = a.copy()
-assert str(b) == str(a)
-assert id(b) != id(a)
-assert id(b._content) != id(a._content)
+c = BitBuffer(bytearray([1,2,3,4,5]))
+c.add_bits(5,6)
+d = c.copy()
+print(c)
+print(d)
+assert str(c) == str(d)
+assert id(c) != id(d)
+assert id(c._content) != id(d._content)
+k = 100
+al = [BitBuffer(bytearray([_ for _ in range(16)])) for _ in range(k)]
+b = BitBuffer()
+for i in al:
+    b += i
+c = BitBuffer(bytearray([_%16 for _ in range(16*k)]))
+print(c)
+assert str(b) == str(c)
 
 print("""
 ## get_bits()
       """)
+b = a.copy()
+print(a)
+print(b)
 print(b.get_bits(4), ": rule = 7, rpos =", b._rpos)
 print(b.get_bits(3), ": dtag = 2, rpos =", b._rpos)
 print("added bits:", b.count_added_bits())
@@ -118,3 +134,4 @@ a = BitBuffer([1, 1, 1, 1])
 print(a, a.allones())
 a = BitBuffer([1, 1, 1, 1, 0])
 print(a, a.allones())
+
