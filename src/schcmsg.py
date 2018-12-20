@@ -3,23 +3,7 @@ from base_import import *  # used for now for differing modules in py/upy
 
 import bitarray
 
-# Copied from schctest/schc_param.py
-
-DEFAULT_FRAGMENT_RID = 1
-DEFAULT_L2_SIZE = 8
-DEFAULT_RECV_BUFSIZE = 512
-DEFAULT_TIMER_T1 = 5
-DEFAULT_TIMER_T2 = 10
-DEFAULT_TIMER_T3 = 10
-DEFAULT_TIMER_T4 = 12
-DEFAULT_TIMER_T5 = 14
-
 #---------------------------------------------------------------------------
-
-# 1372       *  The FCN value with all the bits equal to 1 (called All-1)
-# 1373          signals the very last tile of a SCHC Packet.  By extension, if
-# 1374          windows are used, the last window of a packet is called the
-# 1375          All-1 window.
 
 def get_fcn_all_1(rule):
     return (1<<rule["FCNSize"])-1

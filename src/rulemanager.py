@@ -85,6 +85,16 @@ try:
 except ImportError:
     import ustruct as struct
 
+# XXX to be checked whether they are needed.
+DEFAULT_FRAGMENT_RID = 1
+DEFAULT_L2_SIZE = 8
+DEFAULT_RECV_BUFSIZE = 512
+DEFAULT_TIMER_T1 = 5
+DEFAULT_TIMER_T2 = 10
+DEFAULT_TIMER_T3 = 10
+DEFAULT_TIMER_T4 = 12
+DEFAULT_TIMER_T5 = 14
+
 class DictToAttrDeep:
     def __init__(self, **entries):
         self.__update(**entries)
