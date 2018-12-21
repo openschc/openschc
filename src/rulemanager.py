@@ -1,4 +1,4 @@
-""""
+"""
 This module is used to manage rules.
 
 ## Rationale
@@ -22,7 +22,7 @@ Each rule must contain the following information:
     }
 
 where ruleID contains the rule ID value aligned on the right and ruleLength
-gives 
+gives
 the size in bits of the ruleID. In the previous example, this corresponds to
 the binary value 0b010.
 if ruleLength is not specified the value is set to 1 byte.
@@ -50,7 +50,7 @@ where <<<rule>>> will be defined later.
       "fragmentation": {
           "FRMode" : "noAck" # or "ackAlways", "ackOnError"
           "FRModeProfile" : {
-             "dtagSize" : 1, 
+             "dtagSize" : 1,
              "WSize": 3,
              "FCNSize" : 3,
              "windowSize", 7,
@@ -77,7 +77,7 @@ The "fragmentation" keyword is used to give fragmentation mode and profile:
     by the receiver and therefore when the sender must listen for Ack.
     - "afterAll0" means that the sender waits for ack after sending an All-0
     - "afterAll1" means that the sender waits only after sending the last fragment
-    - other behaviors may be defined in the future.     
+    - other behaviors may be defined in the future.
 """
 
 try:
@@ -149,7 +149,6 @@ class RuleManager:
     def __init__(self):
         self._db = []    #RM database
 
-
     def _checkRuleValue(self, rule_id, rule_id_length):
         """this function looks if bits specified in ruleID are not outside of
         rule_id_length"""
@@ -162,15 +161,13 @@ class RuleManager:
         for k in range (32, rule_id_length, -1):
             if (0x01 << k) & r1 !=0:
                 raise ValueError("rule ID too long")
-            
 
-            
     def _ruleIncluded(self, r1ID, r1l, r2ID, r2l):
         """check if a conflict exists between to ruleID (i.e. same first bits equals) """
         r1 = r1ID << (32-r1l)
         r2 = r2ID << (32-r2l)
         l  = min(r1l, r2l)
-        
+
         for k in range (32-l, 32):
             if ((r1 & (0x01 << k)) != (r2 & (0x01 << k))):
                 return False
@@ -179,7 +176,7 @@ class RuleManager:
 
     def _nameRule (self, r):
         return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
-        
+
     def findRuleByID (self, rule_id, rule_id_length):
         """ returns a rule identified by its ruleID and ruleLength, returns none otherwise """
         for r in self._db:
@@ -238,7 +235,7 @@ class RuleManager:
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
         # proceed to compression check (TBD)
-                              
+
         # proceed to fragmentation check
 
         if "fragmentation" in rule:
@@ -256,10 +253,10 @@ class RuleManager:
                 fragRule["FRModeProfile"] = {}
 
             profile = fragRule["FRModeProfile"]
-                              
+
             if not "dtagSize" in profile:
                 profile["dtagSize"] = 0
-                
+
             if not "WSize" in profile:
                 if  mode == "noAck":
                     profile["WSize"] = 0
@@ -267,7 +264,7 @@ class RuleManager:
                     profile["WSize"] = 1
                 elif mode == "ackOnError":
                     profile["WSize"] = 5
-                    
+
             if not "FCNSize" in profile:
                 if mode == "noAck":
                     profile["FCNSize"] = 1
@@ -282,13 +279,13 @@ class RuleManager:
                     raise ValueError ("{} illegal windowSize".format(self._nameRule(rule)))
             else:
                 profile["windowSize"] = (0x01 << profile["FCNSize"]) - 1
-                    
+
             if mode == "ackOnError":
                 if not "ackBehavior" in profile:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
-                    
+
         rule_id = rule["ruleID"]
         rule_id_length = rule["ruleLength"]
 
@@ -298,7 +295,6 @@ class RuleManager:
             if self._ruleIncluded(rule_id, rule_id_length, r.ruleID, r.ruleLength):
                 raise ValueError ("{} in conflict with {}/{}".format(
                         self._nameRule(rule), r.ruleID, rruleLength))
-            
 
         self._db.append(DictToAttrDeep(**rule))
 
@@ -338,7 +334,6 @@ if __name__ == "__main__":
         "compression" : {},
         }
 
-    
     RM = RuleManager()
     RM.add(rule1)
     RM.add(rule2)
