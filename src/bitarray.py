@@ -149,8 +149,7 @@ class BitBuffer:
     def get_bits_as_buffer(self, nb_bits):
         """ _rpos does change. """
         result = BitBuffer()
-        for bit_index in range(nb_bits):
-            result.add_bits(self.get_bits(1), 1)
+        result.add_bits(self.get_bits(nb_bits), nb_bits)
         return result
 
     def ensure_padding(self):
