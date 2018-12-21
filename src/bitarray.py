@@ -239,8 +239,9 @@ class BitBuffer:
         """
         # XXX assumed that other is not so big.
         new_buf = self.copy()
-        for bit_index in range(other.count_added_bits()):
-            new_buf.add_bits(other.get_bits(1, bit_index), 1)
+        other_copy = other.copy()
+        new_buf.add_bits(other_copy.get_bits(other_copy.count_added_bits()),
+                         other_copy.count_added_bits())
         return new_buf
 
 if __name__ == "__main__":
