@@ -118,10 +118,11 @@ print("""
 # frag: 0000 0001 0000 0002 0000 0003 111
 c = BitBuffer(bytearray([1,2,3]))
 c.add_bits(7, 5)
-b = a + c
-print("a =", a)
+print("a =", c)
 print("c =", c)
+b = a + c
 print("a + c =", b)
+print("c =", c)
 assert str(b) == r"b'\x74\xf0\x08\x10\x19\xc0'/42"
 
 print("""
@@ -142,10 +143,12 @@ assert bl == [0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0]
 print("""
 ### allones()
       """)
-a = BitBuffer(b"\xff\xff")
-print(a, a.allones())
 a = BitBuffer([1, 1, 1, 1])
 print(a, a.allones())
+assert True == a.allones()
 a = BitBuffer([1, 1, 1, 1, 0])
 print(a, a.allones())
-
+assert False == a.allones()
+a = BitBuffer([0, 1, 1, 1, 1])
+print(a,"[1:]", a.allones(1))
+assert True == a.allones(1)
