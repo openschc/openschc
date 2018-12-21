@@ -126,12 +126,6 @@ print("c =", c)
 assert str(b) == r"b'\x74\xf0\x08\x10\x19\xc0'/42"
 
 print("""
-### print out
-      """)
-a.display()
-print(a)
-
-print("""
 ### to_bit_list()
       """)
 a = BitBuffer([0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0])
