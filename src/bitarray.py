@@ -223,8 +223,16 @@ class BitBuffer:
         return ret
 
     def __repr__(self):
-        return "b'{}'/{}".format("".join([ "\\x{:02x}".format(i) for i in
-                                       self._content ]), self._wpos)
+        if self._wpos == 0:
+            nb_bits = 0
+        else:
+            nb_bits = self._wpos - self._rpos
+        if self._rpos == 0:
+            ap = ""
+        else:
+            ap = "[{}:{}]".format(self._rpos, self._wpos)
+        return "b'{}'/{}{}".format("".join([ "\\x{:02x}".format(i) for i in
+                                       self._content ]), nb_bits, ap)
 
     def __add__(self, other):
         """ copy self._content into another BitBuffer and add other into it.
