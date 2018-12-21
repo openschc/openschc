@@ -98,6 +98,20 @@ print("remaining bits:", b.count_remaining_bits())
 assert b.count_remaining_bits() == 13
 
 print("""
+## get_bits_as_buffer()
+      """)
+b = a.copy()
+b.get_bits(1)
+print(b)
+# a = b'\x74\xf0'/12[1:13]
+#     0111 0100 1111 0000
+# b = b'\xe9\xe0'/12
+#     1110 1001 1110 0000
+c = b.get_bits_as_buffer(b.count_remaining_bits())
+print(c)
+assert str(c) == r"b'\xe9\xe0'/12"
+
+print("""
 ## __add__
       """)
 # the header size is 27 bits.
