@@ -1,16 +1,29 @@
 """
 This module is used to manage rules.
 
-## Rationale
+## Base format
 
-A rule is defined in JSON.
+Context is define in JSON.
+Rule is as well.
 
 Each key must be unique through a rule.
-Below the keys of "profile" are not allowed.
+For example, below the keys of "profile" are not allowed.
 
     {
         "profile": { ... },
         "compression": { "profile": ... }
+    }
+
+One Context is uniquely identified by the set of devL2Addr and dstIID.
+devL2Addr specify the L2 address of the device.
+dstIID specify the IPv6 address of the communication peer.
+It's the address of the application node in the configuration at the device,
+and the address of the device in the configuration at the CD/FR middle box.
+"*" and "/" can be used for a wild-card match.
+
+    {
+        "devL2Addr": "aabbccdd"
+        "dstIID": "2001:0db8:85a3:0000::/64"
     }
 
 A rule is uniquely identified by the rule ID of variable length.
