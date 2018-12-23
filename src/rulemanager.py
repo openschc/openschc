@@ -3,28 +3,82 @@ This module is used to manage rules.
 
 ## Base format
 
-Context is define in JSON.
-Rule is as well.
+A context and rule is written in JSON.
 
-Each key must be unique through a rule.
-For example, below the keys of "profile" are not allowed.
+A context contains an identifier, AND one or three rules.
+One of rules must specify the SCHC Compression/Decompression (CD).
+Two specify SCHC Fragmentation/Reassembly (FR) if needed.
+
+Therefore, a context has to be formed to either below structures.
 
     {
+        "devL2Addr": ...,
+        "dstIID": ...,
+        "comp": { ... },
+        "fragSender": { ... },
+        "fragReceiver": { ... }
+    }
+
+    "comp": compression rule.
+    "fragSender": fragmentation rule for inbound.
+    "fragReceiver": fragmentation rule for outbound.
+
+Or,
+
+    {
+        "devL2Addr": ...,
+        "dstIID": ...,
         "profile": { ... },
-        "compression": { "profile": ... }
+        "comp": { ... }
     }
 
-One Context is uniquely identified by the set of devL2Addr and dstIID.
-devL2Addr specify the L2 address of the device.
-dstIID specify the IPv6 address of the communication peer.
-It's the address of the application node in the configuration at the device,
-and the address of the device in the configuration at the CD/FR middle box.
-"*" and "/" can be used for a wild-card match.
+XXX Q. "profile" should be in the context ?
+
+## Context
+
+A context is uniquely identified by devL2Addr
+specifying the L2 address of a SCHC device.
+
+dstIID matches the IP address assigned
+to the interface of the communication peer.
+In the context of the SCHC device, dstIID indicates the IP address of
+the interface at the SCHC Translator,
+which is dedicated between the device and
+the application.
+In the context of the other side, dstIID indicates the IP address of
+the SCHC device.
+
+    +--------+                       +------------+         +-----+
+    |  SCHC  |                       |    SCHC    |---------| App |
+    | Device |                       | Translator |         |     |
+    +--------+                       +------------+         +-----+
+         | D (IP addr)                     | T (IP addr)
+         | L (L2 addr)                     |
+         |                                 |
+         +--// LPWAN //--| GW |------------+
+
+In the above example, the context of each side is like below:
+
+    at the device:
 
     {
-        "devL2Addr": "aabbccdd"
-        "dstIID": "2001:0db8:85a3:0000::/64"
+        "devL2Addr": "L",
+        "dstIID": "M"
     }
+
+    at the translator:
+
+    {
+        "devL2Addr": "L",
+        "dstIID": "D"
+    }
+
+"*" and "/" can be used for a wild-card match. (XXX should be implemented.)
+
+## Rule
+
+XXX is it true that both ruleID and ruleLength is unique key ?
+XXX is the deivce L2 address the real key ?
 
 A rule is uniquely identified by the rule ID of variable length.
 Each rule must contain the following information:
@@ -42,35 +96,9 @@ if ruleLength is not specified the value is set to 1 byte.
 
 The rule is either a compression/decompression rule
 or a fragmentation/reassembly rule.
-For C/D rules, the keyword "compression" must be defined. For F/R rules, the
-keyword "fragmentation" must be defined.
-In other words, either "compression" or "fragmentation" must exist in a rule.
-Both keys must not exists.
-
-For instance:
-
-    {
-      "ruleID" : 14,
-      "ruleLength" : 4   # rule 0b1110
-      "compression": <<<rule>>>
-    }
-
-where <<<rule>>> will be defined later.
-
-    {
-      "ruleID" : 15,
-      "ruleLength" : 4   # rule 0b1110
-      "fragmentation": {
-          "FRMode" : "noAck" # or "ackAlways", "ackOnError"
-          "FRModeProfile" : {
-             "dtagSize" : 1,
-             "WSize": 3,
-             "FCNSize" : 3,
-             "windowSize", 7,
-             "ackBehavior": "afterAll1"
-          }
-      }
-    }
+For C/D rules, the keyword "compression" must be defined.
+For F/R rules, the keyword "fragmentation" and "fragmentation"
+must be defined.
 
 ## Compression Rule
 
@@ -91,12 +119,89 @@ The "fragmentation" keyword is used to give fragmentation mode and profile:
     - "afterAll0" means that the sender waits for ack after sending an All-0
     - "afterAll1" means that the sender waits only after sending the last fragment
     - other behaviors may be defined in the future.
+
+## data model of DB
+
+    db = [
+        {
+            "devL2Addr": ..,
+            "dstIID": ..,
+            "comp": {
+                    "ruleID": ..,
+                    "ruleLength": ..,
+                    "compression": { ...}
+                },
+            "fragSender": {
+                    "ruleID": ..,
+                    "ruleLength": ..,
+                    "fragmentation": { ...}
+                }
+            "fragReceiver": {
+                    "ruleID": ..,
+                    "ruleLength": ..,
+                    "fragmentation": { ...}
+                }
+        }, ...
+    ]
+
+## method
+
+- add_context(context, comp=None, fragSender=None, fragReceiver=None)
+
+    It adds the context.  If it exists, raise ValueError.
+
+- add_rules(context, comp=None, fragSender=None, fragReceiver=None)
+
+    It adds the list of rules into the context specified.
+    If it exists, raise ValueError.
+    If context is not specified, the rule will be added into the default
+    context.
+
+## Rule to add a new key
+
+Each key must be unique through a rule.
+For example, below the keys of "profile" are not allowed.
+
+    {
+        "profile": { ... },
+        "compression": { "profile": ... }
+    }
+
+## Examples
+
+Example 1:
+
+    {
+      "ruleID" : 14,
+      "ruleLength" : 4   # rule 0b1110
+      "compression": { ... }
+    }
+
+Example 2:
+
+    {
+      "ruleID" : 15,
+      "ruleLength" : 4   # rule 0b1110
+      "fragmentationOut": {
+          "FRMode" : "noAck" # or "ackAlways", "ackOnError"
+          "FRModeProfile" : {
+             "dtagSize" : 1,
+             "WSize": 3,
+             "FCNSize" : 3,
+             "windowSize", 7,
+             "ackBehavior": "afterAll1"
+          }
+      }
+    }
+
 """
 
 try:
     import struct
 except ImportError:
     import ustruct as struct
+
+from copy import deepcopy
 
 # XXX to be checked whether they are needed.
 DEFAULT_FRAGMENT_RID = 1
@@ -160,7 +265,8 @@ class RuleManager:
     Reassembly rules."""
 
     def __init__(self):
-        self._db = []    #RM database
+        #RM database
+        self._db = []
 
     def _checkRuleValue(self, rule_id, rule_id_length):
         """this function looks if bits specified in ruleID are not outside of
@@ -190,58 +296,77 @@ class RuleManager:
     def _nameRule (self, r):
         return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
 
-    def findRuleByID (self, rule_id, rule_id_length):
-        """ returns a rule identified by its ruleID and ruleLength, returns none otherwise """
-        for r in self._db:
-            if rule_id_length == r.ruleLength and rule_id == r.ruleID:
-                return r
-        return None
-
-    def findRuleByRemoteID (self, remote_id):
-        """ returns a rule identified by the identifier of the communication
-        end, returns none otherwise """
-        # XXX needs to implement wildcard search or something like that.
-        for r in self._db:
-            id_db = r.get("remoteID")
-            if id_db is None:
-                continue
-            if id_db == "*":
-                return r
-            if remote_id == id_db:
-                return r
-        return None
-
-    def findRuleByPacket (self, remote_id, packet_bbuf):
-        """ returns a rule identified by the identifier of the communication
-        end AND the rule id in the packet, returns none otherwise """
-        # XXX needs to implement wildcard search or something like that.
-        for r in self._db:
-            id_db = r.get("remoteID")
-            if id_db is None:
-                continue
-            if id_db == "*":
+    def find_rule_bypacket(self, context, packet_bbuf):
+        """ returns a compression rule or an fragmentation rule
+        in the context matching with the field value of rule id in the packet.
+        """
+        for k in ["fragSender", "fragReceiver", "comp"]:
+            r = context.get(k)
+            if r is not None:
                 rule_id = packet_bbuf.get_bits(r["ruleLength"], position=0)
                 if r["ruleID"] == rule_id:
-                    return r
-            if remote_id == id_db:
-                rule_id = packet_bbuf.get_bits(r["ruleLength"], position=0)
-                if r["ruleID"] == rule_id:
-                    return r
+                    return k, r
+        return None, None
+
+    def find_context_bydevL2addr(self, dev_L2addr):
+        """ find a context with dev_L2addr. """
+        # XXX needs to implement wildcard search or something like that.
+        for c in self._db:
+            if c["devL2Addr"] == dev_L2addr:
+                return c
+            if c["devL2Addr"] == "*":
+                return c
         return None
 
-    def add (self, rule):
+    def find_context_bydstiid(self, dst_iid):
+        """ find a context with dst_iid, which can be a wild card. """
+        # XXX needs to implement wildcard search or something like that.
+        for c in self._db:
+            if c["dstIID"] == dst_iid:
+                return c
+            if c["dstIID"] == "*":
+                return c
+        return None
+
+    def find_context_exact(self, dev_L2addr, dst_iid):
+        """ find a context by both devL2Addr and dstIID.
+        This is mainly for internal use. """
+        for c in self._db:
+            if c["devL2Addr"] == dev_L2addr and c["dstIID"] == dst_iid:
+                return c
+        return None
+
+    def add_context(self, context, comp=None, fragSender=None, fragReceiver=None):
+        """ add context into the db. """
+        if self.find_context_exact(context["devL2Addr"],
+                                   context["dstIID"]) is not None:
+            raise ValueError("the context {}/{} exist.".format(
+                context["devL2Addr"], context["dstIID"]))
+        # add context
+        c = deepcopy(context)
+        self._db.append(c)
+        self.add_rules(c, comp, fragSender, fragReceiver)
+
+    def add_rules(self, context, comp=None, fragSender=None, fragReceiver=None):
+        """ add rules into the context specified. """
+        if comp is not None:
+            self.add_rule(context, "comp", comp)
+        if fragSender is not None:
+            self.add_rule(context, "fragSender", fragSender)
+        if fragReceiver is not None:
+            self.add_rule(context, "fragReceiver", fragReceiver)
+
+    def add_rule(self, context, key, rule):
         """ Check rule integrity and uniqueless and add it to the db """
 
         if not "ruleID" in rule:
-           raise ValueError ("Rule ID  not defined.")
+           raise ValueError ("Rule ID not defined.")
 
         if not "ruleLength" in rule:
             if rule["ruleID"] < 255:
                 rule["ruleLength"] = 8
             else:
                 raise ValueError ("RuleID too large for default size on a byte")
-
-        # XXX localID, remoteID processing
 
         if (not "compression" in rule and not "fragmentation" in rule) or \
            ("compression" in rule and "fragmentation" in rule):
@@ -304,56 +429,12 @@ class RuleManager:
 
         self._checkRuleValue(rule_id, rule_id_length)
 
-        for r in self._db:
-            if self._ruleIncluded(rule_id, rule_id_length, r.ruleID, r.ruleLength):
-                raise ValueError ("{} in conflict with {}/{}".format(
-                        self._nameRule(rule), r.ruleID, rruleLength))
+        for k in ["fragSender", "fragReceiver", "comp"]:
+            r = context.get(k)
+            if r is not None:
+                if rule_id_length == r.ruleLength and rule_id == r.ruleID:
+                    raise ValueError ("Rule {}/{} exists".format(
+                            rule_id, rule_id_length))
 
-        self._db.append(DictToAttrDeep(**rule))
+        context[key] = DictToAttrDeep(**rule)
 
-if __name__ == "__main__":
-    bogusRule0 = { # bogus rule with no frag or comp
-        "ruleID": 3
-        }
-    rule1 = {
-        "ruleID" : 7,
-        #"remoteID": "e2:92:00:01",
-        "remoteID": bytearray(b"\xe2\x92\x00\x01"),
-        "fragmentation" : {
-            "FRMode" :"noAck"
-        },
-    }
-    rule2 = {
-        "ruleID" : 4,
-        "ruleLength" : 3,
-        "remoteID": "*",
-        "profile": {
-            "MICAlgorithm": "crc32",
-            "MICWordSize": 8,
-            "L2WordSize": 8
-        },
-        "fragmentation" : {
-            "FRMode": "ackOnError",
-            "FRModeProfile": {
-                "dtagSize" : 2,
-                "FCNSize": 3,
-                "ackBehavior" : "afterAll1"
-            }
-        },
-    }
-    conflictingRule0 = {
-        "ruleID" : 15,
-        "ruleLength" : 4,
-        "compression" : {},
-        }
-
-    RM = RuleManager()
-    RM.add(rule1)
-    RM.add(rule2)
-    print(RM._db)
-    RM.add(conflictingRule0)
-    print(RM.findRuleByID(4, 3))
-    print(RM.findRuleByRemoteID(bytearray(b"\xe2\x92\x00\x01")))
-    from bitarray import BitBuffer
-    print(RM.findRuleByPacket(bytearray(b"\x00\x01\x02\x03"),
-                              BitBuffer(int("10000111",2).to_bytes(1, "big"))))

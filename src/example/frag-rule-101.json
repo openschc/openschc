@@ -1,8 +1,6 @@
 {
     "ruleLength": 6,
-    "ruleID": 5,
-    "remoteID": "*",
-    "localID": "*",
+    "ruleID": 1,
     "profile": {
         "L2WordSize": 8
     },

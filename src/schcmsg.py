@@ -194,7 +194,7 @@ class frag_rx(frag_base):
     def parse_bitmap(self):
         """ parse bitmap in the frame. """
         bitmap_size = min(self.packet_bbuf.count_remaining_bits(),
-                          get_max_fcn(self.rule))
+                          get_fcn_all_1(self.rule))
         self.bitmap = self.packet_bbuf.get_bits_as_buffer(bitmap_size)
         return bitmap_size
 

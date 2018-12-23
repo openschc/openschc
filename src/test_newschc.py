@@ -14,22 +14,28 @@ from rulemanager import RuleManager
 
 ap = argparse.ArgumentParser(description="a SCHC simulator.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-ap.add_argument("--rule-file", action="store", dest="rule_file",
-                default="example/fragment-rule-001.json",
-                help="specify a file name containing a rule in JSON.")
+ap.add_argument("--context", action="store", dest="context_file",
+                default="example/context-100.json",
+                help="specify a file name containing a context in JSON.")
+ap.add_argument("--comp-rule", action="store", dest="comp_rule_file",
+                default="example/comp-rule-100.json",
+                help="specify a file name containing a compression rule in JSON.")
+ap.add_argument("--fragin-rule", action="store", dest="fragin_rule_file",
+                default="example/frag-rule-201.json",
+                help="specify a file name containing an inbound fragment rule in JSON.")
+ap.add_argument("--fragout-rule", action="store", dest="fragout_rule_file",
+                default="example/frag-rule-202.json",
+                help="specify a file name containing a outbound fragment rule in JSON.")
 ap.add_argument("--loss-mode", action="store", dest="loss_mode", default=None,
                 choices=["cycle", "list", "rate"],
                 help="specify the mode of loss.")
 ap.add_argument("--loss-param", action="store", dest="loss_param", default=None,
                 help="specify the parameter for the mode of loss.")
-ap.add_argument("--data-file", action="store", dest="data_file", default=None,
+ap.add_argument("--data", action="store", dest="data_file", default=None,
                 help="specify the file name containing the data to be sent.")
 #ap.add_argument("--l2-mtu", action="store", dest="l2_mtu", type=int, default=56,
 #                help="specify the size of L2 MTU. default is 56.")
 opt = ap.parse_args()
-
-#config = "example/fragment-rule-001.json"
-#config = "example/fragment-rule-002.json"
 
 loss_config = None
 if opt.loss_mode in ["cycle","list","rate"]:
@@ -48,20 +54,27 @@ elif opt.loss_mode is not None:
 
 #---------------------------------------------------------------------------
 
-with open(opt.rule_file) as fd:
-    rule = json.loads(fd.read())
-
-rule_manager = RuleManager()
-rule_manager.add(rule)
-
-#---------------------------------------------------------------------------
-
-def make_node(sim, rule_manager, extra_config={}):
+def make_node(sim, rule_manager, devaddr=None, extra_config={}):
     node = simul.SimulSCHCNode(sim, extra_config)
     node.protocol.set_rulemanager(rule_manager)
+    if devaddr is None:
+        devaddr = node.id
+    node.protocol.set_dev_L2addr(devaddr)
     return node
 
 #---------------------------------------------------------------------------
+
+rule = []
+for k in [opt.context_file, opt.comp_rule_file, opt.fragin_rule_file,
+          opt.fragout_rule_file]:
+    with open(k) as fd:
+        rule.append(json.loads(fd.read()))
+
+rm0 = RuleManager()
+rm0.add_context(rule[0], rule[1], rule[2], rule[3])
+
+rm1 = RuleManager()
+rm1.add_context(rule[0], rule[1], rule[3], rule[2])
 
 simul_config = {
     "log": True,
@@ -70,16 +83,23 @@ if loss_config is not None:
     simul_config["loss"] = loss_config
 sim = simul.Simul(simul_config)
 
-node0 = make_node(sim, rule_manager)
-node1 = make_node(sim, rule_manager)
+node0 = make_node(sim, rm0)                   # SCHC device
+node1 = make_node(sim, rm1, devaddr=node0.id) # SCHC gw
 sim.add_sym_link(node0, node1)
 
-print("mac_id:", node0.id, node1.id)
+print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
+                                             rm0.__dict__))
+print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
+                                             rm1.__dict__))
+
+#---------------------------------------------------------------------------
+
 if opt.data_file is None:
     payload = bytearray(range(1, 13+1))
 else:
     payload = open(opt.data_file,"rb").read()
-node0.protocol.layer3.send_later(1, node1.id, payload)
+
+node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
 
 sim.run()
 

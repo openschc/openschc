@@ -156,7 +156,7 @@ class FragmentNoAck(FragmentBase):
                 fcn=fcn,
                 mic=self.mic_sent,
                 payload=tile)
-        # save the last window tiles.
+        # send a SCHC fragment
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 transmit_callback)
@@ -222,7 +222,8 @@ class FragmentAckOnError(FragmentBase):
             self.last_window_tiles = window_tiles
         elif self.mic_sent is not None:
             # it looks that all fragments have been sent.
-            print("xxx how should i do after all fragments have been sent ?")
+            print("xxx looks all tiles have been sent.",
+                  window_tiles, nb_remaining_tiles, remaining_size)
             return
         else:
             # Here, only MIC will be sent since all tiles has been sent.
@@ -249,7 +250,7 @@ class FragmentAckOnError(FragmentBase):
             self.event_id_ack_waiting = self.protocol.scheduler.add_event(
                     10, self.ack_timeout, tuple())
 
-        # send
+        # send a SCHC fragment
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
                 self.event_sent_frag)
@@ -276,7 +277,7 @@ class FragmentAckOnError(FragmentBase):
         self.cancel_ack_timeout()
         #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
-        print("sender_rx", schc_frag.__dict__)
+        print("sender frag received:", schc_frag.__dict__)
         if (schc_frag.win == schcmsg.get_win_all_1(self.rule) and
             schc_frag.cbit == 1 and
             schc_frag.payload.allones() == True):

@@ -11,11 +11,11 @@ from schctest import mic_crc32
 
 class ReassembleBase:
 
-    def __init__(self, protocol, rule, dtag, remote_id, profile=None):
+    def __init__(self, protocol, rule, dtag, sender_L2addr, profile=None):
         self.protocol = protocol
         self.rule = rule    # XXX must be immutable.
         self.dtag = dtag    # XXX must be immutable.
-        self.remote_id = remote_id
+        self.sender_L2addr = sender_L2addr
         self.profile = profile
         self.tile_list = []
         self.mic_received = None
@@ -38,9 +38,7 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX context should be passed from the lower layer.
         # XXX and pass the context to the parser.
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
-
-        print("frag received:", schc_frag.__dict__,
-              schc_frag.payload.__dict__)
+        print("receiver frag received:", schc_frag.__dict__)
         assert schc_frag.fcn is not None
         self.tile_list.append(schc_frag.payload)
         fcn_all_1 = schcmsg.get_fcn_all_1(self.rule)
@@ -56,7 +54,7 @@ class ReassemblerNoAck(ReassembleBase):
                         schc_frag.mic, mic_calced))
                 return
             # decompression
-            self.protocol.process_received_packet(self.remote_id, schc_packet)
+            self.protocol.process_decompress(self.sender_L2addr, schc_packet)
             return
         print("---", schc_frag.fcn)
 
@@ -69,8 +67,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
-        print("frag received:", schc_frag.__dict__,
-              schc_frag.payload.__dict__)
+        print("receiver frag received:", schc_frag.__dict__)
         assert schc_frag.fcn is not None
         # append the payload to the tile list.
         # padding truncation is done later. see below.
@@ -128,17 +125,16 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def finish(self, schc_packet, schc_frag):
         # decompression
-        self.protocol.process_received_packet(self.remote_id, schc_packet)
+        self.protocol.process_decompress(self.sender_L2addr, schc_packet)
         # ACK message
         schc_ack = schcmsg.frag_receiver_tx_all1_ack(
                 schc_frag.rule,
                 schc_frag.dtag,
                 schc_frag.win,
                 cbit=1)
-        print("ACK success message:", schc_ack.packet)
+        print("ACK sent:", schc_ack.__dict__)
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_ack.packet.get_content(), src_dev_id, None, None)
-        print("ACK sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0,
                                             self.protocol.layer2.send_packet,
                                             args)
@@ -172,6 +168,9 @@ class ReassemblerAckOnError(ReassembleBase):
                 i["nb_tiles"]*self.rule["tileSize"])
             schc_packet += self.tile_list[-1]["raw_tiles"]
         # get the target of MIC from the BitBuffer.
+        print("MIC calculation:")
+        for _ in self.tile_list:
+            print(_)
         mic_calced = self.get_mic(schc_packet.get_content())
         return schc_packet, mic_calced
 

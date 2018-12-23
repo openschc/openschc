@@ -12,21 +12,25 @@ Link = namedtuple("Link", "from_id to_id delay")
 SimulNode = SimulLayer2
 
 class SimulLayer3:
+    __v6addr_prefix = "2001:0db8:85a3:0000:0000:0000:0000:000"
+    __v6addr_base = 0
+
     def __init__(self, sim):
         self.sim = sim
         self.protocol = None
+        self.L3addr = SimulLayer3.__get_unique_addr()
 
-    def send_later(self, rel_time, remote_id, raw_packet):
-        self._log("send-later -> {} {}".format(remote_id, raw_packet))
+    def send_later(self, rel_time, dst_L3addr, raw_packet):
+        self._log("send-later -> {} {}".format(dst_L3addr, raw_packet))
         self.sim.scheduler.add_event(
             rel_time, self.protocol.event_receive_from_L3,
-            (remote_id, raw_packet,))
+            (dst_L3addr, raw_packet,))
 
     # XXX need to confirm whether this should be here or not.
     def receive_packet(self, remote_id, local_id, raw_packet):
         """ receive a packet from L2 and process it. """
-        self._log("recv-from {}->{} {}".format(
-            remote_id, local_id, raw_packet))
+        self._log("recv-from {}->{}".format(remote_id, local_id))
+        self._log(raw_packet[0].get_content())
         # XXX do more work
 
     def _set_protocol(self, protocol): # called by SCHCProtocol
@@ -35,10 +39,14 @@ class SimulLayer3:
     def _log(self, message):
         self.protocol.system.log("L3", message)
 
+    @classmethod
+    def __get_unique_addr(cls):
+        result = "{}{}".format(cls.__v6addr_prefix, cls.__v6addr_base)
+        cls.__v6addr_base += 1
+        return result
 
 class SimulNode: # object
     pass
-
 
 class SimulSCHCNode(SimulNode):
     def __init__(self, sim, extra_config={}):
