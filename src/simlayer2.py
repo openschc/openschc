@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------
 
 class SimulLayer2:
-    mac_id = 0
+    __mac_id_base = 0
 
     def __init__(self, sim):
         self.sim = sim
@@ -48,9 +48,10 @@ class SimulLayer2:
         assert self.protocol != None
         self.protocol.event_receive_from_L2(other_mac_id, packet)
 
-    def __get_unique_mac_id():
-        result = SimulLayer2.mac_id
-        SimulLayer2.mac_id += 1
+    @classmethod
+    def __get_unique_mac_id(cls):
+        result = cls.__mac_id_base
+        cls.__mac_id_base += 1
         return result
 
     def get_mtu_size(self):
