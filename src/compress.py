@@ -6,20 +6,22 @@ class Compression:
     def __init__(self, protocol):
         self.protocol = protocol
 
-    def compress(self, packet):
+    def compress(self, packet_bbuf):
         # XXX do more work
+        assert isinstance(packet_bbuf, BitBuffer)
         meta_info = {}
-        result = BitBuffer(packet)
+        result = packet_bbuf.copy()
         self.protocol.log("compress", "{}=>{},{}".format(
-            repr(packet), result, meta_info))
-        return BitBuffer(packet), meta_info
+            packet_bbuf, result, meta_info))
+        return result, meta_info
 
     def decompress(self, packet_bbuf):
         # XXX do more work
+        assert isinstance(packet_bbuf, BitBuffer)
         meta_info = {}
-        result = bbuf[:]
+        result = packet_bbuf.copy()
         self.protocol.log("decompress", "{}=>{},{}".format(
-            repr(packet), result, meta_info))
-        return BitBuffer(packet), meta_info
+            packet_bbuf, result, meta_info))
+        return result, meta_info
 
 #---------------------------------------------------------------------------
