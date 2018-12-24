@@ -230,8 +230,9 @@ class FragmentAckOnError(FragmentBase):
                     payload=TileList.concat(window_tiles))
             if self.mic_sent is not None:
                 # set ack waiting timer
+                args = (schc_frag, window_tiles[0]["w-num"],)
                 self.event_id_ack_waiting = self.protocol.scheduler.add_event(
-                        self.ack_wait_timer, self.ack_timeout, (schc_frag,))
+                        self.ack_wait_timer, self.ack_timeout, args)
             # save the last window tiles.
             self.last_window_tiles = window_tiles
         elif self.mic_sent is not None:
@@ -262,8 +263,9 @@ class FragmentAckOnError(FragmentBase):
                     fcn=schcmsg.get_fcn_all_1(self.rule),
                     mic=self.mic_sent)
             # set ack waiting timer
+            args = (schc_frag, win,)
             self.event_id_ack_waiting = self.protocol.scheduler.add_event(
-                    self.ack_wait_timer, self.ack_timeout, (schc_frag,))
+                    self.ack_wait_timer, self.ack_timeout, args)
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
                 None, self.event_sent_frag)
@@ -278,16 +280,24 @@ class FragmentAckOnError(FragmentBase):
 
     def ack_timeout(self, *args):
         print("ACK timeout")
+        assert len(args) == 2
         assert isinstance(args[0], schcmsg.frag_sender_tx)
+        assert isinstance(args[1], int)
         schc_frag = args[0]
+        win = args[1]
         self.ack_requests_counter += 1
         if self.ack_requests_counter > max_ack_requests:
-            # XXX sending sender abort.
-            print("XXX Sent Sender-Abort.")
+            # sending sender abort.
+            schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
+            args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
+                    None, None)
+            print("Sent Sender-Abort.", schc_frag.__dict__)
+            self.protocol.scheduler.add_event(0,
+                                        self.protocol.layer2.send_packet, args)
             return
         # set ack waiting timer
         self.event_id_ack_waiting = self.protocol.scheduler.add_event(
-                self.ack_wait_timer, self.ack_timeout, (schc_frag,))
+                self.ack_wait_timer, self.ack_timeout, args)
         # retransmit MIC.
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
                 None, self.event_sent_frag)

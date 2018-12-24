@@ -49,6 +49,7 @@ class frag_base():
         self.cbit = None
         self.payload = None
         self.packet = None
+        self.abort = False
 
     def set_param(self, rule_id, dtag, win=None, fcn=None, mic=None,
                   bitmap=None, cbit=None, payload=None):
@@ -70,46 +71,51 @@ class frag_tx(frag_base):
     parent class for sending message.
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
-                  cbit=None, payload=None):
+                  cbit=None, payload=None, abort=False):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
-        #
-        # basic fields.
         if self.rule["ruleID"] is not None and self.rule["ruleLength"] is not None:
             buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
         if dtag is not None and self.rule["dtagSize"] is not None:
             assert self.rule["dtagSize"] != None # CA: sanity check
             buffer.add_bits(dtag, self.rule["dtagSize"])
-        #
-        # extension fields.
         if win is not None and self.rule.get("WSize") is not None:
             buffer.add_bits(win, self.rule["WSize"])
-        if fcn is not None and self.rule.get("FCNSize") is not None:
-            buffer.add_bits(fcn, self.rule["FCNSize"])
-        if mic is not None and self.rule.get("MICAlgorithm") is not None:
-            mic_size = get_mic_size(self.rule)
-            assert mic_size % bitarray.BITS_PER_BYTE == 0
-            assert len(mic) == mic_size // 8
-            buffer.add_bytes(mic)
-        if cbit is not None:
-            buffer.set_bit(cbit)
-        if bitmap is not None:
-            buffer += bitmap
-        #
-        if payload is not None:
-            # assumed that bit_set() has extended to a byte boundary
-            buffer += payload
+        if abort == True:
+            # XXX for receiver abort, needs to be fixed
+            buffer.add_bits(get_fcn_all_1(self.rule), self.rule["FCNSize"])
+        else:
+            if fcn is not None and self.rule.get("FCNSize") is not None:
+                buffer.add_bits(fcn, self.rule["FCNSize"])
+            if mic is not None and self.rule.get("MICAlgorithm") is not None:
+                mic_size = get_mic_size(self.rule)
+                assert mic_size % bitarray.BITS_PER_BYTE == 0
+                assert len(mic) == mic_size // 8
+                buffer.add_bytes(mic)
+            if cbit is not None:
+                buffer.set_bit(cbit)
+            if bitmap is not None:
+                buffer += bitmap
+            #
+            if payload is not None:
+                # assumed that bit_set() has extended to a byte boundary
+                buffer += payload
         #
         self.set_param(self.rule_id, dtag, win, fcn, mic, bitmap, cbit, payload)
         self.packet = buffer
 
-class frag_sender_tx(frag_tx):
+class frag_sender_tx_abort(frag_tx):
+    """ make a message for the SCHC fragment sender. """
+    def __init__(self, rule, dtag=None, win=None):
+        self.init_param()
+        self.rule = rule
+        self.rule_id = rule["ruleID"]
+        self.make_frag(dtag, win=win, abort=True)
 
-    '''
-    for the fragment sender to send a message.
-    '''
+class frag_sender_tx(frag_tx):
+    """ make a message for the SCHC fragment sender. """
     def __init__(self, rule, dtag, win=None, fcn=None, mic=None,
-                 cbit=None, payload=None):
+                 cbit=None, payload=None, abort=False):
         self.init_param()
         self.rule = rule
         self.rule_id = rule["ruleID"]
@@ -291,7 +297,7 @@ class frag_receiver_rx(frag_rx):
     All-0      : [ Rule ID | Dtag | W | FCN(All-0) | payload | (P-0) ]
     All-1      : [ Rule ID | Dtag | W | FCN(All-1) | MIC | (payload) | (P-0) ]
     ACK REQ    : [ Rule ID | Dtag | W | FCN(All-0) | (P-0) ]
-    Send. Abort: [ Rule ID | Dtag | W | FCN(All-0) | (P-0) ]
+    Send. Abort: [ Rule ID | Dtag | W | FCN(All-1) | (P-0) ]
     """
     def __init__(self, rule, packet_bbuf):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
@@ -304,5 +310,10 @@ class frag_receiver_rx(frag_rx):
         pos += self.parse_win()
         pos += self.parse_fcn()
         if self.fcn == get_fcn_all_1(self.rule):
+            if self.packet_bbuf.count_remaining_bits() < self.rule["L2WordSize"]:
+                # this is a Sender Abort message.
+                self.abort = True
+                return
+            # this is a All-1 message.
             pos += self.parse_mic()
         self.payload = self.packet_bbuf.get_bits_as_buffer(self.packet_bbuf.count_remaining_bits())

@@ -42,7 +42,10 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX and pass the context to the parser.
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
-        assert schc_frag.fcn is not None
+        if schc_frag.abort == True:
+            print("Received Sender-Abort.")
+            # XXX needs to release all resources.
+            return
         self.tile_list.append(schc_frag.payload)
         fcn_all_1 = schcmsg.get_fcn_all_1(self.rule)
         if schc_frag.fcn == fcn_all_1:
@@ -75,6 +78,10 @@ class ReassemblerAckOnError(ReassembleBase):
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
+        if schc_frag.abort == True:
+            print("Received Sender-Abort.")
+            # XXX needs to release all resources.
+            return
         if self.state == "DONE":
             print("XXX need sending ACK back.")
             return
