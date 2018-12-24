@@ -274,8 +274,8 @@ class FragmentAckOnError(FragmentBase):
                                           args)
 
     def cancel_ack_timeout(self):
-        if self.event_id_ack_waiting is None:
-            print("WARNING: event_id_ack_waiting is not set.")
+        assert self.event_id_ack_waiting is not None
+        # print("WARNING: event_id_ack_waiting is not set.")
         self.protocol.scheduler.cancel_event(self.event_id_ack_waiting)
 
     def ack_timeout(self, *args):
