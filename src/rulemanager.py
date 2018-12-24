@@ -214,14 +214,17 @@ DEFAULT_TIMER_T4 = 12
 DEFAULT_TIMER_T5 = 14
 
 class DictToAttrDeep:
+
     def __init__(self, **entries):
         self.__update(**entries)
+
     def __update(self, **entries):
         for k,v in entries.items():
             if isinstance(v, dict):
                 self.__dict__[k] = DictToAttrDeep(**v)
             else:
                 self.__dict__.update(entries)
+
     def __contains__(self, t):
         """ t in this """
         for k,v in self.__dict__.items():
@@ -230,6 +233,7 @@ class DictToAttrDeep:
             if isinstance(v, DictToAttrDeep):
                 if t in v:
                     return True
+
     def __getitem__(self, t):
         """ this[k] """
         for k,v in self.__dict__.items():
@@ -238,15 +242,18 @@ class DictToAttrDeep:
             if isinstance(v, DictToAttrDeep):
                 if t in v:
                     return v[t]
+
     def get(self, k, d=None):
         """ this.get(k) """
         if k not in self:
             return d
         return self.__getitem__(k)
+
     def __repr__(self):
         return "{{{}}}".format(str(", ".join(
                 ['"{}": {}'.format(k,self.__reprx(v))
                  for k,v in self.__dict__.items()])))
+
     def __reprx(self, t):
         if isinstance(t, str):
             return '"{}"'.format(t)
