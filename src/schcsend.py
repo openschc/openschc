@@ -98,6 +98,17 @@ class FragmentNoAck(FragmentBase):
 #    Section 8.3.1.1.  The last SCHC Fragment MUST use the All-1 format
 #    specified in Section 8.3.1.2.
 
+    def set_packet(self, packet_bbuf):
+        super().set_packet(packet_bbuf)
+        # because draft-18 requires that in No-ACK mode, each fragment must
+        # contain exactly one tile and the tile size must be at least the size
+        # of an L2 Word.
+        min_size = (schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size(self.rule) +
+                        self.rule["L2WordSize"])
+        if self.protocol.layer2.get_mtu_size() < min_size:
+            raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.protocol.layer2.get_mtu_size(), min_size))
+
     def send_frag(self):
         # XXX
         # because No-ACK mode supports variable MTU,
@@ -181,9 +192,7 @@ class FragmentAckOnError(FragmentBase):
         a = self.all_tiles.get_all_tiles()
         if (a[-1]["t-num"] == 0 and
             a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
-            raise NotImplementedError("{}".format(
-                    """the size of the last tile with the tile number 0 must
-                    be equal to or greater than L2 word size."""))
+            raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size."))
         # make the bitmap
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
                                       self.rule["FCNSize"],
