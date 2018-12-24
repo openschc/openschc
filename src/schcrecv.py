@@ -172,7 +172,7 @@ class ReassemblerAckOnError(ReassembleBase):
             # the last tile exists in the All-1 fragment.
             # it needs to truncate the padding in the fragment before that.
             i = self.tile_list[-2]
-            schc_packet += i["raw_tiles"].get_bits_as_buffer(
+            schc_packet += i["raw_tiles"].copy().get_bits_as_buffer(
                 i["nb_tiles"]*self.rule["tileSize"])
             schc_packet += self.tile_list[-1]["raw_tiles"]
         # get the target of MIC from the BitBuffer.

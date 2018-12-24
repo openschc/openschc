@@ -25,20 +25,21 @@ class FragmentBase():
         """ store the packet of bitbuffer for later use,
         return dtag for the packet """
         self.packet_bbuf = packet_bbuf.copy()
-        self.mic_base = packet_bbuf.get_content()[:]
+        self.mic_base = packet_bbuf.copy()
         # update dtag for next
         self.dtag += 1
         if self.dtag > schcmsg.get_max_dtag(self.rule):
             self.dtag = 0
 
-    def get_mic(self, mic_target, last_frag_base_size,
+    def get_mic(self, mic_base, last_frag_base_size,
                 penultimate_size=0):
-        assert isinstance(mic_target, bytearray)
+        assert isinstance(mic_base, BitBuffer)
         # calculate the significant padding bits.
         # 1. get the extra bits. 
+        #
         #   |<------------ last SCHC frag ------------->|
         #   |<- header ->|<- payload ->|<--- padding -->|
-        #                              |<- extra bits-->|
+        #   |<---- frag base size ---->|<- extra bits-->|
         #                                      L2Word ->|
         extra_bits = (schcmsg.roundup(last_frag_base_size,
                                       self.rule["L2WordSize"]) -
@@ -49,20 +50,17 @@ class FragmentBase():
         #   |<----------------- input data  ----------------->|
         #   |<- a SCHC packet ->|<- extra bits->|<- padding ->|
         #            MIC Word ->|                  MIC Word ->|
-        mic_target += b"\x00" * (
-                schcmsg.roundup(extra_bits, self.rule["MICWordSize"])//
-                self.rule["MICWordSize"])
+        mic_base.add_bits(0, extra_bits)
         # XXX
         if penultimate_size != 0:
             extra_bits = (schcmsg.roundup(penultimate_size,
                                         self.rule["L2WordSize"]) -
                             penultimate_size)
-            mic_target += b"\x00" * (
-                    schcmsg.roundup(extra_bits, self.rule["MICWordSize"])//
-                    self.rule["MICWordSize"])
+            mic_base.add_bits(0, schcmsg.roundup(extra_bits,
+                                                self.rule["MICWordSize"]))
         #
-        mic = mic_crc32.get_mic(mic_target)
-        print("Send MIC {}, base = {}".format(mic, mic_target))
+        mic = mic_crc32.get_mic(mic_base.get_content())
+        print("Send MIC {}, base = {}".format(mic, mic_base.get_content()))
         return mic.to_bytes(4, "big")
 
     def start_sending(self):
@@ -145,8 +143,11 @@ class FragmentNoAck(FragmentBase):
                             remaining_data_size)
                 # make All-1 frag.
                 assert self.mic_sent is None
-                last_frag_base_size = (
+                last_frag_base_size = 0
+                if tile is not None:
+                    last_frag_base_size += (
                         schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size(self.rule) +
                         remaining_data_size)
                 self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
                 # callback doesn't need in No-ACK mode.
