@@ -31,8 +31,10 @@ ap.add_argument("--loss-mode", action="store", dest="loss_mode", default=None,
                 help="specify the mode of loss.")
 ap.add_argument("--loss-param", action="store", dest="loss_param", default=None,
                 help="specify the parameter for the mode of loss.")
-ap.add_argument("--data", action="store", dest="data_file", default=None,
+ap.add_argument("--data-file", action="store", dest="data_file", default=None,
                 help="specify the file name containing the data to be sent.")
+ap.add_argument("--data-size", action="store", dest="data_size", type=int, default=15,
+                help="specify the size of data, used if --data-file is not specified.")
 #ap.add_argument("--l2-mtu", action="store", dest="l2_mtu", type=int, default=56,
 #                help="specify the size of L2 MTU. default is 56.")
 opt = ap.parse_args()
@@ -94,10 +96,10 @@ print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
 
 #---------------------------------------------------------------------------
 
-if opt.data_file is None:
-    payload = bytearray(range(1, 13+1))
-else:
+if opt.data_file is not None:
     payload = open(opt.data_file,"rb").read()
+else:
+    payload = bytearray(range(1, 1+opt.data_size))
 
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
 
