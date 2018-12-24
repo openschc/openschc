@@ -197,7 +197,7 @@ class SCHCProtocol:
             self.process_decompress(sender_L2addr, packet_bbuf)
         elif key is None:
             raise ValueError(
-                    "context exists, but no compression rule for L2Addr {}".
+                    "context exists, but no rule found for L2Addr {}".
                     format(self.dev_L2addr))
         else:
             raise SystemError("should not come here.")
