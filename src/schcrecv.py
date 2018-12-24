@@ -45,6 +45,9 @@ class ReassemblerNoAck(ReassembleBase):
         if schc_frag.fcn == fcn_all_1:
             print("ALL1 received")
             # MIC calculation
+            print("tile_list")
+            for _ in self.tile_list:
+                print(_)
             schc_packet = BitBuffer()
             for i in self.tile_list:
                 schc_packet += i
@@ -148,6 +151,9 @@ class ReassemblerAckOnError(ReassembleBase):
         # because the padding of the last tile must be included into the
         # MIC calculation.  However, the fact that the last tile is
         # received can be known after the All-1 fragment is received.
+        print("tile_list:")
+        for _ in self.tile_list:
+            print(_)
         schc_packet = BitBuffer()
         for i in self.tile_list[:-2]:
             # it needs to copy the buffer as it will be reused later.
@@ -171,8 +177,6 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet += self.tile_list[-1]["raw_tiles"]
         # get the target of MIC from the BitBuffer.
         print("MIC calculation:")
-        for _ in self.tile_list:
-            print(_)
         mic_calced = self.get_mic(schc_packet.get_content())
         return schc_packet, mic_calced
 
