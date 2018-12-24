@@ -17,13 +17,13 @@ ap = argparse.ArgumentParser(description="a SCHC simulator.",
 ap.add_argument("--context", action="store", dest="context_file",
                 default="example/context-100.json",
                 help="specify a file name containing a context in JSON.")
-ap.add_argument("--comp-rule", action="store", dest="comp_rule_file",
+ap.add_argument("--rule-comp", action="store", dest="rule_comp_file",
                 default="example/comp-rule-100.json",
                 help="specify a file name containing a compression rule in JSON.")
-ap.add_argument("--fragin-rule", action="store", dest="fragin_rule_file",
+ap.add_argument("--rule-fragin", action="store", dest="rule_fragin_file",
                 default="example/frag-rule-201.json",
                 help="specify a file name containing an inbound fragment rule in JSON.")
-ap.add_argument("--fragout-rule", action="store", dest="fragout_rule_file",
+ap.add_argument("--rule-fragout", action="store", dest="rule_fragout_file",
                 default="example/frag-rule-202.json",
                 help="specify a file name containing a outbound fragment rule in JSON.")
 ap.add_argument("--loss-mode", action="store", dest="loss_mode", default=None,
