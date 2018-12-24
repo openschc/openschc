@@ -19,6 +19,10 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
+        # state:
+        #   INIT:
+        #   DONE: sent ACK success. only accept ACK REQ.
+        self.state = "INIT"
 
     def get_mic(self, mic_target, extra_bits=0):
         assert isinstance(mic_target, bytearray)
@@ -72,7 +76,9 @@ class ReassemblerAckOnError(ReassembleBase):
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
-        assert schc_frag.fcn is not None
+        if self.state == "DONE":
+            print("XXX need sending ACK back.")
+            return
         # append the payload to the tile list.
         # padding truncation is done later. see below.
         nb_tiles = schc_frag.payload.count_added_bits()//self.rule["tileSize"]
@@ -117,7 +123,7 @@ class ReassemblerAckOnError(ReassembleBase):
                             win=bit_list[bl_index][0],
                             cbit=0,
                             bitmap=bit_list[bl_index][1])
-                    print("ACK failure message:", schc_ack.__dict__)
+                    print("ACK failure sent:", schc_ack.__dict__)
                     src_dev_id = self.protocol.layer2.mac_id
                     args = (schc_ack.packet.get_content(), src_dev_id,
                             None, None)
@@ -128,6 +134,7 @@ class ReassemblerAckOnError(ReassembleBase):
         print("---", schc_frag.fcn)
 
     def finish(self, schc_packet, schc_frag):
+        self.state = "DONE"
         # decompression
         self.protocol.process_decompress(self.context, self.sender_L2addr,
                                          schc_packet)
@@ -137,7 +144,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 schc_frag.dtag,
                 schc_frag.win,
                 cbit=1)
-        print("ACK sent:", schc_ack.__dict__)
+        print("ACK success sent:", schc_ack.__dict__)
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_ack.packet.get_content(), src_dev_id, None, None)
         self.protocol.scheduler.add_event(0,
