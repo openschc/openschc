@@ -6,7 +6,6 @@ import schc
 import schcmsg
 from schctile import TileList
 from schcbitmap import make_bit_list
-from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
 
@@ -59,7 +58,7 @@ class FragmentBase():
             mic_base.add_bits(0, schcmsg.roundup(extra_bits,
                                                 self.rule["MICWordSize"]))
         #
-        mic = mic_crc32.get_mic(mic_base.get_content())
+        mic = get_mic(mic_base.get_content())
         print("Send MIC {}, base = {}".format(mic, mic_base.get_content()))
         return mic.to_bytes(4, "big")
 

@@ -32,3 +32,4 @@ except ImportError:
 # --- default imports
 
 from bitarray import BitBuffer
+from mic_crc32 import get_mic, get_mic_size

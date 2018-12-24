@@ -5,7 +5,6 @@ from base_import import *  # used for now for differing modules in py/upy
 import schc
 import schcmsg
 from schcbitmap import find_missing_tiles, sort_tile_list
-from schctest import mic_crc32
 
 #---------------------------------------------------------------------------
 
@@ -26,7 +25,7 @@ class ReassembleBase:
 
     def get_mic(self, mic_target, extra_bits=0):
         assert isinstance(mic_target, bytearray)
-        mic = mic_crc32.get_mic(mic_target)
+        mic = get_mic(mic_target)
         print("Recv MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
 
