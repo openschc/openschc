@@ -33,10 +33,10 @@ ap.add_argument("--loss-param", action="store", dest="loss_param", default=None,
                 help="specify the parameter for the mode of loss.")
 ap.add_argument("--data-file", action="store", dest="data_file", default=None,
                 help="specify the file name containing the data to be sent.")
-ap.add_argument("--data-size", action="store", dest="data_size", type=int, default=15,
+ap.add_argument("--data-size", action="store", dest="data_size", type=int, default=14,
                 help="specify the size of data, used if --data-file is not specified.")
-#ap.add_argument("--l2-mtu", action="store", dest="l2_mtu", type=int, default=56,
-#                help="specify the size of L2 MTU. default is 56.")
+ap.add_argument("--l2-mtu", action="store", dest="l2_mtu", type=int, default=56,
+                help="specify the size of L2 MTU.")
 opt = ap.parse_args()
 
 loss_config = None
@@ -67,8 +67,8 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 #---------------------------------------------------------------------------
 
 rule = []
-for k in [opt.context_file, opt.comp_rule_file, opt.fragin_rule_file,
-          opt.fragout_rule_file]:
+for k in [opt.context_file, opt.rule_comp_file, opt.rule_fragin_file,
+          opt.rule_fragout_file]:
     with open(k) as fd:
         rule.append(json.loads(fd.read()))
 
@@ -88,6 +88,8 @@ sim = simul.Simul(simul_config)
 node0 = make_node(sim, rm0)                   # SCHC device
 node1 = make_node(sim, rm1, devaddr=node0.id) # SCHC gw
 sim.add_sym_link(node0, node1)
+node0.layer2.set_mtu(opt.l2_mtu)
+node1.layer2.set_mtu(opt.l2_mtu)
 
 print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
                                              rm0.__dict__))
