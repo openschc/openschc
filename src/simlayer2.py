@@ -12,6 +12,7 @@ class SimulLayer2:
         self.counter = 1 # XXX: replace with is_transmitting?
         self.is_transmitting = False
         self.packet_queue = []
+        self.mtu = 56
 
     def _set_protocol(self, protocol):
         self.protocol = protocol
@@ -54,7 +55,10 @@ class SimulLayer2:
         cls.__mac_id_base += 1
         return result
 
+    def set_mtu(self, mtu):
+        self.mtu = mtu
+
     def get_mtu_size(self):
-        return 56   # XXX
+        return self.mtu
 
 #---------------------------------------------------------------------------
