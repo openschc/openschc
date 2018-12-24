@@ -11,10 +11,10 @@ from schctest import mic_crc32
 #---------------------------------------------------------------------------
 
 class FragmentBase():
-    def __init__(self, protocol, rule, profile=None):
+    def __init__(self, protocol, context, rule):
         self.protocol = protocol
+        self.context = context
         self.rule = rule
-        self.profile = profile
         self.dtag = 0
         self.event_timeout = 5
         self.retry_counter = 0

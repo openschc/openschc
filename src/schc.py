@@ -86,7 +86,7 @@ class SCHCProtocol:
         packet_bbuf = BitBuffer(raw_packet)
         rule = context["comp"]
         self._log("compression rule_id={}".format(rule.ruleID))
-        packet_bbuf, meta_info = self.compression.compress(packet_bbuf)
+        packet_bbuf, meta_info = self.compression.compress(context, packet_bbuf)
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
             self._log("SCHC fragmentation is not needed. size={}".format(
@@ -102,34 +102,35 @@ class SCHCProtocol:
         # Do fragmenation
         rule = context["fragSender"]
         self._log("fragmentation rule_id={}".format(rule.ruleID))
-        session = self.new_fragment_session(rule)
+        session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
         self.fragment_session.add(rule.ruleID, rule.ruleLength,
                                     session.dtag, session)
         session.start_sending()
         # self.layer2.send_packet() will be called in the session.
 
-    def new_fragment_session(self, rule):
+    def new_fragment_session(self, context, rule):
         mode = rule.get("FRMode")
         if mode == "noAck":
-            session = FragmentNoAck(self, rule) # XXX
+            session = FragmentNoAck(self, context, rule) # XXX
         elif mode == "ackAlwayw":
             raise NotImplementedError(
                     "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":
-            session = FragmentAckOnError(self, rule) # XXX
+            session = FragmentAckOnError(self, context, rule) # XXX
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         return session
 
-    def new_reassemble_session(self, bbuf, rule, dtag, sender_L2addr):
+    def new_reassemble_session(self, context, rule, dtag, sender_L2addr):
         mode = rule.get("FRMode")
         if mode == "noAck":
-            session = ReassemblerNoAck(self, rule, dtag, sender_L2addr)
+            session = ReassemblerNoAck(self, context, rule, dtag, sender_L2addr)
         elif mode == "ackAlways":
             raise NotImplementedError("FRMode:", mode)
         elif mode == "ackOnError":
-            session = ReassemblerAckOnError(self, rule, dtag, sender_L2addr)
+            session = ReassemblerAckOnError(self, context, rule, dtag,
+                                            sender_L2addr)
         else:
             raise ValueError("FRMode:", mode)
         return session
@@ -183,18 +184,17 @@ class SCHCProtocol:
                 print("Reassembly session found", session)
             else:
                 # no session is found.  create a new reassemble session.
-                session = self.new_reassemble_session(packet_bbuf,
-                                                      rule, dtag,
+                session = self.new_reassemble_session(context, rule, dtag,
                                                       sender_L2addr)
                 self.reassemble_session.add(rule.ruleID, rule.ruleLength,
                                             dtag, session)
                 print("New reassembly session created", session)
             session.receive_frag(packet_bbuf, dtag)
-        elif key == "compression":
+        elif key == "comp":
             # if there is no reassemble rule, process_decompress() is directly
             # called from here.  Otherwise, it will be called from a reassemble
             # function().
-            self.process_decompress(sender_L2addr, packet_bbuf)
+            self.process_decompress(context, sender_L2addr, packet_bbuf)
         elif key is None:
             raise ValueError(
                     "context exists, but no rule found for L2Addr {}".
@@ -202,8 +202,8 @@ class SCHCProtocol:
         else:
             raise SystemError("should not come here.")
 
-    def process_decompress(self, sender_L2addr, schc_packet):
-        raw_packet = self.compression.decompress(schc_packet)
+    def process_decompress(self, context, sender_L2addr, schc_packet):
+        raw_packet = self.compression.decompress(context, schc_packet)
         args = (sender_L2addr, self.layer2.mac_id, raw_packet)
         self.scheduler.add_event(0, self.layer3.receive_packet, args)
 

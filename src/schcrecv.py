@@ -11,12 +11,12 @@ from schctest import mic_crc32
 
 class ReassembleBase:
 
-    def __init__(self, protocol, rule, dtag, sender_L2addr, profile=None):
+    def __init__(self, protocol, context, rule, dtag, sender_L2addr):
         self.protocol = protocol
-        self.rule = rule    # XXX must be immutable.
-        self.dtag = dtag    # XXX must be immutable.
+        self.context = context
+        self.rule = rule
+        self.dtag = dtag
         self.sender_L2addr = sender_L2addr
-        self.profile = profile
         self.tile_list = []
         self.mic_received = None
 
@@ -54,7 +54,8 @@ class ReassemblerNoAck(ReassembleBase):
                         schc_frag.mic, mic_calced))
                 return
             # decompression
-            self.protocol.process_decompress(self.sender_L2addr, schc_packet)
+            self.protocol.process_decompress(self.context, self.sender_L2addr,
+                                             schc_packet)
             return
         print("---", schc_frag.fcn)
 
@@ -125,7 +126,8 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def finish(self, schc_packet, schc_frag):
         # decompression
-        self.protocol.process_decompress(self.sender_L2addr, schc_packet)
+        self.protocol.process_decompress(self.context, self.sender_L2addr,
+                                         schc_packet)
         # ACK message
         schc_ack = schcmsg.frag_receiver_tx_all1_ack(
                 schc_frag.rule,
