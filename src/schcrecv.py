@@ -194,30 +194,36 @@ class ReassemblerAckOnError(ReassembleBase):
         # because the padding of the last tile must be included into the
         # MIC calculation.  However, the fact that the last tile is
         # received can be known after the All-1 fragment is received.
+        assert len(self.tile_list) > 0
         print("tile_list:")
         for _ in self.tile_list:
             print(_)
         schc_packet = BitBuffer()
-        for i in self.tile_list[:-2]:
-            # it needs to copy the buffer as it will be reused later.
-            tiles = i["raw_tiles"].copy().get_bits_as_buffer(
-                i["nb_tiles"]*self.rule["tileSize"])
-            schc_packet += tiles
-        # check the size of the padding in the All-1 fragment.
-        if (self.tile_list[-1]["raw_tiles"].count_added_bits() <
-            self.rule["L2WordSize"]):
-            # the last tile exists in the fragment before the All-1
-            # fragment and the payload has to add as it is.
-            # the All-1 fragment doesn't need to taken into account
-            # of the MIC calculation.
-            schc_packet += self.tile_list[-2]["raw_tiles"]
+        if len(self.tile_list) > 1:
+            for i in self.tile_list[:-2]:
+                # it needs to copy the buffer as it will be reused later.
+                tiles = i["raw_tiles"].copy().get_bits_as_buffer(
+                    i["nb_tiles"]*self.rule["tileSize"])
+                schc_packet += tiles
+            # check the size of the padding in the All-1 fragment.
+            if (self.tile_list[-1]["raw_tiles"].count_added_bits() <
+                self.rule["L2WordSize"]):
+                # the last tile exists in the fragment before the All-1
+                # fragment and the payload has to add as it is.
+                # the All-1 fragment doesn't need to taken into account
+                # of the MIC calculation.
+                schc_packet += self.tile_list[-2]["raw_tiles"]
+            else:
+                # the last tile exists in the All-1 fragment.
+                # it needs to truncate the padding in the fragment before that.
+                i = self.tile_list[-2]
+                schc_packet += i["raw_tiles"].copy().get_bits_as_buffer(
+                    i["nb_tiles"]*self.rule["tileSize"])
+                schc_packet += self.tile_list[-1]["raw_tiles"]
         else:
-            # the last tile exists in the All-1 fragment.
-            # it needs to truncate the padding in the fragment before that.
-            i = self.tile_list[-2]
-            schc_packet += i["raw_tiles"].copy().get_bits_as_buffer(
-                i["nb_tiles"]*self.rule["tileSize"])
-            schc_packet += self.tile_list[-1]["raw_tiles"]
+            # len(self.tile_list) == 1
+            # add into the packet as it is.
+            schc_packet += self.tile_list[0]["raw_tiles"]
         # get the target of MIC from the BitBuffer.
         print("MIC calculation:")
         mic_calced = self.get_mic(schc_packet.get_content())
