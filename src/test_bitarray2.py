@@ -107,9 +107,12 @@ print(b)
 #     0111 0100 1111 0000
 # b = b'\xe9\xe0'/12
 #     1110 1001 1110 0000
-c = b.get_bits_as_buffer(b.count_remaining_bits())
+c = b.get_bits_as_buffer(3)
 print(c)
-assert str(c) == r"b'\xe9\xe0'/12"
+assert str(c) == r"b'\xe0'/3"
+c = b.get_bits_as_buffer()
+print(c)
+assert str(c) == r"b'\x4f\x00'/9"
 
 print("""
 ## __add__
