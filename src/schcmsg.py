@@ -348,4 +348,4 @@ class frag_receiver_rx(frag_rx):
                 return
             # this is a All-1 message.
             pos += self.parse_mic()
-        self.payload = self.packet_bbuf.get_bits_as_buffer(self.packet_bbuf.count_remaining_bits())
+        self.payload = self.packet_bbuf.get_bits_as_buffer()

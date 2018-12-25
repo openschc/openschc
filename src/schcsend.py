@@ -135,8 +135,7 @@ class FragmentNoAck(FragmentBase):
                     payload_size - schcmsg.get_mic_size(self.rule)):
                 tile = None
                 if remaining_data_size > 0:
-                    tile = self.packet_bbuf.get_bits_as_buffer(
-                            remaining_data_size)
+                    tile = self.packet_bbuf.get_bits_as_buffer()
                 # make All-1 frag.
                 assert self.mic_sent is None
                 last_frag_base_size = 0
