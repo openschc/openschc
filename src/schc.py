@@ -164,7 +164,6 @@ class SCHCProtocol:
             session = self.fragment_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
             if session is not None:
-                session.cancel_timer()
                 print("Fragmentation session found", session)
                 session.receive_frag(packet_bbuf, dtag)
             else:
@@ -180,7 +179,6 @@ class SCHCProtocol:
             session = self.reassemble_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
             if session is not None:
-                session.cancel_timer()
                 print("Reassembly session found", session)
             else:
                 # no session is found.  create a new reassemble session.

@@ -17,9 +17,9 @@ class FragmentBase():
         self.rule = rule
         self.dtag = 0
         self.mic_sent = None
-        self.event_id_ack_waiting = None
-        self.ack_requests_counter = 0
+        self.event_id_ack_wait_timer = None
         self.ack_wait_timer = 10
+        self.ack_requests_counter = 0
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -65,10 +65,6 @@ class FragmentBase():
 
     def start_sending(self):
         self.send_frag()
-
-    def cancel_timer(self):
-        # XXX cancel timer registered.
-        pass
 
     def send_frag(self):
         raise NotImplementedError("it is implemented at the subclass.")
@@ -179,6 +175,19 @@ class FragmentNoAck(FragmentBase):
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         self.send_frag()
 
+    def receive_frag(self, bbuf, dtag):
+        # in No-Ack mode, only Receiver Abort message can be acceptable.
+        schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
+        print("sender frag received:", schc_frag.__dict__)
+        if ((self.rule["WSize"] is 0 or
+             schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
+            schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
+            print("Receiver Abort rid={} dtag={}".format(
+                    self.rule.ruleID, self.dtag))
+            return
+        else:
+            print("XXX Unacceptable message has been received.")
+
 #---------------------------------------------------------------------------
 
 class FragmentAckOnError(FragmentBase):
@@ -231,7 +240,7 @@ class FragmentAckOnError(FragmentBase):
             if self.mic_sent is not None:
                 # set ack waiting timer
                 args = (schc_frag, window_tiles[0]["w-num"],)
-                self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+                self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                         self.ack_wait_timer, self.ack_timeout, args)
             # save the last window tiles.
             self.last_window_tiles = window_tiles
@@ -264,7 +273,7 @@ class FragmentAckOnError(FragmentBase):
                     mic=self.mic_sent)
             # set ack waiting timer
             args = (schc_frag, win,)
-            self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+            self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                     self.ack_wait_timer, self.ack_timeout, args)
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
@@ -273,11 +282,11 @@ class FragmentAckOnError(FragmentBase):
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
-    def cancel_ack_timeout(self):
+    def cancel_ack_wait_timer(self):
         # don't assert here because the receiver sends ACK back anytime.
-        #assert self.event_id_ack_waiting is not None
-        self.event_id_ack_waiting = None
-        self.protocol.scheduler.cancel_event(self.event_id_ack_waiting)
+        #assert self.event_id_ack_wait_timer is not None
+        self.protocol.scheduler.cancel_event(self.event_id_ack_wait_timer)
+        self.event_id_ack_wait_timer = None
 
     def ack_timeout(self, *args):
         print("ACK timeout")
@@ -297,7 +306,7 @@ class FragmentAckOnError(FragmentBase):
                                         self.protocol.layer2.send_packet, args)
             return
         # set ack waiting timer
-        self.event_id_ack_waiting = self.protocol.scheduler.add_event(
+        self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         # retransmit MIC.
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
@@ -313,13 +322,13 @@ class FragmentAckOnError(FragmentBase):
         # the ack timer can be cancelled here, because it's been done whether
         # both rule_id and dtag in the fragment are matched to this session
         # at process_received_packet().
-        self.cancel_ack_timeout()
+        self.cancel_ack_wait_timer()
         #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("sender frag received:", schc_frag.__dict__)
-        if (schc_frag.win == schcmsg.get_win_all_1(self.rule) and
-            schc_frag.cbit == 1 and
-            schc_frag.payload.allones() == True):
+        if ((self.rule["WSize"] is None or
+             schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
+            schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
             print("Receiver Abort rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
             return

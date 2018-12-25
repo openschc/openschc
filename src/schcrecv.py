@@ -18,6 +18,8 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
+        self.inactive_timer = 120
+        self.event_id_inactive_timer = None
         # state:
         #   INIT:
         #   DONE: sent ACK success. only accept ACK REQ.
@@ -29,9 +31,22 @@ class ReassembleBase:
         print("Recv MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
 
-    def cancel_timer(self):
-        # XXX cancel timer registered.
-        pass
+    def event_inactive(self):
+        # sending sender abort.
+        schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
+                None, None)
+        print("Sent Receiver-Abort.", schc_frag.__dict__)
+        self.protocol.scheduler.add_event(0,
+                                    self.protocol.layer2.send_packet, args)
+        # XXX needs to release all resources.
+        return
+
+    def cancel_inactive_timer(self):
+        if self.event_id_inactive_timer is None:
+            return
+        self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
+        self.event_id_inactive_timer = None
 
 #---------------------------------------------------------------------------
 
@@ -42,13 +57,17 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX and pass the context to the parser.
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
+        # XXX how to authenticate the message from the peer. without
+        # authentication, any nodes can cancel the invactive timer.
+        self.cancel_inactive_timer()
+        #
         if schc_frag.abort == True:
             print("Received Sender-Abort.")
             # XXX needs to release all resources.
             return
         self.tile_list.append(schc_frag.payload)
-        fcn_all_1 = schcmsg.get_fcn_all_1(self.rule)
-        if schc_frag.fcn == fcn_all_1:
+        #
+        if schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
             print("ALL1 received")
             # MIC calculation
             print("tile_list")
@@ -66,6 +85,9 @@ class ReassemblerNoAck(ReassembleBase):
             self.protocol.process_decompress(self.context, self.sender_L2addr,
                                              schc_packet)
             return
+        # set inactive timer.
+        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+                self.inactive_timer, self.event_inactive, tuple())
         print("---", schc_frag.fcn)
 
 #---------------------------------------------------------------------------
@@ -78,6 +100,10 @@ class ReassemblerAckOnError(ReassembleBase):
     def receive_frag(self, bbuf, dtag):
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
+        # XXX how to authenticate the message from the peer. without
+        # authentication, any nodes can cancel the invactive timer.
+        self.cancel_inactive_timer()
+        #
         if schc_frag.abort == True:
             print("Received Sender-Abort.")
             # XXX needs to release all resources.
@@ -101,6 +127,7 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if self.mic_received == mic_calced:
                 self.finish(schc_packet, schc_frag)
+                return
             else:
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
@@ -111,6 +138,7 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if schc_frag.mic == mic_calced:
                 self.finish(schc_packet, schc_frag)
+                return
             else:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
@@ -136,7 +164,9 @@ class ReassemblerAckOnError(ReassembleBase):
                     self.protocol.scheduler.add_event(
                             0, self.protocol.layer2.send_packet, args)
                     # XXX need to keep the ack message for the ack request.
-                return
+        # set inactive timer.
+        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+                self.inactive_timer, self.event_inactive, tuple())
         print("---", schc_frag.fcn)
 
     def finish(self, schc_packet, schc_frag):

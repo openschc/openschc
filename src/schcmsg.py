@@ -51,7 +51,7 @@ class frag_base():
         self.packet = None
         self.abort = False
 
-    def set_param(self, rule_id, dtag, win=None, fcn=None, mic=None,
+    def set_param(self, rule_id, dtag=None, win=None, fcn=None, mic=None,
                   bitmap=None, cbit=None, payload=None):
         self.rule_id = rule_id
         self.dtag = dtag
@@ -104,6 +104,38 @@ class frag_tx(frag_base):
         self.set_param(self.rule_id, dtag, win, fcn, mic, bitmap, cbit, payload)
         self.packet = buffer
 
+class frag_receiver_tx(frag_base):
+    """ make SCHC fragment receiver TX message. """
+    def make_frag(self, dtag, win=None, cbit=None, bitmap=None, abort=False):
+        buffer = BitBuffer()
+        if (self.rule["ruleID"] is not None and
+            self.rule["ruleLength"] is not None):
+            buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
+        if dtag is not None and self.rule["dtagSize"] is not None:
+            assert self.rule["dtagSize"] != None # CA: sanity check
+            buffer.add_bits(dtag, self.rule["dtagSize"])
+        if abort == True:
+            if self.rule.get("WSize") is not None:
+                win = get_win_all_1(self.rule)
+                buffer.add_bits(win, self.rule["WSize"])
+            # c-bit
+            buffer.set_bit(1)
+            padding_size = (self.rule["L2WordSize"] -
+                            buffer.count_added_bits()%self.rule["L2WordSize"])
+            padding_size += self.rule["L2WordSize"]
+            # padding bits
+            for _ in range(padding_size):
+                buffer.set_bit(1)
+        else:
+            if cbit is not None:
+                buffer.set_bit(cbit)
+            if bitmap is not None:
+                buffer += bitmap
+        #
+        self.set_param(self.rule_id, dtag=dtag, win=win, cbit=cbit,
+                       bitmap=bitmap)
+        self.packet = buffer
+
 class frag_sender_tx_abort(frag_tx):
     """ make a message for the SCHC fragment sender. """
     def __init__(self, rule, dtag=None, win=None):
@@ -144,16 +176,15 @@ class frag_receiver_tx_all1_ack(frag_tx):
         self.rule_id = rule["ruleID"]
         self.make_frag(dtag, win=win, cbit=cbit, bitmap=bitmap)
 
-class frag_receiver_tx_abort(frag_tx):
-
-    '''
-    for the fragment receiver, to make an abort message.
-        Format: [ Rule ID | DTag |W|0xFF|P1]
-    '''
-    def __init__(self, R, dtag, win=None, cbit=None, bitmap=None):
+class frag_receiver_tx_abort(frag_receiver_tx):
+    """ make Receiver Abort message.
+    Recv Abort : [ Rule ID | Dtag | W-1 | C-1 | (P-1) ]
+    """
+    def __init__(self, rule, dtag=None):
         self.init_param()
-        self.rule = R
-        self.make_frag(dtag, win=win, abort=True)
+        self.rule = rule
+        self.rule_id = rule["ruleID"]
+        self.make_frag(dtag, abort=True)
 
 class frag_rx(frag_base):
 
@@ -290,6 +321,7 @@ class frag_sender_rx(frag_rx):
         pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap()
+        self.remaining = self.packet_bbuf.get_bits_as_buffer()
 
 class frag_receiver_rx(frag_rx):
     """ SCHC fragment receiver's class to parse the message from the sender.
