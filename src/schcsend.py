@@ -16,6 +16,7 @@ class FragmentBase():
         self.context = context
         self.rule = rule
         self.dtag = 0
+        # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
         self.ack_wait_timer = 10
@@ -225,18 +226,20 @@ class FragmentAckOnError(FragmentBase):
                         schcmsg.get_sender_header_size(self.rule) +
                         schcmsg.get_mic_size(self.rule) +
                         TileList.get_tile_size(window_tiles))
-                self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
+                mic = self.get_mic(self.mic_base, last_frag_base_size)
+                # store the mic in order to know all-1 has been sent.
+                self.mic_sent = mic
             else:
                 # regular fragment.
                 fcn = window_tiles[0]["t-num"]
-                self.mic_sent = None
+                mic = None
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
                     fcn=fcn,
-                    mic=self.mic_sent,
+                    mic=mic,
                     payload=TileList.concat(window_tiles))
-            if self.mic_sent is not None:
+            if mic is not None:
                 # set ack waiting timer
                 args = (schc_frag, window_tiles[0]["w-num"],)
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
