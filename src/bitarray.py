@@ -241,12 +241,14 @@ class BitBuffer:
 
     def __add__(self, other):
         """ copy self._content into another BitBuffer and add other into it.
+        Assumed that the remaining bits of other is less than 256 bytes.
         """
-        # XXX assumed that other is not so big.
         new_buf = self.copy()
         other_copy = other.copy()
-        new_buf.add_bits(other_copy.get_bits(other_copy.count_added_bits()),
-                         other_copy.count_added_bits())
+        remaining_bits = other_copy.count_remaining_bits()
+        assert remaining_bits < 255*8 
+        new_buf.add_bits(other_copy.get_bits(remaining_bits),
+                         remaining_bits)
         return new_buf
 
 if __name__ == "__main__":
