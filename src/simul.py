@@ -21,7 +21,7 @@ class SimulLayer3:
         self.L3addr = SimulLayer3.__get_unique_addr()
 
     def send_later(self, rel_time, dst_L3addr, raw_packet):
-        self._log("send-later -> {} {}".format(dst_L3addr, raw_packet))
+        self._log("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
         self.sim.scheduler.add_event(
             rel_time, self.protocol.event_receive_from_L3,
             (dst_L3addr, raw_packet,))
@@ -30,7 +30,7 @@ class SimulLayer3:
     def receive_packet(self, remote_id, local_id, raw_packet):
         """ receive a packet from L2 and process it. """
         self._log("recv-from {}->{}".format(remote_id, local_id))
-        self._log(raw_packet[0].get_content())
+        self._log(raw_packet.get_content().hex())
         # XXX do more work
 
     def _set_protocol(self, protocol): # called by SCHCProtocol
