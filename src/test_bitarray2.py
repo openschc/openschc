@@ -149,3 +149,18 @@ assert False == a.allones()
 a = BitBuffer([0, 1, 1, 1, 1])
 print(a,"[1:]", a.allones(1))
 assert True == a.allones(1)
+
+print("""
+## add_bytes()
+      """)
+a = BitBuffer(bytearray([1,2]))
+print(a)
+a.add_bytes(bytearray([3,4]))
+print(a)
+assert str(a) == r"b'\x01\x02\x03\x04'/32"
+a = BitBuffer([0,1,0,1])
+print(a)
+a.add_bytes(bytearray([3,4]))
+print(a)
+assert str(a) == r"b'\x50\x30\x40'/20"
+

@@ -98,10 +98,12 @@ class BitBuffer:
             for i in range(0, nb_bits):
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
 
-# to be rewritten
-    def add_bytes(self, raw_data, position=None):
-        for raw_byte in raw_data:
-            self.add_bits(raw_byte, BITS_PER_BYTE, position=position)
+    def add_bytes(self, bytes_data, position=None):
+        """ write bytes_data as a bytearray into the buffer. """
+        bits_as_long = 0
+        for i in bytes_data:
+            bits_as_long = (bits_as_long << 8) | i
+        self.add_bits(bits_as_long, 8*len(bytes_data), position=position)
 
     def get_bits(self, nb_bits=1, position=None):
         """ return an integer containinng nb_bits from the position.
