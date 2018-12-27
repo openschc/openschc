@@ -2,15 +2,13 @@
 
 from base_import import *  # used for now for differing modules in py/upy
 
-import compress
-
 # ---------------------------------------------------------------------------
 
 from schcrecv import ReassemblerAckOnError
 from schcrecv import ReassemblerNoAck
 from schcsend import FragmentAckOnError
 from schcsend import FragmentNoAck
-from compress import Compression
+from schccomp import Compressor, Decompressor
 
 class Session:
     """ fragmentation/reassembly session manager
@@ -52,7 +50,8 @@ class SCHCProtocol:
         self.layer2._set_protocol(self)
         self.layer3._set_protocol(self)
         self.default_frag_rule = None # XXX: to be in  rule_manager
-        self.compression = compress.Compression(self)
+        self.compressor = Compressor(self)
+        self.decompressor = Decompressor(self)
         self.fragment_session = Session(self)
         self.reassemble_session = Session(self)
 
@@ -86,7 +85,8 @@ class SCHCProtocol:
         packet_bbuf = BitBuffer(raw_packet)
         rule = context["comp"]
         self._log("compression rule_id={}".format(rule.ruleID))
-        packet_bbuf, meta_info = self.compression.compress(context, packet_bbuf)
+        # XXX needs to handl the direction
+        packet_bbuf = self.compressor.compress(context, packet_bbuf)
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
             self._log("SCHC fragmentation is not needed. size={}".format(
@@ -201,7 +201,8 @@ class SCHCProtocol:
             raise SystemError("should not come here.")
 
     def process_decompress(self, context, sender_L2addr, schc_packet):
-        raw_packet = self.compression.decompress(context, schc_packet)
+        self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
+        raw_packet = self.decompressor.decompress(context, schc_packet)
         args = (sender_L2addr, self.layer2.mac_id, raw_packet)
         self.scheduler.add_event(0, self.layer3.receive_packet, args)
 

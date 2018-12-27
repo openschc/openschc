@@ -375,13 +375,49 @@ class RuleManager:
             else:
                 raise ValueError ("RuleID too large for default size on a byte")
 
-        if (not "compression" in rule and not "fragmentation" in rule) or \
-           ("compression" in rule and "fragmentation" in rule):
+        # proceed to compression check (TBD)
+        if key == "comp":
+            self.check_rule_compression(rule)
+        elif key in ["fragSender", "fragReceiver", "comp"]:
+            self.check_rule_fragmentation(rule)
+        else:
+            raise ValueError ("key must be either comp, fragSender, fragReceiver")
+
+        rule_id = rule["ruleID"]
+        rule_id_length = rule["ruleLength"]
+
+        self._checkRuleValue(rule_id, rule_id_length)
+
+        for k in ["fragSender", "fragReceiver", "comp"]:
+            r = context.get(k)
+            if r is not None:
+                if rule_id_length == r.ruleLength and rule_id == r.ruleID:
+                    raise ValueError ("Rule {}/{} exists".format(
+                            rule_id, rule_id_length))
+
+        context[key] = DictToAttrDeep(**rule)
+
+    def check_rule_compression(self, rule):
+        """ compression rule check """
+        # XXX need more work.
+        if (not "compression" in rule or "fragmentation" in rule):
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
-        # proceed to compression check (TBD)
+        canon_rule_set = []
+        for r in rule["compression"]["rule_set"]:
+            canon_r = {}
+            for k,v in r.items():
+                if isinstance(v, str):
+                    canon_r[k.upper()] = v.upper()
+                else:
+                    canon_r[k.upper()] = v
+            canon_rule_set.append(canon_r)
+        rule["compression"]["rule_set"] = canon_rule_set
 
-        # proceed to fragmentation check
+    def check_rule_fragmentation(self, rule):
+        """ fragmentation rule check """
+        if (not "fragmentation" in rule or "compression" in rule):
+            raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
         if "fragmentation" in rule:
             fragRule = rule["fragmentation"]
@@ -430,18 +466,4 @@ class RuleManager:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
-
-        rule_id = rule["ruleID"]
-        rule_id_length = rule["ruleLength"]
-
-        self._checkRuleValue(rule_id, rule_id_length)
-
-        for k in ["fragSender", "fragReceiver", "comp"]:
-            r = context.get(k)
-            if r is not None:
-                if rule_id_length == r.ruleLength and rule_id == r.ruleID:
-                    raise ValueError ("Rule {}/{} exists".format(
-                            rule_id, rule_id_length))
-
-        context[key] = DictToAttrDeep(**rule)
 
