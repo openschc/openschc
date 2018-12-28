@@ -249,11 +249,14 @@ class Decompressor:
         self.cksum_field_offset = 0
 
     def cal_checksum(self, packet):
-        # RFC1071
+        # RFC 1071
         assert isinstance(packet, bytearray)
-        packet += (b"\x00" if len(packet)%2 else b"")
-        fmt = ">{}H".format(len(packet)//2)
-        cksum = sum(struct.unpack_from(fmt, packet))
+        packet_size = len(packet)
+        if packet_size%2:
+            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
+            cksum += (packet[-1]<<8)&0xff00
+        else:
+            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
         while cksum>>16:
             cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
         return ~cksum & 0xFFFF
