@@ -1,7 +1,6 @@
 #---------------------------------------------------------------------------
 
 # Template for schc simulation
-import sys
 import argparse
 
 from base_import import *  # used for now for differing modules in py/upy
