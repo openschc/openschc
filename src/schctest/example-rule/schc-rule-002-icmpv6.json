@@ -1,0 +1,53 @@
+{
+    "COMP_RULE": {
+        "RID": 3,
+        "RULE_SET": [
+            {
+                "FID": "ICMPV6.TYPE",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0x80,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "ICMPV6.CODE",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "ICMPV6.CKSUM",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "ignore",
+                "CDA": "compute-checksum"
+            },
+            {
+                "FID": "ICMPV6.IDENT",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [],
+                "MO": "equal",
+                "CDA": "sent"
+            },
+            {
+                "FID": "ICMPV6.SEQNO",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [],
+                "MO": "ignore",
+                "CDA": "not-sent"
+            }
+        ]
+    }
+}
+
