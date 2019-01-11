@@ -9,6 +9,16 @@ try:
 except ImportError:
     import utime as time
 
+try:
+    import json
+except:
+    import ujson as json
+
+try:
+    from collections import namedtuple
+except ImportError:
+    from ucollections import namedtuple
+
 # --- sched
 #sys.path.append("../../micropython-lib/heapq") # XXX (for pyssched)
 #sys.path.append("../../micropython-lib/ffilib") # XXX (for time)
@@ -21,4 +31,5 @@ except ImportError:
 
 # --- default imports
 
-from bitarray import FakeBitBuffer as BitBuffer
+from bitarray import BitBuffer
+from mic_crc32 import get_mic, get_mic_size
