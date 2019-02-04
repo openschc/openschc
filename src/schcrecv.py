@@ -34,8 +34,7 @@ class ReassembleBase:
     def event_inactive(self):
         # sending sender abort.
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
-        args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, None)
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
         print("Sent Receiver-Abort.", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
@@ -158,9 +157,8 @@ class ReassemblerAckOnError(ReassembleBase):
                             cbit=0,
                             bitmap=bit_list[bl_index][1])
                     print("ACK failure sent:", schc_ack.__dict__)
-                    src_dev_id = self.protocol.layer2.mac_id
-                    args = (schc_ack.packet.get_content(), src_dev_id,
-                            None, None)
+                    args = (schc_ack.packet.get_content(),
+                            self.context["devL2Addr"])
                     self.protocol.scheduler.add_event(
                             0, self.protocol.layer2.send_packet, args)
                     # XXX need to keep the ack message for the ack request.
@@ -181,8 +179,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 schc_frag.win,
                 cbit=1)
         print("ACK success sent:", schc_ack.__dict__)
-        src_dev_id = self.protocol.layer2.mac_id
-        args = (schc_ack.packet.get_content(), src_dev_id, None, None)
+        args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
         self.protocol.scheduler.add_event(0,
                                             self.protocol.layer2.send_packet,
                                             args)

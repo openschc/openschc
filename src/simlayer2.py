@@ -1,11 +1,22 @@
 #---------------------------------------------------------------------------
 
 class SimulLayer2:
+    """
+    The layer 2 of LPWA is not symmetry.
+    The LPWA device must know the devaddr assigned to itself before processing
+    the SCHC packet.
+    The SCHC gateway must know the devaddr of the LPWA device before
+    transmitting the message to the NS.  And, it must know the devaddr
+    when it receives the message from the NS.
+    Therefore, in this L2 simulation layer, the devaddr must be configured
+    before it starts by calling set_devaddr().
+    """
     __mac_id_base = 0
 
     def __init__(self, sim):
         self.sim = sim
         self.protocol = None
+        self.devaddr = None
         self.mac_id = SimulLayer2.__get_unique_mac_id()
         self.receive_function = None
         self.event_timeout = None
@@ -20,9 +31,8 @@ class SimulLayer2:
     def set_receive_callback(self, receive_function):
         self.receive_function = receive_function
 
-    def send_packet(self, packet, src_dev_id, dst_dev_id=None,
-                    transmit_callback=None):
-        self.packet_queue.append((packet, src_dev_id, dst_dev_id,
+    def send_packet(self, packet, dev_L2addr, transmit_callback=None):
+        self.packet_queue.append((packet, self.mac_id, None,
                                   transmit_callback))
         if not self.is_transmitting:
             self._send_packet_from_queue()
@@ -47,13 +57,17 @@ class SimulLayer2:
 
     def event_receive_packet(self, other_mac_id, packet):
         assert self.protocol != None
-        self.protocol.event_receive_from_L2(other_mac_id, packet)
+        assert self.devaddr is not None
+        self.protocol.schc_recv(self.devaddr, packet)
 
     @classmethod
     def __get_unique_mac_id(cls):
         result = cls.__mac_id_base
         cls.__mac_id_base += 1
         return result
+
+    def set_devaddr(self, devaddr):
+        self.devaddr = devaddr
 
     def set_mtu(self, mtu):
         self.mtu = mtu

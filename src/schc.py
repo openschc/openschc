@@ -32,8 +32,8 @@ class Session:
 
     def get(self, rule_id, rule_id_size, dtag):
         for i in self.session_list:
-            if (rule_id == i["rule_id"] and rule_id_size == i["rule_id_size"]
-                and dtag == i["dtag"]):
+            if (rule_id == i["rule_id"] and
+                rule_id_size == i["rule_id_size"] and dtag == i["dtag"]):
                 return i["session"]
         return None
 
@@ -64,23 +64,14 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
-    def set_dev_L2addr(self, dev_L2addr):
-        """ set the L2 address of the SCHC device """
-        self.dev_L2addr = dev_L2addr
-
-    def event_receive_from_L3(self, dst_L3addr, raw_packet):
+    def schc_send(self, dst_L3addr, raw_packet):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
         if context is None:
-            self._log("Looks not for SCHC packet, L3addr={}".format(dst_L3addr))
-            args = (raw_packet, self.layer2.mac_id, None, None)
-            self.scheduler.add_event(0, self.layer2.send_packet, args)
+            # reject it.
+            self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+                    dst_L3addr))
             return
-        # XXX how to know the L2 address of the SCHC device ?
-        # for now, dev_L2addr must be set before processing SCHC.
-        # Therefore, the node must call set_dev_L2addr() before
-        # sending a packet.
-        #
         # Compression process
         packet_bbuf = BitBuffer(raw_packet)
         rule = context["comp"]
@@ -91,8 +82,7 @@ class SCHCProtocol:
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
             self._log("SCHC fragmentation is not needed. size={}".format(
                     packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), self.layer2.mac_id, None,
-                    None)
+            args = (packet_bbuf.get_content(), context["devL2Addr"])
             self.scheduler.add_event(0, self.layer2.send_packet, args)
             return
         # fragmentation is required.
@@ -107,7 +97,6 @@ class SCHCProtocol:
         self.fragment_session.add(rule.ruleID, rule.ruleLength,
                                     session.dtag, session)
         session.start_sending()
-        # self.layer2.send_packet() will be called in the session.
 
     def new_fragment_session(self, context, rule):
         mode = rule.get("FRMode")
@@ -122,34 +111,31 @@ class SCHCProtocol:
             raise ValueError("invalid FRMode: {}".format(mode))
         return session
 
-    def new_reassemble_session(self, context, rule, dtag, sender_L2addr):
+    def new_reassemble_session(self, context, rule, dtag, dev_L2addr):
         mode = rule.get("FRMode")
         if mode == "noAck":
-            session = ReassemblerNoAck(self, context, rule, dtag, sender_L2addr)
+            session = ReassemblerNoAck(self, context, rule, dtag, dev_L2addr)
         elif mode == "ackAlways":
             raise NotImplementedError("FRMode:", mode)
         elif mode == "ackOnError":
             session = ReassemblerAckOnError(self, context, rule, dtag,
-                                            sender_L2addr)
+                                            dev_L2addr)
         else:
             raise ValueError("FRMode:", mode)
         return session
 
-    def event_receive_from_L2(self, sender_L2addr, raw_packet):
-        self._log("recv-from-L2 {}->{} {}".format(
-            sender_L2addr, self.layer2.mac_id, raw_packet))
+    def schc_recv(self, dev_L2addr, raw_packet):
+        self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
         # find context for the SCHC processing.
         # XXX
         # the receiver never knows if the packet from the device having the L2
         # addrss is encoded in SCHC.  Therefore, it has to search the db with
         # the field value of the packet.
-        # XXX for now, dev_L2addr is used.
-        context = self.rule_manager.find_context_bydevL2addr(self.dev_L2addr)
+        context = self.rule_manager.find_context_bydevL2addr(dev_L2addr)
         if context is None:
-            self._log("Looks not for SCHC packet, sender L2addr={}".format(
-                    self.dev_L2addr))
-            args = (sender_L2addr, self.layer2.mac_id, raw_packet)
-            self.scheduler.add_event(0, self.layer3.receive_packet, args)
+            # reject it.
+            self._log("Rejected. Not for SCHC packet, sender L2addr={}".format(
+                    dev_L2addr))
             return
         # find a rule in the context for this packet.
         packet_bbuf = BitBuffer(raw_packet)
@@ -168,7 +154,7 @@ class SCHCProtocol:
                 session.receive_frag(packet_bbuf, dtag)
             else:
                 print("context exists, but no {} session for this packet {}".
-                        format(key, self.dev_L2addr))
+                        format(key, dev_L2addr))
         elif key == "fragReceiver":
             if rule["dtagSize"] > 0:
                 dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
@@ -183,7 +169,7 @@ class SCHCProtocol:
             else:
                 # no session is found.  create a new reassemble session.
                 session = self.new_reassemble_session(context, rule, dtag,
-                                                      sender_L2addr)
+                                                      dev_L2addr)
                 self.reassemble_session.add(rule.ruleID, rule.ruleLength,
                                             dtag, session)
                 print("New reassembly session created", session)
@@ -192,17 +178,16 @@ class SCHCProtocol:
             # if there is no reassemble rule, process_decompress() is directly
             # called from here.  Otherwise, it will be called from a reassemble
             # function().
-            self.process_decompress(context, sender_L2addr, packet_bbuf)
+            self.process_decompress(context, dev_L2addr, packet_bbuf)
         elif key is None:
             raise ValueError(
                     "context exists, but no rule found for L2Addr {}".
-                    format(self.dev_L2addr))
+                    format(dev_L2addr))
         else:
             raise SystemError("should not come here.")
 
-    def process_decompress(self, context, sender_L2addr, schc_packet):
+    def process_decompress(self, context, dev_L2addr, schc_packet):
         self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
         raw_packet = self.decompressor.decompress(context, schc_packet)
-        args = (sender_L2addr, self.layer2.mac_id, raw_packet)
-        self.scheduler.add_event(0, self.layer3.receive_packet, args)
-
+        args = (dev_L2addr, raw_packet)
+        self.scheduler.add_event(0, self.layer3.recv_packet, args)

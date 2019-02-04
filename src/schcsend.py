@@ -165,8 +165,7 @@ class FragmentNoAck(FragmentBase):
                 mic=self.mic_sent,
                 payload=tile)
         # send a SCHC fragment
-        src_dev_id = self.protocol.layer2.mac_id
-        args = (schc_frag.packet.get_content(), src_dev_id, None,
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 transmit_callback)
         print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
@@ -278,8 +277,8 @@ class FragmentAckOnError(FragmentBase):
             self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                     self.ack_wait_timer, self.ack_timeout, args)
         # send a SCHC fragment
-        args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag)
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+                self.event_sent_frag)
         print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
@@ -301,8 +300,7 @@ class FragmentAckOnError(FragmentBase):
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
-            args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                    None, None)
+            args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             print("Sent Sender-Abort.", schc_frag.__dict__)
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
@@ -311,8 +309,8 @@ class FragmentAckOnError(FragmentBase):
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         # retransmit MIC.
-        args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag)
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+                self.event_sent_frag)
         print("Retransmitted frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)

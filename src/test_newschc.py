@@ -55,12 +55,10 @@ elif opt.loss_mode is not None:
 
 #---------------------------------------------------------------------------
 
-def make_node(sim, rule_manager, devaddr=None, extra_config={}):
+def make_node(sim, rule_manager, devaddr, extra_config={}):
     node = simul.SimulSCHCNode(sim, extra_config)
     node.protocol.set_rulemanager(rule_manager)
-    if devaddr is None:
-        devaddr = node.id
-    node.protocol.set_dev_L2addr(devaddr)
+    node.layer2.set_devaddr(devaddr)
     return node
 
 #---------------------------------------------------------------------------
@@ -84,8 +82,9 @@ if loss_config is not None:
     simul_config["loss"] = loss_config
 sim = simul.Simul(simul_config)
 
-node0 = make_node(sim, rm0)                   # SCHC device
-node1 = make_node(sim, rm1, devaddr=node0.id) # SCHC gw
+devaddr = b"\xaa\xbb\xcc\xdd"
+node0 = make_node(sim, rm0, devaddr)    # SCHC device
+node1 = make_node(sim, rm1, devaddr)    # SCHC gw
 sim.add_sym_link(node0, node1)
 node0.layer2.set_mtu(opt.l2_mtu)
 node1.layer2.set_mtu(opt.l2_mtu)
