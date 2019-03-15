@@ -6,25 +6,50 @@ import bitarray
 #---------------------------------------------------------------------------
 
 def get_fcn_all_1(rule):
-    return (1<<rule["FCNSize"])-1
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    FCNSize = ModProfil["FCNSize"]
+    return (1<<FCNSize)-1
 
 def get_win_all_1(rule):
-    return (1<<rule["WSize"])-1
+    #print('get_win_all_1  Rule: ',rule)
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    WSize = ModProfil["WSize"]
+    #print('WSize: ',WSize)
+    return (1<<WSize)-1
 
 def get_max_fcn(rule):
-    return rule["windowSize"]-1
+    #print('get_max_fcn  Rule: ',rule)
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    #print('MaxFCN: ',ModProfil["windowSize"]-1)
+    return ModProfil["windowSize"]-1
 
 def get_max_dtag(rule):
-    return (1<<rule["dtagSize"])-1
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    dtagSize = ModProfil["dtagSize"]
+    return (1<<dtagSize)-1
 
 def get_sender_header_size(rule):
-    return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + rule["FCNSize"]
+    rule_length = rule["ruleLength"]
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    dtagSize = ModProfil["dtagSize"]
+    WSize = ModProfil["WSize"]
+    FCNSize = ModProfil["FCNSize"]
+    #print('FROM RULE ruleLength: ',rule_length, ' dtagSize: ', dtagSize, ' WSize: ',WSize, ' FCNSize: ',FCNSize )
+    return rule_length + dtagSize + WSize + FCNSize
 
 def get_receiver_header_size(rule):
     return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + 1
 
 def get_mic_size(rule):
-    assert rule["MICAlgorithm"] == "crc32"
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    MICAlgorithm = ModProfil["MICAlgorithm"]
+    assert MICAlgorithm == "crc32"
     return 32
 
 def roundup(v, w=8):
@@ -74,20 +99,26 @@ class frag_tx(frag_base):
                   cbit=None, payload=None, abort=False):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
+        frag = self.rule["fragmentation"]
+        Mode = frag["FRModeProfile"]
+        Dtagsize = Mode["dtagSize"]
+        FCNSize = Mode["FCNSize"]
+        MICAlgorithm = Mode["MICAlgorithm"]
+        WSize = Mode["WSize"]
         if self.rule["ruleID"] is not None and self.rule["ruleLength"] is not None:
             buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
-        if dtag is not None and self.rule["dtagSize"] is not None:
-            assert self.rule["dtagSize"] != None # CA: sanity check
-            buffer.add_bits(dtag, self.rule["dtagSize"])
-        if win is not None and self.rule.get("WSize") is not None:
-            buffer.add_bits(win, self.rule["WSize"])
+        if dtag is not None and Dtagsize is not None:
+            assert Dtagsize != None # CA: sanity check
+            buffer.add_bits(dtag, Dtagsize)
+        if win is not None and WSize is not None:
+            buffer.add_bits(win, WSize)
         if abort == True:
             # XXX for receiver abort, needs to be fixed
-            buffer.add_bits(get_fcn_all_1(self.rule), self.rule["FCNSize"])
+            buffer.add_bits(get_fcn_all_1(self.rule), FCNSize)
         else:
-            if fcn is not None and self.rule.get("FCNSize") is not None:
-                buffer.add_bits(fcn, self.rule["FCNSize"])
-            if mic is not None and self.rule.get("MICAlgorithm") is not None:
+            if fcn is not None and FCNSize is not None:
+                buffer.add_bits(fcn, FCNSize)
+            if mic is not None and MICAlgorithm is not None:
                 mic_size = get_mic_size(self.rule)
                 assert mic_size % bitarray.BITS_PER_BYTE == 0
                 assert len(mic) == mic_size // 8
@@ -150,7 +181,6 @@ class frag_sender_tx(frag_tx):
                  cbit=None, payload=None, abort=False):
         self.init_param()
         self.rule = rule
-        self.rule_id = rule["ruleID"]
         self.make_frag(dtag, win=win, fcn=fcn, mic=mic, payload=payload)
 
 class frag_receiver_tx_all0_ack(frag_tx):
@@ -201,7 +231,10 @@ class frag_rx(frag_base):
         if dtagSize in the rule is zero, default dtag is adopted.
         XXX need to be considered.
         """
-        dtag_size = self.rule.get("dtagSize", 0)
+        frag = self.rule["fragmentation"]
+        ModProfil = frag["FRModeProfile"]
+        dtag_size = ModProfil["dtagSize"]
+        #dtag_size = self.rule.get("dtagSize", 0)
         if dtag_size != 0:
             dtag = self.packet_bbuf.get_bits(dtag_size)
         else:
@@ -215,7 +248,10 @@ class frag_rx(frag_base):
         """ get the value of the window field and set it into self.win.
         if WSize in the rule is zero, self.win is not set (None).
         """
-        win_size = self.rule.get("WSize", 0)
+        frag = self.rule["fragmentation"]
+        ModProfil = frag["FRModeProfile"]
+        win_size = ModProfil["WSize"]
+        #win_size = self.rule.get("WSize", 0)
         if win_size != 0:
             self.win = self.packet_bbuf.get_bits(win_size)
         return win_size
@@ -225,8 +261,11 @@ class frag_rx(frag_base):
         parse fcn in the frame.
         assuming that fcn_size is not zero.
         '''
-        self.fcn = self.packet_bbuf.get_bits(self.rule["FCNSize"])
-        return self.rule["FCNSize"]
+        frag = self.rule["fragmentation"]
+        ModProfil = frag["FRModeProfile"]
+        FCNSize = ModProfil["FCNSize"]
+        self.fcn = self.packet_bbuf.get_bits(FCNSize)
+        return FCNSize
 
     def parse_bitmap(self):
         """ parse bitmap in the frame. """
@@ -337,12 +376,16 @@ class frag_receiver_rx(frag_rx):
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
         self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
+
         pos = self.rule["ruleLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()
         pos += self.parse_fcn()
         if self.fcn == get_fcn_all_1(self.rule):
-            if self.packet_bbuf.count_remaining_bits() < self.rule["L2WordSize"]:
+            profile = self.rule["profile"]
+            L2WordSize = profile["L2WordSize"]
+
+            if self.packet_bbuf.count_remaining_bits() < L2WordSize:
                 # this is a Sender Abort message.
                 self.abort = True
                 return

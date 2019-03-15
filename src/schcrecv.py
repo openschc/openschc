@@ -76,20 +76,31 @@ class ReassemblerNoAck(ReassembleBase):
             schc_packet = BitBuffer()
             for i in self.tile_list:
                 schc_packet += i
+            
+            #schc_packet = bytearray(range(1, 100+1))
             mic_calced = self.get_mic(schc_packet.get_content())
+            #mic_calced = self.get_mic(schc_packet)
+            '''print()
+            print("SCHC PACKET ", schc_packet)
+            print()
+            print("MIC calculado: ", mic_calced.hex())'''
+            print()
+            print("*****MIC recibido ",schc_frag.mic)
+            print("*****MIC calculado ",mic_calced)
             if schc_frag.mic != mic_calced:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
-                        schc_frag.mic, mic_calced))
-                return
+                        schc_frag.mic.hex(), mic_calced.hex()))
+                return None
             # decompression
             self.protocol.process_decompress(self.context, self.sender_L2addr,
                                              schc_packet)
-            return
+            
+            return schc_packet
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
                 self.inactive_timer, self.event_inactive, tuple())
         print("---", schc_frag.fcn)
-
+        return None
 #---------------------------------------------------------------------------
 
 class ReassemblerAckOnError(ReassembleBase):
@@ -197,8 +208,9 @@ class ReassemblerAckOnError(ReassembleBase):
         assert len(self.tile_list) > 0
         print("tile_list:")
         for _ in self.tile_list:
-            print(_)
+            print()
         schc_packet = BitBuffer()
+        
         if len(self.tile_list) > 1:
             for i in self.tile_list[:-2]:
                 # it needs to copy the buffer as it will be reused later.

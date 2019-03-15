@@ -15,23 +15,21 @@ class SimulLayer3:
     __v6addr_prefix = "2001:0db8:85a3:0000:0000:0000:0000:000"
     __v6addr_base = 0
 
-    def __init__(self, sim):
-        self.sim = sim
+    def __init__(self):
         self.protocol = None
         self.L3addr = SimulLayer3.__get_unique_addr()
 
-    def send_later(self, rel_time, dst_L3addr, raw_packet):
-        self._log("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
-        self.sim.scheduler.add_event(
-            rel_time, self.protocol.event_receive_from_L3,
-            (dst_L3addr, raw_packet,))
+    def send_later(self, rel_time, dst_L3addr, raw_packet, ruleId):
+        #self._log("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
+        print("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
+        self.protocol.scheduler.add_event(rel_time, self.protocol.event_receive_from_L3,(dst_L3addr, raw_packet,ruleId))
 
     # XXX need to confirm whether this should be here or not.
-    def receive_packet(self, remote_id, local_id, raw_packet):
+    def receive_packet(self, raw_packet):
         """ receive a packet from L2 and process it. """
-        self._log("recv-from {}->{}".format(remote_id, local_id))
-        self._log(raw_packet.get_content().hex())
-        # XXX do more work
+        file = open('ficher_log.txt','w')
+        file.write(raw_packet.decode("utf-8"))
+
 
     def _set_protocol(self, protocol): # called by SCHCProtocol
         self.protocol = protocol
