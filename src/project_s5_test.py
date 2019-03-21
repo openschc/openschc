@@ -2,49 +2,34 @@
 from SCHC_server import SCHC_server
 import binascii
 from simsched import SimulScheduler as Scheduler
-import sys
 
 class Project_s5_test:
     def send_message():
-        #read parameters
-        if len(sys.argv) == 2:
-            ruleId = str(sys.argv[1])
-            fileToSend = "testfile.txt"
-        elif len(sys.argv) == 3:
-            ruleId = str(sys.argv[1])
-            fileToSend = str(sys.argv[2])
-        else:
-            ruleId = "1"
-            fileToSend = "testFile.txt"
-        ruleId = int(ruleId)
-        print("ruleId: ", ruleId, "fileToSend: ", fileToSend)
-        #create protocol instance
         scheduler = Scheduler()
         schc = SCHC_server(scheduler)
-
         '''Message payload generation'''
-        '''payload = bytearray(range(1, 20+1))
+        '''payload = bytearray(range(1, 100+1))
         print("Payload")
         print(binascii.hexlify(payload))
         print("Payload size:", len(payload))
         print("")'''
 
-        #read file for payload
-        file = open(fileToSend, 'r')
+        '''read file for payload '''
+        file = open('testfile.txt', 'r')
         print('file: ', file)
         payload = file.read().encode()
         print("Payload")
         print(binascii.hexlify(payload))
         print("Payload size:", len(payload))
         print("")
-        #send message
-        schc.sendMessage(payload, ruleId)
+
+        schc.sendMessage(payload)
         scheduler.run()
 
-
     def receive_message():
-        
+
         schc = SCHC_server()
+
         '''Fragment1 = b'\x48\x01\x02\x03\x04\x05\x06'
         Fragment2 = b'\x48\x07\x08\x09\x0a\x0b\x0c'
         Fragment3 = b'\x48\x0d\x0e\x0f\x10\x11\x12'

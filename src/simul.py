@@ -19,10 +19,10 @@ class SimulLayer3:
         self.protocol = None
         self.L3addr = SimulLayer3.__get_unique_addr()
 
-    def send_later(self, rel_time, dst_L3addr, raw_packet, ruleId):
+    def send_later(self, rel_time, dst_L3addr, raw_packet):
         #self._log("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
         print("send-later -> {} {}".format(dst_L3addr, raw_packet.hex()))
-        self.protocol.scheduler.add_event(rel_time, self.protocol.event_receive_from_L3,(dst_L3addr, raw_packet,ruleId))
+        self.protocol.scheduler.add_event(rel_time, self.protocol.event_receive_from_L3,(dst_L3addr, raw_packet,))
 
     # XXX need to confirm whether this should be here or not.
     def receive_packet(self, raw_packet):

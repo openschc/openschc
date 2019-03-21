@@ -12,12 +12,7 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
-        #print('TileList()  Rule: ', rule)
-        frag = rule["fragmentation"]
-        ModProfil = frag["FRModeProfile"]
-        tileSize =  ModProfil["tileSize"]
-        #print('tile size = ', tileSize)
-        self.t_size = tileSize
+        self.t_size = rule["tileSize"]
         self.max_fcn = schcmsg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
@@ -37,7 +32,6 @@ class TileList():
             tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
         # make a all_tiles
         for t in tiles:
-            #print('w_num:', w_num,'  t_num:', t_num )
             tile_obj = {
                     "w-num": w_num,
                     "t-num": t_num,
@@ -69,12 +63,6 @@ class TileList():
         max_tiles = remaining_size // self.t_size
         tiles = []
         t_prev = None
-        #print('header size: ', schcmsg.get_sender_header_size(self.rule))
-        #print('mtu_size: ', mtu_size)
-        #print('max_tiles: ', max_tiles)
-        #print('t_size: ', self.t_size)
-        #print('remaining_size: ', remaining_size)
-
         for i in range(len(self.all_tiles)):
             t = self.all_tiles[i]
             '''

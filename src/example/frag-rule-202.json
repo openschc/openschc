@@ -1,6 +1,6 @@
 {
-    "ruleLength": 6,
-    "ruleID": 2,
+    "ruleLength": 3,
+    "ruleID": 1,
     "profile": {
         "L2WordSize": 8
     },
@@ -14,4 +14,3 @@
         }
     }
 }
-

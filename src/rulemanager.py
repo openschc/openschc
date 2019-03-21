@@ -307,15 +307,14 @@ class RuleManager:
         """ returns a compression rule or an fragmentation rule
         in the context matching with the field value of rule id in the packet.
         """
-        for k in ["fragSender", "fragReceiver","fragSender2", "fragReceiver2", "comp"]:
+        for k in ["fragSender", "fragReceiver", "comp"]:
             r = context.get(k)
             if r is not None:
                 rule_id = packet_bbuf.get_bits(r["ruleLength"],position=0)
                 if r["ruleID"] == rule_id:
-                    print("--------------------RuleManage------------------")
+                    print()
                     print("ruleID ",rule_id)
                     print()
-                    print("--------------------------------------------------")
                     return k, r
         return None, None
 
@@ -345,22 +344,25 @@ class RuleManager:
         This is mainly for internal use. """
         for c in self._db:
             if c["devL2Addr"] == dev_L2addr and c["dstIID"] == dst_iid:
-                
+                print()
+                print("RM - add_cfind_context_exact - c ", dev_L2addr," ",dst_iid)
+                print()
                 return c
         return None
 
-    def add_context(self, context, comp=None, fragSender=None, fragReceiver=None, fragSender2=None, fragReceiver2=None):
+    def add_context(self, context, comp=None, fragSender=None, fragReceiver=None):
         
         """ add context into the db. """
-        if self.find_context_exact(context["devL2Addr"],context["dstIID"]) is not None:
+        if self.find_context_exact(context["devL2Addr"],
+                                   context["dstIID"]) is not None:
             raise ValueError("the context {}/{} exist.".format(
                 context["devL2Addr"], context["dstIID"]))
         # add context
         c = deepcopy(context)
         self._db.append(c)
-        self.add_rules(c, comp, fragSender, fragReceiver, fragSender2, fragReceiver2)
+        self.add_rules(c, comp, fragSender, fragReceiver)
 
-    def add_rules(self, context, comp=None, fragSender=None, fragReceiver=None, fragSender2=None, fragReceiver2=None):
+    def add_rules(self, context, comp=None, fragSender=None, fragReceiver=None):
         """ add rules into the context specified. """
         if comp is not None:
             self.add_rule(context, "comp", comp)
@@ -368,10 +370,6 @@ class RuleManager:
             self.add_rule(context, "fragSender", fragSender)
         if fragReceiver is not None:
             self.add_rule(context, "fragReceiver", fragReceiver)
-        if fragSender2 is not None:
-            self.add_rule(context, "fragSender2", fragSender2)
-        if fragReceiver2 is not None:
-            self.add_rule(context, "fragReceiver2", fragReceiver2)
 
     def add_rule(self, context, key, rule):
         """ Check rule integrity and uniqueless and add it to the db """
@@ -388,17 +386,17 @@ class RuleManager:
         # proceed to compression check (TBD)
         if key == "comp":
             self.check_rule_compression(rule)
-        elif key in ["fragSender", "fragReceiver","fragSender2", "fragReceiver2", "comp"]:
+        elif key in ["fragSender", "fragReceiver", "comp"]:
             self.check_rule_fragmentation(rule)
         else:
-            raise ValueError ("key must be either comp, fragSender, fragReceiver, fragSender2, fragReceiver2")
+            raise ValueError ("key must be either comp, fragSender, fragReceiver")
 
         rule_id = rule["ruleID"]
         rule_id_length = rule["ruleLength"]
 
         self._checkRuleValue(rule_id, rule_id_length)
 
-        for k in ["fragSender", "fragReceiver","fragSender2", "fragReceiver2", "comp"]:
+        for k in ["fragSender", "fragReceiver", "comp"]:
             r = context.get(k)
             if r is not None:
                 if rule_id_length == r.ruleLength and rule_id == r.ruleID:

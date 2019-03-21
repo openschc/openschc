@@ -10,7 +10,7 @@
                 "DI": "Bi",
                 "TV": 6,
                 "MO": "equal",
-                "CDA": "not-sent"
+                "CDA": "not-sent" 
             },
             {
                 "FID": "IPV6.TC",

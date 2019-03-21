@@ -175,8 +175,7 @@ class FragmentNoAck(FragmentBase):
         # send a SCHC fragment
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
-                transmit_callback, False)
-        #print('args ', args)
+                transmit_callback)
         #print("frag sent:", schc_frag.__dict__)
         time.sleep(0.5)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
@@ -204,43 +203,30 @@ class FragmentAckOnError(FragmentBase):
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
         self.all_tiles = TileList(self.rule, packet_bbuf)
-        #print('all tils : ')
-        #print(self.all_tiles.get_all_tiles())
         # XXX
         # check whether the size of the last tile is less than L2 word
         # AND the tile number is zero
         # because draft-17 doesn't specify how to handle it.
-        #print('set_packet RULE: ',self.rule)
-        profile = self.rule["profile"]
-        L2WordSize = profile["L2WordSize"]
-        print('L2WordSize: ',L2WordSize)
         a = self.all_tiles.get_all_tiles()
-        #print('all tiles: ', a)
         if (a[-1]["t-num"] == 0 and
-            a[-1]["tile"].count_added_bits() < L2WordSize):
+            a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
             raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
         # make the bitmap
-        frag = self.rule["fragmentation"]
-        Mode = frag["FRModeProfile"]
-        FCNSize = Mode["FCNSize"]
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
-                                      FCNSize,
+                                      self.rule["FCNSize"],
                                       schcmsg.get_fcn_all_1(self.rule))
-        #print("bit_list:", self.bit_list)
+        print("bit_list:", self.bit_list)
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        #print('**********window_tiles: ', window_tiles)
-        #print('**********nb_remaining_tiles: ', nb_remaining_tiles)
-        #print('**********remaining_size: ', remaining_size)
         if window_tiles is not None:
             # even when mic is sent, it comes here in the retransmission.
             if (nb_remaining_tiles == 0 and
                 len(window_tiles) == 1 and
                 remaining_size >= schcmsg.get_mic_size(self.rule)):
-                #make the All-1 frag with this tile.
+                # make the All-1 frag with this tile.
                 # the All-1 fragment can carry only one tile of which the size
                 # is less than L2 word size.
                 fcn = schcmsg.get_fcn_all_1(self.rule)
@@ -301,7 +287,7 @@ class FragmentAckOnError(FragmentBase):
                     self.ack_wait_timer, self.ack_timeout, args)
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag, True)
+                None, self.event_sent_frag)
         print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
@@ -324,7 +310,7 @@ class FragmentAckOnError(FragmentBase):
             # sending sender abort.
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
             args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                    None, None, False)
+                    None, None)
             print("Sent Sender-Abort.", schc_frag.__dict__)
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
@@ -334,7 +320,7 @@ class FragmentAckOnError(FragmentBase):
                 self.ack_wait_timer, self.ack_timeout, args)
         # retransmit MIC.
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag, True)
+                None, self.event_sent_frag)
         print("Retransmitted frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)

@@ -87,10 +87,12 @@ class RPIlora(object):
 			return True
 
 	def sendCommand(self, message):
+		if self.verbosity >= 2: print("---send command method")
+		if self.verbosity >= 2: print('   Sending "' + message + '"')
 		serialcmd = message + "\r\n"
 		self.ser.write(serialcmd.encode())
-		#rxData = self.ReceiveUntil('\r\n', 'ERROR', 5).replace('\r\n', '')
-		rxData = self.ReceiveUntil('\r\n', 'ERROR', 10).replace('\r\n', '')
+		rxData = self.ReceiveUntil('\r\n', 'ERROR', 5).replace('\r\n', '')
+		if self.verbosity >= 2: print('    Received "' + rxData + '"')
 		return rxData
 
 	def close(self):

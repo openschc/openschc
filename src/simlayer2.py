@@ -16,7 +16,7 @@ class SimulLayer2:
         self.is_transmitting = False
         self.packet_queue = []
         self.port = "/dev/ttyAMA0"
-        self.verbosity = 2
+        self.verbosity = 1
         self.lora = LoRa.Lora(self.port, self.verbosity)
         self.mtu = 56
         print('deveui ', self.deveui, '  appeui ', self.appeui, '  appkey ', self.appkey)
@@ -28,9 +28,9 @@ class SimulLayer2:
         self.receive_function = receive_function
 
     def send_packet(self, packet, src_dev_id, dst_dev_id=None,
-                    transmit_callback=None, receive = False):
+                    transmit_callback=None):
         self.packet_queue.append((packet, src_dev_id, dst_dev_id,
-                                  transmit_callback, receive))
+                                  transmit_callback))
         if not self.is_transmitting:
             self._send_packet_from_queue()
 
@@ -39,23 +39,15 @@ class SimulLayer2:
         assert len(self.packet_queue) > 0
 
         self.is_transmitting = True
-        (packet, src_dev_id, dst_dev_id, transmit_callback, receive
+        (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
         #print(transmit_callack, "AAAAAAA")
-        self.send_packetX(packet,receive, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
+        self.send_packetX(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
         #self.sim.send_packet(packet, src_dev_id, dst_dev_id,self._event_sent_callback, (transmit_callback,))
 
-    def send_packetX(self, packet, receive, src_id, dst_id=None, callback=None, callback_args=tuple() ):
-        print("Sent packet: ",packet.hex())
-        print("Listen to receive data? : ",receive)
-        #print('*****Recepcion requerida: ', receive)
-        received = self.lora.send(packet.hex(), receive = receive, verbosity = 2)
-        if receive:
-            if received != None and len(received) > 0 :
-                received = received.replace(" ","")
-                received = bytes.fromhex(received)
-                print('Received in layer 2:',received)
-                self.event_receive_packet(dst_id, received)
+    def send_packetX(self, packet, src_id, dst_id=None, callback=None, callback_args=tuple() ):
+        print("Packete enviado: ",packet.hex())
+        self.lora.send(packet.hex())
         if callback != None:
             count = 1
             args = callback_args+(count,)
