@@ -4,7 +4,7 @@ class Lora():
     #port="/dev/ttyAMA0"
     #verbosity=2
     rpilora = None
-
+    #holis
     def __init__(self, port, verbosity):
         Lora.rpilora = RPILora.RPIlora(port, verbosity)
         Lora.rpilora.open()
