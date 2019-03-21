@@ -1,0 +1,21 @@
+{
+    "ruleLength": 6,
+    "ruleID": 1,
+    "profile": {
+        "L2WordSize": 4
+    },
+    "fragmentation": {
+        "FRMode": "ackOnError",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "WSize": 5,
+            "FCNSize": 3,
+            "ackBehavior": "afterAll1",
+            "tileSize": 9,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8
+        }
+    }
+}
+
+

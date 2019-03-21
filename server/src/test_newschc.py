@@ -90,10 +90,8 @@ sim.add_sym_link(node0, node1)
 node0.layer2.set_mtu(opt.l2_mtu)
 node1.layer2.set_mtu(opt.l2_mtu)
 
-print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
-                                             rm0.__dict__))
-print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
-                                             rm1.__dict__))
+#print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,rm0.__dict__))
+#print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,rm1.__dict__))
 
 #---------------------------------------------------------------------------
 

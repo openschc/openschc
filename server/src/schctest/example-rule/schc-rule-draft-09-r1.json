@@ -1,0 +1,132 @@
+{
+    "COMP_RULE": {
+        "RID": 1,
+        "RULE_SET": [
+            {
+                "FID": "IPV6.VER",
+                "FL": 4,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 6,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPV6.TC",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPV6.FL",
+                "FL": 20,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 0,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPV6.LEN",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "comp-length"
+            },
+            {
+                "FID": "IPV6.NXT",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 17,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPV6.HOP_LMT",
+                "FL": 8,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 255,
+                "MO": "ignore",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "IPV6.DEV_PREFIX",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "2001:db8::/64", "fe80::/64" ],
+                "MO": "match-mapping",
+                "CDA": "mapping-sent",
+                "SB": 1
+            },
+            {
+                "FID": "IPV6.DEV_IID",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "DEViid"
+            },
+            {
+                "FID": "IPV6.APP_PREFIX",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "2001:db8:1::/64", "2001:db8:2::/64", "fe80::/64" ],
+                "MO": "match-mapping",
+                "CDA": "mapping-sent",
+                "SB": 2
+            },
+            {
+                "FID": "IPv6.APP_IID",
+                "FL": 64,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": [ "::1000" ],
+                "MO": "match-mapping",
+                "CDA": "mapping-sent"
+            },
+            {
+                "FID": "UDP.DEV_PORT",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 5683,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "UDP.APP_PORT",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "TV": 5683,
+                "MO": "equal",
+                "CDA": "not-sent"
+            },
+            {
+                "FID": "UDP.LEN",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "comp-length"
+            },
+            {
+                "FID": "UDP.CKSUM",
+                "FL": 16,
+                "FP": 1,
+                "DI": "Bi",
+                "MO": "ignore",
+                "CDA": "comp-chk"
+            }
+        ]
+    }
+}
+

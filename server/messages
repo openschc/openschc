@@ -1,0 +1,165 @@
+A SCHC Fragment message carries one or more tiles, which may span
+ multiple windows. A SCHC ACK reports on the reception of exactly one
+ window of tiles.
+
+
+
+ - the tile size (a tile does not need to be multiple of an L2 Word,
+   but it MUST be at least the size of an L2 Word)
+ - the value of M (size of the W field),
+ - the value of N (size of the FCN field),
+ - the value of WINDOW_SIZE, which MUST be strictly less than 2^N,
+ - the size and algorithm for the MIC field,
+ - the size of the DTag field,
+ 
+
+
+ The fragment sender MUST select a Rule ID and DTag value pair for  this SCHC Packet. A Rule MUST NOT be  selected if the values of M  and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot  be  ragmented in (2^M) * WINDOW_SIZE tiles or less.
+A SCHC Fragment message carries one or more tiles, which may span
+ multiple windows. A SCHC ACK reports on the reception of exactly one
+ window of tiles.
+
+
+
+ - the tile size (a tile does not need to be multiple of an L2 Word,
+   but it MUST be at least the size of an L2 Word)
+ - the value of M (size of the W field),
+ - the value of N (size of the FCN field),
+ - the value of WINDOW_SIZE, which MUST be strictly less than 2^N,
+ - the size and algorithm for the MIC field,
+ - the size of the DTag field,
+ 
+
+
+ The fragment sender MUST select a Rule ID and DTag value pair for  this SCHC Packet. A Rule MUST NOT be  selected if the values of M  and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot  be  ragmented in (2^M) * WINDOW_SIZE tiles or less.
+
+TILES WITH DIFFERENT W NUMBER IN THE SAME PACKET:
+
+ - Tiles that are not the last one MUST be sent in Regular SCHC  Fragments specified in Section 8.3.1.1. The FCN field MUST contain the tile index of the first tile sent in that SCHC Fragment.
+
+ - In a Regular SCHC Fragment message, the sender MUST fill the W field
+ with the window number of the first tile sent in that SCHC Fragment.
+
+
+  +---------------------------------------------...-----------+
+ | SCHC Packet |
+ +---------------------------------------------...-----------+
+ Tile # | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 | | 0 | 4 |3|
+ Window # |-------- 0 --------|-------- 1 --------|- 2 ... 27 -|- 28-|
+
+Payload in binary
+00000001000000100000001100000100000001010000011000000111000010000000100100001010000010110000110000001101000011100000111100010000000100010001001000010011000101000001010100010110000101110001100000011001000110100001101100011100000111010001111000011111001000000010000100100010001000110010010000100101001001100010011100101000001010010010101000101011001011000010110100101110001011110011000000110001001100100011001100110100001101010011011000110111001110000011100100111010001110110011110000111101001111100011111101000000010000010100001001000011010001000100010101000110010001110100100001001001010010100100101101001100010011010100111001001111010100000101000101010010010100110101010001010101010101100101011101011000010110010101101001011011010111000101110101011110010111110110000001100001011000100110001101100100
+
+{
+    "ruleLength": 6,
+    "ruleID": 1,
+    "profile": {
+        "L2WordSize": 8
+    },
+    "fragmentation": {
+        "FRMode": "ackOnError",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "WSize": 5,
+            "FCNSize": 3,
+            "ackBehavior": "afterAll1",
+            "tileSize": 8,
+            "MICAlgorithm": "crc32",
+            "windowSize": 5,
+            "MICWordSize": 8
+        }
+    }
+}
+
+
+WSize = number of tiles for a window number
+tileSize = tile size in bytes
+windowSize = (0x01 << FCNSize) - 1   number of tiles in a real window   -> 7
+
+
+ Fragment in    |       Header            |       Payload (tile size = 8)
+          hexa  | RuleId|dtag|   W  | FCN |
+                |  L=6  |L=2 | L=5  | L=3 |  tile 1   tile 2   tile 3   tile 4   tile 5
+                |  R=1  |    |      |     |   
+05040102030405  | 000001| 01 |00000 | 100 | 00000001 00000010 00000011 00000100 00000101
+050c060708090a  | 000001| 01 |00001 | 100 | 00000110 00000111 00001000 00001001 00001010
+05140b0c0d0e0f  | 000001| 01 |00010 | 100 | 00001011 00001100 00001101 00001110 00001111
+051c1011121314  | 000001| 01 |00011 | 100 | 00010000 00010001 00010010 00010011 00010100
+05241516171819  | 000001| 01 |00100 | 100 | 00010101 00010110 00010111 00011000 00011001
+052c1a1b1c1d1e  | 000001| 01 |00101 | 100 | 00011010 00011011 00011100 00011101 00011110
+05341f20212223  | 000001| 01 |00110 | 100 | 00011111 00100000 00100001 00100010 00100011
+053c2425262728  | 000001| 01 |00111 | 100 | 00100100 00100101 00100110 00100111 00101000
+0544292a2b2c2d  | 000001| 01 |01000 | 100 | 00101001 00101010 00101011 00101100 00101101
+054c2e2f303132  | 000001| 01 |01001 | 100 | 00101110 00101111 00110000 00110001 00110010
+05543334353637  | 000001| 01 |01010 | 100 | 00110011 00110100 00110101 00110110 00110111
+055c38393a3b3c  | 000001| 01 |01011 | 100 | 00111000 00111001 00111010 00111011 00111100
+05643d3e3f4041  | 000001| 01 |01100 | 100 | 00111101 00111110 00111111 01000000 01000001
+056c4243444546  | 000001| 01 |01101 | 100 | 01000010 01000011 01000100 01000101 01000110
+05744748494a4b  | 000001| 01 |01110 | 100 | 01000111 01001000 01001001 01001010 01001011
+057c4c4d4e4f50  | 000001| 01 |01111 | 100 | 01001100 01001101 01001110 01001111 01010000
+05845152535455  | 000001| 01 |10000 | 100 | 01010001 01010010 01010011 01010100 01010101
+058c565758595a  | 000001| 01 |10001 | 100 | 01010110 01010111 01011000 01011001 01011010
+05945b5c5d5e5f  | 000001| 01 |10010 | 100 | 01011011 01011100 01011101 01011110 01011111
+059c6061626364  | 000001| 01 |10011 | 100 | 01100000 01100001 01100010 01100011 01100100
+
+059f65f00f42    | 000001| 01 |10011 | 111 | 01100101111100000000111101000010  --> ALL-1
+059f65f00f42    | 000001| 01 |10011 | 111 | 01100101111100000000111101000010  --> ALL-1 (retransmission)
+059f65f00f42    | 000001| 01 |10011 | 111 | 01100101111100000000111101000010  --> ALL-1 (retransmission)
+059f            | 000001| 01 |10011 | 111 | --> sender abort ?       
+
+
+ACK ON ERROR
+
+Fragment1 = b'\x09\x04\x01\x02\x03\x04\x05  
+Fragment2 = b'\x09\x0c\x06\x07\x08\x09\x0a 
+Fragment3 = b'\x09\x14\x0b\x0c\x0d\x0e\x0f  
+Fragment4 = b'\x09\x1c\x10\x11\x12\x13\x14  
+Fragment5 = b'\x09\x24\x15\x16\x17\x18\x19 
+Fragment6 = b'\x09\x2c\x1a\x1b\x1c\x1d\x1e  
+Fragment7 = b'\x09\x34\x1f\x20\x21\x22\x23  
+Fragment8 = b'\x09\x3c\x24\x25\x26\x27\x28  
+Fragment9 = b'\x09\x44\x29\x2a\x2b\x2c\x2d  
+Fragment10 = b'\x09\x4c\x2e\x2f\x30\x31\x32  
+Fragment11 = b'\x09\x54\x33\x34\x35\x36\x37 
+Fragment12 = b'\x09\x5c\x38\x39\x3a\x3b\x3c  
+Fragment13 = b'\x09\x64\x3d\x3e\x3f\x40\x41  
+Fragment14 = b'\x09\x6c\x42\x43\x44\x45\x46  
+Fragment15 = b'\x09\x74\x47\x48\x49\x4a\x4b 
+Fragment16 = b'\x09\x7c\x4c\x4d\x4e\x4f\x50  
+Fragment17 = b'\x09\x84\x51\x52\x53\x54\x55  
+Fragment18 = b'\x09\x8c\x56\x57\x58\x59\x5a  
+Fragment19 = b'\x09\x94\x5b\x5c\x5d\x5e\x5f  
+Fragment21 = b'\x09\x9c\x60\x61\x62\x63\x64 
+Fragment22 = b'\x09\x9f\x65\xf0\x0f\x42'
+Fragment23 = b'\x09\x9f\x65\xf0\x0f\x42'
+Fragment24 = b'\x09\x9f\x65\xf0\x0f\x42'
+Fragment25 = b'\x09\x9f'   
+
+
+
+
+------------------------------------------------------------------------------------------
+NO ACK
+Fragment1 = b'\x48\x01\x02\x03\x04\x05\x06'
+Fragment2 = b'\x48\x07\x08\x09\x0a\x0b\x0c'
+Fragment3 = b'\x48\x0d\x0e\x0f\x10\x11\x12'
+Fragment4 = b'\x48\x13\x14\x15\x16\x17\x18'
+Fragment5 = b'\x48\x19\x1a\x1b\x1c\x1d\x1e'
+Fragment6 = b'\x48\x1f\x20\x21\x22\x23\x24'
+Fragment7 = b'\x48\x25\x26\x27\x28\x29\x2a'
+Fragment8 = b'\x48\x2b\x2c\x2d\x2e\x2f\x30'
+Fragment9 = b'\x48\x31\x32\x33\x34\x35\x36'
+Fragment10 = b'\x48\x37\x38\x39\x3a\x3b\x3c'
+Fragment11 = b'\x48\x3d\x3e\x3f\x40\x41\x42'
+Fragment12 = b'\x48\x43\x44\x45\x46\x47\x48'
+Fragment13 = b'\x48\x49\x4a\x4b\x4c\x4d\x4e'
+Fragment14 = b'\x48\x4f\x50\x51\x52\x53\x54'
+Fragment15 = b'\x48\x55\x56\x57\x58\x59\x5a'
+Fragment16 = b'\x48\x5b\x5c\x5d\x5e\x5f\x60'
+Fragment17 = b'\x48\x61\x62\x63\x64'
+Fragment18 = b'\x4f\x65\xf0\x0f\x42'
+  
+
+
+MIC = 65f00f42
+
