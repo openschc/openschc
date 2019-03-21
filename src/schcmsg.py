@@ -12,10 +12,15 @@ def get_fcn_all_1(rule):
     return (1<<FCNSize)-1
 
 def get_win_all_1(rule):
-    return (1<<rule["WSize"])-1
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    WSize = ModProfil["WSize"]
+    return (1<<WSize)-1
 
 def get_max_fcn(rule):
-    return rule["windowSize"]-1
+    frag = rule["fragmentation"]
+    ModProfil = frag["FRModeProfile"]
+    return ModProfil["windowSize"]-1
 
 def get_max_dtag(rule):
     frag = rule["fragmentation"]
@@ -28,9 +33,8 @@ def get_sender_header_size(rule):
     frag = rule["fragmentation"]
     ModProfil = frag["FRModeProfile"]
     dtagSize = ModProfil["dtagSize"]
-    WSize = rule.get("WSize", 0)
+    WSize = ModProfil["WSize"]
     FCNSize = ModProfil["FCNSize"]
-    #print('FROM RULE ruleLength: ',rule_length, ' dtagSize: ', dtagSize, ' WSize: ',WSize, ' FCNSize: ',FCNSize )
     return rule_length + dtagSize + WSize + FCNSize
 
 def get_receiver_header_size(rule):
@@ -95,16 +99,17 @@ class frag_tx(frag_base):
         Dtagsize = Mode["dtagSize"]
         FCNSize = Mode["FCNSize"]
         MICAlgorithm = Mode["MICAlgorithm"]
+        WSize = Mode["WSize"]
         if self.rule["ruleID"] is not None and self.rule["ruleLength"] is not None:
             buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
         if dtag is not None and Dtagsize is not None:
             assert Dtagsize != None # CA: sanity check
             buffer.add_bits(dtag, Dtagsize)
-        if win is not None and self.rule.get("WSize") is not None:
-            buffer.add_bits(win, self.rule["WSize"])
+        if win is not None and WSize is not None:
+            buffer.add_bits(win, WSize)
         if abort == True:
             # XXX for receiver abort, needs to be fixed
-            buffer.add_bits(get_fcn_all_1(self.rule), self.rule["FCNSize"])
+            buffer.add_bits(get_fcn_all_1(self.rule), FCNSize)
         else:
             if fcn is not None and FCNSize is not None:
                 buffer.add_bits(fcn, FCNSize)
@@ -254,13 +259,7 @@ class frag_rx(frag_base):
         frag = self.rule["fragmentation"]
         ModProfil = frag["FRModeProfile"]
         FCNSize = ModProfil["FCNSize"]
-        print()
-        print("FCNSize ", FCNSize)
-        print()
         self.fcn = self.packet_bbuf.get_bits(FCNSize)
-        print()
-        print("self.fcn ",self.fcn)
-        print()
         return FCNSize
 
     def parse_bitmap(self):
@@ -284,11 +283,6 @@ class frag_rx(frag_base):
         '''
         mic_size = get_mic_size(self.rule)
         self.mic = self.packet_bbuf.get_bits_as_buffer(mic_size).get_content()
-        print()
-        print("BUFFER ",)
-        print()
-        print("MIC ", self.mic)
-        print()
         return mic_size
 
 class frag_sender_rx_all0_ack(frag_rx):
@@ -379,19 +373,9 @@ class frag_receiver_rx(frag_rx):
         self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
 
         pos = self.rule["ruleLength"]
-        print()
-        print("posicion ruleID size ", pos)
         pos += self.parse_dtag()
-        print()
-        print("posicion dtag ", pos)
         pos += self.parse_win()
-        print()
-        print("posicion win ", pos)
         pos += self.parse_fcn()
-        print()
-        print("posicion FCN ", pos)
-        print("FCN esperado : ",get_fcn_all_1(self.rule))
-        print()
         if self.fcn == get_fcn_all_1(self.rule):
             profile = self.rule["profile"]
             L2WordSize = profile["L2WordSize"]

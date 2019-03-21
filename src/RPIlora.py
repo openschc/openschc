@@ -60,10 +60,8 @@ class RPIlora(object):
 			return ''
 
 	def open(self):
-		#print("self.portOpen = ", self.portOpen)
 		if self.portOpen == False :
 			if self.ser.isOpen() : # on some platforms the serial port needs to be closed first
-				#print('Serial port already open, closing it')
 				self.ser.close()
 			self.close()
 			try:
@@ -87,12 +85,10 @@ class RPIlora(object):
 			return True
 
 	def sendCommand(self, message):
-		if self.verbosity >= 2: print("---send command method")
-		if self.verbosity >= 2: print('   Sending "' + message + '"')
 		serialcmd = message + "\r\n"
 		self.ser.write(serialcmd.encode())
-		rxData = self.ReceiveUntil('\r\n', 'ERROR', 5).replace('\r\n', '')
-		if self.verbosity >= 2: print('    Received "' + rxData + '"')
+		#rxData = self.ReceiveUntil('\r\n', 'ERROR', 5).replace('\r\n', '')
+		rxData = self.ReceiveUntil('\r\n', 'ERROR', 10).replace('\r\n', '')
 		return rxData
 
 	def close(self):

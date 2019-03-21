@@ -61,7 +61,6 @@ def make_bit_list(tile_list, N, window_size):
                 break
         # regular
         if wni < wn:
-            #print("MBL00 wn:tn:nb=", wni, tni, bl)
             while wni < wn:
                 bl = bit_list.setdefault(wni, [])
                 while tni > 0:
@@ -70,23 +69,19 @@ def make_bit_list(tile_list, N, window_size):
                 bl.append(0)
                 wni += 1
                 tni = max_fcn
-                #print("MBL01 wn:tn:nb=", wni, tni, bl)
-        #print("MBL1 nb=", nbt)
         assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
             tni -= 1
-            #print("MBL2 wn:tn:nb=", wni, tni, bl)
+
         for _ in range(nbt):
             bl.append(1)
             if tni == 0:
-                #print("MBL3 wn:tn:nb=", wni, tni, bl)
                 wni += 1
                 bl = bit_list.setdefault(wni, [])
                 tni = max_fcn
             else:
-                #print("MBL4 wn:tn:nb=", wni, tni, bl)
                 tni -= 1
     return bit_list
 

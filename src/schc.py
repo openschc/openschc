@@ -31,8 +31,9 @@ class Session:
 
     def get(self, rule_id, rule_id_size, dtag):
         for i in self.session_list:
-            if (rule_id == i["rule_id"] and rule_id_size == i["rule_id_size"]
-                and dtag == i["dtag"]):
+            print('Session ', i)
+            print('ruleid: ', i["rule_id"],' rule_id_size:  ', i["rule_id_size"], ' dtag: ', i["dtag"])
+            if (rule_id == i["rule_id"] and rule_id_size == i["rule_id_size"] and dtag == i["dtag"]):
                 return i["session"]
         return None
 
@@ -66,7 +67,7 @@ class SCHCProtocol:
         """ set the L2 address of the SCHC device """
         self.dev_L2addr = dev_L2addr
 
-    def event_receive_from_L3(self, dst_L3addr, raw_packet):
+    def event_receive_from_L3(self, dst_L3addr, raw_packet, ruleId):
         #self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         print("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
@@ -102,11 +103,13 @@ class SCHCProtocol:
             print("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
+        #TODO ojo no es escalable, hay que qnqdir mqs rules
         rule = context["fragSender"]
-        #self._log("fragmentation rule_id={}".format(rule.ruleID))
+        idInRule = rule["ruleID"]
+        if ruleId != idInRule:
+            rule = context["fragSender2"]
         print("fragmentation rule_id={}".format(rule.ruleID))
         session = self.new_fragment_session(context, rule)
-        print("Session =", session)
         session.set_packet(packet_bbuf)
         self.fragment_session.add(rule.ruleID, rule.ruleLength,
                                     session.dtag, session)
@@ -129,9 +132,6 @@ class SCHCProtocol:
 
     def new_reassemble_session(self, context, rule, dtag, sender_L2addr):
         mode = rule["fragmentation"].get("FRMode")
-        print()
-        print("Mode ", mode)
-        print()
         if mode == "noAck":
             session = ReassemblerNoAck(self, context, rule, dtag, sender_L2addr)
         elif mode == "ackAlways":
@@ -165,12 +165,17 @@ class SCHCProtocol:
         key, rule = self.rule_manager.find_rule_bypacket(context, packet_bbuf)
 
         if key == "fragSender":
-            if rule["dtagSize"] > 0:
-                dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
+            frag = rule["fragmentation"]
+            Mode = frag["FRModeProfile"]
+            Dtagsize = Mode["dtagSize"]
+            if Dtagsize > 0:
+                dtag = packet_bbuf.get_bits(Dtagsize,
                                     position=rule.get("ruleLength"))
+
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
+            print('self.fragment_session: ',self.fragment_session )
             session = self.fragment_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
             if session is not None:
@@ -180,11 +185,6 @@ class SCHCProtocol:
                 print("context exists, but no {} session for this packet {}".
                         format(key, self.dev_L2addr))
         elif key == "fragReceiver":
-            print()
-            print("rule: ",rule)
-            print()
-            print("KEY: ", key)
-            print()
             frag = rule["fragmentation"]
             Mode = frag["FRModeProfile"]
             Dtagsize = Mode["dtagSize"]
@@ -192,8 +192,7 @@ class SCHCProtocol:
 
                 dtag = packet_bbuf.get_bits(Dtagsize,
                                     position=rule.get("ruleLength"))
-                print("dtag: ", dtag)
-                print()
+
             else:
                 dtag = None
             # find existing session for fragment or reassembly.

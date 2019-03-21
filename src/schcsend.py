@@ -103,7 +103,6 @@ class FragmentNoAck(FragmentBase):
         # of an L2 Word.
         prof = self.rule["profile"]
         L2Word_size = prof["L2WordSize"]
-        #print('L2Word_size from rule: ', L2Word_size)
         min_size = (schcmsg.get_sender_header_size(self.rule) +
                         schcmsg.get_mic_size(self.rule) +
                         L2Word_size)
@@ -175,8 +174,7 @@ class FragmentNoAck(FragmentBase):
         # send a SCHC fragment
         src_dev_id = self.protocol.layer2.mac_id
         args = (schc_frag.packet.get_content(), src_dev_id, None,
-                transmit_callback)
-        #print("frag sent:", schc_frag.__dict__)
+                transmit_callback, False)
         time.sleep(0.5)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
 
@@ -207,15 +205,21 @@ class FragmentAckOnError(FragmentBase):
         # check whether the size of the last tile is less than L2 word
         # AND the tile number is zero
         # because draft-17 doesn't specify how to handle it.
+        profile = self.rule["profile"]
+        L2WordSize = profile["L2WordSize"]
+        print('L2WordSize: ',L2WordSize)
         a = self.all_tiles.get_all_tiles()
+        print('all tiles: ', a)
         if (a[-1]["t-num"] == 0 and
-            a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
+            a[-1]["tile"].count_added_bits() < L2WordSize):
             raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
         # make the bitmap
+        frag = self.rule["fragmentation"]
+        Mode = frag["FRModeProfile"]
+        FCNSize = Mode["FCNSize"]
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
-                                      self.rule["FCNSize"],
+                                      FCNSize,
                                       schcmsg.get_fcn_all_1(self.rule))
-        print("bit_list:", self.bit_list)
 
     def send_frag(self):
         # get contiguous tiles as many as possible fit in MTU.
@@ -226,7 +230,7 @@ class FragmentAckOnError(FragmentBase):
             if (nb_remaining_tiles == 0 and
                 len(window_tiles) == 1 and
                 remaining_size >= schcmsg.get_mic_size(self.rule)):
-                # make the All-1 frag with this tile.
+                #make the All-1 frag with this tile.
                 # the All-1 fragment can carry only one tile of which the size
                 # is less than L2 word size.
                 fcn = schcmsg.get_fcn_all_1(self.rule)
@@ -287,8 +291,7 @@ class FragmentAckOnError(FragmentBase):
                     self.ack_wait_timer, self.ack_timeout, args)
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag)
-        print("frag sent:", schc_frag.__dict__)
+                None, self.event_sent_frag, True)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
@@ -310,7 +313,7 @@ class FragmentAckOnError(FragmentBase):
             # sending sender abort.
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
             args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                    None, None)
+                    None, None, False)
             print("Sent Sender-Abort.", schc_frag.__dict__)
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
@@ -320,7 +323,7 @@ class FragmentAckOnError(FragmentBase):
                 self.ack_wait_timer, self.ack_timeout, args)
         # retransmit MIC.
         args = (schc_frag.packet.get_content(), self.protocol.layer2.mac_id,
-                None, self.event_sent_frag)
+                None, self.event_sent_frag, True)
         print("Retransmitted frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)

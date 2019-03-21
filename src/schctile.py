@@ -12,7 +12,10 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
-        self.t_size = rule["tileSize"]
+        frag = rule["fragmentation"]
+        ModProfil = frag["FRModeProfile"]
+        tileSize =  ModProfil["tileSize"]
+        self.t_size = tileSize
         self.max_fcn = schcmsg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
@@ -50,9 +53,6 @@ class TileList():
                     "ERROR: the packet size > WSize. {} > {}".format(
                             w_num, schcmsg.get_win_all_1(rule)))
         self.max_w_num = w_num
-        #print("DEBUG: all_tiles:")
-        #for i in self.all_tiles:
-        #    print("DEBUG:  ", i)
 
     def get_tiles(self, mtu_size):
         '''
@@ -63,6 +63,7 @@ class TileList():
         max_tiles = remaining_size // self.t_size
         tiles = []
         t_prev = None
+
         for i in range(len(self.all_tiles)):
             t = self.all_tiles[i]
             '''

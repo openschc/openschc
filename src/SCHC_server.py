@@ -15,27 +15,28 @@ from rulemanager import RuleManager
 
 class SCHC_server:
     def __init__(self, scheduler):
+        #self.port = port
+        #self.devEUI = devEUI
+        self.port = None
+        self.devEUI = None
+        self.cont = 0
+        self.loss_config = None
         self.rule = []
         self.context ="example/context-100.json"
         self.rule_comp = "example/comp-rule-100.json"
-        '''NO-ACK'''
-        self.rule_fragin = "example/frag-rule-201.json"
-        self.rule_fragout = "example/frag-rule-202.json"
-        '''ACK-ON-ERROR'''
-        #self.rule_fragin = "example/frag-rule-101.json"
-        #self.rule_fragout = "example/frag-rule-102.json"
-
-        self.rule_fragout = "example/frag-rule-202.json"
-        for k in [self.context,self.rule_comp,self.rule_fragin,self.rule_fragout]:
+        self.rule_fragin2 = "example/frag-rule-201.json"      #NoACK
+        self.rule_fragout2 = "example/frag-rule-202.json"     #NoACK
+        self.rule_fragin = "example/frag-rule-101.json"      #ACK-ON-Error
+        self.rule_fragout = "example/frag-rule-102.json"     #ACK-ON-Error
+        for k in [self.context,self.rule_comp,self.rule_fragin,self.rule_fragout,self.rule_fragin2,self.rule_fragout2]:
             with open(k) as fd:
                 self.rule.append(json.loads(fd.read()))
 
         self.rule_manager = RuleManager()
-        print("RULE: ", self.rule[3])
-        self.rule_manager.add_context(self.rule[0], self.rule[1], self.rule[2], self.rule[3])
+        self.rule_manager.add_context(self.rule[0], self.rule[1], self.rule[2], self.rule[3], self.rule[4], self.rule[5])
 #--------------------------------------------------------------------------
 #simul
-        self.l2_mtu = 56
+        self.l2_mtu = 400
         self.layer_2 = SimulLayer2()
         self.layer_2.set_mtu(self.l2_mtu)
         self.layer_3 = SimulLayer3()
@@ -49,7 +50,7 @@ class SCHC_server:
     def reassemble(self,Fragment):
         self.layer_2.event_receive_packet(self.sender_id, Fragment)
 
-    def sendMessage(self,msg):
-        self.layer_3.send_later(1, 1,msg)
+    def sendMessage(self,msg, ruleId):
+        self.layer_3.send_later(1, 1,msg, ruleId)
 
 #-----------------------------------------------------------------------

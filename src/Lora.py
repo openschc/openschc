@@ -4,17 +4,17 @@ class Lora():
     #port="/dev/ttyAMA0"
     #verbosity=2
     rpilora = None
-    
+
     def __init__(self, port, verbosity):
         Lora.rpilora = RPILora.RPIlora(port, verbosity)
         Lora.rpilora.open()
-    
-    
+
+
     def get_devEUI(self , port="/dev/ttyAMA0", verbosity=1 ):
       #rpilora = RPILora.RPIlora(port, verbosity)
       if Lora.rpilora.open() :
         received = Lora.rpilora.sendCommand('sys get hweui')
-        print(received)
+        print("LoRa received message: ",received)
       else:
         errorCode = 12
       Lora.rpilora.close()
@@ -121,47 +121,46 @@ class Lora():
     def send(self, send, receive = False, channel= 1, port="/dev/ttyAMA0", verbosity=1):
       #rpilora = RPILora.RPIlora(port,verbosity)
       if Lora.rpilora.open() :
-        if Lora.rpilora.verbosity >= 2: print("port opened")
         command_string = 'mac tx '
+        if not receive:
+            command_string += 'un'
        # if not receive:
          # command_string += 'un'
         #command_string += 'uncnf ' + str(channel) + ' ' + send
-        command_string += 'uncnf ' + str(channel) + ' ' + send
-        if Lora.rpilora.verbosity >= 2: print("Send command: ",command_string)
+        command_string += 'cnf ' + str(channel) + ' ' + send
+        if Lora.rpilora.verbosity >= 2: print("LoRa Send command: ",command_string)
         received = Lora.rpilora.sendCommand(command_string)
-        print('RECEIVED FROM PYCOM FASE 1: ', received)
-        if Lora.rpilora.verbosity >= 2: print("Response received = ", received)
+        if Lora.rpilora.verbosity >= 2: print("LoRa Response received = ", received)
         if received == 'ok':
           # send command syntax OK at this point
           if receive:
             # rx data present before mac_tx_ok
+            print('LoRa waiting to receive....')
             loop_flag = True
             received_data = ""
             while loop_flag:
               received = Lora.rpilora.ReceiveUntil('\r\n', 'ERROR', 50).replace('\r\n', '')
               if received == 'mac_tx_ok':
                 # we are done receiving
-                if Lora.rpilora.verbosity == 0 :
-                  print(received_data)
-                else:
-                  print('RX data:' + received_data)
+                print('LoRa RX data:' + received_data)
                 loop_flag = False
-              elif received.startswith('mac_rx ', 0, 0):
-                received_data += received.split()[2]
+                return received_data
+              elif received.startswith('mac_rx '):
+                received_data += received.split()[1]
               else:
                 loop_flag = False
                 errorMessage = 'send failed: ' + received
                 errorCode = 13
           else:
             received = Lora.rpilora.ReceiveUntil('\r\n', 'ERROR', 20).replace('\r\n', '')
-            print('RECEIVED FROM PYCOM: ', received)
             if received == 'mac_tx_ok':
-              if Lora.rpilora.verbosity >= 1 : print('ACK RECEIVED')
+              if Lora.rpilora.verbosity >= 1 : print('ACK from pycom RECEIVED')
+              return None
             else:
               errorMessage = 'send failed: ' + received
               errorCode = 14
         else:
-          if Lora.rpilora.verbosity >= 2: print("Module Error message : ",command_string , " failed: ",received)
+          if Lora.rpilora.verbosity >= 2: print("LoRa Module Error message : ",command_string , " failed: ",received)
           errorMessage = command_string + ' failed: ' + received
           errorCode = 15
         #Lora.rpilora.close()

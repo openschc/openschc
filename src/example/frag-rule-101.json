@@ -1,18 +1,19 @@
 {
-    "ruleLength": 6,
+    "ruleLength": 3,
     "ruleID": 2,
     "profile": {
-        "L2WordSize": 8
+        "L2WordSize": 4
     },
     "fragmentation": {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 5,
+            "WSize": 8,
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
-            "tileSize": 9,
+            "tileSize": 96,
             "MICAlgorithm": "crc32",
+            "windowSize": 4,
             "MICWordSize": 8
         }
     }

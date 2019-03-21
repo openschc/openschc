@@ -246,7 +246,7 @@ class BitBuffer:
         new_buf = self.copy()
         other_copy = other.copy()
         remaining_bits = other_copy.count_remaining_bits()
-        assert remaining_bits < 255*8 
+        #assert remaining_bits < 255*8 
         new_buf.add_bits(other_copy.get_bits(remaining_bits),
                          remaining_bits)
         return new_buf
