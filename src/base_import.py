@@ -4,20 +4,16 @@
 
 import sys
 
-try:
-    import time
-except ImportError:
+if sys.implementation.name == "micropython":
     import utime as time
-
-try:
-    import json
-except:
     import ujson as json
-
-try:
-    from collections import namedtuple
-except ImportError:
     from ucollections import namedtuple
+    import urandom
+else:
+    import time
+    import json
+    from collections import namedtuple
+    import random as random
 
 # --- sched
 #sys.path.append("../../micropython-lib/heapq") # XXX (for pyssched)
