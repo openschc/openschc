@@ -1,3 +1,5 @@
+Simulator and gateway
+=====================
 
 ## example with the simulator
 
@@ -35,13 +37,28 @@ You can define three mode of unstable link with the --loss-mode option.
 
     It causes the 10% framges will drop.
 
+----
+
+schcgw.py
+=========
+
+SCHC GW implementation.
+
+## Requirement
+
+- Python 3.6
+- requests
+- aiohttp
+- [pypcap][https://github.com/pynetwork/pypcap#installation-from-sources]
+- you may need to install libpcap.
+
 ## example with two gateways.
 
 - ACK-on-Error with 
 
 You need 3 terminals.
 
-    % ./schcgw.py -c example/testgw2-config.json
+    % ./schcgw.py -c example/testgw1-config.json
     % ./schcgw.py -c example/testgw2-config.json
     % ./packet_picker.py --untrust -f test/icmpv6.dmp 'https://[::1]:51225/dl'
 
