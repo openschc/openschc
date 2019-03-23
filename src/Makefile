@@ -14,6 +14,8 @@ style:
 
 all-tests: test-bitarray test-simsched test-oschc
 
+pytest:
+	pytest -v
 
 test-bitarray: ; ${M} test_bitarray.py
 test-simsched: ; ${M} test_simsched.py
