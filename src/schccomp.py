@@ -1,5 +1,4 @@
 from base_import import *
-import ipaddress
 
 T_FID = "FID"
 T_FL = "FL"
@@ -113,15 +112,15 @@ class Compressor:
             assert rule[T_FL]%8 == 0
             size = rule[T_FL]//8
             hv = hdr_val.to_bytes(size, "big")
-            a = ipaddress.ip_network(target_val, strict=False)
-            tv = a[0].packed[:size]
+            tv = socket.inet_pton(socket.AF_INET6,
+                                  target_val[:target_val.find("/")])[:size]
         elif rule[T_FID] in [T_IPV6_DEV_IID, T_IPV6_APP_IID]:
             assert isinstance(target_val, str)
             # XXX needs to support any bit length.
             assert rule[T_FL]%8 == 0
             size = rule[T_FL]//8
             hv = hdr_val.to_bytes(size, "big")
-            tv = ipaddress.ip_address(target_val).packed[size:]
+            tv = socket.inet_pton(socket.AF_INET6, target_val)[size:]
         else:
             hv = hdr_val
             tv = target_val
@@ -280,14 +279,13 @@ class Decompressor:
         """ copy the appropriate target_val and return it. """
         if rule[T_FID] in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]:
             assert isinstance(target_val, str)
-            # don't need to consider the prefix length less than 64
-            # because ipaddress.ip_network expands the taret_val into 128bits.
-            a = ipaddress.ip_network(target_val, strict=False)
-            tv = a[0].packed[:64]
+            # inet_pton always expands the taret_val into 128bits.
+            tv = socket.inet_pton(socket.AF_INET6,
+                                  target_val[:target_val.find("/")])[:8]
             out_bbuf.add_bytes(tv)
         elif rule[T_FID] in [T_IPV6_DEV_IID, T_IPV6_APP_IID]:
             assert isinstance(target_val, str)
-            tv = ipaddress.ip_address(target_val).packed[64:]
+            tv = socket.inet_pton(socket.AF_INET6, target_val)[8:]
             out_bbuf.add_bytes(tv)
         else:
             tv = target_val
