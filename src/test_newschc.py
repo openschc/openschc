@@ -11,8 +11,12 @@ import simlayer2
 import simul
 from rulemanager import RuleManager
 
-ap = argparse.ArgumentParser(description="a SCHC simulator.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+if sys.implementation.name == "micropython":
+    ap = argparse.ArgumentParser(description="a SCHC simulator.")
+else:
+    ap = argparse.ArgumentParser(description="a SCHC simulator.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
 ap.add_argument("--context", action="store", dest="context_file",
                 default="example/context-100.json",
                 help="specify a file name containing a context in JSON.")
