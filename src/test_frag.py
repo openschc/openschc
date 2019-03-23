@@ -69,7 +69,7 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
     node.protocol.set_rulemanager(rule_manager)
     if devaddr is None:
         devaddr = node.id
-    node.protocol.set_dev_L2addr(devaddr)
+    node.layer2.set_devaddr(devaddr)
     return node
 
 #---------------------------------------------------------------------------
