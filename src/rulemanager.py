@@ -196,11 +196,7 @@ Example 2:
 
 """
 
-try:
-    import struct
-except ImportError:
-    import ustruct as struct
-
+from base_import import *
 from copy import deepcopy
 
 # XXX to be checked whether they are needed.

@@ -1,6 +1,5 @@
 from base_import import *
 import ipaddress
-import struct
 
 T_FID = "FID"
 T_FL = "FL"

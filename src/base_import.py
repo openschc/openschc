@@ -9,11 +9,13 @@ if sys.implementation.name == "micropython":
     import ujson as json
     from ucollections import namedtuple
     import urandom
+    import ustruct as struct
 else:
     import time
     import json
     from collections import namedtuple
     import random as random
+    import struct
 
 # --- sched
 #sys.path.append("../../micropython-lib/heapq") # XXX (for pyssched)
