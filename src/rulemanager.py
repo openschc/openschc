@@ -217,9 +217,9 @@ class DictToAttrDeep:
     def __update(self, **entries):
         for k,v in entries.items():
             if isinstance(v, dict):
-                self.__dict__[k] = DictToAttrDeep(**v)
+                setattr(self, k, DictToAttrDeep(**v))
             else:
-                self.__dict__.update(entries)
+                setattr(self, k, v)
 
     def __contains__(self, t):
         """ t in this """
