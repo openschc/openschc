@@ -1,0 +1,1 @@
+Search.setIndex({docnames:["index"],envversion:53,filenames:["index.rst"],objects:{},objnames:{},objtypes:{},terms:{branch:0,com:0,github:0,here:0,http:0,implement:0,index:0,micropython:0,modul:0,network:0,page:0,python:0,schc:0,search:0,see:0,wiki:0},titles:["Welcome to OpenSCHC\u2019s documentation!"],titleterms:{document:0,indic:0,openschc:0,tabl:0,welcom:0}})
