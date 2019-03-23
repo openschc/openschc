@@ -1,8 +1,15 @@
-#---------------------------------------------------------------------------
-
-from random import random
+from base_import import *
 
 #---------------------------------------------------------------------------
+
+def cond_random(rate):
+    if sys.implementation.name == "micropython":
+        if urandom.getrandbits(8)/256 * 100 < rate:
+            return True
+        else:
+            return False
+    else:
+        return random.random() * 100 < rate
 
 class ConditionalTrue:
     """ It returns True in a condition of 3 modes.
@@ -58,7 +65,7 @@ class ConditionalTrue:
         return self.count_in_cycle % self.cycle == 0
 
     def __cond_check_rate(self):
-        return random() < self.cycle
+        return cond_random(self.cycle)
 
 if __name__ == "__main__":
     def test(config):
