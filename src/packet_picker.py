@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ap.add_argument("-f", action="store", dest="data_file",
                     help="""specify the file name containing the data
                     to be sent.""")
-    ap.add_argument("-F", action="store", dest="fiters",
+    ap.add_argument("-F", action="store", dest="filters",
                     help="specify the filters.")
     ap.add_argument("--untrust", action="store_false", dest="trust_server",
                     help="disable to check the server certificate.")
