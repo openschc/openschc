@@ -13,6 +13,28 @@
 
     % python3 test_frag.py
 
+## how to check the F/R with unstable link.
+
+You can define three mode of unstable link with the --loss-mode option.
+
+- cycle: a frame will drop once in number times specified in the param.
+
+    e.g. --loss-mode cycle --loss-param 5
+
+    It causes a frame will drop once in 5 times.
+
+- list: the frames specified in the param will be draopped.
+
+    e.g.  --loss-mode list --loss-param 3,6
+
+    It causes the 3th and 6th frames will drop.
+
+- rate: the frames of the rate will be draopped.
+
+    e.g. --loss-mode rate --loss-param 10
+
+    It causes the 10% framges will drop.
+
 ## example with two gateways.
 
 - ACK-on-Error with 
