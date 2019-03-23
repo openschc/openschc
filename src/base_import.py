@@ -31,3 +31,9 @@ else:
 
 from bitarray import BitBuffer
 from mic_crc32 import get_mic, get_mic_size
+
+def b2hex(b):
+    """
+    As Micropython (Python 3.4) doesn't support bytes.hex().
+    """
+    return "".join(["%02x"%_ for _ in b])
