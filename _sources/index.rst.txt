@@ -11,6 +11,8 @@ Welcome to OpenSCHC's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   recv
+
 Our current activity
 --------------------
 
