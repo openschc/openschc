@@ -1,8 +1,13 @@
-from base_import import *  # used for now for differing modules in py/upy
-import pytest
+import sys
+sys.path.insert(0, ".")
+sys.path.insert(0, "..")
 
-@pytest.fixture()
-def bits_list():
+from base_import import *  # used for now for differing modules in py/upy
+if sys.implementation.name != "micropython":
+    import pytest
+
+
+def make_bits_list():
     bits_list = [
         (0xf, 4),
         (0,   0),
@@ -24,7 +29,8 @@ def bits_list():
     return bits_list
 
 
-def test_bitbuffer_consistency(bits_list):
+def test_bitbuffer_consistency():
+    bits_list = make_bits_list()
     #bitbuffer = BitBuffer(should_record_add=True)
     bitbuffer = BitBuffer()
     for bits, nb_bits in bits_list:
@@ -50,7 +56,8 @@ def test_bitbuffer_consistency(bits_list):
     assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception when not
 
 
-def test_check_newbitbuffer_consistency(bits_list):
+def test_check_newbitbuffer_consistency():
+    bits_list = make_bits_list()
     print (bits_list)
 
     bitbuffer = BitBuffer()
@@ -66,3 +73,9 @@ def test_check_newbitbuffer_consistency(bits_list):
         print (bits, nb_bits, bits2)
         assert bits == bits2  # XXX: raise exception
 #    assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception
+
+
+# for micropython and other tester.
+if __name__ == "__main__":
+    test_bitbuffer_consistency()
+    test_check_newbitbuffer_consistency()
