@@ -11,7 +11,12 @@ Welcome to OpenSCHC's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+Wiki
+--------
 
+See the 'Wiki on Github https://github.com/openschc/openschc/wiki'_ for previous documentation. 
+
+See branches 'here https://github.com/openschc/openschc/network'_ . 
 
 Indices and tables
 ==================
