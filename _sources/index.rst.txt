@@ -14,9 +14,9 @@ Welcome to OpenSCHC's documentation!
 Wiki
 --------
 
-See the 'Wiki on Github <https://github.com/openschc/openschc/wiki>'_ for previous documentation. 
+See the `Wiki on Github <https://github.com/openschc/openschc/wiki>`_ for previous documentation. 
 
-See branches 'here <https://github.com/openschc/openschc/network>'_ . 
+See branches `here <https://github.com/openschc/openschc/network>`_ . 
 
 Indices and tables
 ==================
