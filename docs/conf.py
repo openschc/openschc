@@ -166,6 +166,3 @@ texinfo_documents = [
      author, 'OpenSCHC', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
