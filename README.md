@@ -94,10 +94,12 @@ MIC, which the receiver checked and failed. Hence, the sender retransmitted the
 1st and 2nd fragments and when the receiver received all the fragments with the
 MIC, the transmission is successful.
 
-```  ./micropython $youropenschcdirectory/src/test_newschc.py --context
+```  
+./micropython $youropenschcdirectory/src/test_newschc.py --context
 example/context-100.json --rule-comp example/comp-rule-100.json --rule-fragin
 example/frag-rule-101.json --rule-fragout example/frag-rule-102.json --data-file
-test/icmpv6.dmp --loss-mode list --loss-param 1,2```
+test/icmpv6.dmp --loss-mode list --loss-param 1,2
+```
 
 
 
