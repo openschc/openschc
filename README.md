@@ -75,7 +75,7 @@ Step 2: download the needed micropython modules.
 Modules to be installed in order to run SCHC are:
   * argparse.py : ```./micropython -m upip install micropython-argparse```
   * copy.py : ```./micropython -m upip install micropython-copy```
-  * ipaddress.py : ```./micropython -m upip install micropython-ipaddress```
+  * types.py : ```./micropython -m upip install micropython-types```
 
 Libs are located under ```~/.micropython/lib```
 
