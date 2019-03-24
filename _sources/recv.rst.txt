@@ -10,15 +10,14 @@ ReassembleBase -- auto members
 This is from the .rst file, the rest is built from the code up to the next paragraph
 
 
-.. automodule:: schcrecv.schcrecv
-   :members:
+.. automodule:: schcrecv
 
 ReassembleBase -- explicit members
 ==================================
 
 This is from the .rst file.....
 
-.. automodule:: schcrecv.schcrecv
+.. automodule:: schcrecv
 
 .. autoclass:: ReassembleBase
    :members: get_mic
