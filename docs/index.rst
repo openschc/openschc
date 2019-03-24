@@ -7,6 +7,8 @@ Welcome to OpenSCHC's documentation!
 ====================================
 .. include:: ../README.rst
 
+.. include:: ../CONTRIBUTING.rst
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
