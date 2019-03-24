@@ -1,3 +1,8 @@
+"""
+.. module::mic_crc32 
+   :platform: Python, Micropython
+
+"""
 try:
     from binascii import crc32
 except ImportError:
