@@ -1,48 +1,50 @@
-# SCHC Implementation (for micropython and Python).
+# SCHC Implementation (for micropython and Python3).
 
-This document's objective is to provide pointers that could help one to test the
-SCHC protocol using the OpenSCHC implementation.
+This document's objective is to help one use the OpenSCHC implementation of the SCHC protocol.
+
 ToDo - See branches [here](https://github.com/openschc/openschc/network).
 
 ##  openschc
-OpenSCHC (Static Context Header Compression) is an open implementation of the
+OpenSCHC (Static Context Header Compression) is an open srouce implementation of the
 [SCHC
 protocol](https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1).
-which is licensed under the [MIT
+It is licensed under the [MIT
 License](https://github.com/openschc/openschc/blob/master/LICENSE)
 
-Further information about OpenSCHC
-[here](https://github.com/openschc/openschc/wiki)
+Further documentation about OpenSCHC is available
+[here](https://github.com/openschc/openschc/wiki).
 
 ## Understanding the Architecture
-A holistic architecture  of the SCHC is shown below:
+A global architecture of openSCHC implementation is shown below:
 
 <img style="float: right;" src="images/SCHC-Holistic-Arch.png">
 
-The *Rule Manager* defines the rule which is composed of two elements:
+The *Rule Manager* stores a set of Rules and provides methods to install or query Rules.
+
+Rules are composed of two elements:
 * A *ruleid* defines the rule number and
-* A *content* which contains an array of fields. For details refer to [SCHC
+* A *content* which contains an array of fields. For details, refer to [SCHC
 * protocol](https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1)
 
-The *App 1.. App n* indicates the devices (either end-nodes or gateway) which
-uses the *SCHC Orchestrator* to run the necessary SCHC operations briefly
+The *App 1.. App n* are the applications that invoke the *SCHC Orchestrator* to run the necessary SCHC operations briefly
 defined below:
-consumes the rules.
 
-*Compression/Decompression* is used by the App, to compress the packet header
-using a specific rule (whch is the rule ID) and upon receipt the C/D
-infrastructure decompresses the
-packet header based on the same rule.
+*Compression* is used on the sender side to compress the header of a packet provided by the App,
+using a specific rule (identified by its RuleID).
+*Decompression*: on the receiver side, upon receiving a compressed packet,
+the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.
 
-Similarly *Fragmentation/Reassembly* is done based on the Rule ID and other
-fields which could be referred to the [SCHC
+*Fragmentation* is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
+*Reassembly* is used on the receiver side to reconstruct the packet out of the set of fragments.
+
+Fragmentation modes and the associated parameters are described in the [SCHC
 protocol](https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1)
 
 *LPWAN Connector* is the LPWAN technology such as LoRa, Sigfox used for
 communication in the LPWAN.
 
-## Setting up the environment using python
-Step 1 : You need to have a minimum of Python version "3" implemented. Check
+## Setting up the environment using Python3
+Step 1 : Make sure you have a Python3 version installed. Check
 your python version with the following command and update the python version, if
 necessary
 ```sh
@@ -53,46 +55,44 @@ Step 2: Clone the [OpenSCHC repository](https://github.com/openschc/openschc)
 Step 3: For testing a hello world type using SCHC with different scenarios is
 explained [here](https://github.com/openschc/openschc/blob/master/src/README.md)
 
-## Setting up the environment using micro-python
-Micropython is Python for microcontrollers. But one can install it in one's
-distribution and emulate a microcontroller. In the context of SCHC, micro-python
-is needed to flash the software in the end-devices.
+## Setting up the environment using micropython
+Micropython is Python3 for microcontrollers. But it's also available for Windows/Linux/Unix
+so that you can test the code on computer.
 
-Step 1: Need to install micro-python on the device. Some pointers are indicated
+Step 1: install micropython. Some pointers are indicated
 below. For more details, please refer to the proper documentation:
-* For Linux distribs (it should be noted that this have not been tested on all
+* For Linux distribs (it should be noted that this has not been tested on all
 Linux distribs)
   * Micropython GitHub project :
   * ```https://github.com/micropython/micropython```
   * Specific instructions for the Unix port of micropython :
   * ```https://github.com/micropython/micropython#the-unix-version```
 * On OSX
-  * ```https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX```
-  * With brew ```brew install micropython```
-  * On OS X, if you get an error message about missing libffi, try the fix
+  * either recompile from the GitHub project, see ```https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX```
+  * or install with Brew: ```brew install micropython```
+  * Note: on OS X, if you get an error message about missing libffi, try the fix
   * described in
   * ```https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749```
 
-Step 2: Port the SCHC code.
-* Add a module to micropython: ```./micropython -m upip install
-* MICROPYTHON_MODULE```
-* Libs are located under ```~/.micropython/lib```
+Step 2: download the needed micropython modules.
 * Modules to be ported for SCHC
   * argparse.py : ```./micropython -m upip install micropython-argparse```
   * copy.py : ```./micropython -m upip install micropython-copy```
   * ipaddress.py : ```./micropython -m upip install micropython-ipaddress```
+* Libs are located under ```~/.micropython/lib```
 
 Step 3: Test the SCHC C/D and F/R
 
-* Simulate a simple ICMPv6 echo request/response using the SCHC protocol between
+* The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between
 the SCHC device and the gateway. The input JSON files are part of the SCHC
-orchestrator configuration(as you can see in the architecture figure above), and
-the loss parameters introduce the loss during transmission.
-As you can see from th results of the below command, the 1st and the 2nd SCHC
-fragments were lost and while the sender transmitted the last fragment with the
-MIC, which the receiver checked and failed. Hence, the sender retransmitted the
-1st and 2nd fragments and when the receiver received all the fragments with the
-MIC, the transmission is successful.
+orchestrator configuration (as you can see in the architecture figure above), and
+the loss parameters configure the link simulator to simulate packet drops on the radio link.
+
+As you can see from the results of the below command, the 1st and the 2nd SCHC
+fragments are lost. Therefore, when the sender transmits the last fragment that includes
+the MIC, the receiver MIC check fails.
+Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver
+receives all the fragments with the MIC, the transmission is successful.
 
 ```  
 ./micropython $youropenschcdirectory/src/test_newschc.py --context
@@ -111,5 +111,6 @@ of the source code repository.
 
 
 
-See the [Wiki](https://github.com/openschc/openschc/wiki) for documentation. See
-branches [here](https://github.com/openschc/openschc/network).
+See the [Wiki](https://github.com/openschc/openschc/wiki) for documentation.
+
+See branches [here](https://github.com/openschc/openschc/network).
