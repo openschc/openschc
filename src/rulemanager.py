@@ -1,5 +1,7 @@
 """
-This module is used to manage rules.
+.. module:: rulemanager
+   :platform: Python, Micropython
+   :synopsis: This module is used to manage rules.
 
 ## Base format
 

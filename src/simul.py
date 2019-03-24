@@ -1,3 +1,7 @@
+"""
+.. module:: simul
+   :platform: Python, Micropython
+"""
 #---------------------------------------------------------------------------
 
 from base_import import *

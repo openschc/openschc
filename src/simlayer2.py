@@ -1,3 +1,7 @@
+"""
+.. module:: simlayer2
+   :platform: Python, Micropython
+"""
 #---------------------------------------------------------------------------
 
 class SimulLayer2:
