@@ -33,6 +33,14 @@ T_UDP_APP_PORT = "UDP.APP_PORT"
 T_UDP_LEN = "UDP.LEN"
 T_UDP_CKSUM = "UDP.CKSUM"
 
+T_PROTO_COAP = "COAP"
+T_COAP_VERSION = "COAP.VER"
+T_COAP_TYPE = "COAP.TYPE"
+T_COAP_TKL = "COAP.TKL"
+T_COAP_CODE = "COAP.CODE"
+T_COAP_MID = "COAP.MID"
+
+
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
 T_DIR_BI = "BI"
@@ -60,11 +68,11 @@ T_CDA_APPIID = "APPIID"
 
 #---------------------------------------------------------------------------
 # 7.5.  Compression Decompression Actions (CDA)
-# 
+#
 #    The Compression Decompression Action (CDA) describes the actions
 #    taken during the compression of headers fields and the inverse action
 #    taken by the decompressor to restore the original value.
-# 
+#
 #    /--------------------+-------------+----------------------------\
 #    |  Action            | Compression | Decompression              |
 #    |                    |             |                            |
