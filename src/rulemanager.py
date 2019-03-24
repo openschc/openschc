@@ -400,6 +400,8 @@ class RuleManager:
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
         canon_rule_set = []
+        if "rule_set" not in rule["compression"]:
+            raise ValueError ("compression must have a rule_set.")
         for r in rule["compression"]["rule_set"]:
             canon_r = {}
             for k,v in r.items():

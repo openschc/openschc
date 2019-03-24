@@ -1,21 +1,28 @@
-
-M=../../micropython/ports/unix/micropython
+#
+# XXX this should be merged into the tests directory in the future.
+#
+ifeq ($(PY),)
+	PY := micropython
+	#PY := ../../micropython/ports/unix/micropython
+endif
 
 all: default
 	@# nothing to do
 
-default: test-oschc
+default: test-schc
 
-test-oschc:
-	${M} test_newschc.py
+test-schc:
+	${PY} test_newschc.py --data-file test/icmpv6.dmp
 
 style:
 	pycodestyle *.py
 
-all-tests: test-bitarray test-simsched test-oschc
+pytest:
+	pytest -v
 
+all-tests:
+	@echo "Please move into the tests directory, and type make all-tests."
 
-test-bitarray: ; ${M} test_bitarray.py
-test-simsched: ; ${M} test_simsched.py
-test-oschc: ; ${M} test_oschc.py
-test-schcrecv: ; ${M} test_schcrecv.py
+#test-simsched: ; ${PY} test_simsched.py
+#test-oschc: ; ${PY} test_oschc.py
+#test-schcrecv: ; ${PY} test_schcrecv.py
