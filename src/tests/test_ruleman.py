@@ -1,8 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import sys
+sys.path.insert(0, ".")
+sys.path.insert(0, "..")
 
-from __future__ import print_function
 from rulemanager import RuleManager
+from bitarray import BitBuffer
+if sys.implementation.name != "micropython":
+    import pytest
+
 
 context1 = {
     "devL2Addr":"AABBCCDD",
@@ -18,8 +22,7 @@ bogusRule0 = { # bogus rule with no frag or comp
 rule1 = {
     "ruleID" : 4,
     "ruleLength" : 5,
-    "compression" : {
-    }
+    "compression" : { "rule_set": [] }
 }
 rule2 = {
     "ruleID" : 4,
@@ -55,17 +58,22 @@ rule3 = {
 conflictingRule0 = {
     "ruleID" : 15,
     "ruleLength" : 4,
-    "compression" : {},
+    "compression" : { "rule_set": [] }
     }
 
-RM = RuleManager()
-RM.add_context(context1, rule1,rule2,rule3)
-RM.add_context(context2, rule1)
-print(RM._db)
-#RM.add_rules(context1, [conflictingRule0])
-#RM.add_rules(context1, [bogusRule0])
-print(RM.find_context_bydevL2addr("AABBCCDD"))
-print(RM.find_context_bydstiid("2001:0db8:85a3::beef"))
+def test_ruleman_01():
+    # XXX actually, it is not test code right now.
+    RM = RuleManager()
+    RM.add_context(context1, rule1,rule2,rule3)
+    RM.add_context(context2, rule1)
+    print(RM._db)
+    #RM.add_rules(context1, [conflictingRule0])
+    #RM.add_rules(context1, [bogusRule0])
+    print(RM.find_context_bydevL2addr("AABBCCDD"))
+    print(RM.find_context_bydstiid("2001:0db8:85a3::beef"))
+    RM.find_rule_bypacket(context1, BitBuffer(int("10000111",2).to_bytes(1, "big")))
 
-from bitarray import BitBuffer
-RM.find_rule_bypacket(context1, BitBuffer(int("10000111",2).to_bytes(1, "big")))
+
+# for micropython and other tester.
+if __name__ == "__main__":
+    test_ruleman_01()
