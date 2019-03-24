@@ -1,6 +1,5 @@
 OpenSCHC tests
-==================
-
+==============
 
 ## Requirements
 
@@ -13,7 +12,30 @@ pip install pytest
 
 ## Run tests
 
-In root folder:
+Two ways to execute the test.
+
+1. pytest framework.
+
+In the src directory, type:
 ```
 make pytest
+```
+
+2. a traditional way.
+
+Move into the tests directory.
+
+If you want to do the test with micropython, you can just type:
+```
+make all-tests
+```
+
+If you want to use your python, set it into the PY variable like below:
+```
+PY=python3 make all-tests
+```
+
+If the path is a relative path, please make the relative path from the tests directory.
+```
+PY=../../../micropython/ports/unix/micropython make all-tests
 ```
