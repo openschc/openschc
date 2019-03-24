@@ -17,7 +17,7 @@ Further documentation about OpenSCHC is available
 ## Understanding the Architecture
 A global architecture of openSCHC implementation is shown below:
 
-<img style="float: right;" src="images/SCHC-Holistic-Arch.png">
+<img style="float: right;" src="images/openSHCH_arch.png">
 
 The *Rule Manager* stores a set of Rules and provides methods to install or query Rules.
 
