@@ -40,57 +40,50 @@
             
   <div class="section" id="welcome-to-openschc-s-documentation">
 <h1>Welcome to OpenSCHC’s documentation!<a class="headerlink" href="#welcome-to-openschc-s-documentation" title="Permalink to this headline">¶</a></h1>
-</div>
 <div class="section" id="what-is-openschc">
-<h1>What is OpenSCHC ?<a class="headerlink" href="#what-is-openschc" title="Permalink to this headline">¶</a></h1>
+<h2>What is OpenSCHC ?<a class="headerlink" href="#what-is-openschc" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="openschc">
-<h2>OpenSCHC<a class="headerlink" href="#openschc" title="Permalink to this headline">¶</a></h2>
+<h3>OpenSCHC<a class="headerlink" href="#openschc" title="Permalink to this headline">¶</a></h3>
 <p>OpenSCHC is a OpenSource Implementation of <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/">SCHC (Static Context Header Compression)</a> currently being standardized by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> at the IETF. Oversimplifying, this is essentially IPv6 compression and fragmentation intended for low datarate, long range IoT networks.</p>
 <p>The short/medium term goal is to organize SCHC Hackathons that occur at the IETF meetings.</p>
 <p>The long term wish is to have a stable, open-source, reference codebase for the SCHC protocol (in Python)</p>
 <p>OpenSCHC is developed to work with micropython.</p>
 <p>ToDo - See branches here : <a class="reference external" href="https://github.com/openschc/openschc/network">https://github.com/openschc/openschc/network</a> .</p>
 <p>OpenSCHC is licensed under the <a class="reference external" href="https://github.com/openschc/openschc/blob/master/LICENSE">MIT License</a> .</p>
-<p>Further documentation about OpenSCHC is available <a class="reference external" href="https://github.com/openschc/openschc/wiki">here</a> .</p>
+<p>Further documentation about OpenSCHC is available following <a class="reference external" href="https://github.com/openschc/openschc/wiki">https://github.com/openschc/openschc/wiki</a> .</p>
 </div>
 <div class="section" id="understanding-the-architecture">
-<h2>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h2>
+<h3>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h3>
 <p>A global architecture of openSCHC implementation is shown below:</p>
 <p>&lt;img style=”float: right;” src=”images/openSHCH_arch.png”&gt;</p>
 <p>The <em>Rule Manager</em> stores a set of Rules and provides methods to install or retreive Rules.</p>
 <p>Rules are composed of two elements:
 * A <em>RuleID</em> which identifies the Rule by its number, and
 * A <em>content</em> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></p>
-<p>The <em>App 1 … App n</em> are the applications that invoke the <em>SCHC Orchestrator</em> to run the necessary SCHC operations, which are briefly
-defined below:</p>
-<p><em>Compression</em> is used on the sender side to compress the header of a packet provided by the App,
-using a specific rule (identified by its RuleID).
-<em>Decompression</em>: on the receiver side, upon receiving a compressed packet,
-the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
+<p>The <em>App 1 … App n</em> are the applications that invoke the <em>SCHC Orchestrator</em> to run the necessary SCHC operations, which are briefly defined below:</p>
+<p><em>Compression</em> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
+<em>Decompression</em>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
 <p><em>Fragmentation</em> is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
 <em>Reassembly</em> is used on the receiver side to reconstruct the packet out of the set of fragments.</p>
-<p>Fragmentation modes and the associated parameters are described in the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC
-protocol</a> .</p>
+<p>Fragmentation modes and the associated parameters are described in the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a> .</p>
 <p><em>Network Connector</em> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
 or to a link simulator.</p>
 </div>
 <div class="section" id="installing-the-environment">
-<h2>Installing the environment<a class="headerlink" href="#installing-the-environment" title="Permalink to this headline">¶</a></h2>
+<h3>Installing the environment<a class="headerlink" href="#installing-the-environment" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="setting-up-the-environment-using-python3">
-<h3>Setting up the environment using Python3<a class="headerlink" href="#setting-up-the-environment-using-python3" title="Permalink to this headline">¶</a></h3>
+<h4>Setting up the environment using Python3<a class="headerlink" href="#setting-up-the-environment-using-python3" title="Permalink to this headline">¶</a></h4>
 <p>Step 1 : Make sure you have a Python3 version installed. Check your python version with the following command and update the python version, if necessary:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">--</span><span class="n">version</span>
 </pre></div>
 </div>
-<p>Step 2: Clone the [OpenSCHC repository](<a class="reference external" href="https://github.com/openschc/openschc">https://github.com/openschc/openschc</a>).</p>
-<p>Step 3: For testing a simple example using SCHC under different scenarios, see [here](<a class="reference external" href="https://github.com/openschc/openschc/blob/master/src/README.md">https://github.com/openschc/openschc/blob/master/src/README.md</a>).</p>
+<p>Step 2: Clone the <a class="reference external" href="https://github.com/openschc/openschc">OpenSCHC repository</a> .</p>
+<p>Step 3: For testing a simple example using SCHC under different scenarios, see <a class="reference external" href="https://github.com/openschc/openschc/blob/master/src/README.md">https://github.com/openschc/openschc/blob/master/src/README.rst</a>.</p>
 </div>
 <div class="section" id="setting-up-the-environment-using-micropython">
-<h3>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h3>
-<p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix
-machine. Ues this to test your code on a computer before trying on an embedded device.</p>
-<p>Step 1: install micropython. Some pointers are indicated
-below. For more details, please refer to the relevant documentation.</p>
+<h4>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h4>
+<p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
+<p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
 <ul class="simple">
 <li>Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</li>
 <li>For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></li>
@@ -124,13 +117,13 @@ test/icmpv6.dmp --loss-mode list --loss-param 1,2
 </div>
 </div>
 <div class="section" id="file-classification">
-<h2>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h2>
+<h3>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h3>
 <p>Refer to the [File Classification](docs/File_Classification.md) for an overview
 of the source code repository.</p>
 </div>
 </div>
 <div class="section" id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
 <p>TODO – Call to Contribute</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
@@ -139,6 +132,7 @@ of the source code repository.</p>
 <li class="toctree-l1"><a class="reference internal" href="recv.html#reassemblebase-auto-members">ReassembleBase – auto members</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recv.html#reassemblebase-explicit-members">ReassembleBase – explicit members</a></li>
 </ul>
+</div>
 </div>
 <div class="section" id="our-current-activity">
 <h2>Our current activity<a class="headerlink" href="#our-current-activity" title="Permalink to this headline">¶</a></h2>
@@ -150,14 +144,14 @@ of the source code repository.</p>
 <p>See the <a class="reference external" href="https://github.com/openschc/openschc/wiki">Wiki on Github</a> and <a class="reference external" href="https://github.com/openschc-attic/doc/wiki/External-Ressources--(Code)">OpenSCHC Attic on Github</a> for previous documentation.</p>
 <p>See branches <a class="reference external" href="https://github.com/openschc/openschc/network">here</a> .</p>
 </div>
-</div>
 <div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
+</div>
 </div>
 
 
