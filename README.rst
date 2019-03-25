@@ -23,7 +23,7 @@ Understanding the architecture
 
 A global architecture of openSCHC implementation is shown below:
 
-.. image:: images/openSCHC_arch.png
+.. image:: _static/openSCHC_arch.png
    :alt: OpenSCHC Architecture
 
 The **Rule Manager** stores a set of Rules and provides methods to install or retreive Rules.
