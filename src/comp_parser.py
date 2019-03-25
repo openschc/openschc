@@ -2,8 +2,9 @@
 comp_parser.py transforms a packet dump into a dictionnary. Dictionnary
 format is the following:
 {
-"field ID": [value, position, field length in bits, fixed or variable ]
+("field ID", position) : [value, field length in bits, fixed or variable ]
 }
+since field ID can be repeated, the index is the tuple field ID and position.
 """
 
 from base_import import *
