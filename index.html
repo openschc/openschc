@@ -56,17 +56,17 @@
 <h3>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h3>
 <p>A global architecture of openSCHC implementation is shown below:</p>
 <p>&lt;img style=”float: right;” src=”images/openSHCH_arch.png”&gt;</p>
-<p>The <em>Rule Manager</em> stores a set of Rules and provides methods to install or retreive Rules.</p>
+<p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retreive Rules.</p>
 <p>Rules are composed of two elements:
-* A <em>RuleID</em> which identifies the Rule by its number, and
-* A <em>content</em> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></p>
-<p>The <em>App 1 … App n</em> are the applications that invoke the <em>SCHC Orchestrator</em> to run the necessary SCHC operations, which are briefly defined below:</p>
-<p><em>Compression</em> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
-<em>Decompression</em>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
-<p><em>Fragmentation</em> is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
-<em>Reassembly</em> is used on the receiver side to reconstruct the packet out of the set of fragments.</p>
+* A <strong>RuleID</strong> which identifies the Rule by its number, and
+* A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></p>
+<p>The <strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
+<p><strong>Compression</strong> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
+<strong>Decompression</strong>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
+<p><strong>Fragmentation</strong> is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
+<strong>Reassembly</strong> is used on the receiver side to reconstruct the packet out of the set of fragments.</p>
 <p>Fragmentation modes and the associated parameters are described in the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a> .</p>
-<p><em>Network Connector</em> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
+<p><strong>Network Connector</strong> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
 or to a link simulator.</p>
 </div>
 <div class="section" id="installing-the-environment">
@@ -84,13 +84,20 @@ or to a link simulator.</p>
 <h4>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h4>
 <p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
 <p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
-<ul class="simple">
-<li>Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</li>
-<li>For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></li>
-<li>On OSX
-* either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .
-* or install with Brew: <code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code>
-* Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></li>
+<ul>
+<li><p class="first">Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p>
+</li>
+<li><p class="first">For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p>
+</li>
+<li><p class="first">On OSX</p>
+<blockquote>
+<div><ul class="simple">
+<li>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</li>
+<li>or install with Brew: <code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></li>
+<li>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 <p>Step 2: download the needed micropython modules.
 Modules to be installed in order to run SCHC are:
