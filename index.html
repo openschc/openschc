@@ -57,9 +57,11 @@
 <p>A global architecture of openSCHC implementation is shown below:</p>
 <img alt="OpenSCHC Architecture" src="images/openSCHC_arch.png" />
 <p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retreive Rules.</p>
-<p>Rules are composed of two elements:
-* A <strong>RuleID</strong> which identifies the Rule by its number, and
-* A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></p>
+<p>Rules are composed of two elements:</p>
+<ul class="simple">
+<li>A <strong>RuleID</strong> which identifies the Rule by its number, and</li>
+<li>A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></li>
+</ul>
 <p>The <strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
 <p><strong>Compression</strong> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
 <strong>Decompression</strong>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
@@ -99,22 +101,18 @@ or to a link simulator.</p>
 </div></blockquote>
 </li>
 </ul>
-<p>Step 2: download the needed micropython modules.
-Modules to be installed in order to run SCHC are:
-* argparse.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code>
-* copy.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code>
-* types.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></p>
+<p>Step 2: download the needed micropython modules.</p>
+<p>Modules to be installed in order to run SCHC are:</p>
+<ul class="simple">
+<li>argparse.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></li>
+<li>copy.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></li>
+<li>types.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></li>
+</ul>
 <p>Libs are located under <code class="docutils literal"><span class="pre">~/.micropython/lib</span></code></p>
 <p>Step 3: Test the SCHC C/D and F/R</p>
-<p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between
-the SCHC device and the gateway. The input JSON files are part of the SCHC
-orchestrator configuration (as you can see in the architecture figure above), and
-the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
-<p>As you can see from the results of the below command, the 1st and the 2nd SCHC
-fragments are lost. Therefore, when the sender transmits the last fragment that includes
-the MIC, the receiver MIC check fails.
-Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver
-receives all the fragments with the MIC, the transmission is successful:</p>
+<p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between the SCHC device and the gateway. The input JSON files are part of the SCHC orchestrator configuration (as you can see in the architecture figure above), and the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
+<p>As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
+Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>./micropython $youropenschcdirectory/src/test_newschc.py --context \
 example/context-100.json --rule-comp example/comp-rule-100.json --rule-fragin \
 example/frag-rule-101.json --rule-fragout example/frag-rule-102.json --data-file \
@@ -125,8 +123,7 @@ test/icmpv6.dmp --loss-mode list --loss-param 1,2
 </div>
 <div class="section" id="file-classification">
 <h3>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h3>
-<p>Refer to the [File Classification](docs/File_Classification.md) for an overview
-of the source code repository.</p>
+<p>Refer to the [File Classification](docs/File_Classification.md) for an overview of the source code repository.</p>
 </div>
 </div>
 <div class="section" id="contributing">
