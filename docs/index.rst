@@ -8,14 +8,6 @@ Welcome to OpenSCHC's documentation!
 
 .. include:: ../README.rst
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   recv
-   File_Classification
-   CONTRIBUTING
-
 Contributing
 ============
 
@@ -31,7 +23,7 @@ Direct link to the Etherpad for on-line information exchange at the IETF 104 Hac
 Wiki
 ========
 
-See the `Wiki on Github <https://github.com/openschc/openschc/wiki>`_ and `OpenSCHC Attic on Github <https://github.com/openschc-attic/doc/wiki/External-Ressources--(Code)>`_ for previous documentation. 
+See the `Previous Wiki on Github <https://github.com/openschc-attic/doc/wiki>`_ and `OpenSCHC Attic on Github <https://github.com/openschc-attic/doc/wiki/External-Ressources--(Code)>`_ for previous documentation. 
 
 See branches `here <https://github.com/openschc/openschc/network>`_ . 
 
@@ -41,3 +33,8 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Table of contents
+-----------------
+.. include:: toc.rst
+

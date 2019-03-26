@@ -1,5 +1,5 @@
 OpenSCHC Reception Module
-=========================
+*************************
 
 .. automodule:: schcrecv
 
@@ -22,3 +22,5 @@ This is from the .rst file.....
 
 .. autoclass:: ReassembleBase
    :members: get_mic
+
+.. include:: back_index.rst

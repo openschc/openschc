@@ -60,3 +60,4 @@ Each of the different components is
 
   * comp_bitmap.py       ``# this is test implementation for bitmap compression``
 
+.. include:: back_index.rst
