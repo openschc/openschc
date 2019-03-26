@@ -1,0 +1,12 @@
+OpenSCHC Rule Manager Module
+****************************
+
+.. automodule:: rulemanager
+
+.. autoclass:: DictToAttrDeep
+   :members:
+
+.. autoclass:: RuleManager
+   :members:
+
+.. include:: back_index.rst

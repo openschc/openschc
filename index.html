@@ -1,0 +1,224 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to OpenSCHC’s documentation! &#8212; OpenSCHC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File Classification" href="File_Classification.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-openschc-s-documentation">
+<h1>Welcome to OpenSCHC’s documentation!<a class="headerlink" href="#welcome-to-openschc-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-openschc">
+<h2>What is OpenSCHC ?<a class="headerlink" href="#what-is-openschc" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="openschc">
+<h3>OpenSCHC<a class="headerlink" href="#openschc" title="Permalink to this headline">¶</a></h3>
+<p>OpenSCHC is a OpenSource Implementation of <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/">SCHC (Static Context Header Compression)</a> currently being standardized by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> at the IETF. Oversimplifying, this is essentially IPv6 compression and fragmentation intended for low datarate, long range IoT networks.</p>
+<p>The short/medium term goal is to organize SCHC Hackathons that occur at the IETF meetings.</p>
+<p>The long term wish is to have a stable, open-source, reference codebase for the SCHC protocol (in Python)</p>
+<p>OpenSCHC is developed to work with micropython.</p>
+<p>ToDo - See branches here : <a class="reference external" href="https://github.com/openschc/openschc/network">https://github.com/openschc/openschc/network</a> .</p>
+<p>OpenSCHC is licensed under the <a class="reference external" href="https://github.com/openschc/openschc/blob/master/LICENSE">MIT License</a> .</p>
+<p>Further documentation about OpenSCHC is available following <a class="reference external" href="https://github.com/openschc/openschc/wiki">https://github.com/openschc/openschc/wiki</a> .</p>
+</div>
+<div class="section" id="understanding-the-architecture">
+<h3>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h3>
+<p>A global architecture of openSCHC implementation is shown below:</p>
+<img alt="OpenSCHC Architecture" src="_images/openSCHC_arch.png" />
+<p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retreive Rules.</p>
+<p>Rules are composed of two elements:</p>
+<ul class="simple">
+<li>A <strong>RuleID</strong> which identifies the Rule by its number, and</li>
+<li>A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></li>
+</ul>
+<p>The <strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
+<p><strong>Compression</strong> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
+<strong>Decompression</strong>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
+<p><strong>Fragmentation</strong> is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
+<strong>Reassembly</strong> is used on the receiver side to reconstruct the packet out of the set of fragments.</p>
+<p>Fragmentation modes and the associated parameters are described in the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a> .</p>
+<p><strong>Network Connector</strong> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
+or to a link simulator.</p>
+</div>
+<div class="section" id="installing-the-environment">
+<h3>Installing the environment<a class="headerlink" href="#installing-the-environment" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="setting-up-the-environment-using-python3">
+<h4>Setting up the environment using Python3<a class="headerlink" href="#setting-up-the-environment-using-python3" title="Permalink to this headline">¶</a></h4>
+<p>Step 1 : Make sure you have a Python3 version installed. Check your python version with the following command and update the python version, if necessary:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+<p>Step 2: Clone the <a class="reference external" href="https://github.com/openschc/openschc">OpenSCHC repository</a> .</p>
+<p>Step 3: For testing a simple example using SCHC under different scenarios, see <a class="reference external" href="https://github.com/openschc/openschc/blob/master/src/README.md">https://github.com/openschc/openschc/blob/master/src/README.rst</a>.</p>
+</div>
+<div class="section" id="setting-up-the-environment-using-micropython">
+<h4>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h4>
+<p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
+<p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
+<ul>
+<li><p class="first">Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p>
+</li>
+<li><p class="first">For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p>
+</li>
+<li><p class="first">On OSX</p>
+<blockquote>
+<div><ul class="simple">
+<li>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</li>
+<li>or install with Brew: <code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></li>
+<li>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Step 2: download the needed micropython modules.</p>
+<p>Modules to be installed in order to run SCHC are:</p>
+<ul class="simple">
+<li>argparse.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></li>
+<li>copy.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></li>
+<li>types.py : <code class="docutils literal"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></li>
+</ul>
+<p>Libs are located under <code class="docutils literal"><span class="pre">~/.micropython/lib</span></code></p>
+<p>Step 3: Test the SCHC C/D and F/R</p>
+<p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between the SCHC device and the gateway. The input JSON files are part of the SCHC orchestrator configuration (as you can see in the architecture figure above), and the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
+<p>As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
+Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>micropython $youropenschcdirectory/src/test_newschc.py --context \
+example/context-100.json --rule-comp example/comp-rule-100.json \
+--rule-fragin example/frag-rule-101.json --rule-fragout \
+example/frag-rule-102.json --data-file test/icmpv6.dmp \
+--loss-mode list --loss-param 1,2
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="file-classification">
+<h3>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h3>
+<p>Refer to the <a class="reference internal" href="File_Classification.html"><span class="doc">File Classification</span></a> for an overview of the source code repository.</p>
+</div>
+</div>
+<div class="section" id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
+<p>Want to help ? See our <a class="reference internal" href="CONTRIBUTING.html"><span class="doc">Contributing Guidelines</span></a> for more details on the future work on the OpenSCHC project.</p>
+</div>
+<div class="section" id="our-current-activity">
+<h2>Our current activity<a class="headerlink" href="#our-current-activity" title="Permalink to this headline">¶</a></h2>
+<p>We are currently participating the <a class="reference external" href="https://github.com/openschc/openschc/wiki/IETF-104-Hackathon-LPWAN">IETF 104 Hackathon</a></p>
+<p>Direct link to the Etherpad for on-line information exchange at the IETF 104 Hackathon : <a class="reference external" href="https://etherpad.tools.ietf.org/p/openschc">https://etherpad.tools.ietf.org/p/openschc</a></p>
+</div>
+<div class="section" id="wiki">
+<h2>Wiki<a class="headerlink" href="#wiki" title="Permalink to this headline">¶</a></h2>
+<p>See the <a class="reference external" href="https://github.com/openschc-attic/doc/wiki">Previous Wiki on Github</a> and <a class="reference external" href="https://github.com/openschc-attic/doc/wiki/External-Ressources--(Code)">OpenSCHC Attic on Github</a> for previous documentation.</p>
+<p>See branches <a class="reference external" href="https://github.com/openschc/openschc/network">here</a> .</p>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Micropython-specificities.html">Micropython specificities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IETF-104-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rulemanager.html">OpenSCHC Rule Manager Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="File_Classification.html" title="next chapter">File Classification</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Micropython-specificities.html">Micropython specificities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IETF-104-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rulemanager.html">OpenSCHC Rule Manager Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, OpenSCHC.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
