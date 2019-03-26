@@ -92,14 +92,15 @@ The following command line will simulate a simple ICMPv6 echo request/response u
 As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
 Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful::
 
-   ./micropython $youropenschcdirectory/src/test_newschc.py --context \
-   example/context-100.json --rule-comp example/comp-rule-100.json --rule-fragin \
-   example/frag-rule-101.json --rule-fragout example/frag-rule-102.json --data-file \
-   test/icmpv6.dmp --loss-mode list --loss-param 1,2
+   micropython $youropenschcdirectory/src/test_newschc.py --context \
+   example/context-100.json --rule-comp example/comp-rule-100.json \
+   --rule-fragin example/frag-rule-101.json --rule-fragout \
+   example/frag-rule-102.json --data-file test/icmpv6.dmp \
+   --loss-mode list --loss-param 1,2
 
 
 File classification
 -------------------
 
-Refer to the [File Classification](docs/File_Classification.md) for an overview of the source code repository.
+Refer to the :doc:`File_Classification` for an overview of the source code repository.
 
