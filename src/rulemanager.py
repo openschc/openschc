@@ -1,8 +1,4 @@
 """
-.. module:: rulemanager
-   :platform: Python, Micropython
-   :synopsis: This module is used to manage rules.
-
 ## Base format
 
 A context and rule is written in JSON.
@@ -200,6 +196,12 @@ Example 2:
 
 from base_import import *
 from copy import deepcopy
+
+"""
+.. module:: rulemanager
+   :platform: Python, Micropython
+   :synopsis: This module is used to manage rules.
+"""
 
 # XXX to be checked whether they are needed.
 DEFAULT_FRAGMENT_RID = 1
@@ -466,4 +468,5 @@ class RuleManager:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
+
 

@@ -1,3 +1,11 @@
+"""
+.. module:: bitarray
+    :platform: Code running on MicroPython
+    :synopsis: SCHC Bit Buffer Management
+
+"""
+
+
 BITS_PER_BYTE = 8
 
 class BitBuffer:

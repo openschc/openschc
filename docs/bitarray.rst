@@ -1,16 +1,15 @@
 OpenSCHC Reception Module
 *************************
 
-.. automodule:: schcrecv
-
+.. automodule:: bitarray
+   :members:
 
 ReassembleBase -- auto members
 ==============================
 
 This is from the .rst file, the rest is built from the code up to the next paragraph
 
-
-.. automodule:: schcrecv
+.. automodule:: bitarray
    :members:
 
 ReassembleBase -- explicit members
@@ -18,9 +17,9 @@ ReassembleBase -- explicit members
 
 This is from the .rst file.....
 
-.. automodule:: schcrecv
+.. automodule:: bitarray
 
-.. autoclass:: ReassembleBase
-   :members: get_mic
+.. autoclass:: BitBuffer
+   :members:
 
 .. include:: back_index.rst
