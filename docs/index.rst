@@ -8,15 +8,18 @@ Welcome to OpenSCHC's documentation!
 
 .. include:: ../README.rst
 
-.. include:: ../CONTRIBUTING.rst
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    recv
    File_Classification
+   CONTRIBUTING
 
+Contributing
+============
+
+Want to help ? See our :doc:`CONTRIBUTING` for more details on the future work on the OpenSCHC project.
 
 Our current activity
 ====================
