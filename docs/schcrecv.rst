@@ -3,21 +3,6 @@ OpenSCHC Reception Module
 
 .. automodule:: schcrecv
 
-
-ReassembleBase -- auto members
-==============================
-
-This is from the .rst file, the rest is built from the code up to the next paragraph
-
-
-.. automodule:: schcrecv
-   :members:
-
-ReassembleBase -- explicit members
-==================================
-
-This is from the .rst file.....
-
 .. automodule:: schcrecv
 
 .. autoclass:: ReassembleBase
