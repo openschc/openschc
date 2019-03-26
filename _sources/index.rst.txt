@@ -18,9 +18,6 @@ Welcome to OpenSCHC's documentation!
    File_Classification
 
 
-
-
-
 Our current activity
 ====================
 
