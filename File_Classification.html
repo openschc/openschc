@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>FILE CLASSIFICATIO &#8212; OpenSCHC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="OpenSCHC Reception Module" href="recv.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="file-classificatio">
+<h1>FILE CLASSIFICATIO<a class="headerlink" href="#file-classificatio" title="Permalink to this headline">¶</a></h1>
+<p>Each of the different components is</p>
+<ul class="simple">
+<li>RULE_MANAGERS<ul>
+<li>rulemanager.py      <code class="docutils literal"><span class="pre">#</span> <span class="pre">store</span> <span class="pre">and</span> <span class="pre">retrieve</span> <span class="pre">contexts</span></code></li>
+</ul>
+</li>
+<li>COMMON TO C/D &amp; F/R<ul>
+<li>bitarray.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">bit</span> <span class="pre">aligned</span> <span class="pre">buffer</span> <span class="pre">management</span></code></li>
+</ul>
+</li>
+<li>COMPRESSION/DECOMPRESSION prefix<ul>
+<li>schccomp.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">basic</span> <span class="pre">compression/decompression</span> <span class="pre">fct</span></code></li>
+</ul>
+</li>
+<li>FRAGMENTATION/REASSEMBLY prefix<ul>
+<li>mic_crc32.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">MIC</span> <span class="pre">computation/check</span></code></li>
+<li>schcmsg.py          <code class="docutils literal"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">frag</span> <span class="pre">header</span></code></li>
+<li>schcrecv.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">reassemble</span> <span class="pre">fragments</span></code></li>
+<li>schcsend.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">send</span> <span class="pre">fragments</span></code></li>
+<li>schctile.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">tiles</span></code></li>
+</ul>
+</li>
+<li>SYSTEM<ul>
+<li>base_import.py      <code class="docutils literal"><span class="pre">#</span> <span class="pre">import</span> <span class="pre">module</span> <span class="pre">for</span> <span class="pre">python</span> <span class="pre">or</span> <span class="pre">upython</span></code></li>
+</ul>
+</li>
+<li>LPWAN Interface prefix</li>
+<li>SIMULATION            <code class="docutils literal"><span class="pre">#</span> <span class="pre">Code</span> <span class="pre">for</span> <span class="pre">simulation</span> <span class="pre">only</span></code><ul>
+<li>simlayer2.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">emulate</span> <span class="pre">a</span> <span class="pre">L2</span></code></li>
+<li>simsched.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">schedule</span> <span class="pre">transmission</span> <span class="pre">in</span> <span class="pre">simulated</span> <span class="pre">network</span> <span class="pre">?</span></code></li>
+<li>simul.py            <code class="docutils literal"><span class="pre">#</span> <span class="pre">eumulate</span> <span class="pre">L2</span> <span class="pre">?</span></code></li>
+<li>cond_true.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">used</span> <span class="pre">to</span> <span class="pre">emulate</span> <span class="pre">transmission</span> <span class="pre">errors</span></code></li>
+</ul>
+</li>
+<li>APPLICATION<ul>
+<li>packet_picker.py    <code class="docutils literal"><span class="pre">#</span> <span class="pre">read</span> <span class="pre">a</span> <span class="pre">pcap</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">get</span> <span class="pre">packet</span></code></li>
+<li>schcgw.py           <code class="docutils literal"><span class="pre">#</span> <span class="pre">interface</span> <span class="pre">with</span> <span class="pre">LPWAN</span></code></li>
+</ul>
+</li>
+<li>ORCHESTRATION<ul>
+<li>schc.py             <code class="docutils literal"><span class="pre">#</span> <span class="pre">start</span> <span class="pre">rule</span> <span class="pre">manager,</span> <span class="pre">cC/D</span> <span class="pre">and</span> <span class="pre">F/R</span></code></li>
+</ul>
+</li>
+<li>TEST<ul>
+<li>test_bitarray.py</li>
+<li>test_bitarray2.py</li>
+<li>test_bitmap.py</li>
+<li>test_compress.py</li>
+<li>test_frag.py</li>
+<li>test_newschc.py</li>
+<li>test_oschc.py</li>
+<li>test_ruleman.py</li>
+<li>test_simsched.py</li>
+</ul>
+</li>
+<li>UNKNOWN STATUS<ul>
+<li>comp_bitmap.py       <code class="docutils literal"><span class="pre">#</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">test</span> <span class="pre">implementation</span> <span class="pre">for</span> <span class="pre">bitmap</span> <span class="pre">compression</span></code></li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="recv.html" title="previous chapter">OpenSCHC Reception Module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, OpenSCHC.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/File_Classification.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

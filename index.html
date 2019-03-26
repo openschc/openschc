@@ -113,17 +113,18 @@ or to a link simulator.</p>
 <p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between the SCHC device and the gateway. The input JSON files are part of the SCHC orchestrator configuration (as you can see in the architecture figure above), and the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
 <p>As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
 Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>./micropython $youropenschcdirectory/src/test_newschc.py --context \
-example/context-100.json --rule-comp example/comp-rule-100.json --rule-fragin \
-example/frag-rule-101.json --rule-fragout example/frag-rule-102.json --data-file \
-test/icmpv6.dmp --loss-mode list --loss-param 1,2
+<div class="highlight-default"><div class="highlight"><pre><span></span>micropython $youropenschcdirectory/src/test_newschc.py --context \
+example/context-100.json --rule-comp example/comp-rule-100.json \
+--rule-fragin example/frag-rule-101.json --rule-fragout \
+example/frag-rule-102.json --data-file test/icmpv6.dmp \
+--loss-mode list --loss-param 1,2
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="file-classification">
 <h3>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h3>
-<p>Refer to the [File Classification](docs/File_Classification.md) for an overview of the source code repository.</p>
+<p>Refer to the :doc: <cite>File_Classification</cite> for an overview of the source code repository.</p>
 </div>
 </div>
 <div class="section" id="contributing">
@@ -135,6 +136,7 @@ test/icmpv6.dmp --loss-mode list --loss-param 1,2
 <li class="toctree-l1"><a class="reference internal" href="recv.html">OpenSCHC Reception Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recv.html#reassemblebase-auto-members">ReassembleBase – auto members</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recv.html#reassemblebase-explicit-members">ReassembleBase – explicit members</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Classification.html">FILE CLASSIFICATIO</a></li>
 </ul>
 </div>
 </div>
