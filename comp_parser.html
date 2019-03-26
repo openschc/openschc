@@ -38,8 +38,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="openschc-parser-module">
-<h1>OpenSCHC Parser Module<a class="headerlink" href="#openschc-parser-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-comp_parser">
+<span id="openschc-parser-module"></span><h1>OpenSCHC Parser Module<a class="headerlink" href="#module-comp_parser" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="comp_parser.Parser">
+<em class="property">class </em><code class="descclassname">comp_parser.</code><code class="descname">Parser</code><span class="sig-paren">(</span><em>protocol</em><span class="sig-paren">)</span><a class="headerlink" href="#comp_parser.Parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parser takes a bytearray and transforms it into a dictionnay indexed by field id.</p>
+<dl class="method">
+<dt id="comp_parser.Parser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>pkt</em>, <em>direction</em>, <em>layer='IPv6'</em><span class="sig-paren">)</span><a class="headerlink" href="#comp_parser.Parser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parsing a byte array:
+- pkt is the bytearray to be parsed
+- direction can be T_DIR_UP or T_DIR_DW
+- layer is a optional argument: 3 means that parsing must start at ip Layer</p>
+</dd></dl>
+
+</dd></dl>
+
 <div class="section" id="back-to-the-index">
 <h2>Back to the index<a class="headerlink" href="#back-to-the-index" title="Permalink to this headline">¶</a></h2>
 <p>Go back to the <a class="reference internal" href="index.html"><span class="doc">index</span></a></p>
