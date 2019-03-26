@@ -1,5 +1,5 @@
-OpenSCHC Reception Module
-*************************
+OpenSCHC Rule Manager Module
+****************************
 
 .. automodule:: rulemanager
 
