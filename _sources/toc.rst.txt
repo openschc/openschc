@@ -9,3 +9,4 @@
    rulemanager
    bitarray
    schcrecv
+   comp_parser
