@@ -8,15 +8,7 @@ Welcome to OpenSCHC's documentation!
 
 .. include:: ../README.rst
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
-
-   recv
-   File_Classification
-   CONTRIBUTING
-   Micropython-specificities
-   IETF-104-Hackathon-LPWAN
+.. include:: toc.rst
 
 Contributing
 ============
