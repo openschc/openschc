@@ -1,4 +1,4 @@
-FILE CLASSIFICATION
+File Classification
 ===================
 
 Each of the different components is
