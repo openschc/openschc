@@ -1,5 +1,5 @@
 OpenSCHC Reception Module
-=========================
+*************************
 
 .. automodule:: schcrecv
 
