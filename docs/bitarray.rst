@@ -1,5 +1,5 @@
-OpenSCHC Reception Module
-*************************
+OpenSCHC Bit Buffer Management Module
+*************************************
 
 .. automodule:: bitarray
    :members:
