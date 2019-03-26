@@ -1,0 +1,3 @@
+Back to the index
+=================
+Go back to the :doc:`index <index>`
