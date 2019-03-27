@@ -72,8 +72,3 @@ def test_ruleman_01():
     print(RM.find_context_bydevL2addr("AABBCCDD"))
     print(RM.find_context_bydstiid("2001:0db8:85a3::beef"))
     RM.find_rule_bypacket(context1, BitBuffer(int("10000111",2).to_bytes(1, "big")))
-
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_ruleman_01()

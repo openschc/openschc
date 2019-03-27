@@ -26,7 +26,3 @@ def test_simsched_01():
     scheduler.add_event(3, callback, ("4", "four"))
     scheduler.add_event(1, callback, ("1", "one"))
     scheduler.run()
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_simsched_01()

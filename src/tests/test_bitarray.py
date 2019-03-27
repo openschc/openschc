@@ -73,9 +73,3 @@ def test_check_newbitbuffer_consistency():
         print (bits, nb_bits, bits2)
         assert bits == bits2  # XXX: raise exception
 #    assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception
-
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_bitbuffer_consistency()
-    test_check_newbitbuffer_consistency()

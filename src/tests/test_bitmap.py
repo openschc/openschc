@@ -166,11 +166,3 @@ def test_fragment_bitmap_04():
         (2, BitBuffer([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 1]))]
     check_bitmaps(bitmaps, expected)
-
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_fragment_bitmap_01()
-    test_fragment_bitmap_02()
-    test_fragment_bitmap_03()
-    test_fragment_bitmap_04()
