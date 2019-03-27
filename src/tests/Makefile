@@ -3,9 +3,10 @@ ifeq ($(PY),)
 	PY := micropython
 endif
 
+TESTS := $(basename $(wildcard test_*.py))
+TESTBASE := __testbase__
+
 all-tests:
-	$(PY) test_bitarray.py
-	$(PY) test_bitarray2.py
-	$(PY) test_bitmap.py
-	$(PY) test_ruleman.py
-	$(PY) test_simsched.py
+	@for i in $(TESTS) ; do \
+		(cat $$i.py;cat $(TESTBASE).py) | $(PY) ; \
+	done
