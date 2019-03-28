@@ -59,5 +59,3 @@ Each of the different components is
 * UNKNOWN STATUS
 
   * comp_bitmap.py       ``# this is test implementation for bitmap compression``
-
-.. include:: back_index.rst

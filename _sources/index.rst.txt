@@ -11,7 +11,7 @@ Welcome to OpenSCHC's documentation!
 Contributing
 ============
 
-Want to help ? See our :doc:`CONTRIBUTING` for more details on the future work on the OpenSCHC project.
+Want to help ? See our :doc:`General/Contributing_Guidelines` for more details on the future work on the OpenSCHC project.
 
 Our current activity
 ====================
@@ -36,5 +36,6 @@ Indices and tables
 
 Table of contents
 -----------------
+
 .. include:: toc.rst
 
