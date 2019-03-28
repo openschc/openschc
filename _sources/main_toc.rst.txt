@@ -1,16 +1,17 @@
-.. toctree::
-   :maxdepth: 1
-   :caption: Table of Contents:
+.. _contents:
 
-   Full Table of Content <main_toc>
+OpenSCHC Complete Index
+***********************
+
+.. toctree::
+   :maxdepth: 2 
+   :caption: Complete Table of Contents:
 
    General/User_guide
    General/Documenting_Guidelines
    General/Contributing_Guidelines
    General/Micropython_Specificities
-
    Actus/IETF-104-Hackathon-LPWAN
-
    Source/File_Classification
    Source/rulemanager
    Source/bitarray
