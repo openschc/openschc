@@ -1,2 +1,0 @@
-OpenSCHC Compression Module
-===========================

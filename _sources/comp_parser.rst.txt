@@ -1,9 +1,0 @@
-OpenSCHC Parser Module
-**********************
-
-.. automodule:: comp_parser
-
-.. autoclass:: Parser
-   :members:
-
-.. include:: back_index.rst
