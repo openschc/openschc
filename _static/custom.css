@@ -1,1 +1,5 @@
-/* This file intentionally left blank. */
+@import url("default.css");
+span.caption-text {
+  color: red;
+  font-size: 14px;
+}
