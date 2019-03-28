@@ -2,11 +2,12 @@
    :maxdepth: 1
    :caption: Contents:
 
+   User_guide
    Documenting_Guidelines
-   File_Classification
-   CONTRIBUTING
-   Micropython-specificities
    IETF-104-Hackathon-LPWAN
+   CONTRIBUTING
+   File_Classification
+   Micropython-specificities
    rulemanager
    bitarray
    schcrecv

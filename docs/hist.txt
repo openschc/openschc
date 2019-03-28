@@ -1,0 +1,70 @@
+10011  cd src
+10012  ls
+10013  cd openschc
+10014  git pull  https://github.com/openschc/openschc.git master
+10015  git checkout master
+10016  git pull  https://github.com/openschc/openschc.git master
+10017  git status
+10018  git checkout gh-pages
+10019  git pull  https://github.com/openschc/openschc.git gh-pages
+10020  git pull  https://github.com/openschc/openschc.git gh-pages --force
+10021  git stash
+10022  git log
+10023  git reset --help
+10024  git reset --hard db860781b2ee8ce7ef731a1bd1d3b3cd2a1fade5
+10025  git checkout gh-pages
+10026  git reset --hard db860781b2ee8ce7ef731a1bd1d3b3cd2a1fade5
+10027  git pull  https://github.com/openschc/openschc.git gh-pages 
+10028  git status
+10029  git remote -v
+10030  ls
+10031  git checkout master
+10032* pwd
+10033* cd ..
+10034* mkdir compil_doc
+10035* cd compil_doc
+10036* ls
+10037* git clone https://github.com/openschc/openschc.git
+10038* git checkout gh-pages
+10039  ls
+10040* cd openschc
+10041* ls
+10042* git checkout gh-pages
+10043* ls
+10044* cd ..
+10045* ls
+10046* mv openschc html
+10047  cd docs
+10048  ls
+10049  vi Makefile
+10050  make html
+10051  brew install python3-sphinx
+10052  pwd
+10053  cd ..
+10054  source ../venv/bin/activate
+10055  source venv/bin/activate
+10056  cd docs
+10057  pip install sphinx
+10058  make html
+10059* ls
+10060* ls html
+10061* cd html
+10062* git push 
+10063* ls -lt
+10064* git status
+10065* git add 
+10066* git add .
+10067* git commit -m "mise a jour et test avec Antoine"
+10068* git push 
+10069  ls
+10070  head Coding_guidelines.rst
+10071  more Coding_guidelines.rst
+10072  cp Coding_guidelines.rst User_guide.rst
+10073  vi toc.rst
+10074  make html
+10075* ls
+10076  make html
+10077  history | tail -30 > hist.txt
+10078  more hist.txt
+10079  history | tail -50 > hist.txt
+10080  more hist.txt
