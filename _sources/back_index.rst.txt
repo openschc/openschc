@@ -1,4 +1,4 @@
 Back to the index
 =================
 
-Go back to the :doc:`index <index>`_.
+Go back to the :doc:`index <index>`.
