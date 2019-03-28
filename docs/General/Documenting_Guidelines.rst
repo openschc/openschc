@@ -70,5 +70,3 @@ Syntax
 ======
 
 Sphinx's default syntax is called ReStructuredText. The documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
-
-.. include:: ../back_index.rst
