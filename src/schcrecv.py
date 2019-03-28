@@ -1,3 +1,6 @@
+"""OpenSCHC Reception Functionality
+
+"""
 #---------------------------------------------------------------------------
 
 from base_import import *  # used for now for differing modules in py/upy
@@ -8,9 +11,30 @@ from schcbitmap import find_missing_tiles, sort_tile_list
 
 #---------------------------------------------------------------------------
 
+"""
+.. module:: schcrecv
+    :platform: Code Running on MicroPython
+    :synopsis: SCHC Reception Module
+
+"""
+
 class ReassembleBase:
+    """This class is used as a common base for Reassembling packets
+
+    """
 
     def __init__(self, protocol, context, rule, dtag, sender_L2addr):
+        """
+        
+        Args :
+            protocol : protocol
+            context : context
+            rule : rule can be either "comp" for compression, "fragSender" for fragmentation from sender and "fragReceiver" for fragmentation from receiver
+            dtag : ?
+            sender_L2addr : None or 'int' containing the sender's address
+     
+                
+        """
         self.protocol = protocol
         self.context = context
         self.rule = rule
@@ -26,12 +50,24 @@ class ReassembleBase:
         self.state = "INIT"
 
     def get_mic(self, mic_target, extra_bits=0):
+        """This gets the mic
+        
+        This function gets the mic and display it in a 4 byte format
+        
+        """
+
         assert isinstance(mic_target, bytearray)
         mic = get_mic(mic_target)
         print("Recv MIC {}, base = {}".format(mic, mic_target))
         return mic.to_bytes(4, "big")
 
     def event_inactive(self):
+        """ event_inactive
+        
+        // TODO : Redaction (here is schcrecv.py)
+        
+        
+        """
         # sending sender abort.
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
@@ -42,6 +78,11 @@ class ReassembleBase:
         return
 
     def cancel_inactive_timer(self):
+        """ cancel_inactive_timer
+        
+        // TODO : Redaction (here is schcrecv.py)
+        
+        """
         if self.event_id_inactive_timer is None:
             return
         self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
@@ -50,7 +91,11 @@ class ReassembleBase:
 #---------------------------------------------------------------------------
 
 class ReassemblerNoAck(ReassembleBase):
-
+    """ ReassemblerNoAck class
+    
+    // Todo : Redaction
+    
+    """
     def receive_frag(self, bbuf, dtag):
         # XXX context should be passed from the lower layer.
         # XXX and pass the context to the parser.
@@ -92,7 +137,11 @@ class ReassemblerNoAck(ReassembleBase):
 #---------------------------------------------------------------------------
 
 class ReassemblerAckOnError(ReassembleBase):
-
+    """ ReassemblerAckOnError class
+    
+    Todo : Redaction
+    
+    """
     # In ACK-on-Error, a fragment contains tiles belonging to different window.
     # A type of data structure holding tiles in each window is not suitable.  
     # So, here just appends a fragment into the tile_list like No-ACK.

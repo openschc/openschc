@@ -1,4 +1,8 @@
+"""
+.. module:: comp_bitmap
+   :platform: Python, Micropython
 
+"""
 # XXX need to consider the byte boundary.
 
 def compress_bitmap(bbuf):

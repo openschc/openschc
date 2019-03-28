@@ -1,3 +1,7 @@
+"""
+.. module:: schctile
+   :platform: Python, Micropython
+"""
 #---------------------------------------------------------------------------
 
 from base_import import *

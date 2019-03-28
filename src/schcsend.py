@@ -1,3 +1,7 @@
+"""
+.. module:: schcsend
+   :platform: Python, Micropython
+"""
 #---------------------------------------------------------------------------
 
 from base_import import *  # used for now for differing modules in py/upy

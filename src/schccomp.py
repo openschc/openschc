@@ -1,3 +1,7 @@
+"""
+.. module:: schccomp
+   :platform: Python, Micropython
+"""
 from base_import import *
 
 T_FID = "FID"

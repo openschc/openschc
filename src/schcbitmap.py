@@ -1,3 +1,7 @@
+"""
+.. module:: schcbitmap
+   :platform: Python, Micropython
+"""
 #---------------------------------------------------------------------------
 
 from base_import import *
