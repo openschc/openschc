@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = OpenSCHC
 SOURCEDIR     = .
-BUILDDIR      = ../../openschc_perso_docs
+BUILDDIR      = ../../openschc_doc
 
 # Put it first so that "make" without argument is like "make help".
 help:
