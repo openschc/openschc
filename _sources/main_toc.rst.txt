@@ -26,3 +26,5 @@ OpenSCHC Project Complete Content
    :caption: Other informations:
 
    Actus/IETF-104-Hackathon-LPWAN
+
+.. include:: back_index.rst
