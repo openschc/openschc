@@ -8,5 +8,3 @@ OpenSCHC Rule Manager Module
 
 .. autoclass:: RuleManager
    :members:
-
-.. include:: back_index.rst

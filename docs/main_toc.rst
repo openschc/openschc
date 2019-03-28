@@ -1,11 +1,10 @@
-.. toctree::
-   :maxdepth: 1
-   :caption: Table of Contents:
+.. _contents:
 
-   Full Table of Content <main_toc>
-   Back to Index <index>
+OpenSCHC Project Complete Content
+*********************************
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: General Informations:
 
    General/User_guide
@@ -14,7 +13,7 @@
    General/Micropython_Specificities
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Source code in-depth:
 
    Source/File_Classification
@@ -23,7 +22,7 @@
    Source/schcrecv
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Other informations:
 
    Actus/IETF-104-Hackathon-LPWAN
