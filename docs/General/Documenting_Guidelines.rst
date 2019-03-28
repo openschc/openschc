@@ -5,7 +5,7 @@ Following the guidelines below when documenting to the project would be apprecia
 
 
 Building the documentation
---------------------------
+==========================
 
 The documentation is built using `Sphinx <https://sphinx-doc.org>`_.
 
@@ -67,8 +67,8 @@ Then you can build the documentation (in the master branch or your own developme
 Normally the documentation will be built automatically, you can open it in your browser or push it to your remote gh-pages branch to publish the website
 
 Syntax
-------
+======
 
 Sphinx's default syntax is called ReStructuredText. The documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
 
-.. include:: back_index.rst
+.. include:: ../back_index.rst

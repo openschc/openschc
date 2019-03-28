@@ -8,4 +8,4 @@ Document here the micropython restrictions compared to Python3, the idiosynchras
 
 Mostly by pointing toward other sources.
 
-.. include:: back_index.rst
+.. include:: ../back_index.rst

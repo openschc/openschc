@@ -6,4 +6,4 @@ OpenSCHC Bit Buffer Management Module
 .. autoclass:: BitBuffer
    :members:
 
-.. include:: back_index.rst
+.. include:: ../back_index.rst

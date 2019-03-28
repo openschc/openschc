@@ -17,4 +17,4 @@ Write-up of previous hackathon
 
 `PDF version of the final presentation <https://raw.githubusercontent.com/wiki/openschc-attic/doc/wiki/hackathon-presentation-LPWAN.pdf>`_
 
-.. include:: back_index.rst
+.. include:: ../back_index.rst

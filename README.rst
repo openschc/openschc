@@ -102,5 +102,5 @@ Consequently, the sender retransmits the 1st and 2nd fragments and when the rece
 File classification
 -------------------
 
-Refer to the :doc:`File_Classification` for an overview of the source code repository.
+Refer to the :doc:`Source/File_Classification` for an overview of the source code repository.
 

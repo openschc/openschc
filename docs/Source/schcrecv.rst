@@ -11,4 +11,4 @@ OpenSCHC Reception Module
 .. autoclass:: ReassemblerNoAck
    :members:
 
-.. include:: back_index.rst
+.. include:: ../back_index.rst
