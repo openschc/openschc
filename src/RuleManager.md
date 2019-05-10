@@ -22,10 +22,10 @@ Both fields are numerical.
 Compression rules include a list of field description as defined in SCHC specification. 
 The rule defines the order in which the compression residues are sent therefore an array is used.
 The field description contains elements defined in SCHC specification:
-* "FID" : identifies the field ID, the Parser must use the same notation.
-* "FL"  : indicates either a size in bit if the value is a number or a function if the 
+* "**FID**" : identifies the field ID, the Parser must use the same notation.
+* "**FL**"  : indicates either a size in bit if the value is a number or a function if the 
 value is a string. Current functions are:
-  * "var" : the field is of variable length and the length in byte is sent in the compression residue.
+  * "_**var**_" : the field is of variable length and the length in byte is sent in the compression residue.
   * "tkl" : this function is specific for encoding CoAP Token. The token length is given by the CoAP Token length field.
 * "FP" : gives the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
 * "TV" : specifies the Target Value. The value is either a number, a string or an array of these values. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
