@@ -27,7 +27,7 @@ The field description contains elements defined in SCHC specification:
 value is a string. Current functions are:
   * "var" : the field is of variable length and the length in byte is sent in the compression residue.
   * "tkl" : this function is specific for encoding CoAP Token. The token length is given by the CoAP Token length field.
-* "FP" : give the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
+* "FP" : gives the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
 * "TV" : specifies the Target Value. The value is either a number, a string or an array of these values. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
 the field is not present in a header.  
 * "MO" : is pointing on the Matching Operator. It is a string that can take the following values:
@@ -69,7 +69,7 @@ the field is not present in a header.
 ### Remove
  
  
-###FindRuleFromPacket
+### FindRuleFromPacket
 
  this method returns a rule that match with a packet description
  
