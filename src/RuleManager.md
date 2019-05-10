@@ -12,10 +12,10 @@ another one, therefore a Rulelength has to be also specified to indicate the len
 Both fields are numerical.
 
 
- {
- 	"RuleID" : 12,
- 	"RuleLength" : 4
- }
+ 	{
+ 		"RuleID" : 12,
+ 		"RuleLength" : 4
+    }
  
  ## Compression Rules
  
@@ -31,7 +31,10 @@ value is a string. Current functions are:
 * "TV" : specifies the Target Value. The value is either a number, a string or an array of these values. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
 the field is not present in a header.  
 * "MO" : is pointing on the Matching Operator. It is a string that can take the following values:
- * "ignore" : the field must be present in the header, but the value is not checked 
+  * "ignore" : the field must be present in the header, but the value is not checked.
+  * "equal" : type and value must check between the filed value and the target value
+  * "MSB": most significant bits of the target value must check with the most significant bits of the field value. The size of the check is given by the "MOa" field.
+
   
      
  
