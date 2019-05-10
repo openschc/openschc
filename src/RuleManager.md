@@ -30,11 +30,18 @@ value is a string. Current functions are:
 * "FP" : gives the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
 * "TV" : specifies the Target Value. The value is either a number, a string or an array of these values. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
 the field is not present in a header.  
-* "MO" : is pointing on the Matching Operator. It is a string that can take the following values:
+* "MO" : is pointing on the Matching Operator. It is a string that can take the following keyword:
   * "ignore" : the field must be present in the header, but the value is not checked.
   * "equal" : type and value must check between the filed value and the target value
-  * "MSB": most significant bits of the target value must check with the most significant bits of the field value. The size of the check is given by the "MOa" field.
-
+  * "MSB": most significant bits of the target value are checked with the most significant bits of the field value. The size of the check is given by the "MOa" field.
+  * "match-mapping": the target value must be an array and one element in type and value match with the field value.
+* "MOa" : contains, if necessary, the MO argument. This currently apply to "MSB" where the argument specifies in bits the length of the matching.
+* "CDA" : designates the Compression/Decompression Action. It is a string containing the following keywords:
+   * "not-sent" : the field value is not sent as a residue.
+   * "value-sent" : the field value is integrally sent on the residue. 
+   * "LSB" : the remaining bits of the MSB comparison are sent as residues.
+   * "mapping-sent" : the index of the array is sent.
+* "CDAa" : represents the argument of the CDA. Currently no CDAa are defined.
   
      
  
