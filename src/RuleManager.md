@@ -16,6 +16,8 @@ Both fields are numerical.
  		"RuleID" : 12,
  		"RuleLength" : 4
     }
+    
+A rule can be either for compression or fragmentation. One these two keywork "fragmentation" or "compression" must be specified.
  
  ## Compression Rules
  
@@ -28,6 +30,11 @@ value is a string. Current functions are:
   * "_**var**_" : the field is of variable length and the length in byte is sent in the compression residue.
   * "_**tkl**_" : this function is specific for encoding CoAP Token. The token length is given by the CoAP Token length field.
 * "**FP**" : gives the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
+* "**DI**" : tells the expected direction:
+    * "_**Bi**_" for bidrectional field
+    * "_**Up**_" for field sent only on uplink messages (from device to network)
+    * "_**Dw**_" for field sent only on downlink messages (from network to device)
+    
 * "**TV**" : specifies the Target Value. The value is either a number, a string or an array of these values. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
 the field is not present in a header.  
 * "**MO**" : is pointing on the Matching Operator. It is a string that can take the following keyword:
@@ -41,12 +48,41 @@ the field is not present in a header.
    * "_**value-sent**_" : the field value is integrally sent on the residue. 
    * "_**LSB**_" : the remaining bits of the MSB comparison are sent as residues.
    * "_**mapping-sent**_" : the index of the array is sent.
+   * "_**compute**_" : field is not sent in residue and receiver can recover the value from existing parameters. This is generally used for length and checksum.
 * "**CDAa**" : represents the argument of the CDA. Currently no CDAa are defined.
   
-     
- 
- 
- ## Fragmentation Rules
+For example: 
+
+	
+  	{
+ 		"RuleID" : 12,
+ 		"RuleLength" : 4, 
+ 		"compression": [
+				{
+					"FID": "IPV6.VER",
+					"FL": 4,
+					"FP": 1,
+					"DI": "Bi",
+					"TV": 6,
+					"MO": "equal",
+					"CDA": "not-sent"
+				},
+  				{
+					"FID": "IPV6.DEV_PREFIX",
+					"FL": 64,
+					"FP": 1,
+					"DI": "Bi",
+					"TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
+					"MO": "match-mapping",
+					"CDA": "mapping-sent",
+				},
+			]
+	}
+			
+			
+
+
+## Fragmentation Rules
  
  
  # Context
