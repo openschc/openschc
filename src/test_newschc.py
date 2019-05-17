@@ -11,6 +11,8 @@ import simlayer2
 import simul
 from rulemanager import RuleManager
 
+from stats.statsct import Statsct
+
 if sys.implementation.name == "micropython":
     ap = argparse.ArgumentParser(description="a SCHC simulator.")
 else:
@@ -67,6 +69,14 @@ def make_node(sim, rule_manager, devaddr, extra_config={}):
 
 #---------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------
+""" Init stastct module """
+Statsct.initialize()
+Statsct.log("Statsct test")
+#---------------------------------------------------------------------------
+
+
+
 rule = []
 for k in [opt.context_file, opt.rule_comp_file, opt.rule_fragin_file,
           opt.rule_fragout_file]:
@@ -99,11 +109,22 @@ print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
                                              rm1.__dict__))
 
 #---------------------------------------------------------------------------
+Statsct.setSourceAddress(node0.id)
+Statsct.setDestinationAddress(node1.id)
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
 
 if opt.data_file is not None:
     payload = open(opt.data_file,"rb").read()
 else:
     payload = bytearray(range(1, 1+opt.data_size))
+
+#---------------------------------------------------------------------------    
+Statsct.addInfo('real_packet', payload)
+Statsct.addInfo('real_packet_size', len(payload))
+#---------------------------------------------------------------------------
+
 
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
 

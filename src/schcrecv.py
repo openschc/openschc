@@ -9,6 +9,7 @@ import schc
 import schcmsg
 from schcbitmap import find_missing_tiles, sort_tile_list
 
+from stats.statsct import Statsct
 #---------------------------------------------------------------------------
 
 """
@@ -133,6 +134,7 @@ class ReassemblerNoAck(ReassembleBase):
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
                 self.inactive_timer, self.event_inactive, tuple())
         print("---", schc_frag.fcn)
+        Statsct.print_results()
 
 #---------------------------------------------------------------------------
 
@@ -193,6 +195,9 @@ class ReassemblerAckOnError(ReassembleBase):
                 bit_list = find_missing_tiles(self.tile_list,
                                               self.rule["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
+                
+                Statsct.print_results()
+                
                 assert bit_list is not None
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
@@ -233,7 +238,8 @@ class ReassemblerAckOnError(ReassembleBase):
                                             self.protocol.layer2.send_packet,
                                             args)
         # XXX need to keep the ack message for the ack request.
-
+        Statsct.print_results()
+        
     def get_mic_from_tiles_received(self):
         # MIC calculation.
         # The truncation of the padding should be done here

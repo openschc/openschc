@@ -8,12 +8,19 @@ from base_import import *
 
 def cond_random(rate):
     if sys.implementation.name == "micropython":
-        if urandom.getrandbits(8)/256 * 100 < rate:
+        print("micropython")
+        random_num = urandom.getrandbits(8)/256
+        print("random_num -> {}, rate -> {}".format(random_num,rate))
+        if random_num < rate:
+        #if urandom.getrandbits(8)/256 * 100 < rate:
             return True
         else:
             return False
     else:
-        return random.random() * 100 < rate
+        random_num = random.random()
+        print("random_num -> {}, rate -> {}".format(random_num,rate))
+        return random_num < rate
+        #return random.random() * 100 < rate
 
 class ConditionalTrue:
     """ It returns True in a condition of 3 modes.
@@ -82,5 +89,5 @@ if __name__ == "__main__":
     test({ "cond": { "mode": "cycle", "cycle": 3 } })
     test({ "cond": { "mode": "list", "count_num": [ 2,3 ] } })
     test({ "cond": { "mode": "list", "count_num": [ 2,3 ], "cycle": 5 } })
-
+    test({ "cond": { "mode": "rate", "cycle": 10 } })
 #---------------------------------------------------------------------------

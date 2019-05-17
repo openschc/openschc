@@ -26,6 +26,7 @@ class SimulScheduler:
             self.queue.sort()
             self.clock, event_id, callback, args = self.queue.pop(0)
             callback(*args)
+            print("Queue running event -> {}".format(event_id))
 
     # external API
 

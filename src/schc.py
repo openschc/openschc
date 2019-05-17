@@ -48,6 +48,7 @@ class SCHCProtocol:
     def __init__(self, config, system, layer2, layer3):
         self.config = config
         self.system = system
+        print("system -> {}".format(self.system))
         self.scheduler = system.get_scheduler()
         self.layer2 = layer2
         self.layer3 = layer3

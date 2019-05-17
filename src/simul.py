@@ -11,6 +11,8 @@ from cond_true import ConditionalTrue
 
 import schc
 
+from stats.statsct import Statsct
+
 Link = namedtuple("Link", "from_id to_id delay")
 
 SimulNode = SimulLayer2
@@ -122,6 +124,8 @@ class Simul:
                     callback=None, callback_args=tuple() ):
         if not self.frame_loss.check():
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
+            Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
+            Statsct.add_packet_info(packet,src_id,dst_id, True)
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
             count = 0
@@ -129,6 +133,8 @@ class Simul:
                 count += self.send_packet_on_link(link, packet)
         else:
             self._log("packet was lost {}->{}".format(src_id, dst_id))
+            Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))            
+            Statsct.add_packet_info(packet,src_id,dst_id, False)
             count = 0
         #
         if callback != None:

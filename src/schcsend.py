@@ -11,6 +11,7 @@ import schcmsg
 from schctile import TileList
 from schcbitmap import make_bit_list
 
+from stats.statsct import Statsct
 #---------------------------------------------------------------------------
 max_ack_requests = 2
 
@@ -190,6 +191,7 @@ class FragmentNoAck(FragmentBase):
             return
         else:
             print("XXX Unacceptable message has been received.")
+        Statsct.print_results()
 
 #---------------------------------------------------------------------------
 
@@ -330,6 +332,7 @@ class FragmentAckOnError(FragmentBase):
         #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("sender frag received:", schc_frag.__dict__)
+        Statsct.print_results()
         if ((self.rule["WSize"] is None or
              schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
@@ -345,6 +348,7 @@ class FragmentAckOnError(FragmentBase):
                     self.rule.ruleID, self.dtag))
             self.resend_frag(schc_frag)
             return
+        
 
     def resend_frag(self, schc_frag):
         print("recv bitmap:", (schc_frag.win, schc_frag.bitmap.to_bit_list()))
