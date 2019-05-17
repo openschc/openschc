@@ -129,7 +129,7 @@ For example:
       [
           { 
             "deviceID": 0x1234567890,
-            "set_of_rules" : [ ..... ]
+            "sor" : [ ..... ]
           }
       ]
  
@@ -154,15 +154,20 @@ deviceID is a numerical value that must be unique in the context. If the context
  * ruleID/RuleLength do not overlap
  * contain either a single fragmentation or compression description. 
  
- Add compute some internal value to help the compression. 
+ if the deviceID already exists in the context, the new set of rules is added if no conflict on the rule ID is found.
  
+      RM.add ({"deviceID": 0x1234567, "sor": [.....]}) 
  
 ### Remove
- 
+
+Suppress a rule for a specific device, if no rule is specified, the device is removed from the context.
+
+      RM.add ({"deviceID": 0x1234567, "sor": [{"ruleID":12, "ruleLength":4}]}) 
+      RM.add ({"deviceID": 0x1234567}) 
  
 ### FindRuleFromPacket
 
- this method returns a rule that match with a packet description
+This method returns a rule and a deviceID that match with a packet description given by the Parser. 
  
 ### FindFragmentationRule (size)
 
