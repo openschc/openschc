@@ -11,9 +11,13 @@ import schcmsg
 from schctile import TileList
 from schcbitmap import make_bit_list
 
-from stats.statsct import Statsct
+enable_statsct = True
+if enable_statsct:
+    from stats.statsct import Statsct
+
 #---------------------------------------------------------------------------
-max_ack_requests = 2
+
+max_ack_requests = 8
 
 class FragmentBase():
     def __init__(self, protocol, context, rule):
@@ -136,6 +140,9 @@ class FragmentNoAck(FragmentBase):
             transmit_callback = self.event_sent_frag
             fcn=0
             self.mic_sent=None
+            if enable_statsct:
+                Statsct.set_msg_type("SCHC_FRAG")
+                Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
         elif remaining_data_size < payload_size:
             if remaining_data_size <= (
                     payload_size - schcmsg.get_mic_size(self.rule)):
@@ -154,6 +161,10 @@ class FragmentNoAck(FragmentBase):
                 # callback doesn't need in No-ACK mode.
                 transmit_callback = None
                 fcn=schcmsg.get_fcn_all_1(self.rule)
+                if enable_statsct:
+                    Statsct.set_msg_type("SCHC_ALL_1")
+                    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size(self.rule))
             else:
                 # put the size of the complements of the header to L2 Word.
                 tile_size = (remaining_data_size -
@@ -163,12 +174,16 @@ class FragmentNoAck(FragmentBase):
                 transmit_callback = self.event_sent_frag
                 fcn=0
                 self.mic_sent=None
+                if enable_statsct:
+                    Statsct.set_msg_type("SCHC_FRAG")
+                    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
         schc_frag = schcmsg.frag_sender_tx(
                 self.rule, dtag=self.dtag,
                 win=None,
                 fcn=fcn,
                 mic=self.mic_sent,
                 payload=tile)
+                
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 transmit_callback)
@@ -191,7 +206,7 @@ class FragmentNoAck(FragmentBase):
             return
         else:
             print("XXX Unacceptable message has been received.")
-        Statsct.print_results()
+
 
 #---------------------------------------------------------------------------
 
@@ -234,10 +249,17 @@ class FragmentAckOnError(FragmentBase):
                 mic = self.get_mic(self.mic_base, last_frag_base_size)
                 # store the mic in order to know all-1 has been sent.
                 self.mic_sent = mic
+                if enable_statsct:
+                    Statsct.set_msg_type("SCHC_ALL_1")
+                    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size(self.rule))
             else:
                 # regular fragment.
                 fcn = window_tiles[0]["t-num"]
                 mic = None
+                if enable_statsct:
+                    Statsct.set_msg_type("SCHC_FRAG")
+                    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
             schc_frag = schcmsg.frag_sender_tx(
                     self.rule, dtag=self.dtag,
                     win=window_tiles[0]["w-num"],
@@ -246,6 +268,9 @@ class FragmentAckOnError(FragmentBase):
                     payload=TileList.concat(window_tiles))
             if mic is not None:
                 # set ack waiting timer
+                #if enable_statsct:
+                #    Statsct.set_msg_type("SCHC_FRAG")
+                #    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
                 args = (schc_frag, window_tiles[0]["w-num"],)
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                         self.ack_wait_timer, self.ack_timeout, args)
@@ -280,8 +305,15 @@ class FragmentAckOnError(FragmentBase):
                     mic=self.mic_sent)
             # set ack waiting timer
             args = (schc_frag, win,)
+            if enable_statsct:
+                Statsct.set_msg_type("SCHC_ALL_1")
+                Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule) +
+                        schcmsg.get_mic_size(self.rule))
             self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                     self.ack_wait_timer, self.ack_timeout, args)
+            
+
+
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
@@ -308,6 +340,10 @@ class FragmentAckOnError(FragmentBase):
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             print("Sent Sender-Abort.", schc_frag.__dict__)
+            if enable_statsct:
+                Statsct.set_msg_type("SCHC_SENDER_ABORT")
+                #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
             return
@@ -318,6 +354,9 @@ class FragmentAckOnError(FragmentBase):
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
         print("Retransmitted frag:", schc_frag.__dict__)
+        if enable_statsct:
+            Statsct.set_msg_type("SCHC_FRAG")
+            Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
@@ -332,7 +371,6 @@ class FragmentAckOnError(FragmentBase):
         #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("sender frag received:", schc_frag.__dict__)
-        Statsct.print_results()
         if ((self.rule["WSize"] is None or
              schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):

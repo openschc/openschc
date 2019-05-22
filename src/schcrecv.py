@@ -9,7 +9,10 @@ import schc
 import schcmsg
 from schcbitmap import find_missing_tiles, sort_tile_list
 
-from stats.statsct import Statsct
+enable_statsct = True
+if enable_statsct:
+    from stats.statsct import Statsct
+
 #---------------------------------------------------------------------------
 
 """
@@ -43,7 +46,7 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
-        self.inactive_timer = 120
+        self.inactive_timer = 1200
         self.event_id_inactive_timer = None
         # state:
         #   INIT:
@@ -73,6 +76,9 @@ class ReassembleBase:
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
         print("Sent Receiver-Abort.", schc_frag.__dict__)
+        if enable_statsct:
+            Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
+            #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
         # XXX needs to release all resources.
@@ -134,7 +140,6 @@ class ReassemblerNoAck(ReassembleBase):
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
                 self.inactive_timer, self.event_inactive, tuple())
         print("---", schc_frag.fcn)
-        Statsct.print_results()
 
 #---------------------------------------------------------------------------
 
@@ -148,6 +153,8 @@ class ReassemblerAckOnError(ReassembleBase):
     # A type of data structure holding tiles in each window is not suitable.  
     # So, here just appends a fragment into the tile_list like No-ACK.
     def receive_frag(self, bbuf, dtag):
+        print('recieved fragment -> {}, rule-> {}'.format(bbuf, self.rule))
+        
         schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
@@ -156,6 +163,7 @@ class ReassemblerAckOnError(ReassembleBase):
         #
         if schc_frag.abort == True:
             print("Received Sender-Abort.")
+            #Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             return
         if self.state == "DONE":
@@ -184,6 +192,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("waiting for more fragments.")
         elif schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
             print("ALL1 received")
+            #Statsct.set_msg_type("SCHC_ALL_1")
             self.mic_received = schc_frag.mic
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if schc_frag.mic == mic_calced:
@@ -195,8 +204,6 @@ class ReassemblerAckOnError(ReassembleBase):
                 bit_list = find_missing_tiles(self.tile_list,
                                               self.rule["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
-                
-                Statsct.print_results()
                 
                 assert bit_list is not None
                 for bl_index in range(len(bit_list)):
@@ -210,6 +217,8 @@ class ReassemblerAckOnError(ReassembleBase):
                             win=bit_list[bl_index][0],
                             cbit=0,
                             bitmap=bit_list[bl_index][1])
+                    if enable_statsct:
+                        Statsct.set_msg_type("SCHC_ACK_KO")
                     print("ACK failure sent:", schc_ack.__dict__)
                     args = (schc_ack.packet.get_content(),
                             self.context["devL2Addr"])
@@ -233,12 +242,14 @@ class ReassemblerAckOnError(ReassembleBase):
                 schc_frag.win,
                 cbit=1)
         print("ACK success sent:", schc_ack.__dict__)
+        if enable_statsct:
+            Statsct.set_msg_type("SCHC_ACK_OK")
         args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
         self.protocol.scheduler.add_event(0,
                                             self.protocol.layer2.send_packet,
                                             args)
         # XXX need to keep the ack message for the ack request.
-        Statsct.print_results()
+
         
     def get_mic_from_tiles_received(self):
         # MIC calculation.

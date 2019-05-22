@@ -3,7 +3,7 @@
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
-from stats.statsct import Statsct
+#from stats.statsct import Statsct
 
 class SimulLayer2:
     """

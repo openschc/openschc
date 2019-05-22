@@ -107,6 +107,36 @@ print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
                                              rm0.__dict__))
 print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
                                              rm1.__dict__))
+print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
+
+#device rule
+for rule1 in rm0.__dict__:
+    print(rm0.__dict__[rule1])
+    for info in rm0.__dict__[rule1]:
+        print("info -> {}".format(info))
+        Statsct.set_device_rule(info)
+        for tag in info:
+            print(tag)
+            print(info[tag])
+            if tag == "fragSender":
+                print('fragSender rule -> {}'.format(info[tag]))
+            elif tag == "fragReceiver": 
+                print('fragReceiver rule -> {}'.format(info[tag]))
+input('')
+#gw rule
+for rule1 in rm1.__dict__:
+    print(rm1.__dict__[rule1])
+    for info in rm1.__dict__[rule1]:
+        print("info -> {}".format(info))
+        Statsct.set_gw_rule(info)
+        for tag in info:
+            print(tag)
+            print(info[tag])
+            if tag == "fragSender":
+                print('fragSender rule -> {}'.format(info[tag]))
+            elif tag == "fragReceiver": 
+                print('fragReceiver rule -> {}'.format(info[tag]))
+input('')
 
 #---------------------------------------------------------------------------
 Statsct.setSourceAddress(node0.id)
@@ -129,5 +159,9 @@ Statsct.addInfo('real_packet_size', len(payload))
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
 
 sim.run()
+print('simulation ended')
+Statsct.print_results()
+print('Sender Packet list -> {}'.format(Statsct.sender_packets))
+Statsct.print_packet_list(Statsct.sender_packets)
 
 #---------------------------------------------------------------------------

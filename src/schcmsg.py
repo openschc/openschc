@@ -197,6 +197,7 @@ class frag_rx(frag_base):
     recvbuf: str, bytes, bytearray.
     '''
     def set_recvbuf(self, recvbuf):
+        print("set_recvbuf -> {}".format(recvbuf))
         assert isinstance(recvbuf, BitBuffer)
         self.packet_bbuf = recvbuf
 
@@ -315,6 +316,9 @@ class frag_sender_rx(frag_rx):
     """
     def __init__(self, rule, packet_bbuf):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
+        print("frag_sender_rx")
+        print(packet_bbuf)
+        #input("")
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
@@ -337,6 +341,9 @@ class frag_receiver_rx(frag_rx):
     """
     def __init__(self, rule, packet_bbuf):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
+        print("frag_receiver_rx")
+        print(packet_bbuf)
+        #input("")
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
