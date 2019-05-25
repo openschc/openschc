@@ -1,179 +1,186 @@
 # Introduction
 
-A context is defined as a set of rules shared by both ends. Rules are identical and can be
-copy/paste from one end to the other end, if they respect the same format.
+The context includes a set of rules shared by both ends.
+Identical Rules are used on both ends. They can be simply
+copied/pasted from one end to the other end, if both ends use the same format for describing them.
 
-This document specifies the openschc rule data model based on JSON. 
+This document specifies the OpenSCHC rule data model, which is based on JSON.
 
 # Rule definition
 
-A rule is identified through a ruleID, the size of the ruleID can change from one rule to
-another one, therefore a Rulelength has to be also specified to indicate the length in bits.
+A rule is described as a JSON dictionary.
 
-Both fields are numerical.
+A rule is identified by its RuleID.
+
+The size of the RuleID representation can change from one rule to
+the next. Therefore, the rule description includes a RuleIDLength that indicates the length of the RuleID, in bits.
+
+Both fields are integer numbers.
 
 
- 	{
- 		"RuleID" : 12,
- 		"RuleLength" : 4
+    {
+    "RuleID" : 12,
+    "RuleIDLength" : 4
+    # notice that RuleID 12 represented on 6 bits is different from RuleID 12 on 4 bits!
     }
-    
-A rule can  either  be for compression or fragmentation. One these two keywords "fragmentation" or "compression" must be specified.
- 
- ## Compression Rules
- 
-Compression rules include a list of field description as defined in SCHC specification. 
-The rule defines the order in which the compression residues are sent therefore an array is used.
-The field description contains elements defined in SCHC specification:
-* "**FID**" : identifies the field ID, the Parser must use the same notation.
-* "**FL**"  : indicates either a size in bit if the value is a number or a function if the 
-value is a string. Current functions are:
-  * "_**var**_" : the field is of variable length and the length in byte is sent in the compression residue.
-  * "_**tkl**_" : this function is specific for encoding CoAP Token. The token length is given by the CoAP Token length field.
-* "**FP**" : gives the position in the header, by default the value is 1, each time the field is repeated in the header, the value is increased by 1. 
-* "**DI**" : tells the expected direction:
-    * "_**Bi**_" for bidrectional field
-    * "_**Up**_" for field sent only on uplink messages (from device to network)
-    * "_**Dw**_" for field sent only on downlink messages (from network to device)
-    
-* "**TV**" : specifies the Target Value. The value is either a number, a string or an array of these types. "TV" can be avoided or set to None is there is no value to check, for instance "ignore" MO.In an array the value None indicate that 
-the field is not present in a header.  
-* "**MO**" : is pointing on the Matching Operator. It is a string that can take the following keyword:
-  * "_**ignore**_" : the field must be present in the header, but the value is not checked.
-  * "_**equal**_" : type and value must check between the filed value and the target value
-  * "_**MSB**_": most significant bits of the target value are checked with the most significant bits of the field value. The size of the check is given by the "MOa" field.
-  * "_**match-mapping**_": the target value must be an array and one element in type and value match with the field value.
-* "**MOa**" : contains, if necessary, the MO argument. This currently apply to "MSB" where the argument specifies in bits the length of the matching.
-* "**CDA**" : designates the Compression/Decompression Action. It is a string containing the following keywords:
-   * "_**not-sent**_" : the field value is not sent as a residue.
-   * "_**value-sent**_" : the field value is integrally sent on the residue. 
-   * "_**LSB**_" : the remaining bits of the MSB comparison are sent as residues.
-   * "_**mapping-sent**_" : the index of the array is sent.
-   * "_**compute**_" : field is not sent in residue and receiver can recover the value from existing parameters. This is generally used for length and checksum.
-* "**CDAa**" : represents the argument of the CDA. Currently no CDAa are defined.
-  
-For example: 
 
-	
-  	{
- 		"RuleID" : 12,
- 		"RuleLength" : 4, 
- 		"compression": [
-				{
-					"FID": "IPV6.VER",
-					"FL": 4,
-					"FP": 1,
-					"DI": "Bi",
-					"TV": 6,
-					"MO": "equal",
-					"CDA": "not-sent"
-				},
-  				{
-					"FID": "IPV6.DEV_PREFIX",
-					"FL": 64,
-					"FP": 1,
-					"DI": "Bi",
-					"TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
-					"MO": "match-mapping",
-					"CDA": "mapping-sent",
-				},
-			]
-	}
-			
-			
+In SCHC, rules are used either for compression or fragmentation. Therefore, one and only one of the two keywords "fragmentation" or "compression" must be specified, per rule.
+
+## Compression Rules
+
+As defined in the SCHC specification, compression rules are composed of Field Descriptions.
+The order in which the Field Descriptions appear in the rule is significant (e.g. it defines the order in which the compression residues are sent), therefore a compression rule is represented as an array.
+
+The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:
+* "**FID**": a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. "IPV6.VER". <<< why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!>>>
+* "**FL**": if the value is a number, that value expresses the length of the field, in bits. If the
+value is a string, it designates a function that can compute the field length. The functions currently defined are:
+  * "_**var**_": the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.
+  * "_**tkl**_" <<<"_coaptkl_"?>>>: this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
+* "**FP**": an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.
+* "**DI**": tells the direction to which this Field Description applies:
+    * "_**Up**_": only to uplink messages (i.e. from device to network)
+    * "_**Dw**_": only to downlink messages (i.e. from network to device)
+    * "_**Bi**_": to both directions
+
+* "**TV**": specifies the Target Value. The value is a number, a string or an array of these types. The "TV" key can be omitted or its value set to null if there is no value to check, for instance together with the "ignore" MO. If the Target Value is an array, then the value null among the array elements indicates that
+the Field Descriptor matches the case where the field is not present in the header being compressed.
+* "**MO**": specifies the Matching Operator. It is a string that can take the following values:
+  * "_**ignore**_": the field must be present in the header, but the value is not checked.
+  * "_**equal**_": type and value must check between the field value and the Target Value <<< il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? >>
+  * "_**MSB**_": the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the "MOa" field.
+  * "_**match-mapping**_": with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.
+* "**MOa**": specifies, if applicable, an argument to the MO. This currently only applies to the "MSB" MO, where the argument specifies the length of the matching, in bits.
+* "**CDA**": designates the Compression/Decompression Action. It is a string that can take the following values:
+   * "_**not-sent**_": the field value is not sent as a residue.
+   * "_**value-sent**_": the field value is sent in extenso in the residue.
+   * "_**LSB**_": the bits remaining after the MSB comparison are sent in the residue.
+   * "_**mapping-sent**_": the index of the matching element in the array is sent.
+   * "_**compute**_": the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.
+* "**CDAa**": represents the argument of the CDA. Currently, no CDAa is defined.
+
+For example:
+
+
+    {
+    "RuleID" : 12,
+    "RuleIDLength" : 4,
+    "compression": [
+        {
+        "FID": "IPV6.VER",
+        "FL": 4,
+        "FP": 1,
+        "DI": "Bi",
+        "TV": 6,
+        "MO": "equal",
+        "CDA": "not-sent"
+        },
+        {
+        "FID": "IPV6.DEV_PREFIX",
+        "FL": 64,
+        "FP": 1,
+        "DI": "Bi",
+        "TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
+        "MO": "match-mapping",
+        "CDA": "mapping-sent",
+        },
+        ]
+    }
+
+
 ## Fragmentation Rules
- 
- 
- # Context
- 
- A context is associated to a specific device which may be identify by a unique LPWAN 
- identifier, for instance a LoRaWAN devEUI. 
- 
- Two each devices is associated a set of rules, the rule structure is defined previously. 
- 
-      [
-       	{
- 	    	"RuleID" : 12,
- 	     	"RuleLength" : 4, 
- 	    	"compression": [
-				{
-					"FID": "IPV6.VER",
-					"FL": 4,
-					"FP": 1,
-					"DI": "Bi",
-					"TV": 6,
-					"MO": "equal",
-					"CDA": "not-sent"
-				},
-  				{
-					"FID": "IPV6.DEV_PREFIX",
-					"FL": 64,
-					"FP": 1,
-					"DI": "Bi",
-					"TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
-					"MO": "match-mapping",
-					"CDA": "mapping-sent",
-				},
-			]
-	    },
-	    {
- 		    "RuleID" : 13,
- 		    "RuleLength" : 4, 
- 	     	"framentation ": ....
-	    },
-	    .....
-   ]
- 
- The context consists on the association of this set of rule to a device ID. 
- 
-      [
-          { 
-            "deviceID": 0x1234567890,
-            "sor" : [ ..... ]
-          }
-      ]
- 
-deviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted and set ton None. In the core network, the deviceIDs must be specified. 
- 
+<<< to be written >>>.
 
- # RuleManager 
- 
- Rule manager manage contexts for a specific device or a set of devices. It maintains the context database and its consistency. 
- 
- 
- ## Class RuleManager
- 
- A RuleManager object is created this way:
- 
+# Context
+
+A context is associated with a specific device, which may be identified by a unique LPWAN
+identifier, for instance a LoRaWAN devEUI.
+
+The context also includes a set of rules. The rule description is defined [above](#rule-definition).
+
+
+    {
+        "DeviceID": 0x1234567890,
+        "sor" : { ..... }
+    }
+
+DeviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted or set to null. In the core network, the DeviceIDs must be specified.
+
+The set of rules itself expands as shown below.
+
+    {
+        {
+        "RuleID" : 12,
+        "RuleIDLength" : 4,
+        "compression": [
+            {
+            "FID": "IPV6.VER",
+            "FL": 4,
+            "FP": 1,
+            "DI": "Bi",
+            "TV": 6,
+            "MO": "equal",
+            "CDA": "not-sent"
+            },
+            {
+            "FID": "IPV6.DEV_PREFIX",
+            "FL": 64,
+            "FP": 1,
+            "DI": "Bi",
+            "TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
+            "MO": "match-mapping",
+            "CDA": "mapping-sent",
+            },
+          ]
+        },
+        {
+        "RuleID" : 13,
+        "RuleIDLength" : 4,
+        "fragmentation" : ....
+        },
+        .....
+    }
+
+
+
+# RuleManager
+
+The Rule Manager manages the context(s) for a specific device or a set of devices. It maintains the context database and ensures its consistency.
+
+
+## Class RuleManager
+
+A RuleManager object is created this way:
+
       from RuleManager import *
-      RM = RuleManager() 
- 
-### Add 
- 
- Add is used to add a new rule to a context. Add check the validity of the rule:
- * ruleID/RuleLength do not overlap
- * contain either a single fragmentation or compression description. 
- 
- if the deviceID already exists in the context, the new set of rules is added if no conflict on the rule ID is found.
- 
-      RM.add ({"deviceID": 0x1234567, "sor": [.....]}) 
- 
+      RM = RuleManager()
+
+### Add
+
+Add is used to add a new rule to a context <<< only one, or a set of rules? >>>. Add checks the validity of the rule:
+* ruleID/RuleIDLength do not overlap
+* the rule contains either one of a fragmentation and a compression description.
+
+If the DeviceID already exists in the context, the new rule is added to that context, providing no conflict on the RuleID is found.
+
+      RM.add ({"DeviceID": 0x1234567, "sor": {.....}})
+
 ### Remove
 
-Suppress a rule for a specific device, if no rule is specified, the device is removed from the context.
+Suppresses a rule for a specific device <<< only one, or a set of rules? >>>. If no rule is specified, all rules for that device are removed from the context.
 
-      RM.add ({"deviceID": 0x1234567, "sor": [{"ruleID":12, "ruleLength":4}]}) 
-      RM.add ({"deviceID": 0x1234567}) 
- 
+      RM.remove ({"deviceID": 0x1234567, "sor": {{"ruleID":12, "ruleLength":4}}})
+      RM.remove ({"deviceID": 0x1234567})
+
 ### FindRuleFromPacket
 
-This method returns a rule and a deviceID that match with a packet description given by the Parser. 
- 
+This method returns a rule and a DeviceID that match a packet description given by the protocol analyzer.
+
 ### FindFragmentationRule (size)
 
- return a fragmentation rule regarding the packet size.
- 
- 
-### FindRuleFormID
+Returns a fragmentation rule compatible with the packet size passed as parameter.
 
-giving the first bits received from the LPWAN return either a fragmentation or compression rule.
+
+### FindRuleFromID
+
+Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.
