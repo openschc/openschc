@@ -1,203 +1,198 @@
 """
-This module is used to manage rules.
+The Rule Manager manages the context(s) for a specific device or a set of devices.
+It maintains the context database and ensures its consistency. The hierarchy is the
+following:
++ context_database
+  + device_context
+    + set_of_rules
+      + rule_id/rule_id_length
+        + rules
+          + Fragmentation
+          + Compression
 
-## Base format
+# Introduction
 
-A context and rule is written in JSON.
+The context includes a set of rules shared by both ends.
+Identical Rules are used on both ends. They can be simply
+copied/pasted from one end to the other end, if both ends use the same format for describing them.
 
-A context contains an identifier, AND one or three rules.
-One of rules must specify the SCHC Compression/Decompression (CD).
-Two specify SCHC Fragmentation/Reassembly (FR) if needed.
+This document specifies the OpenSCHC rule data model, which is based on JSON.
 
-Therefore, a context has to be formed to either below structures.
+# Rule definition
 
-    {
-        "devL2Addr": ...,
-        "dstIID": ...,
-        "comp": { ... },
-        "fragSender": { ... },
-        "fragReceiver": { ... }
-    }
+A rule is described as a JSON dictionary.
 
-    "comp": compression rule.
-    "fragSender": fragmentation rule for inbound.
-    "fragReceiver": fragmentation rule for outbound.
+A rule is identified by its RuleID.
 
-Or,
+The size of the RuleID representation can change from one rule to
+the next. Therefore, the rule description includes a RuleIDLength that indicates the length of the RuleID, in bits.
 
-    {
-        "devL2Addr": ...,
-        "dstIID": ...,
-        "profile": { ... },
-        "comp": { ... }
-    }
+Both fields are integer numbers.
 
-XXX Q. "profile" should be in the context ?
-
-## Context
-
-A context is uniquely identified by devL2Addr
-specifying the L2 address of a SCHC device.
-
-dstIID matches the IP address assigned
-to the interface of the communication peer.
-In the context of the SCHC device, dstIID indicates the IP address of
-the interface at the SCHC Translator,
-which is dedicated between the device and
-the application.
-In the context of the other side, dstIID indicates the IP address of
-the SCHC device.
-
-    +--------+                       +------------+         +-----+
-    |  SCHC  |                       |    SCHC    |---------| App |
-    | Device |                       | Translator |         |     |
-    +--------+                       +------------+         +-----+
-         | D (IP addr)                     | T (IP addr)
-         | L (L2 addr)                     |
-         |                                 |
-         +--// LPWAN //--| GW |------------+
-
-In the above example, the context of each side is like below:
-
-    at the device:
 
     {
-        "devL2Addr": "L",
-        "dstIID": "M"
+    "RuleID" : 12,
+    "RuleIDLength" : 4
+    # notice that RuleID 12 represented on 6 bits is different from RuleID 12 on 4 bits!
     }
 
-    at the translator:
+In SCHC, rules are used either for compression or fragmentation. Therefore, one and only one of the two keywords "fragmentation" or "compression" must be specified, per rule.
 
-    {
-        "devL2Addr": "L",
-        "dstIID": "D"
-    }
+## Compression Rules
 
-"*" and "/" can be used for a wild-card match. (XXX should be implemented.)
+As defined in the SCHC specification, compression rules are composed of Field Descriptions.
+The order in which the Field Descriptions appear in the rule is significant (e.g. it defines the order in which the compression residues are sent), therefore a compression rule is represented as an array.
 
-## Rule
+The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:
+* "**FID**": a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. "IPV6.VER". <<< why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!>>>
+* "**FL**": if the value is a number, that value expresses the length of the field, in bits. If the
+value is a string, it designates a function that can compute the field length. The functions currently defined are:
+  * "_**var**_": the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.
+  * "_**coaptkl**_": this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
+* "**FP**": an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.
+* "**DI**": tells the direction to which this Field Description applies:
+    * "_**Up**_": only to uplink messages (i.e. from device to network)
+    * "_**Dw**_": only to downlink messages (i.e. from network to device)
+    * "_**Bi**_": to both directions
 
-XXX is it true that both ruleID and ruleLength is unique key ?
-XXX is the deivce L2 address the real key ?
+* "**TV**": specifies the Target Value. The value is a number, a string or an array of these types. The "TV" key can be omitted or its value set to null if there is no value to check, for instance together with the "ignore" MO. If the Target Value is an array, then the value null among the array elements indicates that
+the Field Descriptor matches the case where the field is not present in the header being compressed.
+* "**MO**": specifies the Matching Operator. It is a string that can take the following values:
+  * "_**ignore**_": the field must be present in the header, but the value is not checked.
+  * "_**equal**_": type and value must check between the field value and the Target Value <<< il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? >>
+  * "_**MSB**_": the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the "MOa" field.
+  * "_**match-mapping**_": with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.
+* "**MOa**": specifies, if applicable, an argument to the MO. This currently only applies to the "MSB" MO, where the argument specifies the length of the matching, in bits.
+* "**CDA**": designates the Compression/Decompression Action. It is a string that can take the following values:
+   * "_**not-sent**_": the field value is not sent as a residue.
+   * "_**value-sent**_": the field value is sent in extenso in the residue.
+   * "_**LSB**_": the bits remaining after the MSB comparison are sent in the residue.
+   * "_**mapping-sent**_": the index of the matching element in the array is sent.
+   * "_**compute**_": the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.
+* "**CDAa**": represents the argument of the CDA. Currently, no CDAa is defined.
 
-A rule is uniquely identified by the rule ID of variable length.
-Each rule must contain the following information:
+For example:
 
-    {
-      "ruleID" : 2,
-      "ruleLength" : 3
-    }
+{
+    "ruleID": 12,
+    "ruleLength": 4,
+    "compression": [
+      {"FID": "IPV6.VER", "FL": 4, "FP": 1, "DI": "Bi", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+      {"FID": "IPV6.TC",  "FL": 8, "FP": 1, "DI": "Bi", "TV": 0, "MO": "equal", "CDA": "not-sent"},
+      {"FID": "IPV6.FL",  "FL": 20,"FP": 1, "DI": "Bi", "TV": 0, "MO": "ignore","CDA": "not-sent"},
+      {"FID": "IPV6.LEN", "FL": 16,"FP": 1, "DI": "Bi",          "MO": "ignore","CDA": "compute-length"},
+      {"FID": "IPV6.NXT", "FL": 8, "FP": 1, "DI": "Bi", "TV": 58, "MO": "equal", "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT","FL": 8,"FP": 1,"DI": "Bi","TV": 255,"MO": "ignore","CDA": "not-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64,"FP": 1,"DI": "Bi","TV": ["2001:db8::/64",
+                                                                   "fe80::/64",
+                                                                   "2001:0420:c0dc:1002::/64" ],
+                                                                  "MO": "match-mapping","CDA": "mapping-sent","SB": 1},
+      {"FID": "IPV6.DEV_IID","FL": 64,"FP": 1,"DI": "Bi","TV": "::79","MO": "equal","CDA": "DEVIID"},
+      {"FID": "IPV6.APP_PREFIX","FL": 64,"FP": 1,"DI": "Bi","TV": [ "2001:db8:1::/64",
+                                                                    "fe80::/64",
+                                                                    "2404:6800:4004:818::/64" ],
+                                                                  "MO": "match-mapping","CDA": "mapping-sent", "SB": 2},
+      {"FID": "IPV6.APP_IID","FL": 64,"FP": 1,"DI": "Bi","TV": "::2004","MO": "equal","CDA": "not-sent"},
+      {"FID": "ICMPV6.TYPE","FL": 8,"FP": 1,"DI": "Bi","TV": 128,"MO": "equal","CDA": "not-sent"},
+      {"FID": "ICMPV6.CODE","FL": 8,"FP": 1,"DI": "Bi","TV": 0,  "MO": "equal","CDA": "not-sent"},
+      {"FID": "ICMPV6.CKSUM","FL": 16,"FP": 1,"DI": "Bi","TV": 0,"MO": "ignore","CDA": "compute-checksum"},
+      {"FID": "ICMPV6.IDENT","FL": 16,"FP": 1,"DI": "Bi","TV": [],"MO": "ignore","CDA": "value-sent"},
+      {"FID": "ICMPV6.SEQNO","FL": 16,"FP": 1,"DI": "Bi","TV": [],"MO": "ignore","CDA": "value-sent"}
+    ]
+}
 
-where ruleID contains the rule ID value aligned on the right and ruleLength
-gives
-the size in bits of the ruleID. In the previous example, this corresponds to
-the binary value 0b010.
-if ruleLength is not specified the value is set to 1 byte.
 
-The rule is either a compression/decompression rule
-or a fragmentation/reassembly rule.
-For C/D rules, the keyword "compression" must be defined.
-For F/R rules, the keyword "fragmentation" and "fragmentation"
-must be defined.
+## Fragmentation Rules
+<<< to be written >>>.
 
-## Compression Rule
+# Context
 
-A compression rule is bidirectionnal.
+A context is associated with a specific device, which may be identified by a unique LPWAN
+identifier, for instance a LoRaWAN devEUI.
 
-## Fragmentation Rule
+The context also includes a set of rules. The rule description is defined [above](#rule-definition).
 
-A fragmentation rule is uni directionnal.
 
-The "fragmentation" keyword is used to give fragmentation mode and profile:
-- one fragmentation mode keywork "noAck", "ackAlways" or "ackOnError".
-- FRModeProfile parameters. Default values are automaticaly added.
-- dtagSize, WSize and FCNSize are used to define the SCHC fragmentation header
-- windowSize can be added if not 2^FCNSize - 1
-  For "ackOnError" the following parameter is defined:
-  - "ackBehavior" defined the ack behavior, i.e. when the Ack must be spontaneously sent
-    by the receiver and therefore when the sender must listen for Ack.
-    - "afterAll0" means that the sender waits for ack after sending an All-0
-    - "afterAll1" means that the sender waits only after sending the last fragment
-    - other behaviors may be defined in the future.
-
-## data model of DB
-
-    db = [
+    [
         {
-            "devL2Addr": ..,
-            "dstIID": ..,
-            "comp": {
-                    "ruleID": ..,
-                    "ruleLength": ..,
-                    "compression": { ...}
-                },
-            "fragSender": {
-                    "ruleID": ..,
-                    "ruleLength": ..,
-                    "fragmentation": { ...}
-                }
-            "fragReceiver": {
-                    "ruleID": ..,
-                    "ruleLength": ..,
-                    "fragmentation": { ...}
-                }
-        }, ...
+            "DeviceID": 0x1234567890,
+            "SoR" : { ..... }
+        },
+        {
+            "DeviceID": 0xDEADBEEF,
+            "SoR" : { ..... }
+        },
+        ...
     ]
 
-## method
+DeviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted or set to null. In the core network, the DeviceIDs must be specified.
 
-- add_context(context, comp=None, fragSender=None, fragReceiver=None)
+The set of rules itself expands as shown below.
 
-    It adds the context.  If it exists, raise ValueError.
+    [
+        {
+        "RuleID" : 12,
+        "RuleIDLength" : 4,
+        "compression": [
+            {
+            "FID": "IPV6.VER",
+            "FL": 4,
+            "FP": 1,
+            "DI": "Bi",
+            "TV": 6,
+            "MO": "equal",
+            "CDA": "not-sent"
+            },
+            {
+            "FID": "IPV6.DEV_PREFIX",
+            "FL": 64,
+            "FP": 1,
+            "DI": "Bi",
+            "TV": [ "2001:db8::/64", "fe80::/64", "2001:0420:c0dc:1002::/64" ],
+            "MO": "match-mapping",
+            "CDA": "mapping-sent",
+            },
+          ]
+        },
+        {
+        "RuleID" : 13,
+        "RuleIDLength" : 4,
+        "fragmentation" : ....
+        },
+        .....
+    ]
 
-- add_rules(context, comp=None, fragSender=None, fragReceiver=None)
 
-    It adds the list of rules into the context specified.
-    If it exists, raise ValueError.
-    If context is not specified, the rule will be added into the default
-    context.
 
-## Rule to add a new key
+### Remove
 
-Each key must be unique through a rule.
-For example, below the keys of "profile" are not allowed.
+Suppresses a rule for a specific device <<< only one, or a set of rules? >>>. If no rule is specified, all rules for that device are removed from the context.
 
-    {
-        "profile": { ... },
-        "compression": { "profile": ... }
-    }
+      RM.remove ({"DeviceID": 0x1234567, "SoR": {{"ruleID":12, "ruleLength":4}}})
+      RM.remove ({"DeviceID": 0x1234567})
 
-## Examples
+### FindRuleFromPacket
 
-Example 1:
+This method returns a rule and a DeviceID that match a packet description given by the protocol analyzer.
 
-    {
-      "ruleID" : 14,
-      "ruleLength" : 4   # rule 0b1110
-      "compression": { ... }
-    }
+### FindFragmentationRule (size)
 
-Example 2:
+Returns a fragmentation rule compatible with the packet size passed as parameter.
 
-    {
-      "ruleID" : 15,
-      "ruleLength" : 4   # rule 0b1110
-      "fragmentationOut": {
-          "FRMode" : "noAck" # or "ackAlways", "ackOnError"
-          "FRModeProfile" : {
-             "dtagSize" : 1,
-             "WSize": 3,
-             "FCNSize" : 3,
-             "windowSize", 7,
-             "ackBehavior": "afterAll1"
-          }
-      }
-    }
+
+### FindRuleFromID
+
+Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.
+
 
 """
 
 from base_import import *
 from copy import deepcopy
+from schccomp import *
+import binascii
+import ipaddress
+import pprint
 
 # XXX to be checked whether they are needed.
 DEFAULT_FRAGMENT_RID = 1
@@ -209,6 +204,35 @@ DEFAULT_TIMER_T3 = 10
 DEFAULT_TIMER_T4 = 12
 DEFAULT_TIMER_T5 = 14
 
+# CONTAINS DEFAULT AND USEFUL INFORMATION ON FIELDS
+
+class IPv6address:
+    addr = b''
+
+FIELD__DEFAULT_PROPERTY = {
+    T_IPV6_VER         : {"FL": 4,  "TYPE": int },
+    T_IPV6_TC          : {"FL": 8,  "TYPE": int  },
+    T_IPV6_FL          : {"FL": 20, "TYPE": int  },
+    T_IPV6_NXT         : {"FL": 8,  "TYPE": int  },
+    T_IPV6_HOP_LMT     : {"FL": 8,  "TYPE": int  },
+    T_IPV6_LEN         : {"FL": 16, "TYPE": int },
+    T_IPV6_DEV_PREFIX  : {"FL": 64, "TYPE": bytes  },
+    T_IPV6_DEV_IID     : {"FL": 64, "TYPE": bytes },
+    T_IPV6_APP_PREFIX  : {"FL": 64, "TYPE": bytes  },
+    T_IPV6_APP_IID     : {"FL": 64, "TYPE": bytes  },
+    T_UDP_DEV_PORT     : {"FL": 16, "TYPE": int  },
+    T_UDP_APP_PORT     : {"FL": 16, "TYPE": int  },
+    T_UDP_LEN          : {"FL": 16, "TYPE": int  },
+    T_UDP_CKSUM        : {"FL": 16, "TYPE": int  },
+    T_ICMPV6_TYPE      : {"FL": 8,  "TYPE": int },
+    T_ICMPV6_CODE      : {"FL": 8,  "TYPE": int },
+    T_ICMPV6_CKSUM     : {"FL": 16, "TYPE": int },
+    T_ICMPV6_IDENT     : {"FL": 16, "TYPE": int },
+    T_ICMPV6_SEQNO     : {"FL": 16, "TYPE": int },
+    T_COAP_OPT_URI_PATH: {"FL": "var", "TYPE": str}
+}
+
+print (FIELD__DEFAULT_PROPERTY)
 class DictToAttrDeep:
 
     def __init__(self, **entries):
@@ -264,12 +288,223 @@ class DictToAttrDeep:
             return repr(t)
 
 class RuleManager:
-    """RuleManager class is used to manage Compression/Decompression and Fragmentation/
-    Reassembly rules."""
+    """
+    # Class RuleManager
 
-    def __init__(self):
+    A RuleManager object is created this way:
+
+          from RuleManager import *
+          RM = RuleManager()
+
+          arguments:
+          - file: the RuleManager takes a file to upload rule_set
+          - log:  display debugging events
+    """
+
+    def _return_default(self, elm, idx, val):
+        if idx in elm:
+            return elm[idx]
+        else:
+            return val
+
+    def Add(self, device= None, dev_info=None, file=None):
+        """
+        Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
+        * ruleID/RuleIDLength do not overlap
+        * the rule contains either one of a fragmentation and a compression description.
+
+        If the DeviceID already exists in the context, the new rule is added to that context, providing no conflict on the RuleID is found.
+
+              RM.Add ({"DeviceID": 0x1234567, "sor": {.....}})
+
+        """
+
+        assert (dev_info == None or file == None)
+
+        if file != None:
+            dev_info = json.loads(open(file).read())
+
+        if type(dev_info) is dict: #Context or Rules
+            if "RuleID" in dev_info: # Rules
+                sor = [dev_info]
+            elif "SoR" in dev_info:
+                if "DeviceID" in dev_info:
+                    device = dev_info["DeviceID"]
+                sor    = dev_info["SoR"]
+            else:
+                ValueError("unknown format")
+        elif type(dev_info) is list: # a Set of Rule
+            sor = dev_info
+        else:
+            ValueError("unknown structure")
+
+
+        # check nature of the info: if "SoR" => device context, if "RuleID" => rule
+
+        d = None
+        for d in self._ctxt:
+            if device == d["DeviceID"]:
+                break
+
+        if d == None:
+            d = {"DeviceID": device, "SoR": []}
+            self._ctxt.append(d)
+
+        for n_rule in sor:
+            n_ruleID = n_rule["RuleID"]
+            n_ruleLength = n_rule["RuleLength"]
+            left_aligned_n_ruleID = n_ruleID << (32 - n_ruleLength)
+
+            overlap = False
+            for e_rule in d["SoR"]: # check no overlaps on RuleID
+                left_aligned_e_ruleID = e_rule["RuleID"] << (32 - e_rule["RuleLength"])
+                if left_aligned_e_ruleID == left_aligned_n_ruleID:
+                    print ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
+                    overlap = True
+                    break
+
+            if not overlap:
+                r = self._create_rule(n_rule)
+                d["SoR"].append(r)
+
+    def _adapt_value (self, FID, value):
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
+            if type(value) != int:
+                ValueError ("{} TV type not appropriate")
+            else:
+                return value
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == str:
+            if type(value) != str:
+                ValueError ("{} TV type not appropriate")
+            else:
+                return value
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == bytes: # convert string with IPv6 address to bytes
+            if type(value) is str:
+                slash_pos = value.find("/")
+                if slash_pos != -1:
+                    # a prefix is given, remove / to be compatible with ip_address
+                    value = value[:slash_pos]
+
+                addr = ipaddress.ip_address(value)
+                if addr.version != 6: # expect an IPv6 address
+                    ValueError ("{} only IPv6 is supported")
+
+                if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
+                    return addr.packed[:8]
+                elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
+                    return addr.packed[8:]
+                else:
+                    ValueError ("{} Fid not found".format(FID))
+            elif type(value) is int:
+                return (value).to_bytes(8, byteorder="big")
+
+    def _create_rule (self, nrule):
+        """
+        parse a rule to verify values and fill defaults
+        """
+        arule = {}
+
+        arule["RuleID"] = nrule["RuleID"]
+        arule["RuleLength"] = nrule["RuleLength"]
+        arule["Compression"] = []
+
+        for r in nrule["Compression"]:
+            assert(r["FID"] in FIELD__DEFAULT_PROPERTY)
+
+            entry = {}
+            FID = r[T_FID].upper()
+            entry[T_FID] = FID
+            entry[T_FL] = self._return_default(r, T_FL, FIELD__DEFAULT_PROPERTY[FID][T_FL])
+            entry[T_FP] = self._return_default(r, T_FP, 1)
+            entry[T_DI] = self._return_default(r, T_DI, T_DIR_BI)
+
+            MO = r[T_MO].upper()
+            if MO in [T_MO_EQUAL, T_MO_MSB, T_MO_IGNORE]:
+                if MO == T_MO_MSB:
+                    if T_MO_VAL in r:
+                        entry[T_MO_VAL] = r[T_MO_VAL]
+                    else:
+                        ValueError ("MO Value missing for {}".format(FID))
+
+                if T_TV in  r:
+                    entry[T_TV] = self._adapt_value(FID, r[T_TV])
+
+            elif MO == T_MO_MMAP:
+                entry[T_TV] = []
+                for e in r[T_TV]:
+                    entry[T_TV].append(self._adapt_value(FID, e))
+
+            else:
+                ValueError("{} MO unknown".format(MO))
+            entry[T_MO] = MO
+
+            CDA = r[T_CDA].upper()
+            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM]:
+                ValueError("{} CDA not found".format(CDA))
+            entry[T_CDA] = CDA
+
+            arule["Compression"].append(entry)
+
+        return arule
+
+
+    def __init__(self, file=None, log=None):
         #RM database
-        self._db = []
+        self._ctxt = []
+        self._log = log
+
+
+    def _smart_print(self, v):
+        if type(v) is str:
+            v = '"'+v+'"'
+            print ('{:<30}'.format(v), end="")
+        elif type(v) is int:
+            print ('{:>30}'.format(v), end="")
+        elif type(v) is bytes:
+            print ('{:>30}'.format(v.hex()), end="")
+
+    def Print (self):
+        """
+        Print a context
+        """
+        for dev in self._ctxt:
+            print ("*"*40)
+            print ("Device:", dev["DeviceID"])
+
+            for rule in dev["SoR"]:
+                print ("/" + "-"*25 + "\\")
+                txt = str(rule["RuleID"])+"/"+ str(rule["RuleLength"])
+                print ("|Rule {:8}  {:10}|".format(txt, bin(rule["RuleID"])))
+                if "Compression" in rule:
+
+                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
+                    for e in rule["Compression"]:
+                        print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                        if 'TV' in e:
+                            if type(e[T_TV]) is list:
+                                self._smart_print(e[T_TV][0])
+                            else:
+                                self._smart_print(e[T_TV])
+                        if not T_TV in e or e[T_TV] == None: 
+                            print ("-"*30, end="")
+
+                        txt = e[T_MO]
+                        if T_MO_VAL in e:
+                            txt = txt+ '(' + str(e[T_MO_VAL])+')'
+                    
+                        print ("|{:13}|{:16}|".format(txt, e[T_CDA]))
+
+                        if (T_TV in e) and (type (e[T_TV]) is list):
+                            for i in range (1, len(e[T_TV])):
+                                print (":{:^15s}:{:^3}:{:^2}:{:^2}:".format(".", ".", ".","."), end='')
+                                self._smart_print(e[T_TV][i])
+                                print (":{:^13}:{:^16}:".format(".", "."))
+
+
+                    print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
+
+
+
 
     def _checkRuleValue(self, rule_id, rule_id_length):
         """this function looks if bits specified in ruleID are not outside of
@@ -464,4 +699,3 @@ class RuleManager:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
-
