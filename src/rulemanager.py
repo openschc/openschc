@@ -103,7 +103,45 @@ For example:
 
 
 ## Fragmentation Rules
-<<< to be written >>>.
+
+Fragmentation rules define how the compression and decompression must be performed.
+
+The keyword  __Fragmentation__ is followed by a dictionnary containing the different parameters used.
+Inside the keyword __FRMode__ indicates which Fragmentation mode is used (__noAck__, __ackAlways__, __ackOnError__).
+Then the keyword __FRModeParamter__ gives the information needed to create the SCHC fragmentation header and mode profile:
+
+* __dtagSize__ gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present 
+in the SCHC fragmentation header>>. This keyword can be used by all the fragmentation modes.
+* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in 
+noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
+* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck. 
+For ackAlways and ackOnError the value must be specified.
+* __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
+    * "afterAll1": the bitmap (or Mic OK) is expected only after the reception of a All-1.
+    * "afterAll0": the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
+* __tileSize__ gives the size in bit of a tile. 
+* __MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,
+* __MICWordSize__ gives the size of the MIC word. 
+
+For instance:
+
+    {
+        "RuleID": 1,
+        "RuleLength": 3,
+        "Fragmentation" : {
+            "FRMode": "ackOnError",
+            "FRModeProfile": {
+                "dtagSize": 2,
+                "WSize": 5,
+                "FCNSize": 3,
+                "ackBehavior": "afterAll1",
+                "tileSize": 9,
+                "MICAlgorithm": "crc32",
+                "MICWordSize": 8
+            }
+        }
+    }
+
 
 # Context
 
@@ -364,8 +402,14 @@ class RuleManager:
                     break
 
             if not overlap:
-                r = self._create_rule(n_rule)
-                d["SoR"].append(r)
+                if "Compression" in n_rule:
+                    r = self._create_compression_rule(n_rule)
+                    d["SoR"].append(r)
+                elif "Fragmentation" in n_rule:
+                    r = self._create_fragmentation_rule(n_rule)
+                    d["SoR"].append(r)
+                else:
+                    ValueError ("Rule type undefined")
 
     def _adapt_value (self, FID, value):
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
@@ -398,7 +442,57 @@ class RuleManager:
             elif type(value) is int:
                 return (value).to_bytes(8, byteorder="big")
 
-    def _create_rule (self, nrule):
+    def _create_fragmentation_rule (self, nrule):
+        arule = {}
+
+        arule["RuleID"] = nrule["RuleID"]
+        arule["RuleLength"] = nrule["RuleLength"]
+        arule["Fragmentation"] = {}
+
+        def _default_value (ar, nr, idx, default=None, failed=False):
+            if failed and not idx in nr[T_FRAG][T_FRAG_PROF]:
+                ValueError ("{} not found".format(idx))
+
+            if idx in nr[T_FRAG][T_FRAG_PROF]:
+                ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx] 
+            else:
+                ar[T_FRAG][T_FRAG_PROF][idx] = default 
+            
+        if T_FRAG_MODE in nrule[T_FRAG]:
+            if not T_FRAG_PROF in nrule[T_FRAG]:
+                ValueError("No {} in rule {}".format(T_FRAG_PROF), nrule["RuleID"])
+
+            if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
+                ValueError("No FCN in rule Profile".format(T_FRAG_PROF))
+
+
+            if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
+                arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
+                arule[T_FRAG][T_FRAG_PROF] ={}
+                
+                _default_value (arule, nrule, T_FRAG_FCN)
+                _default_value (arule, nrule, T_FRAG_DTAG, 0)
+                _default_value (arule, nrule, T_FRAG_MIC, "crc32")
+
+                if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
+                    _default_value (arule, nrule, T_FRAG_W, 0)
+                elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
+                    _default_value (arule, nrule, T_FRAG_W, 1)
+                elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                    _default_value (arule, nrule, T_FRAG_W, 1)
+                    _default_value (arule, nrule, T_FRAG_W, 1)
+                    _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
+                    _default_value (arule, nrule, T_FRAG_TILE, None, True)
+                    
+                   
+            else:
+                ValueError ("Unknown fragmentation mode {}".format())
+        else:
+            ValueError("No fragmentation mode")
+
+        return arule
+
+    def _create_compression_rule (self, nrule):
         """
         parse a rule to verify values and fill defaults
         """
@@ -502,7 +596,30 @@ class RuleManager:
 
 
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
+                elif T_FRAG in rule:
+                    print ("!" + "="*25 + "+" + "="*61 +"\\")
+                    print ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:21}!!"
+                        .format(
+                            rule[T_FRAG][T_FRAG_MODE],
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_W],
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
+                            ""
+                        ))
 
+                    if T_FRAG_TILE in rule[T_FRAG][T_FRAG_PROF]:
+                        txt = "Tile size: "+ str(rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE])
+                    else:
+                        txt = "No Tile size specified"
+                    print ("!! {:<84}!!".format(txt))
+
+                    if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                        txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
+                        print ("!! {:<84}!!".format(txt))
+                    
+                    print ("!! MIC Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
+
+                    print ("\\" + "="*87 +"/")
 
 
 

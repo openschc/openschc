@@ -83,6 +83,17 @@ T_CDA_COMP_CKSUM = "COMPUTE-CHECKSUM"
 T_CDA_DEVIID = "DEVIID"
 T_CDA_APPIID = "APPIID"
 
+T_FRAG = "Fragmentation"
+T_FRAG_MODE = "FRMode"
+T_FRAG_PROF = "FRModeProfile"
+T_FRAG_DTAG = "dtagSize"
+T_FRAG_W = "WSize"
+T_FRAG_FCN = "FCNSize"
+T_FRAG_ACK_BEHAVIOR = "ackBehavior"
+T_FRAG_TILE = "tileSize"
+T_FRAG_MIC  = "MICALgorithm"
+
+
 #---------------------------------------------------------------------------
 # MO operation
 #   return (True, tv) if matched.
