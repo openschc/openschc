@@ -8,7 +8,7 @@ from base_import import *
 from simsched import SimulScheduler as Scheduler
 from simlayer2 import SimulLayer2
 from cond_true import ConditionalTrue
-
+import utime
 import schc
 
 from stats.statsct import Statsct
@@ -71,6 +71,8 @@ class SimulSCHCNode(SimulNode):
         self.sim._add_node(self)
 
     def event_receive(self, sender_id, packet):
+        self._log("{} ----------------------- RECEIVED PACKET -----------------------"
+                            .format(utime.time()))
         self._log("recv from {}".format(sender_id))
         self.layer2.event_receive_packet(sender_id, packet)
 
@@ -124,7 +126,9 @@ class Simul:
 
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
+        self._log("----------------------- SEND PACKET -----------------------")
         if not self.frame_loss.check():
+            self._log("----------------------- OK -----------------------")
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
@@ -135,6 +139,7 @@ class Simul:
             for link in link_list:
                 count += self.send_packet_on_link(link, packet)
         else:
+            self._log("----------------------- KO -----------------------")
             self._log("packet was lost {}->{}".format(src_id, dst_id))
             if enable_statsct:
                 Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))            

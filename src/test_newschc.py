@@ -148,7 +148,7 @@ Statsct.setDestinationAddress(node1.id)
 if opt.data_file is not None:
     payload = open(opt.data_file,"rb").read()
 else:
-    payload = bytearray(range(1, 1+opt.data_size))
+    payload = bytearray(range(1, 1+int(opt.data_size)))
 
 #---------------------------------------------------------------------------    
 Statsct.addInfo('real_packet', payload)

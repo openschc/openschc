@@ -96,7 +96,7 @@ class Statsct(object):
     @staticmethod
     def log(message):
         print("[statsct] {}".format(message))
-
+        
     @staticmethod
     def set_SF(SF):
         Statsct.SF = SF
@@ -170,6 +170,8 @@ class Statsct(object):
         Statsct.packet_info['time_off'] = Statsct.dc_time_off(Statsct.packet_info['toa_packet'],Statsct.dc) 
         Statsct.log(Statsct.packet_info)
         if 'msg_type' not in Statsct.packet_info:
+            print("No message type found, asuming retx")
+            input('')
             Statsct.packet_info['msg_type'] = Statsct.last_msg_type
         else:
             Statsct.last_msg_type = Statsct.packet_info['msg_type']
@@ -177,15 +179,19 @@ class Statsct(object):
         #calculate performace metrics
         Statsct.addChannelOccupancy(Statsct.packet_info['toa_packet'])
         #Statsct.log(str(Statsct.results))
+        print("src_dev_id {} , Statsct.src_id {}".format(src_dev_id,Statsct.src_id))
+
         if src_dev_id == Statsct.src_id:
             Statsct.sender_packets['packet_list'].append(Statsct.packet_info)
             Statsct.get_msg_type(packet, Statsct.device_rule['fragSender'])
-
+            print("packet added to sender list")
             #Statsct.log(Statsct.sender_packets)
         else:
             Statsct.receiver_packets['packet_list'].append(Statsct.packet_info)
             Statsct.get_msg_type(packet, Statsct.gw_rule['fragSender'])
+            print("packet added to receiver list")
             #Statsct.log(Statsct.receiver_packets)
+        #input('')
         #calcute the time off of each packet
         # if Statsct.packet_info['msg_type'] == '':
         #     Statsct.packet_info['msg_type'] = Statsct.last_msg_type
@@ -201,7 +207,7 @@ class Statsct(object):
         goodput of the transmission -> packet size / total data send 
         reliability # of data packets / received 
         """
-        print('print_ordered_packets ')
+        print('print_ordered_fragments')
         for i,k in enumerate(Statsct.results['packet_list']):
             
             if "status" in k:
@@ -229,6 +235,17 @@ class Statsct(object):
                 sender_toa += k['toa_packet']
         
         print("total_time_off -> {}, sender_toa -> {}".format(total_time_off,sender_toa))
+        
+        total_time_off_receiver = 0
+        receiver_toa = 0
+        for i,k in enumerate(Statsct.receiver_packets['packet_list']):
+            if "time_off" in k:
+                if i != (len(Statsct.receiver_packets['packet_list']) - 1):
+                    total_time_off_receiver += k['time_off']
+            if "toa_packet" in k:
+                receiver_toa += k['toa_packet']
+        
+        
         ACK_OK_TOA = 0
         RECEIVER_ABORT_TOA = 0
         for k in Statsct.results['packet_list']:
@@ -239,10 +256,14 @@ class Statsct(object):
                 elif k['msg_type'] == SCHC_RECEIVER_ABORT:
                     assert 'toa_packet' in k
                     RECEIVER_ABORT_TOA = k['toa_packet']  
-        print("ACK_OK_TOA: {}, RECEIVER_ABORT_TOA: {}".format(ACK_OK_TOA, RECEIVER_ABORT_TOA))            
+        print("ACK_OK_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
+                    ACK_OK_TOA, RECEIVER_ABORT_TOA, ACK_OK_TOA + RECEIVER_ABORT_TOA))     
+        print("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
+        #input('')
         total_delay = sender_toa + total_time_off + ACK_OK_TOA + RECEIVER_ABORT_TOA
         print("Channel Ocuppancy -> {}".format(Statsct.channel_occupancy))
         print("total_data_send -> {}, packet_length -> {}".format(Statsct.total_data_send,Statsct.packet_length))
+        
         goodput = Statsct.packet_length / Statsct.total_data_send 
 
         return {"channel_occupancy":Statsct.channel_occupancy,

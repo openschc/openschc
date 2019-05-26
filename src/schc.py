@@ -81,6 +81,9 @@ class SCHCProtocol:
         rule = context["comp"]
         self._log("compression rule_id={}".format(rule.ruleID))
         # XXX needs to handl the direction
+        #NEED TO BE FIX -> there is an error when packets are larger than 250B
+        #The assert in the funcion __add__ of bitarray.py line 257 gives an 
+        #Assertion Error. 
         packet_bbuf = self.compressor.compress(context, packet_bbuf)
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
@@ -144,6 +147,8 @@ class SCHCProtocol:
         # find a rule in the context for this packet.
         packet_bbuf = BitBuffer(raw_packet)
         key, rule = self.rule_manager.find_rule_bypacket(context, packet_bbuf)
+        print('key,rule {},{}'.format(key,rule))
+
         if key == "fragSender":
             if rule["dtagSize"] > 0:
                 dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
@@ -153,6 +158,7 @@ class SCHCProtocol:
             # find existing session for fragment or reassembly.
             session = self.fragment_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
+            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(rule.ruleID,rule.ruleLength, dtag))
             if session is not None:
                 print("Fragmentation session found", session)
                 session.receive_frag(packet_bbuf, dtag)
@@ -168,6 +174,8 @@ class SCHCProtocol:
             # find existing session for fragment or reassembly.
             session = self.reassemble_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
+            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(rule.ruleID,rule.ruleLength, dtag))
+
             if session is not None:
                 print("Reassembly session found", session)
             else:

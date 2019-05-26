@@ -96,18 +96,26 @@ class TileList():
         def unset_sent_flag_do(wn, tn):
             if tn is None:
                 # special case. i.e. the last tile.
-                self.all_tiles[-1]["sent"] = False
+                #dont know why it is a special case, if the ALL-1 is received with a tile
+                #then it should always be one, if the tile is consired received by the method
+                #below, then it should not be false
+                print("last tile case")
+                #self.all_tiles[-1]["sent"] = False
                 return
             # normal case.
+            counter = 0
             for t in self.all_tiles:
                 if t["w-num"] == wn:
                     if t["t-num"] == self.max_fcn - tn:
+                        counter += 1
+                        print("counter = {}".format(counter))
                         t["sent"] = False
         #
         if self.max_w_num == win:
             # last window
             for bi in range(len(bit_list[:-1])):
                 if bit_list[bi] == 0:
+                    
                     unset_sent_flag_do(win, bi)
             unset_sent_flag_do(win, None)
         else:

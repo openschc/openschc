@@ -51,46 +51,52 @@ def make_bit_list(tile_list, N, window_size):
     # main
     tni = max_fcn
     for t in sorted_tile_list:
+        print("t:{}".format(t))
         bl = bit_list.setdefault(wni, [])
         wn = t["w-num"]
         tn = t["t-num"]
         nbt = t.get("nb_tiles", 1)
         # all-1
         if tn == all1(N):
-            while tni > 0:
+            #print("all ones found:wn:{}, tn:{}, nbt:{}, tni:{}".format(wn,tn,nbt,tni))
+            #Added a 1 to the tile found in the all-1
+            bl.append(1)
+            while tni-1 > 0:
                 bl.append(0)
                 tni -= 1
             if nbt == 1:
+                print("append 1")
                 bl.append(1)
                 break
         # regular
         if wni < wn:
-            #print("MBL00 wn:tn:nb=", wni, tni, bl)
+            print("MBL00 wn:tn:nb=", wni, tni, bl)
             while wni < wn:
                 bl = bit_list.setdefault(wni, [])
                 while tni > 0:
+                    print("padding")
                     bl.append(0)
                     tni -= 1
                 bl.append(0)
                 wni += 1
                 tni = max_fcn
-                #print("MBL01 wn:tn:nb=", wni, tni, bl)
-        #print("MBL1 nb=", nbt)
+                print("MBL01 wn:tn:nb=", wni, tni, bl)
+        print("MBL1 nb=", nbt)
         assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
             tni -= 1
-            #print("MBL2 wn:tn:nb=", wni, tni, bl)
+            print("MBL2 wn:tn:nb=", wni, tni, bl)
         for _ in range(nbt):
             bl.append(1)
             if tni == 0:
-                #print("MBL3 wn:tn:nb=", wni, tni, bl)
+                print("MBL3 wn:tn:nb=", wni, tni, bl)
                 wni += 1
                 bl = bit_list.setdefault(wni, [])
                 tni = max_fcn
             else:
-                #print("MBL4 wn:tn:nb=", wni, tni, bl)
+                print("MBL4 wn:tn:nb=", wni, tni, bl)
                 tni -= 1
     return bit_list
 
@@ -105,12 +111,26 @@ def find_missing_tiles(tile_list, N, window_size):
             (2, BitBuffer([1, l, l, 0, 0, 0, 1])),
         ]
     In this example, the bitmap will be "1110001".
+    modified to because the last 1 when only there is one window was not set
+    to one when the all-1 arrives
+        [
+            (0, BitBuffer([1, 1, 1, 1, 1, 1, 0])),
+            (2, BitBuffer([1, l, l, 0, 0, 0, 1])),
+        ]
+    In this example, the bitmap will be "1110001".
+    There are problems to create an ack when the all has not arrived and 
+    an ack request is received.
     """
     bit_list = make_bit_list(tile_list, N, window_size)
+    print('bit_list -> {}, lenght: {}'.format(bit_list, len(bit_list)))
     ret = []
     for i in sorted(bit_list.items()):
+        print(" i, all(i[1]) {},{}".format(i,all(i[1])))
         if not all(i[1]):
             ret.append((i[0], BitBuffer(i[1])))
+        else:
+            ret.append((i[0], BitBuffer(i[1])))
+    print("ret -> {}".format(ret))
     return ret
 
 #---------------------------------------------------------------------------

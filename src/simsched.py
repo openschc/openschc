@@ -26,11 +26,12 @@ class SimulScheduler:
             self.queue.sort()
             self.clock, event_id, callback, args = self.queue.pop(0)
             callback(*args)
-            print("Queue running event -> {}".format(event_id))
+            print("Queue running event -> {}, callback -> {}".format(event_id, callback))
 
     # external API
 
     def add_event(self, rel_time, callback, args):
+        print("Add event {}".format(self.queue))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1

@@ -98,7 +98,6 @@ class BitBuffer:
         if position is not specified, the nb_bits are added at the end of the
         buffer.  if position is specified the nb_bits are set at the buffer
         position. Position defines the position if the most significant bit. """
-
         if position == None:
             for i in range(nb_bits, 0, -1):
                 self.set_bit(bits_as_long & (0x01 << (i-1)))
@@ -250,11 +249,12 @@ class BitBuffer:
     def __add__(self, other):
         """ copy self._content into another BitBuffer and add other into it.
         Assumed that the remaining bits of other is less than 256 bytes.
+        REMOVED THE ASSERT -> was causing problems for files larger than 250 bytes
         """
         new_buf = self.copy()
         other_copy = other.copy()
         remaining_bits = other_copy.count_remaining_bits()
-        assert remaining_bits < 255*8 
+        #assert remaining_bits < 255*8 
         new_buf.add_bits(other_copy.get_bits(remaining_bits),
                          remaining_bits)
         return new_buf
