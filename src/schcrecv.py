@@ -7,7 +7,7 @@ from base_import import *  # used for now for differing modules in py/upy
 
 import schc
 import schcmsg
-from schcbitmap import find_missing_tiles, sort_tile_list
+from schcbitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1
 
 enable_statsct = True
 if enable_statsct:
@@ -51,8 +51,12 @@ class ReassembleBase:
         # state:
         #   INIT:
         #   DONE: sent ACK success. only accept ACK REQ.
+        #   ALL-1: All-1 messages has been received
         self.state = "INIT"
         self.schc_ack = None
+        self.all1_received = False
+        self.mic_missmatched = False
+
 
     def get_mic(self, mic_target, extra_bits=0):
         """This gets the mic
@@ -201,13 +205,19 @@ class ReassemblerAckOnError(ReassembleBase):
             print("XXX need sending ACK back.")
             input('')
             self.resend_ack(schc_frag)
-            #return
+            return
         # append the payload to the tile list.
         # padding truncation is done later. see below.
         nb_tiles = schc_frag.payload.count_added_bits()//self.rule["tileSize"]
         # Note that nb_tiles is the number of tiles which is exact number of the
         # size of the tile.  the tile of which the size is less than the size
         # is not included.
+        # The tile that is less than a tile size must be included, so a 1 can be added
+        # in the bitmap when there is a tile in the all-1 message
+        if schc_frag.payload.count_added_bits()%self.rule["tileSize"] != 0:
+            #tile found that is smaller than a normal tile
+            print("tile found that is smaller than a normal tile")
+            nb_tiles = 1
         self.tile_list.append({
                 "w-num": schc_frag.win,
                 "t-num": schc_frag.fcn,
@@ -218,20 +228,24 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if self.mic_received == mic_calced:
                 self.finish(schc_packet, schc_frag)
-                #return
+                return
             else:
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
                 print("waiting for more fragments.")
         elif schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
-            print("ALL1 received")
+            print("----------------------- ALL1 received -----------------------")
+            self.all1_received = True
             #Statsct.set_msg_type("SCHC_ALL_1")
             self.mic_received = schc_frag.mic
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if schc_frag.mic == mic_calced:
+                self.mic_missmatched = True
                 self.finish(schc_packet, schc_frag)
-                #return
+                return
             else:
+                self.mic_missmatched = True
+                print("----------------------- ERROR -----------------------")
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
                 bit_list = find_missing_tiles(self.tile_list,
@@ -239,6 +253,16 @@ class ReassemblerAckOnError(ReassembleBase):
                                               schcmsg.get_fcn_all_1(self.rule))
                 
                 assert bit_list is not None
+                if len(bit_list) == 0:
+                    #When the find_missing_tiles functions returns an empty array
+                    #but we know something is missing because the MIC calculation is wrong
+                    #this can happen when the first fragments are lost
+                    print("bit list empty")
+                    bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                                                self.rule["FCNSize"],
+                                                schcmsg.get_fcn_all_1(self.rule))
+                    print("new bit list, should it work???")
+                    input("")
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
                                                            bit_list[bl_index][1]))
@@ -279,29 +303,72 @@ class ReassemblerAckOnError(ReassembleBase):
                 Statsct.set_msg_type("SCHC_ACK_OK")
             print("----------------------- SCHC ACK OK SEND  -----------------------")
         else:
-            print('send ack before done {},{},{}'.format(self.tile_list,
-                        self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
-            bit_list = find_missing_tiles(self.tile_list,
-                                              self.rule["FCNSize"],
-                                              schcmsg.get_fcn_all_1(self.rule))
-            print('send ack before done {}'.format(bit_list))
-            assert bit_list is not None
-            for bl_index in range(len(bit_list)):
-                print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
-                                                        bit_list[bl_index][1]))
-                # XXX compress bitmap if needed.
-                # ACK failure message
-                schc_ack = schcmsg.frag_receiver_tx_all1_ack(
-                        schc_frag.rule,
-                        schc_frag.dtag,
-                        win=bit_list[bl_index][0],
-                        cbit=0,
-                        bitmap=bit_list[bl_index][1])
-                if enable_statsct:
-                    Statsct.set_msg_type("SCHC_ACK_KO")
-                print("----------------------- SCHC ACK KO SEND  -----------------------")
+            if self.all1_received:
+                print("all-1 received, building ACK")
+                print('send ack before done {},{},{}'.format(self.tile_list,
+                            self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
+                bit_list = find_missing_tiles(self.tile_list,
+                                                self.rule["FCNSize"],
+                                                schcmsg.get_fcn_all_1(self.rule))
+                print('send ack before done {}'.format(bit_list))
+                assert bit_list is not None
+                if len(bit_list) == 0:
+                    #When the find_missing_tiles functions returns an empty array
+                    #but we know something is missing because the MIC calculation is wrong
+                    #this can happen when the first fragments are lost
+                    print("bit list empty")
+                    bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                                                self.rule["FCNSize"],
+                                                schcmsg.get_fcn_all_1(self.rule))
+                    print("new bit list, should it work???")
 
-                print("ACK failure sent:", schc_ack.__dict__)
+                for bl_index in range(len(bit_list)):
+                    print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
+                                                            bit_list[bl_index][1]))
+                    # XXX compress bitmap if needed.
+                    # ACK failure message
+                    schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+                            schc_frag.rule,
+                            schc_frag.dtag,
+                            win=bit_list[bl_index][0],
+                            cbit=0,
+                            bitmap=bit_list[bl_index][1])
+                    if enable_statsct:
+                        Statsct.set_msg_type("SCHC_ACK_KO")
+                    print("----------------------- SCHC ACK KO SEND  -----------------------")
+
+                    print("ACK failure sent:", schc_ack.__dict__)
+            else:
+                #special case when the ALL-1 message is lost: 2 cases:
+                #1) the all-1 carries a tile (bit in bitmap)
+                #2) the all-1 only carries the MIC (no bit in bitmap)
+                print("all-1 received, building ACK")
+                print('send ack before done {},{},{}'.format(self.tile_list,
+                            self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
+                bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                                                self.rule["FCNSize"],
+                                                schcmsg.get_fcn_all_1(self.rule))
+                print('send ack before done {}'.format(bit_list))
+                assert bit_list is not None
+                for bl_index in range(len(bit_list)):
+                    print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
+                                                            bit_list[bl_index][1]))
+                    # XXX compress bitmap if needed.
+                    # ACK failure message
+                    schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+                            schc_frag.rule,
+                            schc_frag.dtag,
+                            win=bit_list[bl_index][0],
+                            cbit=0,
+                            bitmap=bit_list[bl_index][1])
+                    if enable_statsct:
+                        Statsct.set_msg_type("SCHC_ACK_KO")
+                    print("----------------------- SCHC ACK KO SEND  -----------------------")
+
+                    print("ACK failure sent:", schc_ack.__dict__)
+
+
+
 
         args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
         self.protocol.scheduler.add_event(0,
@@ -333,9 +400,9 @@ class ReassemblerAckOnError(ReassembleBase):
         #the ack is build everytime
         self.schc_ack = schc_ack
         # set inactive timer.
-        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-                self.inactive_timer, self.event_inactive, tuple())
-        print("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
+        #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+        #        self.inactive_timer, self.event_inactive, tuple())
+        #print("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
 
     def get_mic_from_tiles_received(self):
         # MIC calculation.

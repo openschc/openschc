@@ -71,8 +71,7 @@ class SimulSCHCNode(SimulNode):
         self.sim._add_node(self)
 
     def event_receive(self, sender_id, packet):
-        self._log("{} ----------------------- RECEIVED PACKET -----------------------"
-                            .format(utime.time()))
+        self._log("----------------------- RECEIVED PACKET -----------------------")
         self._log("recv from {}".format(sender_id))
         self.layer2.event_receive_packet(sender_id, packet)
 

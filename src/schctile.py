@@ -99,6 +99,8 @@ class TileList():
                 #dont know why it is a special case, if the ALL-1 is received with a tile
                 #then it should always be one, if the tile is consired received by the method
                 #below, then it should not be false
+
+                #i think the problem is when the sender does not know if it is the last one
                 print("last tile case")
                 #self.all_tiles[-1]["sent"] = False
                 return

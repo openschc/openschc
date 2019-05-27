@@ -17,7 +17,7 @@ if enable_statsct:
 
 #---------------------------------------------------------------------------
 
-max_ack_requests = 2
+max_ack_requests = 8
 
 class FragmentBase():
     def __init__(self, protocol, context, rule):
@@ -420,7 +420,7 @@ class FragmentAckOnError(FragmentBase):
         # # retransmit MIC.
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
-        print("Retransmitted frag:", schc_frag.__dict__)
+        print("SCHC ACK REQ frag:", schc_frag.__dict__)
         # if enable_statsct:
         #     Statsct.set_msg_type("SCHC_FRAG")
         #     Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
@@ -495,7 +495,6 @@ class FragmentAckOnError(FragmentBase):
             self.resend = False
             self.state = self.ACK_SUCCESS
             self.cancel_ack_wait_timer()
-
             return
         if schc_frag.cbit == 0:
             print("----------------------- ACK Failure rid={} dtag={} -----------------------".format(
