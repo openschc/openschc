@@ -17,7 +17,7 @@ if enable_statsct:
 
 #---------------------------------------------------------------------------
 
-max_ack_requests = 8
+max_ack_requests = 2
 
 class FragmentBase():
     def __init__(self, protocol, context, rule):
@@ -79,8 +79,9 @@ class FragmentBase():
             mic_base.add_bits(0, schcmsg.roundup(extra_bits,
                                                 self.rule["MICWordSize"]))
         #
+
         mic = get_mic(mic_base.get_content())
-        print("Send MIC {}, base = {}".format(mic, mic_base.get_content()))
+        print("Send MIC {}, base = {}, lenght = {}".format(mic, mic_base.get_content(), len(mic_base.get_content())))
         return mic.to_bytes(4, "big")
 
     def start_sending(self):
@@ -316,6 +317,7 @@ class FragmentAckOnError(FragmentBase):
                 # be like this. For example, if the ALL-1s is lost, the receiver timer expires
                 # and a receiver abort is send. If it arrives, there is not need to retransmit 
                 # the message after the retransmission of the missing fragments)
+                #FIX, all-1 is resend
                 print('All-1 ones already send')
                 #cancel timer when there is success
                 # if self.event_id_ack_wait_timer and self.state == self.ACK_SUCCESS:
@@ -342,9 +344,13 @@ class FragmentAckOnError(FragmentBase):
                         schcmsg.get_sender_header_size(self.rule) +
                         schcmsg.get_mic_size(self.rule) +
                         TileList.get_tile_size(window_tiles))
-                mic = self.get_mic(self.mic_base, last_frag_base_size)
-                # store the mic in order to know all-1 has been sent.
-                self.mic_sent = mic
+                #check if mic exists, no need no created again
+                if self.mic_sent is None:        
+                    mic = self.get_mic(self.mic_base, last_frag_base_size)
+                    # store the mic in order to know all-1 has been sent.
+                    self.mic_sent = mic
+                else:
+                    mic = self.mic_sent
                 print("mic_sent -> {}".format(self.mic_sent))
                 if enable_statsct:
                     Statsct.set_msg_type("SCHC_ALL_1")
@@ -367,6 +373,7 @@ class FragmentAckOnError(FragmentBase):
                     fcn=fcn,
                     mic=mic,
                     payload=TileList.concat(window_tiles))
+            
             if mic is not None:
 
                 print("mic is not None")

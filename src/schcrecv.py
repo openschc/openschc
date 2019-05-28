@@ -68,7 +68,7 @@ class ReassembleBase:
 
         assert isinstance(mic_target, bytearray)
         mic = get_mic(mic_target)
-        print("Recv MIC {}, base = {}".format(mic, mic_target))
+        print("Recv MIC {}, base = {}, lenght = {}".format(mic, mic_target, len(mic_target)))
         return mic.to_bytes(4, "big")
 
     def event_inactive(self):
@@ -185,7 +185,7 @@ class ReassemblerAckOnError(ReassembleBase):
             # XXX needs to release all resources.
             return
           
-        if schc_frag.ack_request:
+        if schc_frag.ack_request == True:
             print("Received ACK-REQ")
             # if self.state != "DONE":
             #     #this can happen when the ALL-1 is not received, so the state is
@@ -204,7 +204,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #     # XXX needs to release all resources.
             #     return
             print("XXX need sending ACK back.")
-            input('')
+            #input('')
             self.resend_ack(schc_frag)
             return
         # append the payload to the tile list.
@@ -242,7 +242,7 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             print("schc_frag.mic: {}, mic_calced: {}".format(schc_frag.mic,mic_calced))
             if schc_frag.mic == mic_calced:
-                self.mic_missmatched = True
+                self.mic_missmatched = False
                 self.finish(schc_packet, schc_frag)
                 return
             else:
@@ -265,8 +265,8 @@ class ReassemblerAckOnError(ReassembleBase):
                     bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
-                    print("new bit list, should it work???")
-                    input("")
+                    #print("new bit list, should it work???")
+                    #input("")
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
                                                            bit_list[bl_index][1]))
@@ -294,7 +294,13 @@ class ReassemblerAckOnError(ReassembleBase):
         print("---", schc_frag.fcn)
 
     def resend_ack(self, schc_frag):
+        print("resend ack method")
         print(schc_frag.__dict__)
+        if self.mic_received is not None:
+            schc_packet, mic_calced = self.get_mic_from_tiles_received()
+            print("schc_frag.mic: {}, mic_calced: {}".format(self.mic_received,mic_calced))
+            if self.mic_received == mic_calced:
+                self.state = "DONE"
         if self.state == "DONE":
             # ACK message
             schc_ack = schcmsg.frag_receiver_tx_all1_ack(
@@ -346,14 +352,18 @@ class ReassemblerAckOnError(ReassembleBase):
                 #special case when the ALL-1 message is lost: 2 cases:
                 #1) the all-1 carries a tile (bit in bitmap)
                 #2) the all-1 only carries the MIC (no bit in bitmap)
-                print("all-1 received, building ACK")
+                print("all-1 not received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
                             self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
-                bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                bit_list = find_missing_tiles(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                 print('send ack before done {}'.format(bit_list))
                 assert bit_list is not None
+                if len(bit_list) == 0:
+                    bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                                                self.rule["FCNSize"],
+                                                schcmsg.get_fcn_all_1(self.rule))
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
                                                             bit_list[bl_index][1]))

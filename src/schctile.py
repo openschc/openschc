@@ -143,7 +143,7 @@ class TileList():
                 if bit_list[bi] == 0:
                     unset_sent_flag_do(win, bi)
         print("self.all_tiles -> {}".format(self.all_tiles))
-        input('tiles after for')
+        #input('tiles after for')
 
     @staticmethod
     def get_tile_size(tiles):
