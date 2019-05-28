@@ -250,7 +250,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("----------------------- ERROR -----------------------")
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
-                bit_list = find_missing_tiles(self.tile_list,
+                bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                               self.rule["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
                 
@@ -355,7 +355,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("all-1 not received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
                             self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
-                bit_list = find_missing_tiles(self.tile_list,
+                bit_list = find_missing_tiles_no_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                 print('send ack before done {}'.format(bit_list))

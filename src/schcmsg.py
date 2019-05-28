@@ -394,7 +394,11 @@ class frag_receiver_rx(frag_rx):
             pos += self.parse_mic()
         elif self.fcn == 0:
             print('FCN ALL-0 found!')
-            self.ack_request = True
-            # this is a ACK REQ message
+            if self.packet_bbuf.count_remaining_bits() < self.rule["L2WordSize"]:
+                # this is a ACK REQ message
+                self.ack_request = True
+                return
+
+
         self.payload = self.packet_bbuf.get_bits_as_buffer()
         #TODO: Parse ACK REQ

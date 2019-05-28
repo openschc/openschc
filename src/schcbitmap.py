@@ -358,6 +358,7 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
             bl.append(0)
             tni -= 1
             print("tni:{}".format(tni))
+        
         print("max_fcn:{} bl:{} tni:{} ".format(max_fcn, bl,tni))
 
         print("bl:{}".format(bl))
