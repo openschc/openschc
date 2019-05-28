@@ -82,8 +82,8 @@ class frag_tx(frag_base):
                   cbit=None, payload=None, abort=False, req = False):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
-        print("ruleID")
-        print(self.rule["ruleID"])
+        #print("ruleID")
+        #print(self.rule["ruleID"])
         if self.rule["ruleID"] is not None and self.rule["ruleLength"] is not None:
             buffer.add_bits(self.rule["ruleID"], self.rule["ruleLength"])
         if dtag is not None and self.rule["dtagSize"] is not None:
@@ -91,22 +91,22 @@ class frag_tx(frag_base):
             buffer.add_bits(dtag, self.rule["dtagSize"])
         if win is not None and self.rule.get("WSize") is not None:
             buffer.add_bits(win, self.rule["WSize"])
-        print("buffer before {},{},{}".format(buffer.count_added_bits(), 
-                    buffer.count_padding_bits(),buffer.count_padding_bits()))
+        #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
+        #           buffer.count_padding_bits(),buffer.count_padding_bits()))
         if abort == True:
             # XXX for receiver abort, needs to be fixed
             buffer.add_bits(get_fcn_all_1(self.rule), self.rule["FCNSize"])
         elif req == True:
-            print(buffer)
+            #print(buffer)
             buffer.add_bits(0, self.rule["FCNSize"])
-            print("buffer before {},{},{}".format(buffer.count_added_bits(), 
-                    buffer.count_padding_bits(),buffer.count_padding_bits()))
+            #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
+            #        buffer.count_padding_bits(),buffer.count_padding_bits()))
 
             #for zero in range(0, self.rule["FCNSize"]):
             #    print("{},{}".format(self.rule["FCNSize"],zero))
             #    buffer.set_bit(0)
-            print("buffer after")
-            print(buffer)
+            #print("buffer after")
+            #print(buffer)
         else:
             if fcn is not None and self.rule.get("FCNSize") is not None:
                 buffer.add_bits(fcn, self.rule["FCNSize"])

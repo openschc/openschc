@@ -231,7 +231,12 @@ for packet_size in range(min_packet_size, max_packet_size,10):
         Statsct.addInfo('real_packet', payload)
         Statsct.addInfo('real_packet_size', len(payload))
         #---------------------------------------------------------------------------
+        #try:
         sim.run()
+        #except Exception as e:
+        #    print("Exception: -> {}".format(e))
+        #    input('Enter to continue')
+
         print('simulation ended')
         #Statsct.print_results()
         print('Sender Packet list ')

@@ -7,7 +7,7 @@ from base_import import *  # used for now for differing modules in py/upy
 
 import schc
 import schcmsg
-from schcbitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1
+from schcbitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1, find_missing_tiles_mic_ko_yes_all_1
 
 enable_statsct = True
 if enable_statsct:
@@ -46,7 +46,7 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
-        self.inactive_timer = 120
+        self.inactive_timer = 200
         self.event_id_inactive_timer = None
         # state:
         #   INIT:
@@ -56,6 +56,7 @@ class ReassembleBase:
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
+        
 
 
     def get_mic(self, mic_target, extra_bits=0):
@@ -239,6 +240,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #Statsct.set_msg_type("SCHC_ALL_1")
             self.mic_received = schc_frag.mic
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
+            print("schc_frag.mic: {}, mic_calced: {}".format(schc_frag.mic,mic_calced))
             if schc_frag.mic == mic_calced:
                 self.mic_missmatched = True
                 self.finish(schc_packet, schc_frag)
@@ -256,9 +258,11 @@ class ReassemblerAckOnError(ReassembleBase):
                 if len(bit_list) == 0:
                     #When the find_missing_tiles functions returns an empty array
                     #but we know something is missing because the MIC calculation is wrong
-                    #this can happen when the first fragments are lost
-                    print("bit list empty")
-                    bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                    #this can happen when the first fragments are lost for example
+                    print("bit list empty but the mic missmatched")
+                    #if tiles are missing, then the packet is larger, should send a bitmap
+                    #that considers the max_fcn and the tiles received
+                    bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                     print("new bit list, should it work???")
@@ -317,7 +321,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     #but we know something is missing because the MIC calculation is wrong
                     #this can happen when the first fragments are lost
                     print("bit list empty")
-                    bit_list = find_missing_tiles_no_all_1(self.tile_list,
+                    bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                     print("new bit list, should it work???")
