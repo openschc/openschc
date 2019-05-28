@@ -458,7 +458,7 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
             if len(sorted_tile_list) == 1:
                 #just the all-1 message was received all other fragments were lost
                 #bitmap sould be [0,0,0,0,0,1] if only one tile in the all-1 message
-                for _ in range(max_fcn-nbt):
+                for _ in range(max_fcn-nbt+1):
                     #add zeros to all other tiles, until the tiles in the all-1 
                     bl.append(0)
                 for _ in range(nbt):
@@ -466,9 +466,9 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                     print("append 1")
                     bl.append(1)
                 #add the last bit as 1 -> fcn = 7
-                bl.append(1)
+                #bl.append(1)
                 print(bl)
-                #input('Only received the all-1, added the 1 for the tiles and the last pos')
+                input('Only received the all-1, added the 1 for the tiles and the last pos')
                 break
             elif nbt >= 1:
                 #more fragments arrived and not only the all-1
@@ -482,6 +482,8 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                 for _ in range(nbt):
                     print("append 1")
                     bl.append(1)
+                print(bl)
+                input('added the 1 for the tiles and the last pos')                
                 break
             else:
                 while tni-1 > 0:

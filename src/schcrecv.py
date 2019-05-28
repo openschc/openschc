@@ -52,10 +52,13 @@ class ReassembleBase:
         #   INIT:
         #   DONE: sent ACK success. only accept ACK REQ.
         #   ALL-1: All-1 messages has been received
+        #   ABORT: receiver abort send, reject any message with abort
         self.state = "INIT"
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
+
+        self.fragment_received = False
         
 
 
@@ -94,6 +97,7 @@ class ReassembleBase:
         if enable_statsct:
             Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
             #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+        self.state = "ABORT"
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
         # XXX needs to release all resources.
@@ -169,6 +173,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     
     def receive_frag(self, bbuf, dtag):
+        
         print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
                                 bbuf, self.rule))
         
@@ -177,6 +182,9 @@ class ReassemblerAckOnError(ReassembleBase):
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
+        if self.state == "ABORT":
+            self.send_receiver_abort()
+            return
         #
         #input("")
         if schc_frag.abort == True:
@@ -207,6 +215,8 @@ class ReassemblerAckOnError(ReassembleBase):
             #input('')
             self.resend_ack(schc_frag)
             return
+        
+        self.fragment_received = True
         # append the payload to the tile list.
         # padding truncation is done later. see below.
         nb_tiles = schc_frag.payload.count_added_bits()//self.rule["tileSize"]
@@ -317,7 +327,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("all-1 received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
                             self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
-                bit_list = find_missing_tiles(self.tile_list,
+                bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                 print('send ack before done {}'.format(bit_list))
@@ -352,6 +362,11 @@ class ReassemblerAckOnError(ReassembleBase):
                 #special case when the ALL-1 message is lost: 2 cases:
                 #1) the all-1 carries a tile (bit in bitmap)
                 #2) the all-1 only carries the MIC (no bit in bitmap)
+                if self.fragment_received is False:
+                    print("no fragments received yet, abort")
+                    self.send_receiver_abort()
+                
+                    return
                 print("all-1 not received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
                             self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
@@ -459,4 +474,17 @@ class ReassemblerAckOnError(ReassembleBase):
         mic_calced = self.get_mic(schc_packet.get_content())
         return schc_packet, mic_calced
 
+    def send_receiver_abort(self):
+        # sending Receiver abort.
+        self.state = "ABORT"
+        schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
+        print("Sent Receiver-Abort.", schc_frag.__dict__)
+        print("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
+
+        if enable_statsct:
+            Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
+            #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+        self.protocol.scheduler.add_event(0,
+                                    self.protocol.layer2.send_packet, args)
 #---------------------------------------------------------------------------

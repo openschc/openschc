@@ -17,7 +17,7 @@ if enable_statsct:
 
 #---------------------------------------------------------------------------
 
-max_ack_requests = 2
+max_ack_requests = 8
 
 class FragmentBase():
     def __init__(self, protocol, context, rule):

@@ -127,7 +127,7 @@ l2_mtu = 408 #in bits
 #---------------------------------------------------------------------------
 #Configuration of test_statsct
 #Number of repetitions
-repetitions = 10
+repetitions = 50
 sim_results = []
 total_results = OrderedDict()
 test_file = False
@@ -139,7 +139,7 @@ min_packet_size = int(l2_mtu /8) #byes
 min_packet_size = 111
 max_packet_size = 1290 #bytes 
 packet_sizes = [80,160,320,640,1280]
-#packet_sizes = [450]
+packet_sizes = [80]
 
 ack_on_error = True
 #---------------------------------------------------------------------------
@@ -255,7 +255,7 @@ for packet_size in packet_sizes:
         #print(Statsct.get_results())
         print('performance metrics')
         sim_results.append(Statsct.calculate_tx_parameters())
-        print("{}".format(sim_results))
+        #print("{}".format(sim_results))
 
         input('Continue to next sim')
     #--------------------------------------------------
