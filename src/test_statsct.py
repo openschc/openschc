@@ -36,7 +36,7 @@ frag_rule1 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 5,
+            "WSize": 3,
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 392,
@@ -54,7 +54,7 @@ frag_rule2 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 5,
+            "WSize": 3,
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 392,
@@ -115,31 +115,45 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 loss_rate = 10
 loss_config = {"mode":"rate", "cycle":loss_rate}
 #loss_config = None
-#L2 MTU size in bits
-
-l2_mtu = 56
+#L2 MTU size in bits - byte
+#l2_mtu = 56
 #Size of data in bytes
-data_size = 14
+#data_size = 14
 
 l2_mtu = 408 #in bits
+SF = 12
+# EU863-870 band, maximum payload size:
+#         DR0 = SF12: 51 bytes - 408 bits
+#         DR1 = SF11: 51 bytes - 408 bits
+#         DR2 = SF10: 51 bytes - 408 bits
+#         DR3 = SF9: 115 bytes - 920 bits
+#         DR4 = SF8: 242 bytes - 1936 bits
+#         DR5 = SF7: 242 bytes - 1936 bits
 
+#For US902-928:
+#         DR0: 11 - 88 bits
+#         DR1: 53 - 424 bits
+#         DR2: 125 - 1000 bits
+#         DR3: 242 - 1936 bits
+#         DR4: 242 - 1936 bits
 
 #---------------------------------------------------------------------------
 #Configuration of test_statsct
 #Number of repetitions
-repetitions = 50
+repetitions = 200
 sim_results = []
 total_results = OrderedDict()
 test_file = False
 fileToSend = "testfile_large.txt"
 #fileToSend = "testfile.txt"
 data_size = 300 #Size of data in bytes
-SF = 12
+
 min_packet_size = int(l2_mtu /8) #byes
 min_packet_size = 111
 max_packet_size = 1290 #bytes 
 packet_sizes = [80,160,320,640,1280]
-packet_sizes = [80]
+packet_sizes = [640]
+#packet_sizes = [80,160,320,640]
 
 ack_on_error = True
 #---------------------------------------------------------------------------

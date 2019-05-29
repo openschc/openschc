@@ -48,6 +48,7 @@ class Statsct(object):
     succ_packets = 0
     fail_packets = 0
     last_msg_type = ''
+    msg_type_queue = []
     @staticmethod
     def initialize():
         """Class to initializa the static class
@@ -72,6 +73,7 @@ class Statsct(object):
         Statsct.succ_packets = 0
         Statsct.fail_packets = 0
         Statsct.total_data_send = 0
+        Statsct.msg_type_queue = []
 
     @staticmethod
     def set_packet_size(packet_length):
@@ -85,8 +87,12 @@ class Statsct(object):
     @staticmethod
     def set_msg_type(schc_msg_type):
         Statsct.msg_type = schc_msg_type
-        Statsct.packet_info['msg_type'] = schc_msg_type
-        print("msg_type -> {}".format(Statsct.msg_type))
+        #Statsct.packet_info['msg_type'] = schc_msg_type
+        Statsct.msg_type_queue.append(schc_msg_type)
+        print("msg_type -> {}, msg_queue -> {}".format(Statsct.msg_type, Statsct.msg_type_queue))
+        # input("")
+
+
     @staticmethod
     def set_header_size(header_size):
         Statsct.packet_info['header_size'] = header_size
@@ -169,12 +175,23 @@ class Statsct(object):
         Statsct.packet_info['toa_packet'] = Statsct.packet_info['toa_calculator']['t_packet']
         Statsct.packet_info['time_off'] = Statsct.dc_time_off(Statsct.packet_info['toa_packet'],Statsct.dc) 
         Statsct.log(Statsct.packet_info)
-        if 'msg_type' not in Statsct.packet_info:
-            print("No message type found, asuming retx")
-            input('')
-            Statsct.packet_info['msg_type'] = Statsct.last_msg_type
+        if len(Statsct.msg_type_queue) != 0:
+            Statsct.packet_info['msg_type'] = Statsct.msg_type_queue.pop(0)
+            
+            print(Statsct.packet_info['msg_type'])
+            print("msg_type_queue -> {}".format(Statsct.msg_type_queue))
+            #input('')
         else:
-            Statsct.last_msg_type = Statsct.packet_info['msg_type']
+            print("all elements should have a msg_type")
+            #input('')
+        # if 'msg_type' not in Statsct.packet_info:
+        #     print("No message type found, asuming retx")
+
+        #     #Statsct.packet_info['msg_type'] = Statsct.last_msg_type
+        #     Statsct.packet_info['msg_type'] = ''
+
+        # else:
+        #     Statsct.last_msg_type = Statsct.packet_info['msg_type']
         Statsct.results['packet_list'].append(Statsct.packet_info)
         #calculate performace metrics
         Statsct.addChannelOccupancy(Statsct.packet_info['toa_packet'])
@@ -248,6 +265,7 @@ class Statsct(object):
         
         ACK_OK_TOA = 0
         RECEIVER_ABORT_TOA = 0
+        ACK_KO_TOA = 0
         for k in Statsct.results['packet_list']:
             if "msg_type" in k:
                 if k['msg_type'] == SCHC_ACK_OK:
@@ -255,9 +273,12 @@ class Statsct(object):
                     ACK_OK_TOA = k['toa_packet']
                 elif k['msg_type'] == SCHC_RECEIVER_ABORT:
                     assert 'toa_packet' in k
-                    RECEIVER_ABORT_TOA = k['toa_packet']  
-        print("ACK_OK_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
-                    ACK_OK_TOA, RECEIVER_ABORT_TOA, ACK_OK_TOA + RECEIVER_ABORT_TOA))     
+                    RECEIVER_ABORT_TOA = k['toa_packet'] 
+                elif k['msg_type'] == SCHC_ACK_KO:
+                    assert 'toa_packet' in k
+                    ACK_KO_TOA = k['toa_packet']
+        print("ACK_OK_TOA: {}, ACK_KO_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
+                    ACK_OK_TOA, ACK_KO_TOA,RECEIVER_ABORT_TOA, ACK_OK_TOA + RECEIVER_ABORT_TOA))     
         print("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
         #input('')
         total_delay = sender_toa + total_time_off + ACK_OK_TOA + RECEIVER_ABORT_TOA

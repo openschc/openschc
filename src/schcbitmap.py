@@ -104,7 +104,7 @@ def make_bit_list(tile_list, N, window_size):
                 tni = max_fcn
                 print("MBL01 wn:tn:nb=", wni, tni, bl)
         print("MBL1 nb=", nbt)
-        assert wni == wn
+        #assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
@@ -335,7 +335,7 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
                 tni = max_fcn
                 print("MBL01 wn:tn:nb=", wni, tni, bl)
         print("MBL1 nb=", nbt)
-        assert wni == wn
+        #assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
@@ -409,8 +409,8 @@ def find_missing_tiles_mic_ko_yes_all_1(tile_list, N, window_size):
         print(" i, all(i[1]) {},{}".format(i,all(i[1])))
         if not all(i[1]):
             ret.append((i[0], BitBuffer(i[1])))
-        else:
-            ret.append((i[0], BitBuffer(i[1])))
+        #else:
+        #    ret.append((i[0], BitBuffer(i[1])))
     print("find_missing_tiles_mic_ko_yes_all_1 ret -> {}".format(ret))
     #input('')
     return ret
@@ -468,7 +468,7 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                 #add the last bit as 1 -> fcn = 7
                 #bl.append(1)
                 print(bl)
-                input('Only received the all-1, added the 1 for the tiles and the last pos')
+                #input('Only received the all-1, added the 1 for the tiles and the last pos')
                 break
             elif nbt >= 1:
                 #more fragments arrived and not only the all-1
@@ -483,7 +483,7 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                     print("append 1")
                     bl.append(1)
                 print(bl)
-                input('added the 1 for the tiles and the last pos')                
+                #input('added the 1 for the tiles and the last pos')                
                 break
             else:
                 while tni-1 > 0:
@@ -504,7 +504,7 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
         #         break
         # regular
         if wni < wn:
-            #print("MBL00 wn:tn:nb=", wni, tni, bl)
+            print("MBL00 wn:tn:nb=", wni, tni, bl)
             while wni < wn:
                 bl = bit_list.setdefault(wni, [])
                 while tni > 0:
@@ -513,23 +513,23 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                 bl.append(0)
                 wni += 1
                 tni = max_fcn
-                #print("MBL01 wn:tn:nb=", wni, tni, bl)
-        #print("MBL1 nb=", nbt)
-        assert wni == wn
+                print("MBL01 wn:tn:nb=", wni, tni, bl)
+        print("MBL1 nb=", nbt)
+        #assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
             tni -= 1
-            #print("MBL2 wn:tn:nb=", wni, tni, bl)
+            print("MBL2 wn:tn:nb=", wni, tni, bl)
         for _ in range(nbt):
             bl.append(1)
             if tni == 0:
-                #print("MBL3 wn:tn:nb=", wni, tni, bl)
+                print("MBL3 wn:tn:nb=", wni, tni, bl)
                 wni += 1
                 bl = bit_list.setdefault(wni, [])
                 tni = max_fcn
             else:
-                #print("MBL4 wn:tn:nb=", wni, tni, bl)
+                print("MBL4 wn:tn:nb=", wni, tni, bl)
                 tni -= 1
     return bit_list
     """

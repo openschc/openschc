@@ -234,7 +234,9 @@ class ReassemblerAckOnError(ReassembleBase):
                 "t-num": schc_frag.fcn,
                 "nb_tiles": nb_tiles,
                 "raw_tiles":schc_frag.payload})
-        self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
+        #self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
+        self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
+
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if self.mic_received == mic_calced:

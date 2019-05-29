@@ -37,9 +37,11 @@ class FragmentBase():
         self.ACK_FAILURE = "ACK_FAILURE"
         self.RECEIVER_ABORT = "RECEIVER_ABORT"
         self.SEND_ALL_1 = "SEND_ALL_1"
+        self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
         self.schc_all_1 = None
         self.last_window_tiles = None
-
+        self.num_of_windows = 0
+        self.number_of_ack_waits = 0
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -226,7 +228,7 @@ class FragmentAckOnError(FragmentBase):
 
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
-        self.all_tiles = TileList(self.rule, packet_bbuf)
+        self.all_tiles = TileList(self.rule, packet_bbuf, self.rule["WSize"])
         # XXX
         # check whether the size of the last tile is less than L2 word
         # AND the tile number is zero
@@ -236,14 +238,23 @@ class FragmentAckOnError(FragmentBase):
             a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
             raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
         # make the bitmap
+        #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
+        #                              self.rule["FCNSize"],
+        #                              schcmsg.get_fcn_all_1(self.rule))
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
                                       self.rule["FCNSize"],
-                                      schcmsg.get_fcn_all_1(self.rule))
+                                      self.rule["WSize"])
         print("bit_list:", self.bit_list)
         for tile in self.all_tiles.get_all_tiles():
             print("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
         self.all1_send = False
-
+        self.num_of_windows = 0
+        for pos in self.bit_list:
+            print("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
+            if len(self.bit_list[pos]) is not 0:
+                self.num_of_windows += 1
+        print("number of windows = {}".format(self.num_of_windows))
+        input("")
     def send_frag(self):
         print("{} send_frag!!!!!!!!!!!!!!!!!".format(utime.time()))
         print("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend,self.state))
@@ -252,7 +263,15 @@ class FragmentAckOnError(FragmentBase):
             print("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
         if self.state == self.ACK_SUCCESS:
             return
-         
+        
+        # if self.state == self.ACK_FAILURE and self.num_of_windows != 1 and self.number_of_ack_waits <= self.num_of_windows:
+        #     #waiting for the acks of the others windows
+        #     self.number_of_ack_waits += 1 #wait depends on the number of windows
+        #     #set ack_time_out_timer
+        #     print("waiting for more acks: {}".format(self.number_of_ack_waits))
+        #     return
+
+
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)

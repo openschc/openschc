@@ -14,10 +14,10 @@ class TileList():
 
     # XXX it is almost about the sender side, should be moved into schcsend.py.
     # XXX may it be used in NO-ACK ?
-    def __init__(self, rule, packet_bbuf):
+    def __init__(self, rule, packet_bbuf, max_fcn = None):
         self.rule = rule
         self.t_size = rule["tileSize"]
-        self.max_fcn = schcmsg.get_max_fcn(rule)
+        self.max_fcn = max_fcn if max_fcn is not None else schcmsg.get_max_fcn(rule) 
         self.all_tiles = []
         w_num = 0
         t_num = self.max_fcn
