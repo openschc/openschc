@@ -207,7 +207,7 @@ class FragmentNoAck(FragmentBase):
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         print("event_sent_frag")
         self.send_frag()
-        input("")
+        #input("")
     def receive_frag(self, bbuf, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
@@ -254,7 +254,7 @@ class FragmentAckOnError(FragmentBase):
             if len(self.bit_list[pos]) is not 0:
                 self.num_of_windows += 1
         print("number of windows = {}".format(self.num_of_windows))
-        input("")
+        #input("")
     def send_frag(self):
         print("{} send_frag!!!!!!!!!!!!!!!!!".format(utime.time()))
         print("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend,self.state))
@@ -493,19 +493,25 @@ class FragmentAckOnError(FragmentBase):
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         print("*******event id {}".format(self.event_id_ack_wait_timer))
-        schc_frag = schcmsg.frag_sender_ack_req(self.rule, self.dtag, win)
-        if enable_statsct:
-                Statsct.set_msg_type("SCHC_ACK_REQ")
-        # # retransmit MIC.
-        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
-                self.event_sent_frag)
-        print("SCHC ACK REQ frag:", schc_frag.__dict__)
-        # if enable_statsct:
-        #     Statsct.set_msg_type("SCHC_FRAG")
-        #     Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
-        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-                                          args)
-        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
+        self.number_of_ack_waits += 1
+        print("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
+        if self.number_of_ack_waits > self.num_of_windows:
+            schc_frag = schcmsg.frag_sender_ack_req(self.rule, self.dtag, win)
+            if enable_statsct:
+                    Statsct.set_msg_type("SCHC_ACK_REQ")
+            # # retransmit MIC.
+            args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+                    self.event_sent_frag)
+            print("SCHC ACK REQ frag:", schc_frag.__dict__)
+            # if enable_statsct:
+            #     Statsct.set_msg_type("SCHC_FRAG")
+            #     Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+            self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+                                            args)
+            self.number_of_ack_waits = 0
+            
+        else:
+            print("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
         #since the message is not implemented, then it should send the 
         #ALL-1, so the other side can know that it should send send an ACK
         #print("ALL-1 prepared")

@@ -7,7 +7,7 @@ import simsched
 import simlayer2
 import simul
 from rulemanager import RuleManager
-
+import math
 #import statsct static class 
 from stats.statsct import Statsct
 from ucollections import OrderedDict
@@ -113,19 +113,19 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 
 #---------------------------------------------------------------------------
 #lost_rate in %
-loss_rate = 1
+loss_rate = 10
 loss_config = {"mode":"rate", "cycle":loss_rate}
-#loss_config = None
+loss_config = None
 #L2 MTU size in bits - byte
-# l2_mtu = 56
-# SF = 12
+#l2_mtu = 56
 #Size of data in bytes
 #data_size = 14
 
-l2_mtu = 1936 #in bits
-SF = 8
 l2_mtu = 408 #in bits
 SF = 12
+
+#l2_mtu = 1936
+#SF = 8
 # EU863-870 band, maximum payload size:
 #         DR0 = SF12: 51 bytes - 408 bits
 #         DR1 = SF11: 51 bytes - 408 bits
@@ -144,7 +144,7 @@ SF = 12
 #---------------------------------------------------------------------------
 #Configuration of test_statsct
 #Number of repetitions
-repetitions = 100
+repetitions = 1
 sim_results = []
 total_results = OrderedDict()
 test_file = False
@@ -153,12 +153,14 @@ fileToSend = "testfile_large.txt"
 data_size = 300 #Size of data in bytes
 
 min_packet_size = int(l2_mtu /8) #byes
-min_packet_size = 250 #60
+min_packet_size = 251 #60
 max_packet_size = 1290 #bytes 
 packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
 #packet_sizes = [80,160,320,640]
-
+tile_size = 49
+##tile_size = 240
+payload_ack_always = tile_size * 4
 ack_on_error = True
 #---------------------------------------------------------------------------
 """ Init stastct module """
@@ -190,18 +192,34 @@ simul_config = {
 if loss_config is not None:
     simul_config["loss"] = loss_config
 
-#for packet_size in range(min_packet_size, max_packet_size,10):
+#for packet_size in range(min_packet_size, max_packet_size,11):
 for packet_size in packet_sizes:
-
-    print("packet_size - > {}".format(packet_size))
-    #input('')
+    temp_packet_size = packet_size
+    repetitions = math.ceil(packet_size / payload_ack_always)
+    print("repetitions -> {}".format(repetitions))
     for i in range(repetitions):
-        print("packet_size - > {}".format(packet_size))
+        print("{}".format(temp_packet_size))
+        if temp_packet_size >= payload_ack_always:
+            temp_packet_size -= payload_ack_always
+            send_data = payload_ack_always
+            print("if packet_size: {}, temp_packet_size:{}, send_data:{}".format(packet_size,temp_packet_size,send_data))
+        else:
+            send_data = temp_packet_size
+            temp_packet_size = 0
+            #break
+        
+        print("0packet_size: {}, temp_packet_size:{}, send_data:{}".format(packet_size,temp_packet_size,send_data))
+        
+
+        print("packet_size - > {}".format(send_data))
+        #input('')
+        #for i in range(repetitions):
+        print("packet_size - > {}".format(send_data))
         #---------------------------------------------------------------------------
         """ Init stastct module """
         Statsct.initialize()
         Statsct.log("Statsct test")
-        Statsct.set_packet_size(packet_size)
+        Statsct.set_packet_size(send_data)
         #---------------------------------------------------------------------------
         Statsct.get_results()
         sim = simul.Simul(simul_config)
@@ -248,7 +266,7 @@ for packet_size in packet_sizes:
             print("Payload: {}".format(b2hex(payload)))
             print("")
         else:
-            payload = bytearray(range(1, 1+packet_size))
+            payload = bytearray(range(1, 1+send_data))
         node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
         #---------------------------------------------------------------------------    
         Statsct.addInfo('real_packet', payload)
@@ -275,8 +293,10 @@ for packet_size in packet_sizes:
         sim_results.append(Statsct.calculate_tx_parameters())
         #print("{}".format(sim_results))
 
-        #input('Continue to next sim')
+        input('Continue to next sim')
     #--------------------------------------------------
+    
+    
     average_goodput = 0
     average_total_delay = 0
     average_channe_occupancy = 0
@@ -287,10 +307,11 @@ for packet_size in packet_sizes:
     number_failed_fragments = 0
     channel_occupancy_sender = 0
     channel_occupancy_receiver = 0
-
+    total_data_send = 0
     for result in sim_results:
         print("{}".format(result))
-        average_goodput += result['goodput']
+        #average_goodput += result['goodput']
+        total_data_send += result['total_data_send']
         average_total_delay += result['total_delay']
         average_channe_occupancy += result['channel_occupancy']
         number_success_fragments += result['succ_fragments']
@@ -301,14 +322,16 @@ for packet_size in packet_sizes:
             number_success_packets += 1
         else:
             number_failed_packets += 1
-    average_goodput = average_goodput / len(sim_results)
-    average_channe_occupancy = average_channe_occupancy / len(sim_results)
-    average_total_delay = average_total_delay / len(sim_results)
+    #average_goodput = average_goodput / len(sim_results)
+    #average_channe_occupancy = average_channe_occupancy / len(sim_results)
+    #average_total_delay = average_total_delay / len(sim_results)
     reliability = number_success_packets / (number_success_packets + number_failed_packets)
     ratio = number_success_fragments / (number_success_fragments + number_failed_fragments)
     print("{}".format(len(payload)))
-    print("goodput:{}, total delay: {}, channel Occupancy: {}, reliability: {}, ratio (FER): {}".format(average_goodput,
-        average_total_delay, average_channe_occupancy, reliability, ratio*100))
+    average_goodput = packet_size / total_data_send
+    print("goodput:{}, total delay: {}, channel Occupancy: {}, reliability: {}, ratio (FER): {} total_data_send:{}".format(
+        average_goodput,
+        average_total_delay, average_channe_occupancy, reliability, ratio*100, total_data_send))
     total_results[packet_size] = {'goodput':average_goodput, 'total_delay': average_total_delay,
                                  'channel_occupancy':average_channe_occupancy, 
                                  'reliability': reliability, 'ratio': ratio*100,

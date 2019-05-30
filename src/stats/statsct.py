@@ -49,6 +49,8 @@ class Statsct(object):
     fail_packets = 0
     last_msg_type = ''
     msg_type_queue = []
+    channel_occupancy_sender = 0
+    channel_occupancy_receiver = 0
     @staticmethod
     def initialize():
         """Class to initializa the static class
@@ -74,7 +76,8 @@ class Statsct(object):
         Statsct.fail_packets = 0
         Statsct.total_data_send = 0
         Statsct.msg_type_queue = []
-
+        Statsct.channel_occupancy_sender = 0
+        Statsct.channel_occupancy_receiver = 0
     @staticmethod
     def set_packet_size(packet_length):
         Statsct.packet_length = packet_length
@@ -175,9 +178,9 @@ class Statsct(object):
         Statsct.packet_info['toa_packet'] = Statsct.packet_info['toa_calculator']['t_packet']
         Statsct.packet_info['time_off'] = Statsct.dc_time_off(Statsct.packet_info['toa_packet'],Statsct.dc) 
         Statsct.log(Statsct.packet_info)
+        Statsct.packet_info['msg_type'] =''
         if len(Statsct.msg_type_queue) != 0:
             Statsct.packet_info['msg_type'] = Statsct.msg_type_queue.pop(0)
-            
             print(Statsct.packet_info['msg_type'])
             print("msg_type_queue -> {}".format(Statsct.msg_type_queue))
             #input('')
@@ -201,11 +204,15 @@ class Statsct(object):
         if src_dev_id == Statsct.src_id:
             Statsct.sender_packets['packet_list'].append(Statsct.packet_info)
             Statsct.get_msg_type(packet, Statsct.device_rule['fragSender'])
+            Statsct.channel_occupancy_sender += Statsct.packet_info['toa_packet']
+
             print("packet added to sender list")
             #Statsct.log(Statsct.sender_packets)
         else:
             Statsct.receiver_packets['packet_list'].append(Statsct.packet_info)
             Statsct.get_msg_type(packet, Statsct.gw_rule['fragSender'])
+            Statsct.channel_occupancy_receiver += Statsct.packet_info['toa_packet']
+            
             print("packet added to receiver list")
             #Statsct.log(Statsct.receiver_packets)
         #input('')
@@ -244,22 +251,31 @@ class Statsct(object):
         total_time_off = 0
         total_delay = 0
         sender_toa = 0
+        time_off_last_send_frag = 0
         for i,k in enumerate(Statsct.sender_packets['packet_list']):
             if "time_off" in k:
                 if i != (len(Statsct.sender_packets['packet_list']) - 1):
                     total_time_off += k['time_off']
+                else:
+                    time_off_last_send_frag = k['time_off']
             if "toa_packet" in k:
+
                 sender_toa += k['toa_packet']
         
         print("total_time_off -> {}, sender_toa -> {}".format(total_time_off,sender_toa))
         
         total_time_off_receiver = 0
         receiver_toa = 0
+        toa_last_receiver_frag = 0
         for i,k in enumerate(Statsct.receiver_packets['packet_list']):
             if "time_off" in k:
                 if i != (len(Statsct.receiver_packets['packet_list']) - 1):
                     total_time_off_receiver += k['time_off']
             if "toa_packet" in k:
+                if i == (len(Statsct.receiver_packets['packet_list'])):
+                    toa_last_receiver_frag = k['toa_packet']
+                    print("toa_last_receiver_frag -> {}".format(toa_last_receiver_frag))
+                    input("")
                 receiver_toa += k['toa_packet']
         
         
@@ -282,6 +298,8 @@ class Statsct(object):
         print("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
         #input('')
         total_delay = sender_toa + total_time_off + ACK_OK_TOA + RECEIVER_ABORT_TOA
+        total_delay_app = sender_toa + total_time_off
+        
         print("Channel Ocuppancy -> {}".format(Statsct.channel_occupancy))
         print("total_data_send -> {}, packet_length -> {}".format(Statsct.total_data_send,Statsct.packet_length))
         
@@ -290,7 +308,15 @@ class Statsct(object):
         return {"channel_occupancy":Statsct.channel_occupancy,
                 "goodput":goodput, "ratio": ratio, "succ_fragments": Statsct.succ_packets,
                 "fail_fragments":Statsct.fail_packets, "packet_status":packet_status,
-                "total_delay":total_delay}
+                "total_delay":total_delay, "channel_occupancy_sender":Statsct.channel_occupancy_sender,
+                "channel_occupancy_receiver":Statsct.channel_occupancy_receiver,
+                 "total_data_send":Statsct.total_data_send, "packet_length":Statsct.packet_length,
+                 "total_time_off":total_time_off, "sender_toa":sender_toa,
+                 "total_time_off_receiver":total_time_off_receiver, 
+                 "toa_last_receiver_frag":toa_last_receiver_frag,
+                 "receiver_toa":receiver_toa,
+                 "total_delay_app":total_delay_app
+                  }
 
     @staticmethod
     def addChannelOccupancy(toa):
