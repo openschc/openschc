@@ -228,7 +228,7 @@ class FragmentAckOnError(FragmentBase):
 
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
-        self.all_tiles = TileList(self.rule, packet_bbuf, self.rule["WSize"])
+        self.all_tiles = TileList(self.rule, packet_bbuf)
         # XXX
         # check whether the size of the last tile is less than L2 word
         # AND the tile number is zero
@@ -493,6 +493,17 @@ class FragmentAckOnError(FragmentBase):
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         print("*******event id {}".format(self.event_id_ack_wait_timer))
+        schc_frag = schcmsg.frag_sender_ack_req(self.rule, self.dtag, win)
+        if enable_statsct:
+                Statsct.set_msg_type("SCHC_ACK_REQ")
+        # # retransmit MIC.
+        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+                self.event_sent_frag)
+        print("SCHC ACK REQ frag:", schc_frag.__dict__)
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+                                        args)
+        """ waits for all the acks before sending the ack request
+        
         self.number_of_ack_waits += 1
         print("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
         if self.number_of_ack_waits > self.num_of_windows:
@@ -512,45 +523,7 @@ class FragmentAckOnError(FragmentBase):
             
         else:
             print("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
-        #since the message is not implemented, then it should send the 
-        #ALL-1, so the other side can know that it should send send an ACK
-        #print("ALL-1 prepared")
-        # get contiguous tiles as many as possible fit in MTU.
-        #mtu_size = self.protocol.layer2.get_mtu_size()
-        #window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        #print("window tiles: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
-        # make the All-1 frag with this tile.
-        # the All-1 fragment can carry only one tile of which the size
-        # is less than L2 word size.
-        #fcn = schcmsg.get_fcn_all_1(self.rule)
-        #last_frag_base_size = (
-        #        schcmsg.get_sender_header_size(self.rule) +
-        #        schcmsg.get_mic_size(self.rule) +
-        #        TileList.get_tile_size(window_tiles))
-        #mic = self.get_mic(self.mic_base, last_frag_base_size)
-        # store the mic in order to know all-1 has been sent.
-        #self.mic_sent = mic
-        #if enable_statsct:
-        #    Statsct.set_msg_type("SCHC_ALL_1")
-        #    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule) +
-        #        schcmsg.get_mic_size(self.rule))
-        #self.all1_send = True
-        #self.state = self.SEND_ALL_1
-        #if mic is not None:
-        #print("mic is not None")
-        # set ack waiting timer
-        #if enable_statsct:
-        #    Statsct.set_msg_type("SCHC_FRAG")
-        #    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
-        #schc_frag, args = self.schc_all_1
-        #print("schc_frag: {}, args:{}".format(schc_frag.__dict__, args))
-        #args = (schc_frag, window_tiles[0]["w-num"],)
-        #self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
-        #        self.ack_wait_timer, self.ack_timeout, args)
-        #print("resending all-1")
-        #print("*******event id {}".format(self.event_id_ack_wait_timer))
-        #self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-        #                                  args)
+        """
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         print("EVENT SEND FRAG")

@@ -229,13 +229,33 @@ class ReassemblerAckOnError(ReassembleBase):
             #tile found that is smaller than a normal tile
             print("tile found that is smaller than a normal tile")
             nb_tiles = 1
-        self.tile_list.append({
-                "w-num": schc_frag.win,
-                "t-num": schc_frag.fcn,
-                "nb_tiles": nb_tiles,
-                "raw_tiles":schc_frag.payload})
-        #self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
-        self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
+        #tile should only be append if it is not in the list
+        tile_in_list = False
+        for tile in self.tile_list:
+            if tile["w-num"] == schc_frag.win:
+                if tile["t-num"] == schc_frag.fcn:
+                    print("tile is already in tile list")
+                    tile_in_list = True
+        if not tile_in_list:
+            self.tile_list.append({
+                    "w-num": schc_frag.win,
+                    "t-num": schc_frag.fcn,
+                    "nb_tiles": nb_tiles,
+                    "raw_tiles":schc_frag.payload})
+            self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
+        for tile in self.tile_list:
+            print("w-num: {} t-num: {} nb_tiles:{}".format(
+                    tile['w-num'],tile['t-num'],tile['nb_tiles']))
+            #print("raw_tiles:{}".format(tile['raw_tiles']))
+        #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
+
+        # self.tile_list.append({
+        #         "w-num": schc_frag.win,
+        #         "t-num": schc_frag.fcn,
+        #         "nb_tiles": nb_tiles,
+        #         "raw_tiles":schc_frag.payload})
+        # self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
+        #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
 
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
@@ -332,6 +352,10 @@ class ReassemblerAckOnError(ReassembleBase):
                 bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
+                for tile in self.tile_list:
+                    print("w-num: {} t-num: {} nb_tiles:{}".format(
+                        tile['w-num'],tile['t-num'],tile['nb_tiles']))
+                    print("raw_tiles:{}".format(tile['raw_tiles']))
                 print('send ack before done {}'.format(bit_list))
                 assert bit_list is not None
                 if len(bit_list) == 0:
@@ -372,6 +396,12 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("all-1 not received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
                             self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
+                for tile in self.tile_list:
+                    print("w-num: {} t-num: {} nb_tiles:{}".format(
+                        tile['w-num'],tile['t-num'],tile['nb_tiles']))
+                    print("raw_tiles:{}".format(tile['raw_tiles']))
+                
+                
                 bit_list = find_missing_tiles_no_all_1(self.tile_list,
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))

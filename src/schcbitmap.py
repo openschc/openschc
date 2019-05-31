@@ -335,7 +335,7 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
                 tni = max_fcn
                 print("MBL01 wn:tn:nb=", wni, tni, bl)
         print("MBL1 nb=", nbt)
-        #assert wni == wn
+        assert wni == wn
         bl = bit_list.setdefault(wni, [])
         while tni > tn:
             bl.append(0)
@@ -454,7 +454,8 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
             #set to one is not the last one, but the ones next to the
             #previous tile number
             #example, tiles 1 tile in ALL-1
-            print("nb_tiles {}".format(nbt))
+            #input('Only received the all-1, added the 1 for the tiles and the last pos')
+            print("nb_tiles {} len(sorted_tile_list):{}".format(nbt,len(sorted_tile_list)))
             if len(sorted_tile_list) == 1:
                 #just the all-1 message was received all other fragments were lost
                 #bitmap sould be [0,0,0,0,0,1] if only one tile in the all-1 message

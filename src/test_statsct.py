@@ -113,7 +113,7 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 
 #---------------------------------------------------------------------------
 #lost_rate in %
-loss_rate = 1
+loss_rate = 10
 loss_config = {"mode":"rate", "cycle":loss_rate}
 #loss_config = None
 #L2 MTU size in bits - byte
@@ -157,7 +157,7 @@ min_packet_size = 250 #60
 max_packet_size = 1290 #bytes 
 packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
-#packet_sizes = [80,160,320,640]
+packet_sizes = [80,160,320,640]
 
 ack_on_error = True
 #---------------------------------------------------------------------------
@@ -275,7 +275,7 @@ for packet_size in packet_sizes:
         sim_results.append(Statsct.calculate_tx_parameters())
         #print("{}".format(sim_results))
 
-        #input('Continue to next sim')
+        input('Continue to next sim')
     #--------------------------------------------------
     average_goodput = 0
     average_total_delay = 0
