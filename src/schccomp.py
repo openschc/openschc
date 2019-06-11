@@ -142,7 +142,7 @@ class Compressor:
 
     def __init__(self, protocol):
         self.protocol = protocol
-    
+
         self.__func_tx_cda = {
             T_CDA_NOT_SENT : self.tx_cda_not_sent,
             T_CDA_VAL_SENT : self.tx_cda_val_sent,
@@ -268,7 +268,7 @@ class Compressor:
     #     return output_bbuf
 
     def compress(self, rule, parsed_packet, data, direction=T_DIR_UP):
-        """ 
+        """
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
         assert direction in [T_DIR_UP, T_DIR_DW]
@@ -297,7 +297,7 @@ class Compressor:
             output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
-        
+
         return output_bbuf
 
 #---------------------------------------------------------------------------
@@ -360,7 +360,7 @@ class Decompressor:
 
     def rx_cda_not_sent(self, rule, in_bbuf):
         return (rule[T_TV], rule[T_FL])
- 
+
     def rx_cda_val_sent(self, rule, in_bbuf):
         # XXX not implemented that the variable length size.
 
@@ -387,7 +387,7 @@ class Decompressor:
         # The number of bits sent is the minimal size for coding all the
         # possible indices.
 
- 
+
         size = len(bin(len(rule[T_TV])-1)[2:])
         val = in_bbuf.get_bits(size)
 
@@ -513,11 +513,12 @@ class Decompressor:
 
         for r in rule["Compression"]:
             print (r)
-            full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-            print ("<<<", full_field)
-            self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
-            pprint.pprint (self.parsed_packet)
-            
+            if r[T_DI] in [T_DIR_BI, direction]:
+                full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
+                print ("<<<", full_field)
+                self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
+                pprint.pprint (self.parsed_packet)
+
         return self.parsed_packet
 
 #---------------------------------------------------------------------------
