@@ -48,7 +48,7 @@ The Field Description is a dictionary containing the key+data pairs as defined i
 * "**FL**": if the value is a number, that value expresses the length of the field, in bits. If the
 value is a string, it designates a function that can compute the field length. The functions currently defined are:
   * "_**var**_": the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.
-  * "_**coaptkl**_": this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
+  * "_**tkl**_": this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
 * "**FP**": an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.
 * "**DI**": tells the direction to which this Field Description applies:
     * "_**Up**_": only to uplink messages (i.e. from device to network)
@@ -110,18 +110,20 @@ The keyword  __Fragmentation__ is followed by a dictionnary containing the diffe
 Inside the keyword __FRMode__ indicates which Fragmentation mode is used (__noAck__, __ackAlways__, __ackOnError__).
 Then the keyword __FRModeParamter__ gives the information needed to create the SCHC fragmentation header and mode profile:
 
-* __dtagSize__ gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present 
+* __dtagSize__ gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present
 in the SCHC fragmentation header>>. This keyword can be used by all the fragmentation modes.
-* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in 
+* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in
 noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
-* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck. 
+* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck.
 For ackAlways and ackOnError the value must be specified.
 * __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
     * "afterAll1": the bitmap (or Mic OK) is expected only after the reception of a All-1.
     * "afterAll0": the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
-* __tileSize__ gives the size in bit of a tile. 
+* __tileSize__ gives the size in bit of a tile.
 * __MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,
-* __MICWordSize__ gives the size of the MIC word. 
+* __MICWordSize__ gives the size of the MIC word.
+* __maxRetry__ indicates to the sender how many time a fragment or ack request can be sent.
+* __timeout__ indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.
 
 For instance:
 
@@ -137,7 +139,9 @@ For instance:
                 "ackBehavior": "afterAll1",
                 "tileSize": 9,
                 "MICAlgorithm": "crc32",
-                "MICWordSize": 8
+                "MICWordSize": 8,
+                "maxRetry": 4,
+                "timeout": 600
             }
         }
     }
@@ -248,29 +252,37 @@ class IPv6address:
     addr = b''
 
 FIELD__DEFAULT_PROPERTY = {
-    T_IPV6_VER         : {"FL": 4,  "TYPE": int },
-    T_IPV6_TC          : {"FL": 8,  "TYPE": int  },
-    T_IPV6_FL          : {"FL": 20, "TYPE": int  },
-    T_IPV6_NXT         : {"FL": 8,  "TYPE": int  },
-    T_IPV6_HOP_LMT     : {"FL": 8,  "TYPE": int  },
-    T_IPV6_LEN         : {"FL": 16, "TYPE": int },
-    T_IPV6_DEV_PREFIX  : {"FL": 64, "TYPE": bytes  },
-    T_IPV6_DEV_IID     : {"FL": 64, "TYPE": bytes },
-    T_IPV6_APP_PREFIX  : {"FL": 64, "TYPE": bytes  },
-    T_IPV6_APP_IID     : {"FL": 64, "TYPE": bytes  },
-    T_UDP_DEV_PORT     : {"FL": 16, "TYPE": int  },
-    T_UDP_APP_PORT     : {"FL": 16, "TYPE": int  },
-    T_UDP_LEN          : {"FL": 16, "TYPE": int  },
-    T_UDP_CKSUM        : {"FL": 16, "TYPE": int  },
-    T_ICMPV6_TYPE      : {"FL": 8,  "TYPE": int },
-    T_ICMPV6_CODE      : {"FL": 8,  "TYPE": int },
-    T_ICMPV6_CKSUM     : {"FL": 16, "TYPE": int },
-    T_ICMPV6_IDENT     : {"FL": 16, "TYPE": int },
-    T_ICMPV6_SEQNO     : {"FL": 16, "TYPE": int },
-    T_COAP_OPT_URI_PATH: {"FL": "var", "TYPE": str}
+    T_IPV6_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
+    T_IPV6_TC              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV6_FL              : {"FL": 20, "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV6_NXT             : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV6_HOP_LMT         : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV6_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV6_DEV_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
+    T_IPV6_DEV_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"  },
+    T_IPV6_APP_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
+    T_IPV6_APP_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
+    T_UDP_DEV_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
+    T_UDP_APP_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
+    T_UDP_LEN              : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
+    T_UDP_CKSUM            : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
+    T_ICMPV6_TYPE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_CODE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_CKSUM         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_IDENT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_SEQNO         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_VERSION         : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_TYPE            : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_TKL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_CODE            : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_MID             : {"FL": 16,  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_TOKEN           : {"FL": "tkl",  "TYPE": int, "ALGO": "DIRECT"  },
+    T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
+    T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_END         : {"FL": 1,     "TYPE": int, "TV" : 0xFF, "ALGO": "DIRECT"}
 }
 
-print (FIELD__DEFAULT_PROPERTY)
 class DictToAttrDeep:
 
     def __init__(self, **entries):
@@ -454,10 +466,10 @@ class RuleManager:
                 ValueError ("{} not found".format(idx))
 
             if idx in nr[T_FRAG][T_FRAG_PROF]:
-                ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx] 
+                ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx]
             else:
-                ar[T_FRAG][T_FRAG_PROF][idx] = default 
-            
+                ar[T_FRAG][T_FRAG_PROF][idx] = default
+
         if T_FRAG_MODE in nrule[T_FRAG]:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 ValueError("No {} in rule {}".format(T_FRAG_PROF), nrule["RuleID"])
@@ -469,7 +481,7 @@ class RuleManager:
             if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
-                
+
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
                 _default_value (arule, nrule, T_FRAG_MIC, "crc32")
@@ -480,11 +492,13 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_W, 1)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                     _default_value (arule, nrule, T_FRAG_W, 1)
-                    _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
                     _default_value (arule, nrule, T_FRAG_TILE, None, True)
-                    
-                   
+                    _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
+                    _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
+
+
+
             else:
                 ValueError ("Unknown fragmentation mode {}".format())
         else:
@@ -502,8 +516,14 @@ class RuleManager:
         arule["RuleLength"] = nrule["RuleLength"]
         arule["Compression"] = []
 
+        up_rules = 0
+        dw_rules = 0
+
         for r in nrule["Compression"]:
-            assert(r["FID"] in FIELD__DEFAULT_PROPERTY)
+            if not r["FID"] in FIELD__DEFAULT_PROPERTY:
+                ValueError( "Unkwown field id {} in rule {}/{}".format(
+                    r["FID"], arule["RuleID"],  arule["RuleLength"]
+                ))
 
             entry = {}
             FID = r[T_FID].upper()
@@ -511,6 +531,8 @@ class RuleManager:
             entry[T_FL] = self._return_default(r, T_FL, FIELD__DEFAULT_PROPERTY[FID][T_FL])
             entry[T_FP] = self._return_default(r, T_FP, 1)
             entry[T_DI] = self._return_default(r, T_DI, T_DIR_BI)
+            if entry[T_DI] in [T_DIR_BI, T_DIR_UP]: up_rules += 1
+            if entry[T_DI] in [T_DIR_BI, T_DIR_DW]: dw_rules += 1
 
             MO = r[T_MO].upper()
             if MO in [T_MO_EQUAL, T_MO_MSB, T_MO_IGNORE]:
@@ -522,6 +544,8 @@ class RuleManager:
 
                 if T_TV in  r:
                     entry[T_TV] = self._adapt_value(FID, r[T_TV])
+                else:
+                    entry[T_TV] = None
 
             elif MO == T_MO_MMAP:
                 entry[T_TV] = []
@@ -538,6 +562,11 @@ class RuleManager:
             entry[T_CDA] = CDA
 
             arule["Compression"].append(entry)
+
+        if not T_META in arule:
+            arule[T_META] = {}
+        arule[T_META][T_UP_RULES] = up_rules
+        arule[T_META][T_DW_RULES] = dw_rules
 
         return arule
 
@@ -557,6 +586,14 @@ class RuleManager:
         elif type(v) is bytes:
             print ('{:>30}'.format(v.hex()), end="")
 
+    def printBin(self, v, l):
+        txt = ""
+        for i in range (7, -1, -1):
+            if i >= l: txt += " "
+            elif v & (0x01 << i) == 0: txt += "0"
+            else: txt += "1"
+        return txt
+
     def Print (self):
         """
         Print a context
@@ -568,9 +605,9 @@ class RuleManager:
             for rule in dev["SoR"]:
                 print ("/" + "-"*25 + "\\")
                 txt = str(rule["RuleID"])+"/"+ str(rule["RuleLength"])
-                print ("|Rule {:8}  {:10}|".format(txt, bin(rule["RuleID"])))
-                if "Compression" in rule:
+                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule["RuleID"], rule["RuleLength"])))
 
+                if "Compression" in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
                     for e in rule["Compression"]:
                         print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
@@ -579,13 +616,13 @@ class RuleManager:
                                 self._smart_print(e[T_TV][0])
                             else:
                                 self._smart_print(e[T_TV])
-                        if not T_TV in e or e[T_TV] == None: 
+                        if not T_TV in e or e[T_TV] == None:
                             print ("-"*30, end="")
 
                         txt = e[T_MO]
                         if T_MO_VAL in e:
                             txt = txt+ '(' + str(e[T_MO_VAL])+')'
-                    
+
                         print ("|{:13}|{:16}|".format(txt, e[T_CDA]))
 
                         if (T_TV in e) and (type (e[T_TV]) is list):
@@ -613,15 +650,124 @@ class RuleManager:
                         txt = "No Tile size specified"
                     print ("!! {:<84}!!".format(txt))
 
-                    if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
-                        txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
-                        print ("!! {:<84}!!".format(txt))
-                    
+
                     print ("!! MIC Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
+
+                    if rule[T_FRAG][T_FRAG_MODE] != "noAck":
+                        print ("!!" + "-"*85 +"!!")
+                        if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                            txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
+                            print ("!! {:<84}!!".format(txt))
+
+                        print ("!! Max Retry : {:4}   Timeout {:5} seconds {:42} !!".format(
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY],
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT], ""
+                        ))
 
                     print ("\\" + "="*87 +"/")
 
+    def MO_IGNORE (self, TV, FV, rlength, flength, arg):
+        return True
 
+    def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
+        if type(TV) != type(FV):
+            return False
+
+        if TV != FV: return False
+        return True
+
+    def MO_MSB (self, TV, FV, rlength, flength, arg):
+        print ("MSB")
+        print (TV, FV, rlength, flength, arg)
+
+        if type (TV) != type (FV): 
+            return False
+
+        if type(TV) == int:
+            if type(arg) != int:
+                ValueError ("MO Arg should be integer")
+
+            shift = rlength-arg
+            return self.MO_EQUAL(TV >> shift, FV >> shift, rlength-shift, flength-shift, 0)
+
+        if type(TV) == str:
+            if type (arg) != int and arg % 8 != 0:
+                ValueError("MO arg should be an Interget multiple of 8")
+            
+            for i in range(0, arg // 8):
+                print ("=", TV[i], FV[i], TV[i] == FV[i])
+                if TV[i] != FV[i]:
+                    return False
+                
+            return True
+
+    def MO_MMAP (self, TV, FV,  rlength, flength, arg):
+        for v in TV:
+            if self.MO_EQUAL (v, FV, rlength, flength, arg): return True
+        return False
+
+    MO_function = {
+        T_MO_IGNORE : MO_IGNORE,
+        T_MO_EQUAL  : MO_EQUAL,
+        T_MO_MSB    : MO_MSB,
+        T_MO_MMAP   : MO_MMAP,
+    }
+
+    def FindRuleFromSCHCpacket (self, schc, device=None):
+        """ returns the rule corresponding to the id stored at the 
+        beginning of the SCHC packet.
+        """
+        for d in self._ctxt:
+            print (d["DeviceID"])
+            if d["DeviceID"] == device: #look for a specific device
+                for r in d["SoR"]:
+                    ruleID = r["RuleID"]
+                    ruleLength = r["RuleLength"]
+
+                    tested_rule = schc.get_bits(ruleLength, position=0)
+
+                    print (tested_rule, ruleID)
+                    if tested_rule == ruleID:
+                        return r 
+        
+        return None
+
+
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI):
+        """ Takes a parsed packet and returns the matching rule.
+        """
+        for dev in self._ctxt:
+            for rule in dev["SoR"]:
+                if "Compression" in rule:
+                    matches = 0
+                    for r in rule["Compression"]:
+                        print(r)
+                        if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
+                            print (r)
+                            if (r[T_FID], r[T_FP]) in pkt:
+                                if T_MO_VAL in r:
+                                    arg = r[T_MO_VAL]
+                                else:
+                                    arg = None
+
+                                if self.MO_function[r[T_MO]](self, 
+                                    r[T_TV], pkt[(r[T_FID], r[T_FP])][0], 
+                                    r[T_FL], pkt[(r[T_FID], r[T_FP])][1], 
+                                    arg):
+                                        matches += 1
+                                else:
+                                        break # field does not match, rule does not match 
+                            else:
+                                if r[T_FL] == "var":  #entry not found, but variable length => accept
+                                    matches += 1      # residue size set to 0
+                                    print("Suboptimal rule")
+                                else:
+                                    break # field from rule not found in pkt, go to next
+                            print ("->", matches)
+                    print("-"*10, matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
+        return None
 
     def _checkRuleValue(self, rule_id, rule_id_length):
         """this function looks if bits specified in ruleID are not outside of

@@ -98,12 +98,65 @@ class BitBuffer:
             for i in range(0, nb_bits):
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
 
+    def add_value(self, value, nb_bits, position=None):
+        if type (value) == int:
+            self.add_bits(value, nb_bits, position=None)
+        elif type (value) == bytes:
+            self.add_bits(int.from_bytes(value, "big"), nb_bits, position=None)
+        elif type (value) == BitBuffer:
+            self.add_value(bytes(value.get_content()), nb_bits, position)
+        elif type (value) == str:
+            self.add_value(bytes(value, "utf-8"), nb_bits, position)
+        else:
+            raise ValueError("Unknown type {}".format(type(value)))
+
+    def add_length(self, size):
+        """add to the buffer the length with the draft coding:
+
+          The size (using the unit defined in the FL) is encoded as follows:
+
+            o  If the size is between 0 and 14, it is sent as a 4-bits unsigned
+                integer.
+
+            o  For values between 15 and 254, 0b1111 is transmitted and then the
+                size is sent as an 8 bits unsigned integer.
+
+            o  For larger values of the size, 0xfff is transmitted and then the
+                next two bytes contain the size value as a 16 bits unsigned
+                integer.
+
+        """
+        if size < 0xF:
+            print ("size =======>", size)
+            self.add_bits(size, 4)
+        elif size < 0xFF:
+            print ("size =================>", size)
+            self.add_bits(0x0F, 4)
+            self.add_bits(size, 8)
+        elif size < 0xFFFF:
+            self.add_bits(0xFFF, 12)
+            self.add_bits(size, 16)
+        else:
+            raise ValueError ("Size is too large, should be < 0xFFFF")
+         
+    def get_length (self):
+        val = self.get_bits(4)
+        print ("read length =", val)
+        if val == 0xF:
+            val = self.get_bits(8)
+            if val == 0xFF:
+                val = self.get_bits(16)
+        return val
+
     def add_bytes(self, bytes_data, position=None):
         """ write bytes_data as a bytearray into the buffer. """
         bits_as_long = 0
         for i in bytes_data:
             bits_as_long = (bits_as_long << 8) | i
         self.add_bits(bits_as_long, 8*len(bytes_data), position=position)
+
+    def set_read_position(self, value):
+        self._rpos = value
 
     def get_bits(self, nb_bits=1, position=None):
         """ return an integer containinng nb_bits from the position.
@@ -199,8 +252,19 @@ class BitBuffer:
             bit_list.append(self.get_bits(1, i))
         return bit_list
 
-    def display(self):
-        print ("{}/{}".format(self._content, self._wpos))
+    def display(self, format=None):
+        """ Display the content, if format is set to "bin" the 
+        buffer is in binary, underline shows its size.
+        """
+        if format == None or format == "hex":
+            print ("{}/{}".format(self._content.hex(), self._wpos))
+
+        if format == "bin":
+            for x in self._content:
+                print ("{:08b}".format(x), end = "")
+            print ("/{}".format(self._wpos))
+            print ('='*self._rpos, end="")
+            print ("-"*(self._wpos-self._rpos))
 
     def allones(self, position=None):
         """ check whether the bits from the position set all 1 or not.

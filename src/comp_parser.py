@@ -53,7 +53,7 @@ class Parser:
         - layer is a optional argument: 3 means that parsing must start at ip Layer
         """
 
-        assert (direction == T_DIR_UP) or (direction == T_DIR_DOWN)  # cannot be bidirectionnal
+        assert (direction == T_DIR_UP) or (direction == T_DIR_DW)  # cannot be bidirectionnal
 
         pos = 0
         self.header_fields = {}
@@ -75,11 +75,11 @@ class Parser:
             self.header_fields[T_IPV6_HOP_LMT, 1]  = [firstBytes[5], 8,  'fixed']
 
             if direction == T_DIR_UP:
-                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6], 64, 'fixed']
-                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7], 64, 'fixed']
-                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[8], 64, 'fixed']
-                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[9], 64, 'fixed']
-            elif direction == T_DIR_DOWN:
+                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64, 'fixed']
+                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64, 'fixed']
+                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64, 'fixed']
+                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64, 'fixed']
+            elif direction == T_DIR_DW:
                 self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[6], 64, 'fixed']
                 self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[7], 64, 'fixed']
                 self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[8], 64, 'fixed']
@@ -140,7 +140,6 @@ class Parser:
 
             option_number = 0
             while (pos < len(pkt)):
-                print (">>>>", self.header_fields)
                 if (int(pkt[pos]) == 0xFF): break
 
                 deltaTL = int(pkt[pos])
@@ -174,7 +173,7 @@ class Parser:
             if(pos < len(pkt)):
                 assert int(pkt[pos]) == 0xFF # if data reamins, an 0xFF must be present
 
-                self.header_fields["CoAP.Option-End", 1] = [0xFF, 8, 'fixed']
+                self.header_fields[T_COAP_OPT_END, 1] = [0xFF, 8, 'fixed']
                 pos += 1
 
 
