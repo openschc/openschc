@@ -1,7 +1,8 @@
 """
 The Rule Manager manages the context(s) for a specific device or a set of devices.
-It maintains the context database and ensures its consistency. The hierarchy is the
-following:
+It maintains the context database and ensures its consistency.
+
+The internal data structure is maintained as a hierarchy as follows:
 + context_database
   + device_context
     + set_of_rules
@@ -10,6 +11,7 @@ following:
           + Fragmentation
           + Compression
 
+
 # Introduction
 
 The context includes a set of rules shared by both ends.
@@ -17,6 +19,24 @@ Identical Rules are used on both ends. They can be simply
 copied/pasted from one end to the other end, if both ends use the same format for describing them.
 
 This document specifies the OpenSCHC rule data model, which is based on JSON.
+
+# File Format
+
+When the rules are stored in a file, the file format is JSON as specified here.
+When the rules are given or handled in Python, the data format is the equivalent
+of the parsed JSON (e.g. dictionaries, lists, etc.).
+
+# Internal data structure
+
+The reason for the internal data structure given abose is as follows:
+- in SCHC, a Rule ID is defined only in the context of one device 
+("multiple Dev instances, which refer to different header compression Contexts, MAY reuse the same Rule ID for different Rules", SCHC RFC-TBD-XXX, section 7.2),
+- hence the database of rules, is chosen to be a list of device contexts 
+ (defined by device identifiers), each of them associated with a set of rules.
+The device_context is specified below in section Context, and looks like:
+  {"DeviceID": 0x1234567, "SoR": {<rule 1>, <rule 2>, ...}}
+where each <rule> has the format specified below in 'Compression Rules'
+or 'Fragmentation Rules'
 
 # Rule definition
 
