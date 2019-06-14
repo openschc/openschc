@@ -34,7 +34,7 @@ The reason for the internal data structure given abose is as follows:
 - hence the database of rules, is chosen to be a list of device contexts 
  (defined by device identifiers), each of them associated with a set of rules.
 The device_context is specified below in section Context, and looks like:
-  {"DeviceID": 0x1234567, "SoR": {<rule 1>, <rule 2>, ...}}
+  {"DeviceID": 0x1234567, "SoR": [<rule 1>, <rule 2>, ...]}
 where each <rule> has the format specified below in 'Compression Rules'
 or 'Fragmentation Rules'
 
@@ -172,17 +172,17 @@ For instance:
 A context is associated with a specific device, which may be identified by a unique LPWAN
 identifier, for instance a LoRaWAN devEUI.
 
-The context also includes a set of rules. The rule description is defined [above](#rule-definition).
+The context also includes a set of rules (represented and stored as a JSON/Python list). The rule description is defined [above](#rule-definition).
 
 
     [
         {
             "DeviceID": 0x1234567890,
-            "SoR" : { ..... }
+            "SoR" : [ ..... ]
         },
         {
             "DeviceID": 0xDEADBEEF,
-            "SoR" : { ..... }
+            "SoR" : [ ..... ]
         },
         ...
     ]
@@ -230,7 +230,7 @@ The set of rules itself expands as shown below.
 
 Suppresses a rule for a specific device <<< only one, or a set of rules? >>>. If no rule is specified, all rules for that device are removed from the context.
 
-      RM.remove ({"DeviceID": 0x1234567, "SoR": {{"ruleID":12, "ruleLength":4}}})
+      RM.remove ({"DeviceID": 0x1234567, "SoR": [{"ruleID":12, "ruleLength":4}]})
       RM.remove ({"DeviceID": 0x1234567})
 
 ### FindRuleFromPacket
