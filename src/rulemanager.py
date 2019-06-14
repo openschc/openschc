@@ -158,11 +158,11 @@ The context also includes a set of rules. The rule description is defined [above
     [
         {
             "DeviceID": 0x1234567890,
-            "SoR" : { ..... }
+            "SoR" : [ ..... ]
         },
         {
             "DeviceID": 0xDEADBEEF,
-            "SoR" : { ..... }
+            "SoR" : [ ..... ]
         },
         ...
     ]
@@ -680,7 +680,7 @@ class RuleManager:
         print ("MSB")
         print (TV, FV, rlength, flength, arg)
 
-        if type (TV) != type (FV): 
+        if type (TV) != type (FV):
             return False
 
         if type(TV) == int:
@@ -693,12 +693,12 @@ class RuleManager:
         if type(TV) == str:
             if type (arg) != int and arg % 8 != 0:
                 ValueError("MO arg should be an Interget multiple of 8")
-            
+
             for i in range(0, arg // 8):
                 print ("=", TV[i], FV[i], TV[i] == FV[i])
                 if TV[i] != FV[i]:
                     return False
-                
+
             return True
 
     def MO_MMAP (self, TV, FV,  rlength, flength, arg):
@@ -714,7 +714,7 @@ class RuleManager:
     }
 
     def FindRuleFromSCHCpacket (self, schc, device=None):
-        """ returns the rule corresponding to the id stored at the 
+        """ returns the rule corresponding to the id stored at the
         beginning of the SCHC packet.
         """
         for d in self._ctxt:
@@ -728,8 +728,8 @@ class RuleManager:
 
                     print (tested_rule, ruleID)
                     if tested_rule == ruleID:
-                        return r 
-        
+                        return r
+
         return None
 
 
@@ -750,13 +750,13 @@ class RuleManager:
                                 else:
                                     arg = None
 
-                                if self.MO_function[r[T_MO]](self, 
-                                    r[T_TV], pkt[(r[T_FID], r[T_FP])][0], 
-                                    r[T_FL], pkt[(r[T_FID], r[T_FP])][1], 
+                                if self.MO_function[r[T_MO]](self,
+                                    r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
+                                    r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
                                     arg):
                                         matches += 1
                                 else:
-                                        break # field does not match, rule does not match 
+                                        break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
