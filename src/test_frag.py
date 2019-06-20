@@ -19,18 +19,18 @@ rule_context = {
 }
 
 compress_rule = {
-    "ruleLength": 3,
-    "ruleID": 5,
+    "RuleLength": 3,
+    "RuleID": 5,
     "compression": {
         "rule_set": []
     }
 }
 
 frag_rule1 = {
-    "ruleLength": 6,
-    "ruleID": 1,
+    "RuleLength": 6,
+    "RuleID": 1,
     "profile": { "L2WordSize": 8 },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -45,10 +45,10 @@ frag_rule1 = {
 }
 
 frag_rule2 = {
-    "ruleLength": 6,
-    "ruleID": 2,
+    "RuleLength": 6,
+    "RuleID": 2,
     "profile": { "L2WordSize": 8 },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -75,10 +75,15 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 #---------------------------------------------------------------------------
 
 rm0 = RuleManager()
-rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
+rm0.Add(dev_info=frag_rule1)
+rm0.Add(dev_info=frag_rule2)
+
 
 rm1 = RuleManager()
-rm1.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
+rm1.Add(dev_info=frag_rule1)
+rm1.Add(dev_info=frag_rule2)
+
+#rm1.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
 
 #--------------------------------------------------
 
@@ -101,7 +106,7 @@ print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
 #--------------------------------------------------
 
 payload = bytearray(range(1, 1+data_size))
-node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
+node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload, frag_rule=rm0.FindFragmentationRule())
 
 sim.run()
 

@@ -375,7 +375,7 @@ class RuleManager:
             dev_info = json.loads(open(file).read())
 
         if type(dev_info) is dict: #Context or Rules
-            if "RuleID" in dev_info: # Rules
+            if T_RULEID in dev_info: # Rules
                 sor = [dev_info]
             elif "SoR" in dev_info:
                 if "DeviceID" in dev_info:
@@ -387,7 +387,6 @@ class RuleManager:
             sor = dev_info
         else:
             ValueError("unknown structure")
-
 
         # check nature of the info: if "SoR" => device context, if "RuleID" => rule
 
@@ -401,13 +400,13 @@ class RuleManager:
             self._ctxt.append(d)
 
         for n_rule in sor:
-            n_ruleID = n_rule["RuleID"]
-            n_ruleLength = n_rule["RuleLength"]
+            n_ruleID = n_rule[T_RULEID]
+            n_ruleLength = n_rule[T_RULEIDLENGTH]
             left_aligned_n_ruleID = n_ruleID << (32 - n_ruleLength)
 
             overlap = False
             for e_rule in d["SoR"]: # check no overlaps on RuleID
-                left_aligned_e_ruleID = e_rule["RuleID"] << (32 - e_rule["RuleLength"])
+                left_aligned_e_ruleID = e_rule[T_RULEID] << (32 - e_rule[T_RULEIDLENGTH])
                 if left_aligned_e_ruleID == left_aligned_n_ruleID:
                     print ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
                     overlap = True
@@ -457,8 +456,8 @@ class RuleManager:
     def _create_fragmentation_rule (self, nrule):
         arule = {}
 
-        arule["RuleID"] = nrule["RuleID"]
-        arule["RuleLength"] = nrule["RuleLength"]
+        arule[T_RULEID] = nrule[T_RULEID]
+        arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
         arule["Fragmentation"] = {}
 
         def _default_value (ar, nr, idx, default=None, failed=False):
@@ -470,17 +469,16 @@ class RuleManager:
             else:
                 ar[T_FRAG][T_FRAG_PROF][idx] = default
 
-        if T_FRAG_MODE in nrule[T_FRAG]:
+
+
+        if  T_FRAG_MODE in nrule[T_FRAG]:
             if not T_FRAG_PROF in nrule[T_FRAG]:
-                ValueError("No {} in rule {}".format(T_FRAG_PROF), nrule["RuleID"])
-
-            if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
-                ValueError("No FCN in rule Profile".format(T_FRAG_PROF))
-
+                arule[T_FRAG][T_FRAG_MODE] = {}
 
             if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
+                nrule[T_FRAG][T_FRAG_PROF] ={}
 
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
@@ -488,6 +486,7 @@ class RuleManager:
 
                 if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
                     _default_value (arule, nrule, T_FRAG_W, 0)
+                    _default_value (arule, nrule, T_FRAG_FCN, 1)
                 elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
@@ -498,6 +497,8 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
 
 
+            if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
+                ValueError("No FCN in rule Profile".format(T_FRAG_PROF))
 
             else:
                 ValueError ("Unknown fragmentation mode {}".format())
@@ -512,8 +513,8 @@ class RuleManager:
         """
         arule = {}
 
-        arule["RuleID"] = nrule["RuleID"]
-        arule["RuleLength"] = nrule["RuleLength"]
+        arule[T_RULEID] = nrule[T_RULEID]
+        arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
         arule["Compression"] = []
 
         up_rules = 0
@@ -522,7 +523,7 @@ class RuleManager:
         for r in nrule["Compression"]:
             if not r["FID"] in FIELD__DEFAULT_PROPERTY:
                 ValueError( "Unkwown field id {} in rule {}/{}".format(
-                    r["FID"], arule["RuleID"],  arule["RuleLength"]
+                    r["FID"], arule[T_RULEID],  arule[T_RULEIDLENGTH]
                 ))
 
             entry = {}
@@ -604,8 +605,8 @@ class RuleManager:
 
             for rule in dev["SoR"]:
                 print ("/" + "-"*25 + "\\")
-                txt = str(rule["RuleID"])+"/"+ str(rule["RuleLength"])
-                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule["RuleID"], rule["RuleLength"])))
+                txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
+                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if "Compression" in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
@@ -635,7 +636,7 @@ class RuleManager:
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
                     print ("!" + "="*25 + "+" + "="*61 +"\\")
-                    print ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:21}!!"
+                    print ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:22} !!"
                         .format(
                             rule[T_FRAG][T_FRAG_MODE],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
@@ -721,8 +722,8 @@ class RuleManager:
             print (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
                 for r in d["SoR"]:
-                    ruleID = r["RuleID"]
-                    ruleLength = r["RuleLength"]
+                    ruleID = r[T_RULEID]
+                    ruleLength = r[T_RULEIDLENGTH]
 
                     tested_rule = schc.get_bits(ruleLength, position=0)
 
@@ -769,6 +770,15 @@ class RuleManager:
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
 
+    def FindFragmentationRule(self, deviceID=None, originalSize=None):
+        for d in self._ctxt:
+            if d["DeviceID"] == deviceID:
+                for r in d["SoR"]:
+                    if "Fragmentation" in r:
+                        return r
+
+        return None
+
     def _checkRuleValue(self, rule_id, rule_id_length):
         """this function looks if bits specified in ruleID are not outside of
         rule_id_length"""
@@ -795,7 +805,7 @@ class RuleManager:
         return True
 
     def _nameRule (self, r):
-        return "Rule {}/{}:".format(r["ruleID"], r["ruleLength"])
+        return "Rule {}/{}:".format(r[T_RULEID], r[T_RULEIDLENGTH])
 
     def find_rule_bypacket(self, context, packet_bbuf):
         """ returns a compression rule or an fragmentation rule
@@ -804,8 +814,8 @@ class RuleManager:
         for k in ["fragSender", "fragReceiver", "comp"]:
             r = context.get(k)
             if r is not None:
-                rule_id = packet_bbuf.get_bits(r["ruleLength"], position=0)
-                if r["ruleID"] == rule_id:
+                rule_id = packet_bbuf.get_bits(r[T_RULEIDLENGTH], position=0)
+                if r[T_RULEIDLENGTH] == rule_id:
                     return k, r
         return None, None
 
@@ -860,12 +870,12 @@ class RuleManager:
     def add_rule(self, context, key, rule):
         """ Check rule integrity and uniqueless and add it to the db """
 
-        if not "ruleID" in rule:
+        if not T_RULEID in rule:
            raise ValueError ("Rule ID not defined.")
 
-        if not "ruleLength" in rule:
-            if rule["ruleID"] < 255:
-                rule["ruleLength"] = 8
+        if not T_RULEIDLENGTH in rule:
+            if rule[T_RULEID] < 255:
+                rule[T_RULEIDLENGTH] = 8
             else:
                 raise ValueError ("RuleID too large for default size on a byte")
 
@@ -877,8 +887,8 @@ class RuleManager:
         else:
             raise ValueError ("key must be either comp, fragSender, fragReceiver")
 
-        rule_id = rule["ruleID"]
-        rule_id_length = rule["ruleLength"]
+        rule_id = rule[T_RULEID]
+        rule_id_length = rule[T_RULEIDLENGTH]
 
         self._checkRuleValue(rule_id, rule_id_length)
 

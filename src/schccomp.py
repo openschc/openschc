@@ -2,6 +2,8 @@ from base_import import *
 
 import pprint
 
+T_RULEID = "RuleID"
+T_RULEIDLENGTH = "RuleIDLength"
 
 T_FID = "FID"
 T_FL = "FL"
@@ -274,9 +276,9 @@ class Compressor:
         assert direction in [T_DIR_UP, T_DIR_DW]
         output_bbuf = BitBuffer()
         # set ruleID first.
-        if rule["RuleID"] is not None and rule["RuleLength"] is not None:
-            output_bbuf.add_bits(rule["RuleID"], rule["RuleLength"])
-            print("rule {}/{}".format(rule["RuleID"], rule["RuleLength"]))
+        if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
+            output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
+            print("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
             output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
@@ -508,7 +510,7 @@ class Decompressor:
 
         self.parsed_packet = {}
 
-        rule_send = schc.get_bits(nb_bits=rule["RuleLength"])
+        rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:

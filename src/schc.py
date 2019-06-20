@@ -64,20 +64,23 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
-    def schc_send(self, dst_L3addr, raw_packet):
+    def schc_send(self, dst_L3addr, raw_packet, frag_rule=None):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
-        context = self.rule_manager.find_context_bydstiid(dst_L3addr)
-        if context is None:
-            # reject it.
-            self._log("Rejected. Not for SCHC packet, L3addr={}".format(
-                    dst_L3addr))
-            return
-        # Compression process
+        # #parsed_packet =
+        # context = self.rule_manager.find_context_bydstiid(dst_L3addr)
+        # if context is None:
+        #     # reject it.
+        #     self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+        #             dst_L3addr))
+        #     return
+        # # Compression process
+        # packet_bbuf = BitBuffer(raw_packet)
+        # rule = context["comp"]
+        # self._log("compression rule_id={}".format(rule.ruleID))
+        # # XXX needs to handl the direction
+        # packet_bbuf = self.compressor.compress(context, packet_bbuf)
+
         packet_bbuf = BitBuffer(raw_packet)
-        rule = context["comp"]
-        self._log("compression rule_id={}".format(rule.ruleID))
-        # XXX needs to handl the direction
-        packet_bbuf = self.compressor.compress(context, packet_bbuf)
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
             self._log("SCHC fragmentation is not needed. size={}".format(
@@ -86,11 +89,12 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args)
             return
         # fragmentation is required.
-        if context.get("fragSender") is None:
+
+        if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
-        rule = context["fragSender"]
+        rule = frag_rule
         self._log("fragmentation rule_id={}".format(rule.ruleID))
         session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
