@@ -11,6 +11,7 @@ from rulemanager import RuleManager
 #import statsct static class 
 from stats.statsct import Statsct
 from ucollections import OrderedDict
+from stats.cdf_calc import cdf_cal
 #---------------------------------------------------------------------------
 
 
@@ -122,8 +123,8 @@ loss_config = {"mode":"rate", "cycle":loss_rate}
 #Size of data in bytes
 #data_size = 14
 
-l2_mtu = 1936 #in bits
-SF = 8
+# l2_mtu = 1936 #in bits
+# SF = 8
 l2_mtu = 408 #in bits
 SF = 12
 # EU863-870 band, maximum payload size:
@@ -147,19 +148,25 @@ SF = 12
 repetitions = 100
 sim_results = []
 total_results = OrderedDict()
+total_delay_packet = []
+total_delay_packet_size = OrderedDict()
 test_file = False
 fileToSend = "testfile_large.txt"
 #fileToSend = "testfile.txt"
 data_size = 300 #Size of data in bytes
 
 min_packet_size = int(l2_mtu /8) #byes
-min_packet_size = 250 #60
+min_packet_size = 60 #60
 max_packet_size = 1290 #bytes 
-packet_sizes = [80,160,320,640,1280]
-#packet_sizes = [320]
+#packet_sizes = [80,160,320,640,1280]
+#packet_sizes = [320,640,1280]
 packet_sizes = [80,160,320,640]
-
+#packet_sizes = [80]
 ack_on_error = True
+
+
+
+
 #---------------------------------------------------------------------------
 """ Init stastct module """
 Statsct.initialize()
@@ -190,7 +197,7 @@ simul_config = {
 if loss_config is not None:
     simul_config["loss"] = loss_config
 
-#for packet_size in range(min_packet_size, max_packet_size,10):
+#for packet_size in range(min_packet_size, max_packet_size,11):
 for packet_size in packet_sizes:
 
     print("packet_size - > {}".format(packet_size))
@@ -272,11 +279,19 @@ for packet_size in packet_sizes:
         Statsct.print_ordered_packets()
         #print(Statsct.get_results())
         print('performance metrics')
-        sim_results.append(Statsct.calculate_tx_parameters())
+        params = Statsct.calculate_tx_parameters()
+        sim_results.append(params)
         #print("{}".format(sim_results))
+        if params['packet_status']:
+            total_delay_packet.append(params['total_delay'])
 
-        input('Continue to next sim')
+        #input('Continue to next sim')
     #--------------------------------------------------
+    total_delay_packet_size[packet_size] = total_delay_packet
+    #print("total_delay_packet_size:{}".format(total_delay_packet_size))
+    #print("total_delay_packet:{}".format(total_delay_packet))
+    #cdf_cal(total_delay_packet)
+    #input('....')
     average_goodput = 0
     average_total_delay = 0
     average_channe_occupancy = 0
@@ -291,7 +306,11 @@ for packet_size in packet_sizes:
     for result in sim_results:
         print("{}".format(result))
         average_goodput += result['goodput']
-        average_total_delay += result['total_delay']
+
+        if result['packet_status']:
+            average_total_delay += result['total_delay']
+            total_delay_packet.append(result['total_delay'])
+
         average_channe_occupancy += result['channel_occupancy']
         number_success_fragments += result['succ_fragments']
         number_failed_fragments += result['fail_fragments']
@@ -315,6 +334,7 @@ for packet_size in packet_sizes:
                                  'channel_occupancy_sender':channel_occupancy_sender,
                                  'channel_occupancy_receiver':channel_occupancy_receiver}
     sim_results = []
+    total_delay_packet_size
     #input("")
 #print("{}".format(total_results))
 print("goodput")

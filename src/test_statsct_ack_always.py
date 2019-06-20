@@ -115,7 +115,7 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 #lost_rate in %
 loss_rate = 10
 loss_config = {"mode":"rate", "cycle":loss_rate}
-loss_config = None
+#loss_config = None
 #L2 MTU size in bits - byte
 #l2_mtu = 56
 #Size of data in bytes
@@ -153,14 +153,19 @@ fileToSend = "testfile_large.txt"
 data_size = 300 #Size of data in bytes
 
 min_packet_size = int(l2_mtu /8) #byes
-min_packet_size = 251 #60
+#min_packet_size = 60 #60
+min_packet_size = 250 #60
+
 max_packet_size = 1290 #bytes 
-packet_sizes = [80,160,320,640,1280]
+#packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
-#packet_sizes = [80,160,320,640]
+#packet_sizes = [320,640,1280]
+packet_sizes = [80,160,320,640]
+packet_sizes = [80]
+
 tile_size = 49
-##tile_size = 240
-payload_ack_always = tile_size * 4
+#tile_size = 240
+payload_ack_always = tile_size * 2
 ack_on_error = True
 #---------------------------------------------------------------------------
 """ Init stastct module """

@@ -28,7 +28,7 @@ class FragmentBase():
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
-        self.ack_wait_timer = 150   
+        self.ack_wait_timer = 200   
         self.ack_requests_counter = 0
         self.resend = False
         self.all1_send = False
@@ -493,6 +493,10 @@ class FragmentAckOnError(FragmentBase):
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         print("*******event id {}".format(self.event_id_ack_wait_timer))
+
+
+
+        
         schc_frag = schcmsg.frag_sender_ack_req(self.rule, self.dtag, win)
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
@@ -502,8 +506,9 @@ class FragmentAckOnError(FragmentBase):
         print("SCHC ACK REQ frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                         args)
-        """ waits for all the acks before sending the ack request
         
+        """ waits for all the acks before sending the ack request """
+        """
         self.number_of_ack_waits += 1
         print("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
         if self.number_of_ack_waits > self.num_of_windows:

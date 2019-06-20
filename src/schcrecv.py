@@ -46,7 +46,7 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
-        self.inactive_timer = 200
+        self.inactive_timer = 250
         self.event_id_inactive_timer = None
         # state:
         #   INIT:
