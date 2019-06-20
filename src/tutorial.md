@@ -151,3 +151,21 @@ containing the JSON structure as to be used.
      RM.Print()
 
 ## device definition
+
+As seen before, when not specified, the device is identified as None. This can be enough
+if the SCHC instance is on the device, since there is no ambiguities. On the other hand
+when the SCHC instance is on the core network side, the set of rules must be associated to
+a device ID.
+
+Device ID rules can be directly stored into the rule manager through the __Add__ method.
+The JSON structure is the following:
+
+
+    {
+        "DeviceID": 1234567890,
+        "SoR" : [ ..... ]
+    }
+
+Where __DeviceID__ keyword represents the device ID in a specific technology, for
+instance LoRaWAN DevEUI. Note that this should be viewed as a JSON structure Therefore
+value must be given in decimal.
