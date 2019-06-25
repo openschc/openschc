@@ -27,7 +27,7 @@ compress_rule = {
 }
 
 frag_rule1 = {
-    "RuleLength": 6,
+    "RuleIDLength": 6,
     "RuleID": 1,
     "profile": { "L2WordSize": 8 },
     "Fragmentation": {
@@ -45,7 +45,7 @@ frag_rule1 = {
 }
 
 frag_rule2 = {
-    "RuleLength": 6,
+    "RuleIDLength": 6,
     "RuleID": 2,
     "profile": { "L2WordSize": 8 },
     "Fragmentation": {

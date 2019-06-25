@@ -464,10 +464,10 @@ class RuleManager:
             if failed and not idx in nr[T_FRAG][T_FRAG_PROF]:
                 ValueError ("{} not found".format(idx))
 
-            if idx in nr[T_FRAG][T_FRAG_PROF]:
-                ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx]
-            else:
+            if not T_FRAG_PROF in nr[T_FRAG] or not idx in nr[T_FRAG][T_FRAG_PROF]:
                 ar[T_FRAG][T_FRAG_PROF][idx] = default
+            else:
+                ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx]
 
 
 
@@ -478,7 +478,6 @@ class RuleManager:
             if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
-                nrule[T_FRAG][T_FRAG_PROF] ={}
 
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
@@ -490,20 +489,21 @@ class RuleManager:
                 elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                    if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
+                        raise ValueError ("FCN Must be specified for Ack On Error")
+
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
                     _default_value (arule, nrule, T_FRAG_TILE, None, True)
                     _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
 
-
-            if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
-                ValueError("No FCN in rule Profile".format(T_FRAG_PROF))
+                print (arule, nrule)
 
             else:
-                ValueError ("Unknown fragmentation mode {}".format())
+                raise ValueError ("Unknown fragmentation mode {}".format())
         else:
-            ValueError("No fragmentation mode")
+            raise ValueError("No fragmentation mode")
 
         return arule
 
@@ -522,7 +522,7 @@ class RuleManager:
 
         for r in nrule["Compression"]:
             if not r["FID"] in FIELD__DEFAULT_PROPERTY:
-                ValueError( "Unkwown field id {} in rule {}/{}".format(
+                raise ValueError( "Unkwown field id {} in rule {}/{}".format(
                     r["FID"], arule[T_RULEID],  arule[T_RULEIDLENGTH]
                 ))
 
@@ -541,7 +541,7 @@ class RuleManager:
                     if T_MO_VAL in r:
                         entry[T_MO_VAL] = r[T_MO_VAL]
                     else:
-                        ValueError ("MO Value missing for {}".format(FID))
+                        raise ValueError ("MO Value missing for {}".format(FID))
 
                 if T_TV in  r:
                     entry[T_TV] = self._adapt_value(FID, r[T_TV])
@@ -554,12 +554,12 @@ class RuleManager:
                     entry[T_TV].append(self._adapt_value(FID, e))
 
             else:
-                ValueError("{} MO unknown".format(MO))
+                raise ValueError("{} MO unknown".format(MO))
             entry[T_MO] = MO
 
             CDA = r[T_CDA].upper()
-            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM]:
-                ValueError("{} CDA not found".format(CDA))
+            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM, T_CDA_DEVIID, T_CDA_APPIID]:
+                raise ValueError("{} CDA not found".format(CDA))
             entry[T_CDA] = CDA
 
             arule["Compression"].append(entry)
@@ -686,14 +686,14 @@ class RuleManager:
 
         if type(TV) == int:
             if type(arg) != int:
-                ValueError ("MO Arg should be integer")
+                raise ValueError ("MO Arg should be integer")
 
             shift = rlength-arg
             return self.MO_EQUAL(TV >> shift, FV >> shift, rlength-shift, flength-shift, 0)
 
         if type(TV) == str:
             if type (arg) != int and arg % 8 != 0:
-                ValueError("MO arg should be an Interget multiple of 8")
+                raise ValueError("MO arg should be an Interget multiple of 8")
 
             for i in range(0, arg // 8):
                 print ("=", TV[i], FV[i], TV[i] == FV[i])
