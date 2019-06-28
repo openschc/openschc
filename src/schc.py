@@ -8,6 +8,7 @@ from schcrecv import ReassemblerAckOnError
 from schcrecv import ReassemblerNoAck
 from schcsend import FragmentAckOnError
 from schcsend import FragmentNoAck
+from comp_parser import *
 from schccomp import Compressor, Decompressor
 
 class Session:
@@ -64,23 +65,39 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
-    def schc_send(self, dst_L3addr, raw_packet, frag_rule=None):
+    def schc_send(self, dst_L3addr, raw_packet):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
-        # #parsed_packet =
-        # context = self.rule_manager.find_context_bydstiid(dst_L3addr)
-        # if context is None:
-        #     # reject it.
-        #     self._log("Rejected. Not for SCHC packet, L3addr={}".format(
-        #             dst_L3addr))
-        #     return
-        # # Compression process
-        # packet_bbuf = BitBuffer(raw_packet)
-        # rule = context["comp"]
+        print ("raw_packet", raw_packet)
+
+        P = Parser(self._log)
+        
+        try:
+            parsed_packet, data = P.parse(raw_packet, direction=T_DIR_BI)
+        except: 
+            print ("no parsing, try fragmentation")
+            parsed_packet = None
+            compressed_packet = None
+
+        if parsed_packet != None:
+            pass        # to be done
+            # frag_rule = self.rule_manager.FindRuleFromPacket(parsed_packet)
+            # if frag_rule is None:
+            #     # reject it.
+            #     self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+            #             dst_L3addr))
+            #     return
+            # # Compression process
+            # packet_bbuf = BitBuffer(raw_packet)
+            # rule = context["Compression"]
         # self._log("compression rule_id={}".format(rule.ruleID))
         # # XXX needs to handl the direction
         # packet_bbuf = self.compressor.compress(context, packet_bbuf)
 
-        packet_bbuf = BitBuffer(raw_packet)
+        if compressed_packet == None:
+            packet_bbuf = BitBuffer(raw_packet)
+        else:
+            packet_bbuf = BitBuffer(compressed_packet)
+
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
             self._log("SCHC fragmentation is not needed. size={}".format(
@@ -90,12 +107,14 @@ class SCHCProtocol:
             return
         # fragmentation is required.
 
+        frag_rule = self.rule_manager.FindFragmentationRule()
+
         if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
         rule = frag_rule
-        self._log("fragmentation rule_id={}".format(rule.ruleID))
+        self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
         session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
         self.fragment_session.add(rule.ruleID, rule.ruleLength,
@@ -103,7 +122,7 @@ class SCHCProtocol:
         session.start_sending()
 
     def new_fragment_session(self, context, rule):
-        mode = rule.get("FRMode")
+        mode = rule[T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule) # XXX
         elif mode == "ackAlwayw":

@@ -26,7 +26,7 @@ class SimulScheduler:
     # external API
 
     def add_event(self, rel_time, callback, args):
-        print("ARGS", arg)
+        print ("ARGS", args)
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1

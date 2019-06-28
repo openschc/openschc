@@ -53,7 +53,7 @@ class Parser:
         - layer is a optional argument: 3 means that parsing must start at ip Layer
         """
 
-        assert (direction == T_DIR_UP) or (direction == T_DIR_DW)  # cannot be bidirectionnal
+        assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
 
         pos = 0
         self.header_fields = {}

@@ -106,7 +106,7 @@ print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
 #--------------------------------------------------
 
 payload = bytearray(range(1, 1+data_size))
-node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload, frag_rule=rm0.FindFragmentationRule())
+node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
 
 sim.run()
 

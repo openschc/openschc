@@ -20,12 +20,12 @@ class SimulLayer3:
         self.protocol = None
         self.L3addr = SimulLayer3.__get_unique_addr()
 
-    def send_later(self, rel_time, dst_L3addr, raw_packet, frag_rule=None):
+    def send_later(self, rel_time, dst_L3addr, raw_packet):
         self._log("send-later Devaddr={} Packet={}".format(
                 dst_L3addr, b2hex(raw_packet)))
         self.sim.scheduler.add_event(
             rel_time, self.protocol.schc_send,
-            (dst_L3addr, raw_packet, frag_rule,))
+            (dst_L3addr, raw_packet,))
 
     # XXX need to confirm whether this should be here or not.
     def recv_packet(self, dev_L2addr, raw_packet):
