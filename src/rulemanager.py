@@ -498,8 +498,8 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
 
-                print (arule, nrule)
-
+                # the size include All-*, Max_VLAUE is WINDOW_SIZE-1
+                _default_value(arule, nrule, T_FRAG_WINDOW_SIZE, (0x01 <<(arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]))-1)
             else:
                 raise ValueError ("Unknown fragmentation mode {}".format())
         else:

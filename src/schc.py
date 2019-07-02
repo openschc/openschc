@@ -114,6 +114,7 @@ class SCHCProtocol:
             return
         # Do fragmenation
         rule = frag_rule
+        context = None # LT: don't know why context is needed, should be self.rule_manager which handle the context
         self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
         session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
@@ -122,7 +123,7 @@ class SCHCProtocol:
         session.start_sending()
 
     def new_fragment_session(self, context, rule):
-        mode = rule[T_FRAG_MODE]
+        mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule) # XXX
         elif mode == "ackAlwayw":
