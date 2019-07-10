@@ -8,7 +8,12 @@ from base_import import *
 from simsched import SimulScheduler as Scheduler
 from simlayer2 import SimulLayer2
 from cond_true import ConditionalTrue
-import utime
+
+try:
+    import utime as time
+except ImportError:
+    import time
+    
 import schc
 
 from stats.statsct import Statsct
@@ -26,7 +31,7 @@ class SimulLayer3:
     def __init__(self, sim):
         self.sim = sim
         self.protocol = None
-        self.L3addr = SimulLayer3.__get_unique_addr()
+        self.L3addr = SimulLayer3.__get_unique_addr()        
 
     def send_later(self, rel_time, dst_L3addr, raw_packet):
         self._log("send-later Devaddr={} Packet={}".format(

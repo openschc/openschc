@@ -59,6 +59,7 @@ class frag_base():
         self.packet = None
         self.abort = False
         self.ack_request = False
+
     def set_param(self, rule_id, dtag=None, win=None, fcn=None, mic=None,
                   bitmap=None, cbit=None, payload=None):
         self.rule_id = rule_id
@@ -79,7 +80,7 @@ class frag_tx(frag_base):
     parent class for sending message.
     '''
     def make_frag(self, dtag, win=None, fcn=None, mic=None, bitmap=None,
-                  cbit=None, payload=None, abort=False, req = False):
+                  cbit=None, payload=None, abort=False , req = False):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
         #print("ruleID")
@@ -92,7 +93,7 @@ class frag_tx(frag_base):
         if win is not None and self.rule.get("WSize") is not None:
             buffer.add_bits(win, self.rule["WSize"])
         #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
-        #           buffer.count_padding_bits(),buffer.count_padding_bits()))
+        #buffer.count_padding_bits(),buffer.count_padding_bits()))
         if abort == True:
             # XXX for receiver abort, needs to be fixed
             buffer.add_bits(get_fcn_all_1(self.rule), self.rule["FCNSize"])
@@ -101,12 +102,12 @@ class frag_tx(frag_base):
             buffer.add_bits(0, self.rule["FCNSize"])
             #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
             #        buffer.count_padding_bits(),buffer.count_padding_bits()))
-
+ 
             #for zero in range(0, self.rule["FCNSize"]):
             #    print("{},{}".format(self.rule["FCNSize"],zero))
             #    buffer.set_bit(0)
             #print("buffer after")
-            #print(buffer)
+            #print(buffer)        
         else:
             if fcn is not None and self.rule.get("FCNSize") is not None:
                 buffer.add_bits(fcn, self.rule["FCNSize"])
@@ -185,7 +186,6 @@ class frag_sender_ack_req(frag_tx):
         self.rule = rule
         self.rule_id = rule["ruleID"]
         self.make_frag(dtag, win=win,req=True)
-
 
 
 class frag_receiver_tx_all0_ack(frag_tx):
@@ -351,7 +351,7 @@ class frag_sender_rx(frag_rx):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
         print("frag_sender_rx")
         print(packet_bbuf)
-        #input("")
+        #input("")        
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
@@ -398,7 +398,5 @@ class frag_receiver_rx(frag_rx):
                 # this is a ACK REQ message
                 self.ack_request = True
                 return
-
-
         self.payload = self.packet_bbuf.get_bits_as_buffer()
         #TODO: Parse ACK REQ

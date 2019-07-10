@@ -28,16 +28,16 @@ How are the 3rd and 4th fragments ?
 I thought that they including the 1st and 2nd are like below.
 
     |<- header ->|<---------------- tile 1 --------------->|
-1st |  11 bits   |                 45 bits                 |
+    |  11 bits   |                 45 bits                 | 1st
 
     |<- header ->|<---------------- tile 2 --------------->|
-2nd |  11 bits   |                 45 bits                 |
+    |  11 bits   |                 45 bits                 | 2nd
 
     |<- header ->|<-  tile 3 ->|<- padding ->|
-3rd |  11 bits   |   14 bits   |   7 bits    |
+    |  11 bits   |   14 bits   |   7 bits    | 3rd
 
     |<- header ->|<------   MIC   ------>|<- padding ->|
-4th |  11 bits   |        32 bits        |    5 bits   |
+    |  11 bits   |        32 bits        |    5 bits   | 4th
 
 However, the sesion of 8.4.1 describes that only the All-1 SCHC
 Fragment is padded as needed.

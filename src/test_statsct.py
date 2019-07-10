@@ -10,7 +10,11 @@ from rulemanager import RuleManager
 
 #import statsct static class 
 from stats.statsct import Statsct
-from ucollections import OrderedDict
+
+try:
+    from ucollections import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 #---------------------------------------------------------------------------
 
 
@@ -144,10 +148,10 @@ SF = 12
 #---------------------------------------------------------------------------
 #Configuration of test_statsct
 #Number of repetitions
-repetitions = 100
+repetitions = 1
 sim_results = []
 total_results = OrderedDict()
-test_file = False
+test_file = True
 fileToSend = "testfile_large.txt"
 #fileToSend = "testfile.txt"
 data_size = 300 #Size of data in bytes
@@ -155,9 +159,10 @@ data_size = 300 #Size of data in bytes
 min_packet_size = int(l2_mtu /8) #byes
 min_packet_size = 250 #60
 max_packet_size = 1290 #bytes 
-packet_sizes = [80,160,320,640,1280]
+#packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
-packet_sizes = [80,160,320,640]
+#packet_sizes = [80,160,320,640]
+packet_sizes = [80,160,255]
 
 ack_on_error = True
 #---------------------------------------------------------------------------
@@ -247,8 +252,11 @@ for packet_size in packet_sizes:
             print("Payload size:", len(payload))
             print("Payload: {}".format(b2hex(payload)))
             print("")
-        else:
+        else:                      
             payload = bytearray(range(1, 1+packet_size))
+            print("Payload size:", len(payload))
+            print("Payload: {}".format(b2hex(payload)))
+            print("")
         node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
         #---------------------------------------------------------------------------    
         Statsct.addInfo('real_packet', payload)

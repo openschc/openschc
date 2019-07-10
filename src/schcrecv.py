@@ -8,7 +8,7 @@ from base_import import *  # used for now for differing modules in py/upy
 import schc
 import schcmsg
 from schcbitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1, find_missing_tiles_mic_ko_yes_all_1
-
+ 
 enable_statsct = True
 if enable_statsct:
     from stats.statsct import Statsct
@@ -46,7 +46,7 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
-        self.inactive_timer = 200
+        self.inactive_timer = 200 #last value 120
         self.event_id_inactive_timer = None
         # state:
         #   INIT:
@@ -59,7 +59,7 @@ class ReassembleBase:
         self.mic_missmatched = False
 
         self.fragment_received = False
-        
+
 
 
     def get_mic(self, mic_target, extra_bits=0):
@@ -88,7 +88,7 @@ class ReassembleBase:
         if self.state == "DONE":
             return
 
-        # sending Receiver abort.
+        # sending sender abort.
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
         print("Sent Receiver-Abort.", schc_frag.__dict__)
@@ -171,9 +171,9 @@ class ReassemblerAckOnError(ReassembleBase):
     # In ACK-on-Error, a fragment contains tiles belonging to different window.
     # A type of data structure holding tiles in each window is not suitable.  
     # So, here just appends a fragment into the tile_list like No-ACK.
-    
+
     def receive_frag(self, bbuf, dtag):
-        
+
         print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
                                 bbuf, self.rule))
         
@@ -192,7 +192,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             return
-          
+
         if schc_frag.ack_request == True:
             print("Received ACK-REQ")
             # if self.state != "DONE":
@@ -203,7 +203,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #     args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             #     print("Sent Receiver-Abort.", schc_frag.__dict__)
             #     print("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
-
+ 
             #     if enable_statsct:
             #         Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
             #         #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
@@ -248,7 +248,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     tile['w-num'],tile['t-num'],tile['nb_tiles']))
             #print("raw_tiles:{}".format(tile['raw_tiles']))
         #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
-
+ 
         # self.tile_list.append({
         #         "w-num": schc_frag.win,
         #         "t-num": schc_frag.fcn,
@@ -285,7 +285,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                               self.rule["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
-                
+
                 assert bit_list is not None
                 if len(bit_list) == 0:
                     #When the find_missing_tiles functions returns an empty array
@@ -367,7 +367,7 @@ class ReassemblerAckOnError(ReassembleBase):
                                                 self.rule["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                     print("new bit list, should it work???")
-
+ 
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
                                                             bit_list[bl_index][1]))
@@ -382,7 +382,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     if enable_statsct:
                         Statsct.set_msg_type("SCHC_ACK_KO")
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
-
+ 
                     print("ACK failure sent:", schc_ack.__dict__)
             else:
                 #special case when the ALL-1 message is lost: 2 cases:
@@ -425,12 +425,12 @@ class ReassemblerAckOnError(ReassembleBase):
                     if enable_statsct:
                         Statsct.set_msg_type("SCHC_ACK_KO")
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
-
+ 
                     print("ACK failure sent:", schc_ack.__dict__)
-
-
-
-
+ 
+ 
+ 
+ 
         args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
         self.protocol.scheduler.add_event(0,
                                             self.protocol.layer2.send_packet,

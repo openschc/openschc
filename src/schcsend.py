@@ -15,6 +15,15 @@ enable_statsct = True
 if enable_statsct:
     from stats.statsct import Statsct
 
+try:
+    import utime as time
+except ImportError:
+    import time
+ 
+enable_statsct = True
+if enable_statsct:
+    from stats.statsct import Statsct
+
 #---------------------------------------------------------------------------
 
 max_ack_requests = 8
@@ -28,7 +37,7 @@ class FragmentBase():
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
-        self.ack_wait_timer = 150   
+        self.ack_wait_timer = 150
         self.ack_requests_counter = 0
         self.resend = False
         self.all1_send = False
@@ -208,6 +217,7 @@ class FragmentNoAck(FragmentBase):
         print("event_sent_frag")
         self.send_frag()
         #input("")
+
     def receive_frag(self, bbuf, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
@@ -255,8 +265,9 @@ class FragmentAckOnError(FragmentBase):
                 self.num_of_windows += 1
         print("number of windows = {}".format(self.num_of_windows))
         #input("")
+
     def send_frag(self):
-        print("{} send_frag!!!!!!!!!!!!!!!!!".format(utime.time()))
+        print("{} send_frag!!!!!!!!!!!!!!!!!".format(time.time()))#utime.time()
         print("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend,self.state))
         print("all tiles unsend -> {}".format(self.all_tiles))
         for tile in self.all_tiles.get_all_tiles():
@@ -308,8 +319,8 @@ class FragmentAckOnError(FragmentBase):
             #                                     args)
             #     print("Sending all-1 beacuse there is an ACK FaILURE but cannot find the missing tiles")
             #     input("")
-
-
+ 
+ 
             # win = self.last_window_tiles[0]["w-num"] if self.last_window_tiles[0]["w-num"] is not None else 0 
             # if self.last_window_tiles[0]["t-num"] == 0:
             #     win += 1
@@ -322,10 +333,11 @@ class FragmentAckOnError(FragmentBase):
             #self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
             #        self.ack_wait_timer, self.ack_timeout, args)
             #print("*******event id {}".format(self.event_id_ack_wait_timer))
-
+ 
         #if window_tiles is not None and not self.all1_send and not self.resend:
+
         if window_tiles is not None:
-        
+            
             print("window_tiles is not None -> {}, resend -> {}".format(self.all1_send, self.resend))
             # even when mic is sent, it comes here in the retransmission.
             if self.all1_send and self.state != self.ACK_FAILURE:
@@ -348,13 +360,13 @@ class FragmentAckOnError(FragmentBase):
                 # elf.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 # self.ack_wait_timer, self.ack_timeout, args)
                 #fcn = schcmsg.get_fcn_all_1(self.rule)
-                return
+                return            
             elif (nb_remaining_tiles == 0 and
                 len(window_tiles) == 1 and
                 remaining_size >= schcmsg.get_mic_size(self.rule)):
                 print("ALL-1 prepared")
+
                 
-                    
                 # make the All-1 frag with this tile.
                 # the All-1 fragment can carry only one tile of which the size
                 # is less than L2 word size.
@@ -364,7 +376,7 @@ class FragmentAckOnError(FragmentBase):
                         schcmsg.get_mic_size(self.rule) +
                         TileList.get_tile_size(window_tiles))
                 #check if mic exists, no need no created again
-                if self.mic_sent is None:        
+                if self.mic_sent is None:                 
                     mic = self.get_mic(self.mic_base, last_frag_base_size)
                     # store the mic in order to know all-1 has been sent.
                     self.mic_sent = mic
@@ -382,7 +394,7 @@ class FragmentAckOnError(FragmentBase):
                 # regular fragment.
                 fcn = window_tiles[0]["t-num"]
                 mic = None
-                
+
                 if enable_statsct:
                     Statsct.set_msg_type("SCHC_FRAG")
                     Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
@@ -402,13 +414,13 @@ class FragmentAckOnError(FragmentBase):
                 #    Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
                 args = (schc_frag, window_tiles[0]["w-num"],)
                 print("all ones")
-                self.schc_all_1 = schc_frag          
+                self.schc_all_1 = schc_frag 
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                         self.ack_wait_timer, self.ack_timeout, args)
                 print("*******event id {}".format(self.event_id_ack_wait_timer))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
-            print("self.last_window_tiles -> {}".format(self.last_window_tiles))
+            print("self.last_window_tiles -> {}".format(self.last_window_tiles)) 
         elif self.mic_sent is not None or self.all1_send:
             print("self.mic_sent is not None state -> {}".format(self.state))
             # it looks that all fragments have been sent.
@@ -417,7 +429,7 @@ class FragmentAckOnError(FragmentBase):
             schc_frag = None
             self.all1_send = True
             if self.event_id_ack_wait_timer and self.state == self.ACK_SUCCESS:
-                self.cancel_ack_wait_timer() 
+                self.cancel_ack_wait_timer()             
             return
         else:
             print("only mic all tiles send")
@@ -452,7 +464,7 @@ class FragmentAckOnError(FragmentBase):
                     self.ack_wait_timer, self.ack_timeout, args)
             print("*******event id {}".format(self.event_id_ack_wait_timer))
 
-
+        
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
@@ -485,7 +497,7 @@ class FragmentAckOnError(FragmentBase):
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
-
+            
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
             return
@@ -524,7 +536,7 @@ class FragmentAckOnError(FragmentBase):
         else:
             print("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
         """
-
+                                         
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         print("EVENT SEND FRAG")
         self.send_frag()
@@ -539,15 +551,15 @@ class FragmentAckOnError(FragmentBase):
         #
         schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("-----------------------  sender frag received -----------------------") 
-        print("fragment received -> {}".format(schc_frag.__dict__))
+        print("fragment received -> {}".format(schc_frag.__dict__))        
         if ((self.rule["WSize"] is None or
-             schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
+            schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
             print("-----------------------  Receiver Abort rid={} dtag={} -----------------------".format(
                     self.rule.ruleID, self.dtag))
             #self.resend = False
             self.state = self.RECEIVER_ABORT
-            
+
             return
         if schc_frag.cbit == 1:
             print("----------------------- ACK Success rid={} dtag={} -----------------------".format(

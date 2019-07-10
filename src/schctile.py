@@ -125,8 +125,8 @@ class TileList():
             # last window
             print("last window")
             print("self.all_tiles -> {}".format(self.all_tiles))
-
-            for bi in range(len(bit_list)):
+            
+            for bi in range(len(bit_list[:-1])):
                 print("bi -> {}".format(bi))
                 if bit_list[bi] == 0:
                     
@@ -136,7 +136,7 @@ class TileList():
                 print("Problem in tx, the last bit is set as 1")
                 print("self.all_tiles -> {}".format(self.all_tiles))
                 self.all_tiles[-1]["sent"] = True
-                #unset_sent_flag_do()
+                #unset_sent_flag_do()        
         else:
             print("not last window")
             for bi in range(len(bit_list)):

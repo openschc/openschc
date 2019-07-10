@@ -6,9 +6,23 @@ Centralize the information for analysis
 The stats are write to a file
 """
 #import collections.defaultdict as defaultdict
-from collections import defaultdict
-from ucollections import OrderedDict
-import utime
+
+try:
+    from ucollections import defaultdict
+except ImportError:
+    from collections import defaultdict
+
+
+try:
+    from ucollections import OrderedDict
+except ImportError:
+    from collections import OrderedDict
+
+try:
+    import utime as time
+except ImportError:
+    import time
+    
 import sys
 from .toa_calculator import get_toa
 import schcmsg
@@ -55,8 +69,8 @@ class Statsct(object):
     def initialize():
         """Class to initializa the static class
         creates the file to write and the instance of the class """
-        print('Init statsct module')
-        Statsct.results['init_time'] = utime.time()
+        print('Init statsct module')        
+        Statsct.results['init_time'] = time.time()#utime.time() -->exception
         Statsct.results['packet_list'] = []
         Statsct.sender_packets['packet_list'] = []
         Statsct.receiver_packets['packet_list'] = []
@@ -64,6 +78,7 @@ class Statsct(object):
         Statsct.dst_id = None
         Statsct.device_rule = dict()
         Statsct.gw_rule = dict()
+        Statsct.gw_rule['fragSender'] = []
         Statsct.channel_occupancy = 0
         Statsct.goodput = 0
         Statsct.total_delay = 0
@@ -165,7 +180,7 @@ class Statsct(object):
         :param src_dev_id: device source id
         :param dst_dev_id: device destination id
         :param status: if the message was send successful (True) or not (False) """
-        Statsct.packet_info['time'] = utime.time()
+        Statsct.packet_info['time'] = time.time() # utime.time()
         Statsct.packet_info['src_dev_id'] = src_dev_id
         Statsct.packet_info['dst_dev_id'] = dst_dev_id
         Statsct.packet_info['packet'] = packet
@@ -194,8 +209,10 @@ class Statsct(object):
         #     Statsct.packet_info['msg_type'] = ''
 
         # else:
-        #     Statsct.last_msg_type = Statsct.packet_info['msg_type']
+        #     Statsct.last_msg_type = Statsct.packet_info['msg_type']    
+       
         Statsct.results['packet_list'].append(Statsct.packet_info)
+        #print('Statsct.results: ',Statsct.results)
         #calculate performace metrics
         Statsct.addChannelOccupancy(Statsct.packet_info['toa_packet'])
         #Statsct.log(str(Statsct.results))

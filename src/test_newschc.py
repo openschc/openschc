@@ -108,7 +108,7 @@ print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
 print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
                                              rm1.__dict__))
 print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
-
+ 
 #device rule
 for rule1 in rm0.__dict__:
     print(rm0.__dict__[rule1])
@@ -137,31 +137,33 @@ for rule1 in rm1.__dict__:
             elif tag == "fragReceiver": 
                 print('fragReceiver rule -> {}'.format(info[tag]))
 input('')
-
+ 
 #---------------------------------------------------------------------------
 Statsct.setSourceAddress(node0.id)
 Statsct.setDestinationAddress(node1.id)
+ 
 #---------------------------------------------------------------------------
-
+ 
 #---------------------------------------------------------------------------
-
+ 
 if opt.data_file is not None:
     payload = open(opt.data_file,"rb").read()
 else:
     payload = bytearray(range(1, 1+int(opt.data_size)))
-
+ 
 #---------------------------------------------------------------------------    
 Statsct.addInfo('real_packet', payload)
 Statsct.addInfo('real_packet_size', len(payload))
 #---------------------------------------------------------------------------
-
-
+ 
+ 
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, payload)
-
+ 
 sim.run()
 print('simulation ended')
 Statsct.print_results()
 print('Sender Packet list -> {}'.format(Statsct.sender_packets))
 Statsct.print_packet_list(Statsct.sender_packets)
-
+ 
 #---------------------------------------------------------------------------
+ 

@@ -83,7 +83,7 @@ class SCHCProtocol:
         # XXX needs to handl the direction
         #NEED TO BE FIX -> there is an error when packets are larger than 250B
         #The assert in the funcion __add__ of bitarray.py line 257 gives an 
-        #Assertion Error. 
+        #Assertion Error.
         packet_bbuf = self.compressor.compress(context, packet_bbuf)
         # check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
@@ -175,7 +175,7 @@ class SCHCProtocol:
             session = self.reassemble_session.get(rule.ruleID,
                                                 rule.ruleLength, dtag)
             print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(rule.ruleID,rule.ruleLength, dtag))
-
+            
             if session is not None:
                 print("Reassembly session found", session)
             else:

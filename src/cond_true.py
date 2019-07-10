@@ -58,6 +58,7 @@ class ConditionalTrue:
                 self.cycle = 1
             else:
                 self.cycle = cycle
+                #self.cycle = 1 / cycle
             self.check_func = self.__cond_check_rate
         else:
             raise ValueError("mode must be list, cycle, or rante.")

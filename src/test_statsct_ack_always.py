@@ -10,7 +10,10 @@ from rulemanager import RuleManager
 import math
 #import statsct static class 
 from stats.statsct import Statsct
-from ucollections import OrderedDict
+try:
+    from ucollections import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 #---------------------------------------------------------------------------
 
 

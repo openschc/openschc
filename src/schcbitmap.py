@@ -360,7 +360,7 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
             print("tni:{}".format(tni))
         
         print("max_fcn:{} bl:{} tni:{} ".format(max_fcn, bl,tni))
-
+ 
         print("bl:{}".format(bl))
     return bit_list
 
@@ -396,7 +396,7 @@ def find_missing_tiles_mic_ko_yes_all_1(tile_list, N, window_size):
         sender bitmap: (0,BitBuffer([1, 1, 1, 1]))
     Also when the ALL-1 is received, the mic is ko and the resulting bit_list
     is [], there is a problem since some tiles are missing the result bitmap is
-
+ 
         received bitmap : (0, BitBuffer([1, l, l, 0, 0, 0, 0]))
         sender bitmap: (0,BitBuffer([1, 1, 1, 1]))
     """
@@ -414,7 +414,7 @@ def find_missing_tiles_mic_ko_yes_all_1(tile_list, N, window_size):
     print("find_missing_tiles_mic_ko_yes_all_1 ret -> {}".format(ret))
     #input('')
     return ret
-
+ 
 def make_bit_list_mic_ko(tile_list, N, window_size):
     """ make a bit list for each window from the tile_list, and return it.
     the bit list is going to be used to make the bitmap.
@@ -490,7 +490,7 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
                 while tni-1 > 0:
                     bl.append(0)
                     tni -= 1
-
+ 
                 if nbt == 1:
                     #will never be True 
                     print("append 1")
@@ -615,5 +615,5 @@ def make_bit_list_mic_ko(tile_list, N, window_size):
 
 
 
-
+    
 #---------------------------------------------------------------------------

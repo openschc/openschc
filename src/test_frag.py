@@ -8,6 +8,8 @@ import simlayer2
 import simul
 from rulemanager import RuleManager
 
+from stats.statsct import Statsct
+
 #---------------------------------------------------------------------------
 
 l2_mtu = 56
@@ -62,6 +64,19 @@ frag_rule2 = {
     }
 }
 
+frag_rule3 = {
+    "ruleLength": 6,
+    "ruleID": 3,
+    "profile": { "L2WordSize": 8 },
+    "fragmentation": {
+        "FRMode": "noAck",
+        "FRModeProfile": {
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8
+        }
+    }
+}
+
 #---------------------------------------------------------------------------
 
 def make_node(sim, rule_manager, devaddr=None, extra_config={}):
@@ -73,6 +88,7 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
     return node
 
 #---------------------------------------------------------------------------
+Statsct.initialize()
 
 rm0 = RuleManager()
 rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
