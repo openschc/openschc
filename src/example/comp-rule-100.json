@@ -47,7 +47,7 @@
       {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
       {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
       {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-      {"FID": "IPV6.DEV_PREFIX","TV": "2001:41d0:401:3100", "MO": "equal","CDA": "not-sent"},
+      {"FID": "IPV6.DEV_PREFIX","TV": "2001:41d0:401:3100::", "MO": "equal","CDA": "not-sent"},
       {"FID": "IPV6.DEV_IID", "TV": "::57d7","MO": "equal","CDA": "not-sent"},
       {"FID": "IPV6.APP_PREFIX",            "MO": "ignore","CDA": "value-sent"},
       {"FID": "IPV6.APP_IID",               "MO": "ignore","CDA": "value-sent"},
