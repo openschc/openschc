@@ -113,10 +113,10 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 Statsct.initialize()
 
 rm0 = RuleManager()
-rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
+rm0.add_context(rule_context, compress_rule, frag_rule3, frag_rule4)
 
 rm1 = RuleManager()
-rm1.add_context(rule_context, compress_rule, frag_rule2, frag_rule1)
+rm1.add_context(rule_context, compress_rule, frag_rule4, frag_rule3)
 
 #--------------------------------------------------
 
