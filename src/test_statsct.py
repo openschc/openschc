@@ -117,9 +117,10 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 
 #---------------------------------------------------------------------------
 #lost_rate in %
-loss_rate = 10
-loss_config = {"mode":"rate", "cycle":loss_rate}
-#loss_config = None
+loss_rate = 0
+#loss_rate = 10
+#loss_config = {"mode":"rate", "cycle":loss_rate}
+loss_config = None
 #L2 MTU size in bits - byte
 # l2_mtu = 56
 # SF = 12
@@ -129,6 +130,8 @@ loss_config = {"mode":"rate", "cycle":loss_rate}
 l2_mtu = 1936 #in bits
 SF = 8
 l2_mtu = 408 #in bits
+SF = 12
+l2_mtu = 54 #in bits
 SF = 12
 # EU863-870 band, maximum payload size:
 #         DR0 = SF12: 51 bytes - 408 bits
@@ -151,7 +154,7 @@ SF = 12
 repetitions = 1
 sim_results = []
 total_results = OrderedDict()
-test_file = True
+test_file = False
 fileToSend = "testfile_large.txt"
 #fileToSend = "testfile.txt"
 data_size = 300 #Size of data in bytes
@@ -162,9 +165,9 @@ max_packet_size = 1290 #bytes
 #packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
 #packet_sizes = [80,160,320,640]
-packet_sizes = [80,160,255]
+packet_sizes = [15]
 
-ack_on_error = True
+ack_on_error = False
 #---------------------------------------------------------------------------
 """ Init stastct module """
 Statsct.initialize()
@@ -174,6 +177,7 @@ Statsct.set_SF(SF)
 #---------------------------------------------------------------------------
 
 #no-ack
+mode = "noAck"
 rm0 = RuleManager()
 rm0.add_context(rule_context, compress_rule, frag_rule3, frag_rule4)
 
@@ -181,6 +185,9 @@ rm1 = RuleManager()
 rm1.add_context(rule_context, compress_rule, frag_rule4, frag_rule3)
 #ack-on-error
 if ack_on_error:
+
+    mode = "ackOnError"
+
     rm0 = RuleManager()
     rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
 

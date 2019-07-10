@@ -157,15 +157,18 @@ class FragmentNoAck(FragmentBase):
                         schcmsg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
         if remaining_data_size >= payload_size:
+            print("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
             transmit_callback = self.event_sent_frag
             fcn=0
             self.mic_sent=None
+            
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_FRAG")
                 Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
         elif remaining_data_size < payload_size:
+            print("----------------------- Fragmentation process -----------------------")
             if remaining_data_size <= (
                     payload_size - schcmsg.get_mic_size(self.rule)):
                 tile = None

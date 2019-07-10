@@ -138,6 +138,7 @@ class ReassemblerNoAck(ReassembleBase):
         self.tile_list.append(schc_frag.payload)
         #
         if schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
+            print("----------------------- Final Reassembly -----------------------")
             print("ALL1 received")
             # MIC calculation
             print("tile_list")
@@ -152,6 +153,7 @@ class ReassemblerNoAck(ReassembleBase):
                         schc_frag.mic, mic_calced))
                 return
             # decompression
+            print("----------------------- Decompression -----------------------")
             self.protocol.process_decompress(self.context, self.sender_L2addr,
                                              schc_packet)
             return

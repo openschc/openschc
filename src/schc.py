@@ -78,7 +78,8 @@ class SCHCProtocol:
             return
         # Compression process
         packet_bbuf = BitBuffer(raw_packet)
-        rule = context["comp"]
+        rule = context["comp"]        
+        print("----------------------- Compression Process ----------------------------")
         self._log("compression rule_id={}".format(rule.ruleID))
         # XXX needs to handl the direction
         #NEED TO BE FIX -> there is an error when packets are larger than 250B
@@ -97,6 +98,7 @@ class SCHCProtocol:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
+        print("----------------------- Fragmentation Rule -----------------------")
         rule = context["fragSender"]
         self._log("fragmentation rule_id={}".format(rule.ruleID))
         session = self.new_fragment_session(context, rule)
@@ -152,7 +154,7 @@ class SCHCProtocol:
         if key == "fragSender":
             if rule["dtagSize"] > 0:
                 dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
-                                    position=rule.get("ruleLength"))
+                                    position=rule.get("ruleLength"))                           
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
@@ -185,6 +187,7 @@ class SCHCProtocol:
                 self.reassemble_session.add(rule.ruleID, rule.ruleLength,
                                             dtag, session)
                 print("New reassembly session created", session)
+            print("----------------------- Reassembly process -----------------------")
             session.receive_frag(packet_bbuf, dtag)
         elif key == "comp":
             # if there is no reassemble rule, process_decompress() is directly

@@ -66,16 +66,38 @@ frag_rule2 = {
 
 frag_rule3 = {
     "ruleLength": 6,
-    "ruleID": 3,
-    "profile": { "L2WordSize": 8 },
+    "ruleID": 1,
+    "profile": {
+        "L2WordSize": 8
+    },
     "fragmentation": {
         "FRMode": "noAck",
         "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3,
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
     }
 }
+
+frag_rule4 = {
+    "ruleLength": 6,
+    "ruleID": 2,
+    "profile": {
+        "L2WordSize": 8
+    },
+    "fragmentation": {
+        "FRMode": "noAck",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8
+        }
+    }
+}
+
 
 #---------------------------------------------------------------------------
 
@@ -94,7 +116,7 @@ rm0 = RuleManager()
 rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
 
 rm1 = RuleManager()
-rm1.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
+rm1.add_context(rule_context, compress_rule, frag_rule2, frag_rule1)
 
 #--------------------------------------------------
 
