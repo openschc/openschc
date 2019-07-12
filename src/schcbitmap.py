@@ -58,7 +58,7 @@ def make_bit_list(tile_list, N, window_size):
         nbt = t.get("nb_tiles", 1)
         # all-1
         if tn == all1(N):
-            print("all ones found:wn:{}, tn:{}, nbt:{}, tni:{}".format(wn,tn,nbt,tni))
+            print("----all ones found:wn:{}, tn:{}, nbt:{}, tni:{}".format(wn,tn,nbt,tni))
             #if the number of tiles is smaller than max_fcn,
             #and there is a tile in the ALL-1, the bit that should be 
             #set to one is not the last one, but the ones next to the

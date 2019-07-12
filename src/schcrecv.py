@@ -132,7 +132,7 @@ class ReassemblerNoAck(ReassembleBase):
         self.cancel_inactive_timer()
         #
         if schc_frag.abort == True:
-            print("Received Sender-Abort.")
+            print("----------------------- Sender-Abort ---------------------------")
             # XXX needs to release all resources.
             return
         self.tile_list.append(schc_frag.payload)
@@ -190,7 +190,7 @@ class ReassemblerAckOnError(ReassembleBase):
         #
         #input("")
         if schc_frag.abort == True:
-            print("Received Sender-Abort.")
+            print("----------------------- Sender-Abort ---------------------------")
             #Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             return
@@ -248,6 +248,7 @@ class ReassemblerAckOnError(ReassembleBase):
         for tile in self.tile_list:
             print("w-num: {} t-num: {} nb_tiles:{}".format(
                     tile['w-num'],tile['t-num'],tile['nb_tiles']))
+        print("")
             #print("raw_tiles:{}".format(tile['raw_tiles']))
         #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
  
@@ -443,6 +444,7 @@ class ReassemblerAckOnError(ReassembleBase):
         print('state DONE -> {}'.format(self.state))
         #input('DONE')
         # decompression
+        print("----------------------- Decompression -----------------------")
         self.protocol.process_decompress(self.context, self.sender_L2addr,
                                          schc_packet)
         # ACK message
@@ -504,7 +506,7 @@ class ReassemblerAckOnError(ReassembleBase):
             # add into the packet as it is.
             schc_packet += self.tile_list[0]["raw_tiles"]
         # get the target of MIC from the BitBuffer.
-        print("MIC calculation:")
+        print("---MIC calculation:")
         mic_calced = self.get_mic(schc_packet.get_content())
         return schc_packet, mic_calced
 

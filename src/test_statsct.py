@@ -40,10 +40,10 @@ frag_rule1 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 3,
-            "FCNSize": 3,
+            "WSize": 7, # 3 # Number of tiles per window
+            "FCNSize": 3, # 3 # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
-            "tileSize": 392,
+            "tileSize": 800, # 392 # size of each tile -> 8 bits
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
@@ -58,10 +58,10 @@ frag_rule2 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 3,
-            "FCNSize": 3,
+            "WSize": 7, # 3 # Number of tiles per window
+            "FCNSize": 3, # 3 # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
-            "tileSize": 392,
+            "tileSize": 800, # 392 # size of each tile -> 8 bits
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
@@ -117,10 +117,10 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 
 #---------------------------------------------------------------------------
 #lost_rate in %
-loss_rate = 0
-#loss_rate = 10
-#loss_config = {"mode":"rate", "cycle":loss_rate}
-loss_config = None
+#loss_rate = None
+loss_rate = 10
+loss_config = {"mode":"rate", "cycle":loss_rate}
+#loss_config = None
 #L2 MTU size in bits - byte
 # l2_mtu = 56
 # SF = 12
@@ -154,7 +154,7 @@ SF = 12
 repetitions = 1
 sim_results = []
 total_results = OrderedDict()
-test_file = False
+test_file = True
 fileToSend = "testfile_large.txt"
 #fileToSend = "testfile.txt"
 data_size = 300 #Size of data in bytes
@@ -165,9 +165,9 @@ max_packet_size = 1290 #bytes
 #packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]
 #packet_sizes = [80,160,320,640]
-packet_sizes = [15]
+packet_sizes = [14]
 
-ack_on_error = False
+ack_on_error = True
 #---------------------------------------------------------------------------
 """ Init stastct module """
 Statsct.initialize()
@@ -177,16 +177,13 @@ Statsct.set_SF(SF)
 #---------------------------------------------------------------------------
 
 #no-ack
-mode = "noAck"
 rm0 = RuleManager()
 rm0.add_context(rule_context, compress_rule, frag_rule3, frag_rule4)
 
 rm1 = RuleManager()
 rm1.add_context(rule_context, compress_rule, frag_rule4, frag_rule3)
 #ack-on-error
-if ack_on_error:
-
-    mode = "ackOnError"
+if ack_on_error:  
 
     rm0 = RuleManager()
     rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
@@ -224,11 +221,15 @@ for packet_size in packet_sizes:
         node0.layer2.set_mtu(l2_mtu)
         node1.layer2.set_mtu(l2_mtu)
 
+        print("-------------------------------- SCHC device------------------------")
         print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
                                                     rm0.__dict__))
+        print("-------------------------------- SCHC gw ---------------------------")
         print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
                                                     rm1.__dict__))
+        print("-------------------------------- Rules -----------------------------")                                              
         print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
+        print("")
 
         #device rule
         for rule1 in rm0.__dict__:

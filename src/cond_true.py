@@ -12,15 +12,12 @@ def cond_random(rate):
         random_num = urandom.getrandbits(8)/256
         print("1000*random_num -> {} < 10 *rate  -> {}".format(random_num*1000,10*rate))
         #if random.randint(0,1000) <= (1000 * FER)
-        #if random.randint(0,1000) <= FER_RANDOM * 10
-        if random_num * 1000 < rate * 10:
+        #if random.randint(0,1000) <= FER_RANDOM * 10        
         #if urandom.getrandbits(8)/256 * 100 < rate:
-            return True
-        else:
-            return False
+        return random_num * 1000 < rate * 10
     else:
-        random_num = random.random()
-        print("random_num -> {}, rate -> {}".format(random_num,rate))
+        random_num = random.random()*100
+        print("random_num -> {}, rate -> {}, Packet Loss Condition is -> {} ".format(random_num,rate,random_num < rate))
         return random_num < rate
         #return random.random() * 100 < rate
 
