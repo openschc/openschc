@@ -126,7 +126,7 @@ class Simul:
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
         self._log("----------------------- SEND PACKET -----------------------")
-        if not self.frame_loss.check():
+        if not self.frame_loss.check(len(packet)):
             self._log("----------------------- OK -----------------------")
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:

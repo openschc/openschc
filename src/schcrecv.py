@@ -320,6 +320,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     self.protocol.scheduler.add_event(
                             0, self.protocol.layer2.send_packet, args)
                     # XXX need to keep the ack message for the ack request.
+                    break
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
                 self.inactive_timer, self.event_inactive, tuple())
@@ -384,6 +385,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
 
                     print("ACK failure sent:", schc_ack.__dict__)
+                    break
             else:
                 #special case when the ALL-1 message is lost: 2 cases:
                 #1) the all-1 carries a tile (bit in bitmap)
@@ -427,7 +429,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
 
                     print("ACK failure sent:", schc_ack.__dict__)
-
+                    break
 
 
 

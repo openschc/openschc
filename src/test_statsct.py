@@ -114,8 +114,12 @@ def make_node(sim, rule_manager, devaddr=None, extra_config={}):
 
 #---------------------------------------------------------------------------
 #lost_rate in %
-loss_rate = 10
+loss_rate = 15
+collision_lambda = 0.1
+background_frag_size = 54
 loss_config = {"mode":"rate", "cycle":loss_rate}
+#loss_config = {"mode":"collision", "G":collision_lambda, "background_frag_size":background_frag_size}
+
 #loss_config = None
 #L2 MTU size in bits - byte
 # l2_mtu = 56
@@ -145,7 +149,7 @@ SF = 12
 #---------------------------------------------------------------------------
 #Configuration of test_statsct
 #Number of repetitions
-repetitions = 100
+repetitions = 10
 sim_results = []
 total_results = OrderedDict()
 total_delay_packet = []
@@ -160,8 +164,9 @@ min_packet_size = 60 #60
 max_packet_size = 1290 #bytes 
 #packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320,640,1280]
-packet_sizes = [80,160,320,640]
+#packet_sizes = [80,160,320,640]
 #packet_sizes = [80]
+packet_sizes = [1400]
 ack_on_error = True
 
 
@@ -285,7 +290,7 @@ for packet_size in packet_sizes:
         if params['packet_status']:
             total_delay_packet.append(params['total_delay'])
 
-        #input('Continue to next sim')
+            input('Continue to next sim')
     #--------------------------------------------------
     total_delay_packet_size[packet_size] = total_delay_packet
     #print("total_delay_packet_size:{}".format(total_delay_packet_size))
