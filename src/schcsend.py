@@ -10,10 +10,6 @@ import schc
 import schcmsg
 from schctile import TileList
 from schcbitmap import make_bit_list
-import utime
-enable_statsct = True
-if enable_statsct:
-    from stats.statsct import Statsct
 
 try:
     import utime as time

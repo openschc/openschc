@@ -285,7 +285,10 @@ class ReassemblerAckOnError(ReassembleBase):
                 print("----------------------- ERROR -----------------------")
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
-                bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
+                import warnings
+                warnings.warn("[CA] XXX check here why git flipped this:")
+                #bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
+                bit_list = find_missing_tiles(self.tile_list,
                                               self.rule["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
 
