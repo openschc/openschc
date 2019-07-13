@@ -672,7 +672,10 @@ class RuleManager:
 
     def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
         if type(TV) != type(FV):
-            return False
+            if type(TV) == bytes and type (FV) == int:
+                FV = FV.to_bytes(len(TV), byteorder="big") # same length both
+            else:
+                return False
 
         if TV != FV: return False
         return True
