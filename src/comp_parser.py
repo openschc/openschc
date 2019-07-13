@@ -115,7 +115,13 @@ class Parser:
             self.header_fields[T_ICMPV6_CODE, 1]        = [icmpBytes[1], 8, 'fixed']
             self.header_fields[T_ICMPV6_CKSUM, 1]       = [icmpBytes[2], 16, 'fixed']
 
-            pos += 6
+            pos += 4
+            if icmpBytes[0] == 128 or icmpBytes[0] == 129: #icmp echo request or reply
+                echoHeader = unpack('!HH', pkt[pos:pos+4])
+                self.header_fields[T_ICMPV6_IDENT, 1]       = [echoHeader[0], 16, 'fixed']
+                self.header_fields[T_ICMPV6_SEQNB, 1]        = [echoHeader[1], 16, 'fixed']
+                pos += 4
+
 
         if layer == "coap":
             field_position = {}
