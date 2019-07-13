@@ -109,10 +109,10 @@ class Parser:
             layer = "coap"
 
         if layer == "icmp":
-            icmpBytes = unpack('!HHH', pkt[pos:pos+6])
+            icmpBytes = unpack('!BBH', pkt[pos:pos+4])
 
-            self.header_fields[T_ICMPV6_TYPE, 1]        = [icmpBytes[0], 16, 'fixed']
-            self.header_fields[T_ICMPV6_CODE, 1]        = [icmpBytes[1], 16, 'fixed']
+            self.header_fields[T_ICMPV6_TYPE, 1]        = [icmpBytes[0], 8, 'fixed']
+            self.header_fields[T_ICMPV6_CODE, 1]        = [icmpBytes[1], 8, 'fixed']
             self.header_fields[T_ICMPV6_CKSUM, 1]       = [icmpBytes[2], 16, 'fixed']
 
             pos += 6
