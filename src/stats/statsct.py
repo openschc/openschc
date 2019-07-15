@@ -114,8 +114,7 @@ class Statsct(object):
     @staticmethod
     def get_position():
         return Statsct.position
-
-
+        
     @staticmethod
     def set_packet_size(packet_length):
         Statsct.packet_length = packet_length

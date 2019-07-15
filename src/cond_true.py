@@ -10,22 +10,24 @@ if enable_statsct:
     from stats.statsct import Statsct
 import math
 #import machine
+
 #---------------------------------------------------------------------------
 
 def cond_random(rate):
     if sys.implementation.name == "micropython":
         #print("micropython")
         random_num = urandom.getrandbits(8)/256
-        print("1000*random_num -> {} < 10 *rate  -> {}".format(random_num*1000,10*rate))
+        print("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
         #if random.randint(0,1000) <= (1000 * FER)
         #if random.randint(0,1000) <= FER_RANDOM * 10        
         #if urandom.getrandbits(8)/256 * 100 < rate:
         return random_num * 1000 < rate * 10
     else:
-        random_num = random.random()*100
-        print("random_num -> {}, rate -> {}, Packet Loss Condition is -> {} ".format(random_num,rate,random_num < rate))
-        return random_num < rate
-        #return random.random() * 100 < rate
+        random_num = random.getrandbits(8)/256
+        print("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
+        return random_num * 1000 < rate * 10
+
+
 
 class ConditionalTrue:
     """ It returns True in a condition of 3 modes.
@@ -41,7 +43,7 @@ class ConditionalTrue:
         cycle mode:
             cycle: the cycle in which true is returned.
         rate mode:
-            cycle: the rate in which true is returned.  i.e. % of losses Fragment Error Rate (e.g. 10 -> 10%)
+            cycle: the rate in which true is returned. i.e. % of losses Fragment Error Rate (e.g. 10 -> 10%)
         collision mode:
             G: percentage of occupation of the channel between 0 and 1
             background devices using the channel
@@ -67,7 +69,6 @@ class ConditionalTrue:
                 self.cycle = 1
             else:
                 self.cycle = cycle
-                #self.cycle = 1 / cycle
             self.check_func = self.__cond_check_rate
         elif mode == "collision":
             assert G is not None
@@ -103,7 +104,7 @@ class ConditionalTrue:
         #make sure the table is begin enough to transmitt the packet
         self.current_time = 10000 * urandom.getrandbits(8)/256
         input('')
-
+ 
     def generate_background_traffic(self,G, background_frag_size):
         self.background_traffic
         T = get_toa(background_frag_size,Statsct.SF)
@@ -112,7 +113,7 @@ class ConditionalTrue:
         for i in range (1000):
             #aleatoire = machine.rng()
             #aleatoire2 = aleatoire/(2**24-1)
-
+ 
             aleatoire = urandom.getrandbits(8)/256
             aleatoire2 = aleatoire/(2**24-1)
             #print(aleatoire2)
@@ -122,9 +123,9 @@ class ConditionalTrue:
         if enable_statsct:
             Statsct.set_background_traffic(self.background_traffic)
             #print (tableau)
-
-
-
+ 
+ 
+ 
     def cond_collision(self, frag_size):
         """Calculates if there is a collision"""
         frag_ToA = get_toa(frag_size, Statsct.SF)
@@ -152,8 +153,8 @@ class ConditionalTrue:
                     return True
         self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
         input('')
-        return False
-
+        return False    
+    
 
 
     def check(self,packet_size):
@@ -171,9 +172,9 @@ class ConditionalTrue:
             return False
         return self.count_in_cycle % self.cycle == 0
 
-    def __cond_check_rate(self,packet_size=None):
+    def __cond_check_rate(self, packet_size=None):
         return cond_random(self.cycle)
-    
+
     def __cond_check_collision(self, packet_size):
         return self.cond_collision(packet_size)
 

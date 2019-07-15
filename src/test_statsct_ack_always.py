@@ -157,8 +157,7 @@ data_size = 300 #Size of data in bytes
 
 min_packet_size = int(l2_mtu /8) #byes
 #min_packet_size = 60 #60
-min_packet_size = 250 #60
-
+min_packet_size = 251 #60
 max_packet_size = 1290 #bytes 
 #packet_sizes = [80,160,320,640,1280]
 #packet_sizes = [320]

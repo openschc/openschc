@@ -33,7 +33,7 @@ class FragmentBase():
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
-        self.ack_wait_timer = 200   
+        self.ack_wait_timer = 200
         self.ack_requests_counter = 0
         self.resend = False
         self.all1_send = False
@@ -287,7 +287,7 @@ class FragmentAckOnError(FragmentBase):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        print("---window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
+        print("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
         
         if window_tiles is None and self.resend:
             print("no more tiles to resend")
@@ -498,6 +498,7 @@ class FragmentAckOnError(FragmentBase):
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             print("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
+            print("")
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
@@ -509,10 +510,6 @@ class FragmentAckOnError(FragmentBase):
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
         print("*******event id {}".format(self.event_id_ack_wait_timer))
-
-
-
-        
         schc_frag = schcmsg.frag_sender_ack_req(self.rule, self.dtag, win)
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
@@ -522,9 +519,8 @@ class FragmentAckOnError(FragmentBase):
         print("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                         args)
+        """ waits for all the acks before sending the ack request
         
-        """ waits for all the acks before sending the ack request """
-        """
         self.number_of_ack_waits += 1
         print("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
         if self.number_of_ack_waits > self.num_of_windows:

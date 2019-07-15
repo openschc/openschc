@@ -1,6 +1,7 @@
-from ucollections import OrderedDict
-
-
+try:
+    from ucollections import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 
 def cdf_cal(time_list):
     """ Calculates the cdf for the time delay
@@ -12,7 +13,7 @@ def cdf_cal(time_list):
         round_time = round(time,3)
         print("round_time:{}".format(round_time))
         if round_time in results_sum:
-            results_sum[round_time] +=1
+            results_sum[round_time] += 1
         else:
             results_sum[round_time] = 1
         #print("results_sum -> {}".format(results_sum))
