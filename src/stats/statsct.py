@@ -65,6 +65,9 @@ class Statsct(object):
     msg_type_queue = []
     channel_occupancy_sender = 0
     channel_occupancy_receiver = 0
+    background_traffic = None
+    position = None
+    current_time = None
     @staticmethod
     def initialize():
         """Class to initializa the static class
@@ -93,6 +96,26 @@ class Statsct(object):
         Statsct.msg_type_queue = []
         Statsct.channel_occupancy_sender = 0
         Statsct.channel_occupancy_receiver = 0
+    @staticmethod
+    def set_background_traffic(background_traffic):
+        Statsct.background_traffic = background_traffic
+    @staticmethod
+    def get_background_traffic():
+        return Statsct.background_traffic
+    @staticmethod
+    def set_current_time(current_time):
+        Statsct.current_time = current_time
+    @staticmethod
+    def get_current_time():
+        return Statsct.current_time
+    @staticmethod
+    def set_position(position):
+        Statsct.position = position
+    @staticmethod
+    def get_position():
+        return Statsct.position
+
+
     @staticmethod
     def set_packet_size(packet_length):
         Statsct.packet_length = packet_length
@@ -309,7 +332,7 @@ class Statsct(object):
                     RECEIVER_ABORT_TOA = k['toa_packet'] 
                 elif k['msg_type'] == SCHC_ACK_KO:
                     assert 'toa_packet' in k
-                    ACK_KO_TOA = k['toa_packet']
+                    ACK_KO_TOA += k['toa_packet']
         print("ACK_OK_TOA: {}, ACK_KO_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
                     ACK_OK_TOA, ACK_KO_TOA,RECEIVER_ABORT_TOA, ACK_OK_TOA + RECEIVER_ABORT_TOA))     
         print("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
