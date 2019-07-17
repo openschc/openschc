@@ -2,11 +2,14 @@ import os
 import sys
 sys.path.insert(0, '../..')
 import binascii
+import pprint
 
 # -----   SCHC ------
 
 
 from rulemanager import *
+from comp_parser import *
+
 
 
 # ----- scapy -----
@@ -15,18 +18,82 @@ from kamene.all import *
 
 import ipaddress
 
-def AnalyzePkt(packet):
-    print(len(packet), binascii.unhexlify(packet))
+class debug_protocol:
+    def _log(*arg):
+        print(*arg)
 
-    fields, data = packetParser.parser(bytes(packet), direction="dw")
-    print("Fields = ", fields, data)
+P = Parser(debug_protocol)
+RM = RuleManager()
+
+def AnalyzePkt(packet):
+    global RM
     
-    rule =RM.FindRuleFromHeader(fields, "dw")
+    print(len(packet), bytes(packet).hex())
+
+    withoutL2 = bytes(packet)
+
+    print (withoutL2.hex())
+    try:
+        fields, data = P.parse(withoutL2, direction=T_DIR_DW)
+    except:
+        print ("not a parsable packet")
+        return
+        
+    pprint.pprint(fields)
+    print(data)
+    
+    rule = RM.FindRuleFromPacket(fields, direction=T_DIR_DW)
+    pprint.pprint (rule)
+
+    if rule == None:
+        return
+    
+    if "Action" in rule:
+        if rule[T_ACTION] == T_ACTION_PPING:
+            print ("proxy ping")
+
+            print (hex(fields[(T_IPV6_DEV_PREFIX, 1)][0]))
+            print (hex(fields[(T_IPV6_DEV_IID, 1)][0]))
+            print (hex(fields[(T_IPV6_APP_PREFIX, 1)][0]))
+            print (hex(fields[(T_IPV6_APP_IID, 1)][0]))
+
+            IPv6Src = (fields[(T_IPV6_DEV_PREFIX, 1)][0]<< 64) + fields[(T_IPV6_DEV_IID, 1)][0]
+            IPv6Dst = (fields[(T_IPV6_APP_PREFIX, 1)][0]<< 64) + fields[(T_IPV6_APP_IID, 1)][0]
+
+
+            IPv6SrcStr = ipaddress.IPv6Address(IPv6Src)
+            IPv6DstStr = ipaddress.IPv6Address(IPv6Dst)
+
+            IPv6Header = IPv6 (
+                version = fields[(T_IPV6_VER, 1)][0],
+                tc      = fields[(T_IPV6_TC,  1)][0],
+                fl      = fields[(T_IPV6_FL,  1)][0],
+                nh      = fields[(T_IPV6_NXT, 1)][0],
+                hlim    = 30,
+                src     = IPv6SrcStr.compressed,
+                dst     = IPv6DstStr.compressed
+                )
+
+            txt = "SCHC device is alive"
+
+            Echo = ICMPv6EchoReply(
+                id  = fields[(T_ICMPV6_IDENT, 1)][0],
+                seq = fields[(T_ICMPV6_SEQNB, 1)][0],
+                data = data
+                #data = txt.encode() + data[len(txt):]
+            )
+
+            myMessage = IPv6Header / Echo
+            myMessage.show()
+            send (myMessage, iface="he-ipv6")
+    else:
+        pass  #should compresss
         
 if __name__ == '__main__':
 
     print (sys.argv)
 
     RM = RuleManager()
+    RM.Add(file="example/comp-rule-100.json")
 
-    sniff (filter="ip", prn=AnalyzePkt, iface="enp0s5")
+    sniff (filter="ip6", prn=AnalyzePkt, iface="he-ipv6")

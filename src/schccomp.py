@@ -5,6 +5,8 @@ import pprint
 T_RULEID = "RuleID"
 T_RULEIDLENGTH = "RuleIDLength"
 
+T_ACTION = "Action"
+
 T_FID = "FID"
 T_FL = "FL"
 T_FP = "FP"
@@ -69,6 +71,7 @@ T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
 T_COAP_OPT_END = "COAP.END"
 
+T_ACTION_PPING = "ping-proxy"
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"

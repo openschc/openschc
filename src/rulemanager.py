@@ -412,6 +412,7 @@ class RuleManager:
                     overlap = True
                     break
 
+
             if not overlap:
                 if "Compression" in n_rule:
                     r = self._create_compression_rule(n_rule)
@@ -515,6 +516,12 @@ class RuleManager:
 
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
+
+        if T_ACTION in nrule:
+            print ("Warning: using experimental Action")
+            arule[T_ACTION] = nrule[T_ACTION]    
+
+
         arule["Compression"] = []
 
         up_rules = 0
