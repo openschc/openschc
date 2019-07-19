@@ -42,9 +42,9 @@ class SimulLayer3:
 
     # XXX need to confirm whether this should be here or not.
     def recv_packet(self, dev_L2addr, raw_packet):
-        """ receive a packet from L2 and process it. """
-        self._log("recv-from-L2 Devaddr={} Packet={}".format(
-                dev_L2addr, b2hex(raw_packet.get_content())))
+        """ Two lines below commented"""
+        #self._log("recv-from-L2 Devaddr={} Packet={}".format(
+        #        dev_L2addr, b2hex(raw_packet.get_content())))
         # XXX do more work
 
     def _set_protocol(self, protocol): # called by SCHCProtocol
@@ -131,7 +131,7 @@ class Simul:
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple() ):
         self._log("----------------------- SEND PACKET -----------------------")
-        if not self.frame_loss.check(len(packet)):
+        if not self.frame_loss.check():
             self._log("----------------------- OK -----------------------")
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:

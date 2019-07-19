@@ -33,7 +33,7 @@ class FragmentBase():
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
-        self.ack_wait_timer = 200
+        self.ack_wait_timer = 150
         self.ack_requests_counter = 0
         self.resend = False
         self.all1_send = False
@@ -68,9 +68,16 @@ class FragmentBase():
         #   |<- header ->|<- payload ->|<--- padding -->|
         #   |<---- frag base size ---->|<- extra bits-->|
         #                                      L2Word ->|
+        
+        """ Changement à Corriger
         extra_bits = (schcmsg.roundup(last_frag_base_size,
                                       self.rule["L2WordSize"]) -
                         last_frag_base_size)
+        """
+        extra_bits = (schcmsg.roundup(last_frag_base_size,
+                                      8) -
+                        last_frag_base_size)
+
         # 2. round up the payload of all SCHC fragments
         #    to the MIC word size.
         #
@@ -86,7 +93,6 @@ class FragmentBase():
             mic_base.add_bits(0, schcmsg.roundup(extra_bits,
                                                 self.rule["MICWordSize"]))
         #
-
         mic = get_mic(mic_base.get_content())
         print("Send MIC {}, base = {}, lenght = {}".format(mic, mic_base.get_content(), len(mic_base.get_content())))
         return mic.to_bytes(4, "big")
@@ -204,7 +210,6 @@ class FragmentNoAck(FragmentBase):
                 fcn=fcn,
                 mic=self.mic_sent,
                 payload=tile)
-                
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 transmit_callback)
@@ -230,7 +235,6 @@ class FragmentNoAck(FragmentBase):
         else:
             print("XXX Unacceptable message has been received.")
 
-
 #---------------------------------------------------------------------------
 
 class FragmentAckOnError(FragmentBase):
@@ -243,8 +247,13 @@ class FragmentAckOnError(FragmentBase):
         # AND the tile number is zero
         # because draft-17 doesn't specify how to handle it.
         a = self.all_tiles.get_all_tiles()
+        """ Changement à corriger
         if (a[-1]["t-num"] == 0 and
             a[-1]["tile"].count_added_bits() < self.rule["L2WordSize"]):
+            raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
+        """
+        if (a[-1]["t-num"] == 0 and
+            a[-1]["tile"].count_added_bits() < 8):
             raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
         # make the bitmap
         #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
@@ -252,8 +261,8 @@ class FragmentAckOnError(FragmentBase):
         #                              schcmsg.get_fcn_all_1(self.rule))
         print("----------------------- Fragmentation process -----------------------")
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
-                                      self.rule["FCNSize"],
-                                      self.rule["WSize"])
+                                      self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"],
+                                      self.rule["Fragmentation"]["FRModeProfile"]["WSize"])
         print("bit_list:", self.bit_list)
         for tile in self.all_tiles.get_all_tiles():
             print("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
@@ -287,7 +296,7 @@ class FragmentAckOnError(FragmentBase):
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        print("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
+        print("---window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
         
         if window_tiles is None and self.resend:
             print("no more tiles to resend")
@@ -470,8 +479,13 @@ class FragmentAckOnError(FragmentBase):
 
         
         # send a SCHC fragment
+        """ Changement à Corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
+        """
+        args = (schc_frag.packet.get_content(), '*',
+                self.event_sent_frag)
+
         print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
@@ -496,9 +510,11 @@ class FragmentAckOnError(FragmentBase):
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = schcmsg.frag_sender_tx_abort(self.rule, self.dtag, win)
+            """ Changement à corriger
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
+            """
+            args = (schc_frag.packet.get_content(), "*")
             print("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
-            print("")
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
@@ -514,8 +530,13 @@ class FragmentAckOnError(FragmentBase):
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
         # # retransmit MIC.
+        """Changement à corriger 
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
+        """
+        args = (schc_frag.packet.get_content(), '*',
+                self.event_sent_frag)
+
         print("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                         args)
@@ -580,7 +601,6 @@ class FragmentAckOnError(FragmentBase):
             self.state = self.ACK_FAILURE
             self.resend_frag(schc_frag)
             return
-        
 
     def resend_frag(self, schc_frag):
         self.resend = True
