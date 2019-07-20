@@ -153,7 +153,8 @@ class SCHCProtocol:
                     dev_L2addr))
             return
         # find a rule in the context for this packet.
-        packet_bbuf = BitBuffer(raw_packet)
+        packet_bbuf = BitBuffer(raw_packet) 
+        #XXX print(self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf))
         key, rule = self.rule_manager.find_rule_bypacket(context, packet_bbuf)
         print('key,rule {},{}'.format(key,rule))
 
@@ -164,9 +165,10 @@ class SCHCProtocol:
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
-            session = self.fragment_session.get(rule.ruleID,
-                                                rule.ruleLength, dtag)
-            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(rule.ruleID,rule.ruleLength, dtag))
+            session = self.fragment_session.get(rule.RuleID,
+                                                rule.RuleIDLength, dtag)
+            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(
+                rule.RuleID, rule.RuleIDLength, dtag))
             if session is not None:
                 print("Fragmentation session found", session)
                 session.receive_frag(packet_bbuf, dtag)
