@@ -913,7 +913,7 @@ class RuleManager:
         for k in ["fragSender", "fragReceiver", "comp"]:
             r = context.get(k)
             if r is not None:
-                if rule_id_length == r.ruleLength and rule_id == r.ruleID:
+                if rule_id_length == r.RuleIDLength and rule_id == r.RuleID:
                     raise ValueError ("Rule {}/{} exists".format(
                             rule_id, rule_id_length))
 

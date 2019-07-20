@@ -278,7 +278,8 @@ class Statsct(object):
                     Statsct.succ_packets +=1
                 else:
                     Statsct.fail_packets +=1
-        ratio = Statsct.succ_packets / (Statsct.fail_packets + Statsct.succ_packets)
+        nb_packet = (Statsct.fail_packets + Statsct.succ_packets)
+        ratio = Statsct.succ_packets / max(nb_packet, 1)
             #print('{},toa_packet: {},status: {}, packet_length:{}, msg_type: {}'.format(i,k['toa_packet'], k['status'],k['packet_length'],k['msg_type']))
         packet_status = None
         for k in Statsct.results['packet_list']:
@@ -342,7 +343,7 @@ class Statsct(object):
         print("Channel Ocuppancy -> {}".format(Statsct.channel_occupancy))
         print("total_data_send -> {}, packet_length -> {}".format(Statsct.total_data_send,Statsct.packet_length))
         
-        goodput = Statsct.packet_length / Statsct.total_data_send 
+        goodput = Statsct.packet_length / max(Statsct.total_data_send, 1)
 
         return {"channel_occupancy":Statsct.channel_occupancy,
                 "goodput":goodput, "ratio": ratio, "succ_fragments": Statsct.succ_packets,
