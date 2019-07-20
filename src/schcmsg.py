@@ -21,7 +21,7 @@ def get_fcn_all_0(rule):
 
 def get_win_all_1(rule):
     #return (1<<rule["WSize"])-1
-    return rule[T_FRAG][T_FRAG_PROF][T_FRAG_W]-1
+    return (1<<rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])-1
 
 
 def get_max_fcn(rule): #LT: I don't understand this computation
