@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>OpenSCHC Rule Manager Module &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="OpenSCHC Bit Buffer Management Module" href="bitarray.html" />
@@ -28,237 +21,283 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="module-rulemanager">
 <span id="openschc-rule-manager-module"></span><h1>OpenSCHC Rule Manager Module<a class="headerlink" href="#module-rulemanager" title="Permalink to this headline">¶</a></h1>
-<p>## Base format</p>
-<p>A context and rule is written in JSON.</p>
-<p>A context contains an identifier, AND one or three rules.
-One of rules must specify the SCHC Compression/Decompression (CD).
-Two specify SCHC Fragmentation/Reassembly (FR) if needed.</p>
-<p>Therefore, a context has to be formed to either below structures.</p>
+<p>The Rule Manager manages the context(s) for a specific device or a set of devices.
+It maintains the context database and ensures its consistency. The hierarchy is the
+following:
++ context_database</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd>“devL2Addr”: …,
-“dstIID”: …,
-“comp”: { … },
-“fragSender”: { … },
-“fragReceiver”: { … }</dd>
+<div><ul>
+<li><p class="first">device_context
++ set_of_rules</p>
+<blockquote>
+<div><ul>
+<li><p class="first">rule_id/rule_id_length
++ rules</p>
+<blockquote>
+<div><ul class="simple">
+<li>Fragmentation</li>
+<li>Compression</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p># Introduction</p>
+<p>The context includes a set of rules shared by both ends.
+Identical Rules are used on both ends. They can be simply
+copied/pasted from one end to the other end, if both ends use the same format for describing them.</p>
+<p>This document specifies the OpenSCHC rule data model, which is based on JSON.</p>
+<p># Rule definition</p>
+<p>A rule is described as a JSON dictionary.</p>
+<p>A rule is identified by its RuleID.</p>
+<p>The size of the RuleID representation can change from one rule to
+the next. Therefore, the rule description includes a RuleIDLength that indicates the length of the RuleID, in bits.</p>
+<p>Both fields are integer numbers.</p>
+<blockquote>
+<div>{
+“RuleID” : 12,
+“RuleIDLength” : 4
+# notice that RuleID 12 represented on 6 bits is different from RuleID 12 on 4 bits!
+}</div></blockquote>
+<p>In SCHC, rules are used either for compression or fragmentation. Therefore, one and only one of the two keywords “fragmentation” or “compression” must be specified, per rule.</p>
+<p>## Compression Rules</p>
+<p>As defined in the SCHC specification, compression rules are composed of Field Descriptions.
+The order in which the Field Descriptions appear in the rule is significant (e.g. it defines the order in which the compression residues are sent), therefore a compression rule is represented as an array.</p>
+<p>The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:
+* “<strong>FID</strong>”: a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. “IPV6.VER”. &lt;&lt;&lt; why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!&gt;&gt;&gt;
+* “<strong>FL</strong>”: if the value is a number, that value expresses the length of the field, in bits. If the
+value is a string, it designates a function that can compute the field length. The functions currently defined are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>“_**var**_”: the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.</li>
+<li>“_**tkl**_”: this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>“<strong>FP</strong>”: an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.</li>
+<li><dl class="first docutils">
+<dt>“<strong>DI</strong>”: tells the direction to which this Field Description applies:</dt>
+<dd><ul class="first last">
+<li>“_**Up**_”: only to uplink messages (i.e. from device to network)</li>
+<li>“_**Dw**_”: only to downlink messages (i.e. from network to device)</li>
+<li>“_**Bi**_”: to both directions</li>
+</ul>
+</dd>
 </dl>
-<p>}</p>
-<p>“comp”: compression rule.
-“fragSender”: fragmentation rule for inbound.
-“fragReceiver”: fragmentation rule for outbound.</p>
-</div></blockquote>
-<p>Or,</p>
+</li>
+<li>“<strong>TV</strong>”: specifies the Target Value. The value is a number, a string or an array of these types. The “TV” key can be omitted or its value set to null if there is no value to check, for instance together with the “ignore” MO. If the Target Value is an array, then the value null among the array elements indicates that</li>
+</ul>
+<p>the Field Descriptor matches the case where the field is not present in the header being compressed.
+* “<strong>MO</strong>”: specifies the Matching Operator. It is a string that can take the following values:</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd>“devL2Addr”: …,
-“dstIID”: …,
-“profile”: { … },
-“comp”: { … }</dd>
+<div><ul class="simple">
+<li>“_**ignore**_”: the field must be present in the header, but the value is not checked.</li>
+<li>“_**equal**_”: type and value must check between the field value and the Target Value &lt;&lt;&lt; il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? &gt;&gt;</li>
+<li>“_**MSB**_”: the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the “MOa” field.</li>
+<li>“_**match-mapping**_”: with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>“<strong>MOa</strong>”: specifies, if applicable, an argument to the MO. This currently only applies to the “MSB” MO, where the argument specifies the length of the matching, in bits.</li>
+<li><dl class="first docutils">
+<dt>“<strong>CDA</strong>”: designates the Compression/Decompression Action. It is a string that can take the following values:</dt>
+<dd><ul class="first last">
+<li>“_**not-sent**_”: the field value is not sent as a residue.</li>
+<li>“_**value-sent**_”: the field value is sent in extenso in the residue.</li>
+<li>“_**LSB**_”: the bits remaining after the MSB comparison are sent in the residue.</li>
+<li>“_**mapping-sent**_”: the index of the matching element in the array is sent.</li>
+<li>“_**compute**_”: the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.</li>
+</ul>
+</dd>
 </dl>
-<p>}</p>
-</div></blockquote>
-<p>XXX Q. “profile” should be in the context ?</p>
-<p>## Context</p>
-<p>A context is uniquely identified by devL2Addr
-specifying the L2 address of a SCHC device.</p>
-<p>dstIID matches the IP address assigned
-to the interface of the communication peer.
-In the context of the SCHC device, dstIID indicates the IP address of
-the interface at the SCHC Translator,
-which is dedicated between the device and
-the application.
-In the context of the other side, dstIID indicates the IP address of
-the SCHC device.</p>
-<blockquote>
-<div><p>+——–+                       +————+         +—–+
-|  SCHC  |                       |    SCHC    <a href="#id5"><span class="problematic" id="id6">|---------|</span></a> App |
-| Device |                       | Translator |         |     |
-+——–+                       +————+         +—–+</p>
-<blockquote>
-<div><div class="line-block">
-<div class="line">D (IP addr)                     | T (IP addr)</div>
-<div class="line">L (L2 addr)                     |</div>
-<div class="line-block">
-<div class="line"><a href="#id1"><span class="problematic" id="id2">|</span></a></div>
-</div>
-</div>
-<p>+–// LPWAN //–| GW <a href="#id3"><span class="problematic" id="id4">|</span></a>————+</p>
-</div></blockquote>
-</div></blockquote>
-<p>In the above example, the context of each side is like below:</p>
-<blockquote>
-<div><p>at the device:</p>
+</li>
+<li>“<strong>CDAa</strong>”: represents the argument of the CDA. Currently, no CDAa is defined.</li>
+</ul>
+<p>For example:</p>
 <dl class="docutils">
 <dt>{</dt>
-<dd>“devL2Addr”: “L”,
-“dstIID”: “M”</dd>
-</dl>
-<p>}</p>
-<p>at the translator:</p>
-<dl class="docutils">
-<dt>{</dt>
-<dd>“devL2Addr”: “L”,
-“dstIID”: “D”</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p>“*” and “/” can be used for a wild-card match. (XXX should be implemented.)</p>
-<p>## Rule</p>
-<p>XXX is it true that both ruleID and ruleLength is unique key ?
-XXX is the deivce L2 address the real key ?</p>
-<p>A rule is uniquely identified by the rule ID of variable length.
-Each rule must contain the following information:</p>
+<dd><p class="first">“ruleID”: 12,
+“ruleLength”: 4,
+“compression”: [</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd>“ruleID” : 2,
-“ruleLength” : 3</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p>where ruleID contains the rule ID value aligned on the right and ruleLength
-gives
-the size in bits of the ruleID. In the previous example, this corresponds to
-the binary value 0b010.
-if ruleLength is not specified the value is set to 1 byte.</p>
-<p>The rule is either a compression/decompression rule
-or a fragmentation/reassembly rule.
-For C/D rules, the keyword “compression” must be defined.
-For F/R rules, the keyword “fragmentation” and “fragmentation”
-must be defined.</p>
-<p>## Compression Rule</p>
-<p>A compression rule is bidirectionnal.</p>
-<p>## Fragmentation Rule</p>
-<p>A fragmentation rule is uni directionnal.</p>
-<p>The “fragmentation” keyword is used to give fragmentation mode and profile:
-- one fragmentation mode keywork “noAck”, “ackAlways” or “ackOnError”.
-- FRModeProfile parameters. Default values are automaticaly added.
-- dtagSize, WSize and FCNSize are used to define the SCHC fragmentation header
-- windowSize can be added if not 2^FCNSize - 1</p>
-<blockquote>
-<div><p>For “ackOnError” the following parameter is defined:
-- “ackBehavior” defined the ack behavior, i.e. when the Ack must be spontaneously sent</p>
-<blockquote>
-<div>by the receiver and therefore when the sender must listen for Ack.
-- “afterAll0” means that the sender waits for ack after sending an All-0
-- “afterAll1” means that the sender waits only after sending the last fragment
-- other behaviors may be defined in the future.</div></blockquote>
-</div></blockquote>
-<p>## data model of DB</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>db = [</dt>
-<dd><dl class="first docutils">
-<dt>{</dt>
-<dd><p class="first">“devL2Addr”: ..,
-“dstIID”: ..,
-“comp”: {</p>
+<div><p>{“FID”: “IPV6.VER”, “FL”: 4, “FP”: 1, “DI”: “Bi”, “TV”: 6, “MO”: “equal”, “CDA”: “not-sent”},
+{“FID”: “IPV6.TC”,  “FL”: 8, “FP”: 1, “DI”: “Bi”, “TV”: 0, “MO”: “equal”, “CDA”: “not-sent”},
+{“FID”: “IPV6.FL”,  “FL”: 20,”FP”: 1, “DI”: “Bi”, “TV”: 0, “MO”: “ignore”,”CDA”: “not-sent”},
+{“FID”: “IPV6.LEN”, “FL”: 16,”FP”: 1, “DI”: “Bi”,          “MO”: “ignore”,”CDA”: “compute-length”},
+{“FID”: “IPV6.NXT”, “FL”: 8, “FP”: 1, “DI”: “Bi”, “TV”: 58, “MO”: “equal”, “CDA”: “not-sent”},
+{“FID”: “IPV6.HOP_LMT”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 255,”MO”: “ignore”,”CDA”: “not-sent”},
+{“FID”: “IPV6.DEV_PREFIX”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: [“2001:db8::/64”,</p>
 <blockquote>
 <div><blockquote>
-<div>“ruleID”: ..,
-“ruleLength”: ..,
-“compression”: { …}</div></blockquote>
-<p>},</p>
+<div>“fe80::/64”,
+“2001:0420:c0dc:1002::/64” ],</div></blockquote>
+<p>“MO”: “match-mapping”,”CDA”: “mapping-sent”,”SB”: 1},</p>
 </div></blockquote>
-<dl class="last docutils">
-<dt>“fragSender”: {</dt>
-<dd><blockquote class="first">
-<div>“ruleID”: ..,
-“ruleLength”: ..,
-“fragmentation”: { …}</div></blockquote>
-<p class="last">}</p>
+<p>{“FID”: “IPV6.DEV_IID”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: “::79”,”MO”: “equal”,”CDA”: “DEVIID”},
+{“FID”: “IPV6.APP_PREFIX”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: [ “2001:db8:1::/64”,</p>
+<blockquote>
+<div><blockquote>
+<div>“fe80::/64”,
+“2404:6800:4004:818::/64” ],</div></blockquote>
+<p>“MO”: “match-mapping”,”CDA”: “mapping-sent”, “SB”: 2},</p>
+</div></blockquote>
+<p>{“FID”: “IPV6.APP_IID”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: “::2004”,”MO”: “equal”,”CDA”: “not-sent”},
+{“FID”: “ICMPV6.TYPE”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 128,”MO”: “equal”,”CDA”: “not-sent”},
+{“FID”: “ICMPV6.CODE”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 0,  “MO”: “equal”,”CDA”: “not-sent”},
+{“FID”: “ICMPV6.CKSUM”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: 0,”MO”: “ignore”,”CDA”: “compute-checksum”},
+{“FID”: “ICMPV6.IDENT”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: [],”MO”: “ignore”,”CDA”: “value-sent”},
+{“FID”: “ICMPV6.SEQNB”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: [],”MO”: “ignore”,”CDA”: “value-sent”}</p>
+</div></blockquote>
+<p class="last">]</p>
 </dd>
-<dt>“fragReceiver”: {</dt>
-<dd><blockquote class="first">
-<div>“ruleID”: ..,
-“ruleLength”: ..,
-“fragmentation”: { …}</div></blockquote>
+</dl>
+<p>}</p>
+<p>## Fragmentation Rules</p>
+<p>Fragmentation rules define how the compression and decompression must be performed.</p>
+<p>The keyword  __Fragmentation__ is followed by a dictionnary containing the different parameters used.
+Inside the keyword __FRMode__ indicates which Fragmentation mode is used (__noAck__, __ackAlways__, __ackOnError__).
+Then the keyword __FRModeParamter__ gives the information needed to create the SCHC fragmentation header and mode profile:</p>
+<ul class="simple">
+<li>__dtagSize__ gives in bit the size of the dtag field. &lt;&lt;if not present or set to 0, this field is not present</li>
+</ul>
+<p>in the SCHC fragmentation header&gt;&gt;. This keyword can be used by all the fragmentation modes.
+* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in
+noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
+* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck.
+For ackAlways and ackOnError the value must be specified.
+* __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:</p>
+<blockquote>
+<div><ul class="simple">
+<li>“afterAll1”: the bitmap (or Mic OK) is expected only after the reception of a All-1.</li>
+<li>“afterAll0”: the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>__tileSize__ gives the size in bit of a tile.</li>
+<li>__MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,</li>
+<li>__MICWordSize__ gives the size of the MIC word.</li>
+<li>__maxRetry__ indicates to the sender how many time a fragment or ack request can be sent.</li>
+<li>__timeout__ indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.</li>
+</ul>
+<p>For instance:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{</dt>
+<dd><p class="first">“RuleID”: 1,
+“RuleLength”: 3,
+“Fragmentation” : {</p>
+<blockquote>
+<div><p>“FRMode”: “ackOnError”,
+“FRModeProfile”: {</p>
+<blockquote>
+<div>“dtagSize”: 2,
+“WSize”: 5,
+“FCNSize”: 3,
+“ackBehavior”: “afterAll1”,
+“tileSize”: 9,
+“MICAlgorithm”: “crc32”,
+“MICWordSize”: 8,
+“maxRetry”: 4,
+“timeout”: 600</div></blockquote>
+<p>}</p>
+</div></blockquote>
 <p class="last">}</p>
 </dd>
 </dl>
-</dd>
+<p>}</p>
+</div></blockquote>
+<p># Context</p>
+<p>A context is associated with a specific device, which may be identified by a unique LPWAN
+identifier, for instance a LoRaWAN devEUI.</p>
+<p>The context also includes a set of rules. The rule description is defined [above](#rule-definition).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>[</dt>
+<dd><dl class="first docutils">
+<dt>{</dt>
+<dd>“DeviceID”: 0x1234567890,
+“SoR” : [ ….. ]</dd>
 </dl>
-<p class="last">}, …</p>
+<p>},
+{</p>
+<blockquote class="last">
+<div>“DeviceID”: 0xDEADBEEF,
+“SoR” : [ ….. ]</div></blockquote>
 </dd>
 </dl>
 <p>]</p>
 </div></blockquote>
-<p>## method</p>
-<ul>
-<li><p class="first">add_context(context, comp=None, fragSender=None, fragReceiver=None)</p>
-<blockquote>
-<div><p>It adds the context.  If it exists, raise ValueError.</p>
-</div></blockquote>
-</li>
-<li><p class="first">add_rules(context, comp=None, fragSender=None, fragReceiver=None)</p>
-<blockquote>
-<div><p>It adds the list of rules into the context specified.
-If it exists, raise ValueError.
-If context is not specified, the rule will be added into the default
-context.</p>
-</div></blockquote>
-</li>
-</ul>
-<p>## Rule to add a new key</p>
-<p>Each key must be unique through a rule.
-For example, below the keys of “profile” are not allowed.</p>
+<p>DeviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted or set to null. In the core network, the DeviceIDs must be specified.</p>
+<p>The set of rules itself expands as shown below.</p>
 <blockquote>
 <div><dl class="docutils">
-<dt>{</dt>
-<dd>“profile”: { … },
-“compression”: { “profile”: … }</dd>
-</dl>
-<p>}</p>
+<dt>[</dt>
+<dd><p class="first">{
+“RuleID” : 12,
+“RuleIDLength” : 4,
+“compression”: [</p>
+<blockquote>
+<div><blockquote>
+<div>{
+“FID”: “IPV6.VER”,
+“FL”: 4,
+“FP”: 1,
+“DI”: “Bi”,
+“TV”: 6,
+“MO”: “equal”,
+“CDA”: “not-sent”
+},
+{
+“FID”: “IPV6.DEV_PREFIX”,
+“FL”: 64,
+“FP”: 1,
+“DI”: “Bi”,
+“TV”: [ “2001:db8::/64”, “fe80::/64”, “2001:0420:c0dc:1002::/64” ],
+“MO”: “match-mapping”,
+“CDA”: “mapping-sent”,
+},</div></blockquote>
+<p>]</p>
 </div></blockquote>
-<p>## Examples</p>
-<p>Example 1:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd>“ruleID” : 14,
-“ruleLength” : 4   # rule 0b1110
-“compression”: { … }</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p>Example 2:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd><p class="first">“ruleID” : 15,
-“ruleLength” : 4   # rule 0b1110
-“fragmentationOut”: {</p>
-<blockquote>
-<div><p>“FRMode” : “noAck” # or “ackAlways”, “ackOnError”
-“FRModeProfile” : {</p>
-<blockquote>
-<div>“dtagSize” : 1,
-“WSize”: 3,
-“FCNSize” : 3,
-“windowSize”, 7,
-“ackBehavior”: “afterAll1”</div></blockquote>
-<p>}</p>
-</div></blockquote>
-<p class="last">}</p>
+<p class="last">},
+{
+“RuleID” : 13,
+“RuleIDLength” : 4,
+“fragmentation” : ….
+},
+…..</p>
 </dd>
 </dl>
-<p>}</p>
+<p>]</p>
 </div></blockquote>
+<p>### Remove</p>
+<p>Suppresses a rule for a specific device &lt;&lt;&lt; only one, or a set of rules? &gt;&gt;&gt;. If no rule is specified, all rules for that device are removed from the context.</p>
+<blockquote>
+<div>RM.remove ({“DeviceID”: 0x1234567, “SoR”: {{“ruleID”:12, “ruleLength”:4}}})
+RM.remove ({“DeviceID”: 0x1234567})</div></blockquote>
+<p>### FindRuleFromPacket</p>
+<p>This method returns a rule and a DeviceID that match a packet description given by the protocol analyzer.</p>
+<p>### FindFragmentationRule (size)</p>
+<p>Returns a fragmentation rule compatible with the packet size passed as parameter.</p>
+<p>### FindRuleFromID</p>
+<p>Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.</p>
 <dl class="class">
 <dt id="rulemanager.DictToAttrDeep">
 <em class="property">class </em><code class="descclassname">rulemanager.</code><code class="descname">DictToAttrDeep</code><span class="sig-paren">(</span><em>**entries</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.DictToAttrDeep" title="Permalink to this definition">¶</a></dt>
@@ -272,9 +311,46 @@ For example, below the keys of “profile” are not allowed.</p>
 
 <dl class="class">
 <dt id="rulemanager.RuleManager">
-<em class="property">class </em><code class="descclassname">rulemanager.</code><code class="descname">RuleManager</code><a class="headerlink" href="#rulemanager.RuleManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>RuleManager class is used to manage Compression/Decompression and Fragmentation/
-Reassembly rules.</p>
+<em class="property">class </em><code class="descclassname">rulemanager.</code><code class="descname">RuleManager</code><span class="sig-paren">(</span><em>file=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager" title="Permalink to this definition">¶</a></dt>
+<dd><p># Class RuleManager</p>
+<p>A RuleManager object is created this way:</p>
+<blockquote>
+<div><p>from RuleManager import *
+RM = RuleManager()</p>
+<p>arguments:
+- file: the RuleManager takes a file to upload rule_set
+- log:  display debugging events</p>
+</div></blockquote>
+<dl class="method">
+<dt id="rulemanager.RuleManager.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>device=None</em>, <em>dev_info=None</em>, <em>file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
+* ruleID/RuleIDLength do not overlap
+* the rule contains either one of a fragmentation and a compression description.</p>
+<p>If the DeviceID already exists in the context, the new rule is added to that context, providing no conflict on the RuleID is found.</p>
+<blockquote>
+<div>RM.Add ({“DeviceID”: 0x1234567, “sor”: {…..}})</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="rulemanager.RuleManager.FindRuleFromPacket">
+<code class="descname">FindRuleFromPacket</code><span class="sig-paren">(</span><em>pkt</em>, <em>direction='BI'</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager.FindRuleFromPacket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a parsed packet and returns the matching rule.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rulemanager.RuleManager.FindRuleFromSCHCpacket">
+<code class="descname">FindRuleFromSCHCpacket</code><span class="sig-paren">(</span><em>schc</em>, <em>device=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager.FindRuleFromSCHCpacket" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the rule corresponding to the id stored at the
+beginning of the SCHC packet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rulemanager.RuleManager.Print">
+<code class="descname">Print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager.Print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a context</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="rulemanager.RuleManager.add_context">
 <code class="descname">add_context</code><span class="sig-paren">(</span><em>context</em>, <em>comp=None</em>, <em>fragSender=None</em>, <em>fragReceiver=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rulemanager.RuleManager.add_context" title="Permalink to this definition">¶</a></dt>
@@ -337,6 +413,7 @@ in the context matching with the field value of rule id in the packet.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -353,36 +430,42 @@ in the context matching with the field value of rule id in the packet.</p>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Back to Index</a></li>
+<p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Index</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations:</span></p>
+<p class="caption"><span class="caption-text">General Informations</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code in-depth:</span></p>
+<p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">OpenSCHC Rule Manager Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other informations:</span></p>
+<p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-104-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing informations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other informations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
 </ul>
 
 
@@ -394,8 +477,8 @@ in the context matching with the field value of rule id in the packet.</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/Source/rulemanager.rst.txt"

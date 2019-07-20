@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>File Classification &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="OpenSCHC Rule Manager Module" href="rulemanager.html" />
@@ -28,15 +21,17 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="file-classification">
@@ -45,50 +40,50 @@
 Each of the different components is</p>
 <ul class="simple">
 <li>RULE_MANAGERS<ul>
-<li>rulemanager.py      <code class="docutils literal"><span class="pre">#</span> <span class="pre">store</span> <span class="pre">and</span> <span class="pre">retrieve</span> <span class="pre">contexts</span></code></li>
+<li>rulemanager.py      <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">store</span> <span class="pre">and</span> <span class="pre">retrieve</span> <span class="pre">contexts</span></code></li>
 </ul>
 </li>
 <li>COMMON TO C/D &amp; F/R<ul>
-<li>bitarray.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">bit</span> <span class="pre">aligned</span> <span class="pre">buffer</span> <span class="pre">management</span></code></li>
+<li>bitarray.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">bit</span> <span class="pre">aligned</span> <span class="pre">buffer</span> <span class="pre">management</span></code></li>
 </ul>
 </li>
 <li>COMPRESSION/DECOMPRESSION prefix<ul>
-<li>schccomp.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">basic</span> <span class="pre">compression/decompression</span> <span class="pre">fct</span></code></li>
+<li>schccomp.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">basic</span> <span class="pre">compression/decompression</span> <span class="pre">fct</span></code></li>
 </ul>
 </li>
 <li>FRAGMENTATION/REASSEMBLY prefix<ul>
-<li>mic_crc32.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">MIC</span> <span class="pre">computation/check</span></code></li>
-<li>schcmsg.py          <code class="docutils literal"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">frag</span> <span class="pre">header</span></code></li>
-<li>schcrecv.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">reassemble</span> <span class="pre">fragments</span></code></li>
-<li>schcsend.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">send</span> <span class="pre">fragments</span></code></li>
-<li>schctile.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">tiles</span></code></li>
+<li>mic_crc32.py        <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">MIC</span> <span class="pre">computation/check</span></code></li>
+<li>schcmsg.py          <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">frag</span> <span class="pre">header</span></code></li>
+<li>schcrecv.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">reassemble</span> <span class="pre">fragments</span></code></li>
+<li>schcsend.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">send</span> <span class="pre">fragments</span></code></li>
+<li>schctile.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">manage</span> <span class="pre">tiles</span></code></li>
 </ul>
 </li>
 <li>SYSTEM<ul>
-<li>base_import.py      <code class="docutils literal"><span class="pre">#</span> <span class="pre">import</span> <span class="pre">module</span> <span class="pre">for</span> <span class="pre">python</span> <span class="pre">or</span> <span class="pre">upython</span></code></li>
+<li>base_import.py      <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">import</span> <span class="pre">module</span> <span class="pre">for</span> <span class="pre">python</span> <span class="pre">or</span> <span class="pre">upython</span></code></li>
 </ul>
 </li>
 <li>LPWAN Interface prefix</li>
-<li>SIMULATION            <code class="docutils literal"><span class="pre">#</span> <span class="pre">Code</span> <span class="pre">for</span> <span class="pre">simulation</span> <span class="pre">only</span></code><ul>
-<li>simlayer2.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">emulate</span> <span class="pre">a</span> <span class="pre">L2</span></code></li>
-<li>simsched.py         <code class="docutils literal"><span class="pre">#</span> <span class="pre">schedule</span> <span class="pre">transmission</span> <span class="pre">in</span> <span class="pre">simulated</span> <span class="pre">network</span> <span class="pre">?</span></code></li>
-<li>simul.py            <code class="docutils literal"><span class="pre">#</span> <span class="pre">eumulate</span> <span class="pre">L2</span> <span class="pre">?</span></code></li>
-<li>cond_true.py        <code class="docutils literal"><span class="pre">#</span> <span class="pre">used</span> <span class="pre">to</span> <span class="pre">emulate</span> <span class="pre">transmission</span> <span class="pre">errors</span></code></li>
+<li>SIMULATION            <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Code</span> <span class="pre">for</span> <span class="pre">simulation</span> <span class="pre">only</span></code><ul>
+<li>simlayer2.py        <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">emulate</span> <span class="pre">a</span> <span class="pre">L2</span></code></li>
+<li>simsched.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">schedule</span> <span class="pre">transmission</span> <span class="pre">in</span> <span class="pre">simulated</span> <span class="pre">network</span> <span class="pre">?</span></code></li>
+<li>simul.py            <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">eumulate</span> <span class="pre">L2</span> <span class="pre">?</span></code></li>
+<li>cond_true.py        <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">used</span> <span class="pre">to</span> <span class="pre">emulate</span> <span class="pre">transmission</span> <span class="pre">errors</span></code></li>
 </ul>
 </li>
 <li>APPLICATION<ul>
-<li>packet_picker.py    <code class="docutils literal"><span class="pre">#</span> <span class="pre">read</span> <span class="pre">a</span> <span class="pre">pcap</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">get</span> <span class="pre">packet</span></code></li>
-<li>schcgw.py           <code class="docutils literal"><span class="pre">#</span> <span class="pre">interface</span> <span class="pre">with</span> <span class="pre">LPWAN</span></code></li>
+<li>packet_picker.py    <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">read</span> <span class="pre">a</span> <span class="pre">pcap</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">get</span> <span class="pre">packet</span></code></li>
+<li>schcgw.py           <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">interface</span> <span class="pre">with</span> <span class="pre">LPWAN</span></code></li>
 </ul>
 </li>
 <li>ORCHESTRATION<ul>
-<li>schc.py             <code class="docutils literal"><span class="pre">#</span> <span class="pre">start</span> <span class="pre">rule</span> <span class="pre">manager,</span> <span class="pre">cC/D</span> <span class="pre">and</span> <span class="pre">F/R</span></code></li>
+<li>schc.py             <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">start</span> <span class="pre">rule</span> <span class="pre">manager,</span> <span class="pre">cC/D</span> <span class="pre">and</span> <span class="pre">F/R</span></code></li>
 </ul>
 </li>
-<li>TEST<ul>
-<li>test_bitarray.py</li>
-<li>test_bitarray2.py</li>
-<li>test_bitmap.py</li>
+<li>TEST (under the tests directory)<ul>
+<li>test_bitarray.py    <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">tests</span> <span class="pre">the</span> <span class="pre">BitBuffer</span> <span class="pre">functionalities</span></code></li>
+<li>test_bitarray2.py   <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">more</span> <span class="pre">tests</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">BitBuffer</span> <span class="pre">functionalities</span></code></li>
+<li>test_bitmap.py      <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">tests</span> <span class="pre">the</span> <span class="pre">generation</span> <span class="pre">of</span> <span class="pre">a</span> <span class="pre">BitMap</span> <span class="pre">out</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">tiles</span> <span class="pre">received</span></code></li>
 <li>test_compress.py</li>
 <li>test_frag.py</li>
 <li>test_newschc.py</li>
@@ -98,7 +93,7 @@ Each of the different components is</p>
 </ul>
 </li>
 <li>UNKNOWN STATUS<ul>
-<li>comp_bitmap.py       <code class="docutils literal"><span class="pre">#</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">test</span> <span class="pre">implementation</span> <span class="pre">for</span> <span class="pre">bitmap</span> <span class="pre">compression</span></code></li>
+<li>comp_bitmap.py       <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">test</span> <span class="pre">implementation</span> <span class="pre">for</span> <span class="pre">bitmap</span> <span class="pre">compression</span></code></li>
 </ul>
 </li>
 </ul>
@@ -106,6 +101,7 @@ Each of the different components is</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -122,36 +118,42 @@ Each of the different components is</p>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Back to Index</a></li>
+<p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Index</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations:</span></p>
+<p class="caption"><span class="caption-text">General Informations</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code in-depth:</span></p>
+<p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">File Classification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rulemanager.html">OpenSCHC Rule Manager Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other informations:</span></p>
+<p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-104-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing information</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific information</a></li>
 </ul>
 
 
@@ -163,8 +165,8 @@ Each of the different components is</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/Source/File_Classification.rst.txt"

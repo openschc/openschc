@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>OpenSCHC Bit Buffer Management Module &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="OpenSCHC Reception Module" href="schcrecv.html" />
@@ -28,15 +21,17 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="module-bitarray">
@@ -57,6 +52,24 @@ position. Position defines the position if the most significant bit.</p>
 <dt id="bitarray.BitBuffer.add_bytes">
 <code class="descname">add_bytes</code><span class="sig-paren">(</span><em>bytes_data</em>, <em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.add_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>write bytes_data as a bytearray into the buffer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bitarray.BitBuffer.add_length">
+<code class="descname">add_length</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.add_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>add to the buffer the length with the draft coding:</p>
+<p>The size (using the unit defined in the FL) is encoded as follows:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>o  If the size is between 0 and 14, it is sent as a 4-bits unsigned</dt>
+<dd>integer.</dd>
+<dt>o  For values between 15 and 254, 0b1111 is transmitted and then the</dt>
+<dd>size is sent as an 8 bits unsigned integer.</dd>
+<dt>o  For larger values of the size, 0xfff is transmitted and then the</dt>
+<dd>next two bytes contain the size value as a 16 bits unsigned
+integer.</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -85,6 +98,13 @@ but _rpos doesn’t change.</p>
 <code class="descname">count_remaining_bits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.count_remaining_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the number of the remaining bits from
 the position of self._rpos to _wpos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bitarray.BitBuffer.display">
+<code class="descname">display</code><span class="sig-paren">(</span><em>format=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the content, if format is set to “bin” the 
+buffer is in binary, underline shows its size.</p>
 </dd></dl>
 
 <dl class="method">
@@ -133,6 +153,7 @@ incremented.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -149,36 +170,42 @@ incremented.</p>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Back to Index</a></li>
+<p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Index</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations:</span></p>
+<p class="caption"><span class="caption-text">General Informations</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code in-depth:</span></p>
+<p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rulemanager.html">OpenSCHC Rule Manager Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">OpenSCHC Bit Buffer Management Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other informations:</span></p>
+<p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-104-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing informations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other informations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific informations</a></li>
 </ul>
 
 
@@ -190,8 +217,8 @@ incremented.</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/Source/bitarray.rst.txt"
