@@ -152,6 +152,8 @@ Statsct.set_SF(SF)
 #---------------------------------------------------------------------------
 # Fragmentation mode 
 
+compress_rule = None
+
 #no-ack
 rm0 = RuleManager()
 rm0.add_context(rule_context, compress_rule, frag_rule3, frag_rule4)
@@ -193,8 +195,10 @@ print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
 print("")
 
 #device rule
-print("-------------------------------- Device Rule -----------------------------")  
+print("-------------------------------- Device Rule -----------------------------")
 for rule1 in rm0.__dict__:
+    if rm0.__dict__[rule1] is None:
+        continue
     print(rm0.__dict__[rule1])
     for info in rm0.__dict__[rule1]:
         print("info -> {}".format(info))
@@ -203,6 +207,8 @@ for rule1 in rm0.__dict__:
 #gw rule
 print("-------------------------------- gw Rule -----------------------------")  
 for rule1 in rm1.__dict__:
+    if rm0.__dict__[rule1] is None:
+        continue
     print(rm1.__dict__[rule1])
     for info in rm1.__dict__[rule1]:
         print("info -> {}".format(info))

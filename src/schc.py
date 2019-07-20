@@ -79,21 +79,23 @@ class SCHCProtocol:
             return
         # Compression process
         packet_bbuf = BitBuffer(raw_packet)
-        rule = context["comp"]        
         print("----------------------- Compression Process ----------------------------")
-        self._log("compression rule_id={}".format(rule.ruleID))
-        # XXX needs to handl the direction
-        #NEED TO BE FIX -> there is an error when packets are larger than 250B
-        #The assert in the funcion __add__ of bitarray.py line 257 gives an 
-        #Assertion Error.
-        packet_bbuf = self.compressor.compress(context, packet_bbuf)
-        # check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
-            self._log("SCHC fragmentation is not needed. size={}".format(
-                    packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), context["devL2Addr"])
-            self.scheduler.add_event(0, self.layer2.send_packet, args)
-            return
+        if "comp" in context:
+            rule = context["comp"]                
+            self._log("compression rule_id={}".format(rule.ruleID))
+            # XXX needs to handl the direction
+            #NEED TO BE FIX -> there is an error when packets are larger than 250B
+            #The assert in the funcion __add__ of bitarray.py line 257 gives an 
+            #Assertion Error.
+            packet_bbuf = self.compressor.compress(context, packet_bbuf)
+            # check if fragmentation is needed.
+            if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
+                self._log("SCHC fragmentation is not needed. size={}".format(
+                        packet_bbuf.count_added_bits()))
+                args = (packet_bbuf.get_content(), context["devL2Addr"])
+                self.scheduler.add_event(0, self.layer2.send_packet, args)
+                return
+            
         # fragmentation is required.
 
         frag_rule = self.rule_manager.FindFragmentationRule()
@@ -104,10 +106,11 @@ class SCHCProtocol:
         # Do fragmenation
         print("----------------------- Fragmentation Rule -----------------------")
         rule = context["fragSender"]
-        self._log("fragmentation rule_id={}".format(rule.ruleID))
+        print(rule)
+        self._log("fragmentation rule_id={}".format(rule.RuleID))
         session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
-        self.fragment_session.add(rule.ruleID, rule.ruleLength,
+        self.fragment_session.add(rule.RuleID, rule.RuleIDLength,
                                     session.dtag, session)
         session.start_sending()
 
@@ -178,9 +181,9 @@ class SCHCProtocol:
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
-            session = self.reassemble_session.get(rule.ruleID,
-                                                rule.ruleLength, dtag)
-            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(rule.ruleID,rule.ruleLength, dtag))
+            session = self.reassemble_session.get(rule.RuleID,
+                                                rule.RuleIDLength, dtag)
+            print("rule.RuleID -> {},rule.RuleIDLength-> {}, dtag -> {}".format(rule.RuleID,rule.RuleIDLength, dtag))
             
             if session is not None:
                 print("Reassembly session found", session)
@@ -188,7 +191,7 @@ class SCHCProtocol:
                 # no session is found.  create a new reassemble session.
                 session = self.new_reassemble_session(context, rule, dtag,
                                                       dev_L2addr)
-                self.reassemble_session.add(rule.ruleID, rule.ruleLength,
+                self.reassemble_session.add(rule.RuleID, rule.RuleIDLength,
                                             dtag, session)
                 print("New reassembly session created", session)
             print("----------------------- Reassembly process -----------------------")
