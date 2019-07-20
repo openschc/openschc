@@ -1,5 +1,8 @@
 #---------------------------------------------------------------------------
 
+import random
+random.seed(1)
+
 from base_import import *  # used for now for differing modules in py/upy
 
 import schc
@@ -99,7 +102,8 @@ frag_rule4 = {
 # Main configuration
 
 ack_on_error = True
-packet_loss_simulation = True
+#packet_loss_simulation = True
+packet_loss_simulation = False
 payload_file_simulation = False # Configure the rules, l2_mtu and SF to support the use of a 1400 bytes file
 
 #--------------------------------------------------

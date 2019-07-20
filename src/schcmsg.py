@@ -45,7 +45,7 @@ def get_receiver_header_size(rule):
 
 def get_mic_size(rule):
     rule = rule["Fragmentation"]["FRModeProfile"] #ajoute
-    assert rule["MICALgorithm"] == "crc32"
+    assert rule["MICAlgorithm"] == "crc32"
     return 32
 
 def roundup(v, w=8):
@@ -147,7 +147,7 @@ class frag_receiver_tx(frag_base):
         buffer = BitBuffer()
         if (self.rule["RuleID"] is not None and
             self.rule["RuleIDLength"] is not None):
-            buffer.add_bits(self.rule["ruleID"], self.rule["RuleIDLength"])
+            buffer.add_bits(self.rule["RuleID"], self.rule["RuleIDLength"])
         if dtag is not None and self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"] is not None:
             assert self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"] != None # CA: sanity check
             buffer.add_bits(dtag, self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"])

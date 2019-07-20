@@ -838,7 +838,7 @@ class RuleManager:
             r = context.get(k)
             if r is not None:
                 rule_id = packet_bbuf.get_bits(r[T_RULEIDLENGTH], position=0)
-                if r[T_RULEIDLENGTH] == rule_id:
+                if r[T_RULEID] == rule_id:
                     return k, r
         return None, None
 
