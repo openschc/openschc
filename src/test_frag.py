@@ -11,16 +11,16 @@ from rulemanager import RuleManager
 from stats.statsct import Statsct
 
 #---------------------------------------------------------------------------
-# Rules
+# RULES
 rule_context = {
     "devL2Addr": "*",
     "dstIID": "*"
 }
 
 compress_rule = {
-    "RuleLength": 3,
+    "RuleIDLength": 3,
     "RuleID": 5,
-    "compression": {
+    "Compression": {
         "rule_set": []
     }
 }
@@ -33,10 +33,10 @@ frag_rule1 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize":3, # Number of tiles per window
+            "WSize": 7, # Number of tiles per window
             "FCNSize": 3, # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
-            "tileSize": 392, # size of each tile -> 9 bits or 392 bits
+            "tileSize": 9, # size of each tile -> 9 bits or 392 bits
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
@@ -51,10 +51,10 @@ frag_rule2 = {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 3, # Number of tiles per window
+            "WSize": 7, # Number of tiles per window
             "FCNSize": 3, # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
-            "tileSize": 392, # size of each tile -> e.g. 9 bits or 392 bits
+            "tileSize": 9, # size of each tile -> e.g. 9 bits or 392 bits
             "MICAlgorithm": "crc32",
             "MICWordSize": 8
         }
@@ -62,12 +62,12 @@ frag_rule2 = {
 }
 
 frag_rule3 = {
-    "ruleLength": 6,
-    "ruleID": 1,
+    "RuleIDLength": 6,
+    "RuleID": 1,
     "profile": {
         "L2WordSize": 8
     },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "noAck",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -79,12 +79,12 @@ frag_rule3 = {
 }
 
 frag_rule4 = {
-    "ruleLength": 6,
-    "ruleID": 2,
+    "RuleIDLength": 6,
+    "RuleID": 2,
     "profile": {
         "L2WordSize": 8
     },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "noAck",
         "FRModeProfile": {
             "dtagSize": 2,
