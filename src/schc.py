@@ -12,6 +12,7 @@ from schcrecv import ReassemblerAckOnError
 from schcrecv import ReassemblerNoAck
 from schcsend import FragmentAckOnError
 from schcsend import FragmentNoAck
+from comp_parser import *
 from schccomp import Compressor, Decompressor
 
 class Session:
@@ -94,7 +95,10 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args)
             return
         # fragmentation is required.
-        if context.get("fragSender") is None:
+
+        frag_rule = self.rule_manager.FindFragmentationRule()
+
+        if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
@@ -108,7 +112,7 @@ class SCHCProtocol:
         session.start_sending()
 
     def new_fragment_session(self, context, rule):
-        mode = rule.get("FRMode")
+        mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule) # XXX
         elif mode == "ackAlwayw":

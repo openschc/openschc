@@ -6,6 +6,7 @@
 from base_import import *  # used for now for differing modules in py/upy
 
 import bitarray
+from schccomp import *
 
 #---------------------------------------------------------------------------
 
@@ -17,13 +18,16 @@ def get_fcn_all_0(rule):
     return (0<<rule["FCNSize"])-4
 
 def get_win_all_1(rule):
-    return (1<<rule["WSize"])-1
+    #return (1<<rule["WSize"])-1
+    return rule[T_FRAG][T_FRAG_PROF][T_FRAG_W]-1
 
-def get_max_fcn(rule):
-    return rule["windowSize"]-1
+
+def get_max_fcn(rule): #LT: I don't understand this computation
+    #return rule["windowSize"]-1
+    return rule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE]-1
 
 def get_max_dtag(rule):
-    return (1<<rule["dtagSize"])-1
+    return (1<<rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])-1
 
 def get_sender_header_size(rule):
     return rule["ruleLength"] + rule["dtagSize"] + rule.get("WSize", 0) + rule["FCNSize"]

@@ -18,18 +18,18 @@ rule_context = {
 }
 
 compress_rule = {
-    "ruleLength": 3,
-    "ruleID": 5,
+    "RuleLength": 3,
+    "RuleID": 5,
     "compression": {
         "rule_set": []
     }
 }
 
 frag_rule1 = {
-    "ruleLength": 6,
-    "ruleID": 1,
+    "RuleIDLength": 6,
+    "RuleID": 1,
     "profile": { "L2WordSize": 8 },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -44,10 +44,10 @@ frag_rule1 = {
 }
 
 frag_rule2 = {
-    "ruleLength": 6,
-    "ruleID": 2,
+    "RuleIDLength": 6,
+    "RuleID": 2,
     "profile": { "L2WordSize": 8 },
-    "fragmentation": {
+    "Fragmentation": {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -160,7 +160,7 @@ rm1 = RuleManager()
 rm1.add_context(rule_context, compress_rule, frag_rule4, frag_rule3)
 #ack-on-error
 if ack_on_error:  
-
+    
     rm0 = RuleManager()
     rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
 

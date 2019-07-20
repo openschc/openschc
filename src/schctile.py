@@ -7,6 +7,7 @@
 from base_import import *
 
 import schcmsg
+from schccomp import *
 
 #---------------------------------------------------------------------------
 
