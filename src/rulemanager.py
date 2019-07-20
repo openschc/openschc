@@ -789,6 +789,11 @@ class RuleManager:
         return None
 
     def FindFragmentationRule(self, deviceID=None, originalSize=None):
+        import warnings
+        warnings.warn("XXX: remove _db")
+        if self._db is not None:
+           return self._db[0]["fragSender"]
+        
         for d in self._ctxt:
             if d["DeviceID"] == deviceID:
                 for r in d["SoR"]:

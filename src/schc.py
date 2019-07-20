@@ -99,14 +99,13 @@ class SCHCProtocol:
         # fragmentation is required.
 
         frag_rule = self.rule_manager.FindFragmentationRule()
-
         if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
         # Do fragmenation
         print("----------------------- Fragmentation Rule -----------------------")
         rule = context["fragSender"]
-        print(rule)
+        pprint.pprint(rule.__dict__)
         self._log("fragmentation rule_id={}".format(rule.RuleID))
         session = self.new_fragment_session(context, rule)
         session.set_packet(packet_bbuf)
