@@ -5,7 +5,7 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: General Informations:
+   :caption: General Informations
 
    General/User_guide
    General/Documenting_Guidelines
@@ -14,7 +14,7 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: Source code in-depth:
+   :caption: Source code in-depth
 
    Source/File_Classification
    Source/rulemanager
@@ -23,6 +23,12 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: Other informations:
+   :caption: Testing
 
-   Actus/IETF-104-Hackathon-LPWAN
+   Testing/testing
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Other information
+
+   Actus/IETF-Hackathon-LPWAN

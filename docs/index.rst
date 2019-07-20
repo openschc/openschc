@@ -16,9 +16,7 @@ Want to help ? See our :doc:`General/Contributing_Guidelines` for more details o
 Our current activity
 ====================
 
-We are currently participating the `IETF 104 Hackathon <https://github.com/openschc/openschc/wiki/IETF-104-Hackathon-LPWAN>`_
-
-Direct link to the Etherpad for on-line information exchange at the IETF 104 Hackathon : `https://etherpad.tools.ietf.org/p/openschc <https://etherpad.tools.ietf.org/p/openschc>`_
+Direct link to the Etherpad for on-line information exchange at the IETF Hackathons : `https://etherpad.tools.ietf.org/p/openschc <https://etherpad.tools.ietf.org/p/openschc>`_
 
 Wiki
 ========
