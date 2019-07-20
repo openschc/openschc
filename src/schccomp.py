@@ -115,6 +115,7 @@ T_FRAG_TILE = "tileSize"
 T_FRAG_MIC  = "MICALgorithm"
 T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
+T_FRAG_L2WORDSIZE = "L2WordSize"
 
 from rulemanager import *
 

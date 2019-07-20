@@ -21,7 +21,7 @@ import binascii
 # rule_base["compression"] = new_rule_set # rule_set has been removed
 # context = { "comp": rule_base }
 
-pkt = open("test/icmpv6.dmp", "rb").read()
+#pkt = open("test/icmpv6.dmp", "rb").read()
 #input_bbuf = BitBuffer(pkt)
 
 class debug_protocol:

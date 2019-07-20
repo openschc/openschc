@@ -504,6 +504,7 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_TILE, None, True)
                     _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
+                    _default_value (arule, nrule, T_FRAG_L2WORDSIZE, 8)
 
                 # the size include All-*, Max_VLAUE is WINDOW_SIZE-1
                 _default_value(arule, nrule, T_FRAG_WINDOW_SIZE, (0x01 <<(arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]))-1)
@@ -589,6 +590,7 @@ class RuleManager:
         #RM database
         self._ctxt = []
         self._log = log
+        self._db = []
 
 
     def _smart_print(self, v):
@@ -920,13 +922,13 @@ class RuleManager:
     def check_rule_compression(self, rule):
         """ compression rule check """
         # XXX need more work.
-        if (not "compression" in rule or "fragmentation" in rule):
+        if (not "Compression" in rule or "Fragmentation" in rule):
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
         canon_rule_set = []
-        if "rule_set" not in rule["compression"]:
-            raise ValueError ("compression must have a rule_set.")
-        for r in rule["compression"]["rule_set"]:
+        #if "rule_set" not in rule["compression"]:
+        #    raise ValueError ("compression must have a rule_set.")
+        for r in rule["Compression"]:
             canon_r = {}
             for k,v in r.items():
                 if isinstance(v, str):
@@ -934,15 +936,15 @@ class RuleManager:
                 else:
                     canon_r[k.upper()] = v
             canon_rule_set.append(canon_r)
-        rule["compression"]["rule_set"] = canon_rule_set
+        rule["Compression"] = canon_rule_set
 
     def check_rule_fragmentation(self, rule):
         """ fragmentation rule check """
-        if (not "fragmentation" in rule or "compression" in rule):
+        if (not "Fragmentation" in rule or "Compression" in rule):
             raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
 
-        if "fragmentation" in rule:
-            fragRule = rule["fragmentation"]
+        if "Fragmentation" in rule:
+            fragRule = rule["Fragmentation"]
 
             if not "FRMode" in fragRule:
                 raise ValueError ("{} Fragmentation mode must be specified".format(self._nameRule(rule)))
