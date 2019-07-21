@@ -43,8 +43,8 @@ class SimulLayer3:
     # XXX need to confirm whether this should be here or not.
     def recv_packet(self, dev_L2addr, raw_packet):
         """ Two lines below commented"""
-        #self._log("recv-from-L2 Devaddr={} Packet={}".format(
-        #        dev_L2addr, b2hex(raw_packet.get_content())))
+        self._log("recv-from-L2 Devaddr={} Packet={}".format(
+                dev_L2addr, b2hex(raw_packet.get_content())))
         # XXX do more work
 
     def _set_protocol(self, protocol): # called by SCHCProtocol

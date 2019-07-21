@@ -80,22 +80,31 @@ class SCHCProtocol:
             return
         # Compression process
         packet_bbuf = BitBuffer(raw_packet)
-        print("----------------------- Compression Process ----------------------------")
-        if "comp" in context:
-            rule = context["comp"]                
-            self._log("compression rule_id={}".format(rule.ruleID))
-            # XXX needs to handl the direction
-            #NEED TO BE FIX -> there is an error when packets are larger than 250B
-            #The assert in the funcion __add__ of bitarray.py line 257 gives an 
-            #Assertion Error.
-            packet_bbuf = self.compressor.compress(context, packet_bbuf)
-            # check if fragmentation is needed.
-            if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
-                self._log("SCHC fragmentation is not needed. size={}".format(
-                        packet_bbuf.count_added_bits()))
-                args = (packet_bbuf.get_content(), context["devL2Addr"])
-                self.scheduler.add_event(0, self.layer2.send_packet, args)
-                return
+        if not self.config.get("debug-fragment"):
+            print("----------------------- Compression Process ----------------------------")
+            # XXX debug_protocol is for debug, need to be moved somewhere.
+            class debug_protocol:
+                def _log(*arg):
+                    print(*arg)
+            p = Parser(debug_protocol)
+            # XXX a hint of the direction must be defined in the config.
+            direction = T_DIR_UP    # XXX must be defined in the config or other!!
+            v = p.parse(raw_packet, direction)
+            self._log("packet parsed: {}".format(pprint.pprint(v[0])))
+            rule = self.rule_manager.FindRuleFromPacket(v[0], direction=direction)
+            if rule != None:
+                self._log("compression rule={}".format(rule))
+                schc_packet = self.compressor.compress(rule, v[0], v[1], direction)
+                #NEED TO BE FIX -> there is an error when packets are larger than 250B
+                #The assert in the funcion __add__ of bitarray.py line 257 gives an 
+                #Assertion Error.
+                # check if fragmentation is needed.
+                if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
+                    self._log("SCHC fragmentation is not needed. size={}".format(
+                            packet_bbuf.count_added_bits()))
+                    args = (packet_bbuf.get_content(), context["devL2Addr"])
+                    self.scheduler.add_event(0, self.layer2.send_packet, args)
+                    return
             
         # fragmentation is required.
 
@@ -191,20 +200,20 @@ class SCHCProtocol:
                 print("New reassembly session created", session)
             print("----------------------- Reassembly process -----------------------")
             session.receive_frag(schc_frag)
-        elif key == "comp":
+        #
+        rule = self.rule_manager.FindRuleFromSCHCpacket(schc=packet_bbuf)
+        if rule is not None:
             # if there is no reassemble rule, process_decompress() is directly
             # called from here.  Otherwise, it will be called from a reassemble
             # function().
-            self.process_decompress(context, dev_L2addr, packet_bbuf)
-        elif key is None:
-            raise ValueError(
-                    "context exists, but no rule found for L2Addr {}".
-                    format(dev_L2addr))
-        else:
-            raise SystemError("should not come here.")
+            self.process_decompress(rule, dev_L2addr, packet_bbuf)
 
-    def process_decompress(self, context, dev_L2addr, schc_packet):
-        self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
-        raw_packet = self.decompressor.decompress(context, schc_packet)
+    def process_decompress(self, rule, dev_L2addr, schc_packet):
+        if rule is not None:
+            self._log("compression rule_id={}".format(rule))
+            direction = T_DIR_UP    # XXX it must come from the config!!!
+            raw_packet = self.decompressor.decompress(schc_packet, rule, direction=T_DIR_UP)
+        else:
+            raw_packet = schc_packet
         args = (dev_L2addr, raw_packet)
         self.scheduler.add_event(0, self.layer3.recv_packet, args)

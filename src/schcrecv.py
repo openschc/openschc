@@ -151,8 +151,16 @@ class ReassemblerNoAck(ReassembleBase):
                 return
             # decompression
             print("----------------------- Decompression -----------------------")
-            self.protocol.process_decompress(self.context, self.sender_L2addr,
-                                             schc_packet)
+            if not self.protocol.config.get("debug-fragment"):
+                # XXX
+                # XXX in hack105, we have separate databases for C/D and F/R.
+                # XXX need to merge them into one.  Then, here searching database will
+                # XXX be moved into somewhere.
+                # XXX
+                rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+                print("debug: no-ack FindRuleFromSCHCpacket", rule)
+                self.protocol.process_decompress(rule, self.sender_L2addr,
+                                                schc_packet)
             return
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
@@ -436,9 +444,19 @@ class ReassemblerAckOnError(ReassembleBase):
         self.state = "DONE"
         print('state DONE -> {}'.format(self.state))
         #input('DONE')
-        # decompression
         print("----------------------- Decompression -----------------------")
-        self.protocol.process_decompress(self.context, self.sender_L2addr,
+        if not self.protocol.config.get("debug-fragment"):
+            # XXX
+            # XXX in hack105, we have separate databases for C/D and F/R.
+            # XXX need to merge them into one.  Then, here searching database will
+            # XXX be moved into somewhere.
+            # XXX
+            rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+        else:
+            rule = None
+        # decompression
+        print("debug: ack-on-error FindRuleFromSCHCpacket", rule)
+        self.protocol.process_decompress(rule, self.sender_L2addr,
                                          schc_packet)
         # ACK message
         schc_ack = schcmsg.frag_receiver_tx_all1_ack(

@@ -105,6 +105,7 @@ ack_on_error = True
 #packet_loss_simulation = True
 packet_loss_simulation = False
 payload_file_simulation = False # Configure the rules, l2_mtu and SF to support the use of a 1400 bytes file
+payload_coap = True
 
 #--------------------------------------------------
 # General configuration
@@ -116,6 +117,9 @@ SF = 12
 simul_config = {
     "log": True,
 }
+if not payload_coap:
+    simul_config.update({"node-config": { "debug-fragment": True }})
+    print("Please keep in mind compresion will not be done.")
 
 #---------------------------------------------------------------------------
 # Configuration packets loss
@@ -172,6 +176,9 @@ if ack_on_error:
 
     rm1 = RuleManager()
     rm1.add_context(rule_context, compress_rule, frag_rule2, frag_rule1)
+
+rm0.Add(file="example/comp-rule-100.json")
+rm1.Add(file="example/comp-rule-100.json")
 
 #---------------------------------------------------------------------------
 # Configuration of the simulation
@@ -239,6 +246,12 @@ else:
     print("Payload size:", len(payload)) 
     print("Payload: {}".format(b2hex(payload)))
     print("")
+
+if payload_coap:
+    #payload = bytes.fromhex("60123456001e111efe800000000000000000000000000001fe80000000000000000000000000000216321633001e0000410200010ab3666f6f0362617206414243443d3d466b3d65746830ff8401822020264568656c6c6f")
+    from binascii import a2b_hex
+    payload = a2b_hex("60123456001e111efe800000000000000000000000000001fe80000000000000000000000000000216321633001e0000410200010ab3666f6f0362617206414243443d3d466b3d65746830ff8401822020264568656c6c6f")
+
 #---------------------------------------------------------------------------
 # Simnulation
 
