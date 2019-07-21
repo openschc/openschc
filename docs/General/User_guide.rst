@@ -9,7 +9,8 @@ This document explains how to run the openSCHC fragmentation and compression cod
 This entails the following steps:
 
 - installing the "context" that will be used for compressing and fragmenting the traffic flows.
-- establishing the flows of traffic to be compressed/decompressed and fragmented/reassembled, and potentially setup the channel characteristics (in link simulation mode)
+- establishing the flows of traffic to be compressed/decompressed and fragmented/reassembled,
+  and potentially setup the channel characteristics (in link simulation mode)
 
 Rule Manager
 ============
@@ -37,8 +38,8 @@ following: ::
     "RuleIDLength" : 4
     }
 
-The __RuleID__ is a positive integer aligned to the right. So 12 can be writen in
-binary 1100. The __ruleIDLength__ gives the number of bits used. So the previous
+The **RuleID** is a positive integer aligned to the right. So 12 can be writen in
+binary 1100. The **ruleIDLength** gives the number of bits used. So the previous
 rule is different from this one: ::
 
     {
@@ -52,7 +53,7 @@ Rule IDs compose a binary tree and can also be noted with the / representation
 (as IP prefixes) 12/4 or 12/6.
 
 A rule is either a fragmentation rule or a compression rule. They are differentiated
-by the JSON keyword __Fragmentation__ or __Compression__. A rule can contain only one of
+by the JSON keyword **Fragmentation** or **Compression**. A rule can contain only one of
 these keywords.
 
 For compression, the keyword is followed by an array, containing the field descriptions.
@@ -105,7 +106,7 @@ The following program adds these 2 basic rules into the rule manager and display
 
 The first line imports the rule manager module.
 
-__RM__ will be the rule manager instance. If necessary, several rule managers can be instantiated.
+**RM** will be the rule manager instance. If necessary, several rule managers can be instantiated.
 
 The two rules are created as a python dictionary and added to the instance of rule manager.
 
@@ -129,10 +130,10 @@ Compression rules contain the field descriptions (here absent) and the Fragmenta
 fragmentation parameters. As we will notice in the rest of this chapter, the rule manager may add some default
 parameters.
 
-We can notice that, since no device is specified, the rules are associated to the device __None__.
+We can notice that, since no device is specified, the rules are associated to the device **None**.
 
-In the add method, we used the __dev_info__ named argument to indicate that the rule is contained in
-a python structure. The named argument  __file__ could have been used instead. In that case, a filename
+In the add method, we used the **dev_info** named argument to indicate that the rule is contained in
+a python structure. The named argument  **file** could have been used instead. In that case, a filename
 containing the JSON structure is used.
 
 Set of Rules
@@ -166,13 +167,13 @@ Set of Rules
 Device definition
 -----------------
 
-As seen before, when not specified, the device is identified as __None__. This can be appropriate
+As seen before, when not specified, the device is identified as **None**. This can be appropriate
 when SCHC is instantiated on a device, since there is no ambiguity as to which device the rule set
 applies to. Conversely,
 when the SCHC instance is on the core network side, the set of rules must be associated with
 a device ID.
 
-Rules associated with a Device ID can be directly stored into the rule manager through the __Add__ method.
+Rules associated with a Device ID can be directly stored into the rule manager through the **Add** method.
 The JSON structure is the following: ::
 
 
@@ -181,6 +182,6 @@ The JSON structure is the following: ::
         "SoR" : [ ..... ]
     }
 
-where the __DeviceID__ keyword represents the device ID in a specific technology, for
+where the **DeviceID** keyword represents the device ID in a specific technology, for
 instance LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
 the DeviceID literal must be expressed in decimal, not hexadecimal.
