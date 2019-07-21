@@ -222,9 +222,8 @@ class FragmentNoAck(FragmentBase):
         self.send_frag()
         #input("")
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, schc_frag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
-        schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("sender frag received:", schc_frag.__dict__)
         if ((self.rule["WSize"] is 0 or
              schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
@@ -567,7 +566,7 @@ class FragmentAckOnError(FragmentBase):
         print("EVENT SEND FRAG")
         self.send_frag()
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, schc_frag):
         # the ack timer can be cancelled here, because it's been done whether
         # both rule_id and dtag in the fragment are matched to this session
         # at process_received_packet().
@@ -575,8 +574,11 @@ class FragmentAckOnError(FragmentBase):
         # when an ack should be received
         self.resend = False
         #
-        schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
         print("-----------------------  Sender Frag Received -----------------------") 
+        if self.dtag != schc_frag.dtag:
+            print("ERROR: dtag mismatched, expected {} != frame {}".format(
+                    self.dtag, schc_frag.dtag))
+            return
         print("fragment received -> {}".format(schc_frag.__dict__))        
         if ((self.rule["WSize"] is None or
             schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
@@ -595,7 +597,7 @@ class FragmentAckOnError(FragmentBase):
             return
         if schc_frag.cbit == 0:
             print("----------------------- ACK Failure rid={} dtag={} -----------------------".format(
-                    self.rule.ruleID, self.dtag))
+                    self.rule["RuleID"], self.dtag))
             #self.resend = False
             #self.all1_send = False
             self.state = self.ACK_FAILURE

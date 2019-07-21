@@ -322,7 +322,7 @@ class frag_sender_rx_all0_ack(frag_rx):
         self.init_param()
         self.set_recvbuf(recvbuf)
         self.rule = rule
-        pos = rule["ruleLength"]
+        pos = rule["RuleIDLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()
         # XXX the abort is not supported yet.
@@ -344,7 +344,7 @@ class frag_sender_rx_all0_ack(frag_rx):
 #        self.init_param()
 #        self.set_recvbuf(recvbuf)
 #        self.rule = rule
-#        pos = rule["ruleLength"]
+#        pos = rule["RuleIDLength"]
 #        pos += self.parse_dtag()
 #        pos += self.parse_win()
 #        # XXX the abort is not supported yet.
@@ -366,8 +366,8 @@ class frag_sender_rx(frag_rx):
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
-        self.rule_id = self.packet_bbuf.get_bits(rule["ruleLength"])
-        pos = self.rule["ruleLength"]
+        self.rule_id = self.packet_bbuf.get_bits(rule["RuleIDLength"])
+        pos = self.rule["RuleIDLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()
         pos += self.parse_cbit()

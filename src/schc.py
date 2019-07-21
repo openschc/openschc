@@ -12,6 +12,7 @@ from schcrecv import ReassemblerAckOnError
 from schcrecv import ReassemblerNoAck
 from schcsend import FragmentAckOnError
 from schcsend import FragmentNoAck
+import schcmsg
 from comp_parser import *
 from schccomp import Compressor, Decompressor
 
@@ -98,10 +99,9 @@ class SCHCProtocol:
             
         # fragmentation is required.
 
-        frag_rule = self.rule_manager.FindFragmentationRule()
-        if frag_rule is None:
-            self._log("Rejected the packet due to no fragmenation rule.")
-            return
+        # NOTE: If you need fragmentation just after compression, the follwing
+        # fragmentation block should be included in the above "comp" block.
+
         # Do fragmenation
         print("----------------------- Fragmentation Rule -----------------------")
         rule = context["fragSender"]
@@ -159,44 +159,38 @@ class SCHCProtocol:
         print('key,rule {},{}'.format(key,rule))
 
         if key == "fragSender":
-            if rule["dtagSize"] > 0:
-                dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
-                                    position=rule.get("ruleLength"))                           
-            else:
-                dtag = None
+            schc_frag = schcmsg.frag_sender_rx(rule, packet_bbuf)
             # find existing session for fragment or reassembly.
             session = self.fragment_session.get(rule.RuleID,
-                                                rule.RuleIDLength, dtag)
+                                                rule.RuleIDLength,
+                                                schc_frag.dtag)
             print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(
-                rule.RuleID, rule.RuleIDLength, dtag))
+                rule.RuleID, rule.RuleIDLength, schc_frag.dtag))
             if session is not None:
                 print("Fragmentation session found", session)
-                session.receive_frag(packet_bbuf, dtag)
+                session.receive_frag(schc_frag)
             else:
                 print("context exists, but no {} session for this packet {}".
                         format(key, dev_L2addr))
         elif key == "fragReceiver":
-            if rule["dtagSize"] > 0:
-                dtag = packet_bbuf.get_bits(rule.get("dtagSize"),
-                                    position=rule.get("ruleLength"))
-            else:
-                dtag = None
+            schc_frag = schcmsg.frag_receiver_rx(rule, packet_bbuf)
             # find existing session for fragment or reassembly.
             session = self.reassemble_session.get(rule.RuleID,
-                                                rule.RuleIDLength, dtag)
-            print("rule.RuleID -> {},rule.RuleIDLength-> {}, dtag -> {}".format(rule.RuleID,rule.RuleIDLength, dtag))
+                                                rule.RuleIDLength, schc_frag.dtag)
+            print("rule.RuleID -> {},rule.RuleIDLength-> {}, dtag -> {}".format(
+                    rule.RuleID,rule.RuleIDLength, schc_frag.dtag))
             
             if session is not None:
                 print("Reassembly session found", session)
             else:
                 # no session is found.  create a new reassemble session.
-                session = self.new_reassemble_session(context, rule, dtag,
+                session = self.new_reassemble_session(context, rule, schc_frag.dtag,
                                                       dev_L2addr)
                 self.reassemble_session.add(rule.RuleID, rule.RuleIDLength,
-                                            dtag, session)
+                                            schc_frag.dtag, session)
                 print("New reassembly session created", session)
             print("----------------------- Reassembly process -----------------------")
-            session.receive_frag(packet_bbuf, dtag)
+            session.receive_frag(schc_frag)
         elif key == "comp":
             # if there is no reassemble rule, process_decompress() is directly
             # called from here.  Otherwise, it will be called from a reassemble

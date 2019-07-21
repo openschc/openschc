@@ -122,10 +122,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
     
     """
-    def receive_frag(self, bbuf, dtag):
-        # XXX context should be passed from the lower layer.
-        # XXX and pass the context to the parser.
-        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
+    def receive_frag(self, schc_frag):
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
@@ -174,12 +171,8 @@ class ReassemblerAckOnError(ReassembleBase):
     # A type of data structure holding tiles in each window is not suitable.  
     # So, here just appends a fragment into the tile_list like No-ACK.
 
-    def receive_frag(self, bbuf, dtag):
-
-        print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
-                                bbuf, self.rule))
-        
-        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
+    def receive_frag(self, schc_frag):
+        print('state: {}, rule-> {}'.format(self.state, self.rule))
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
