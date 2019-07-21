@@ -1,6 +1,6 @@
 # Introduction
 
-The context includes a set of rules shared by both ends.
+The context includes a set of rules (sor) shared by both ends.
 Identical Rules are used on both ends. They can be simply
 copied/pasted from one end to the other end, if both ends use the same format for describing them.
 
