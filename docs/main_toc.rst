@@ -5,8 +5,9 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: General Informations
+   :caption: General Information
 
+   General/Installation_guide
    General/User_guide
    General/Documenting_Guidelines
    General/Contributing_Guidelines
@@ -33,3 +34,4 @@ OpenSCHC Project Complete Content
    :caption: Other information
 
    Actus/IETF-Hackathon-LPWAN
+   General/old-docs

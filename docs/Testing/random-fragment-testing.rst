@@ -1,11 +1,11 @@
-=======================
-Random Fragment Testing
-=======================
+==================
+Fragm. Random Test
+==================
 
-RFT operation
+FRT operation
 ^^^^^^^^^^^^^
 
-Random Fragment Testing generates and runs test cases in a loop in 4 stages:
+Fragmentation Random Test generates and runs test cases in a loop in 4 stages:
 
 Stage 1
 -------

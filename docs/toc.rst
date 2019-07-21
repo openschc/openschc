@@ -1,13 +1,14 @@
 .. toctree::
    :maxdepth: 1
-   :caption: Table of Contents
 
-   Full Table of Content <main_toc>
-   Back to Index <index>
+   Back to Home <index>
+   Detailed Table of Content <main_toc>
+
 .. toctree::
    :maxdepth: 1
-   :caption: General Informations
+   :caption: General Information
 
+   General/Installation_guide
    General/User_guide
    General/Documenting_Guidelines
    General/Contributing_Guidelines
@@ -32,6 +33,7 @@
 
 .. toctree::
    :maxdepth: 1
-   :caption: Other information
+   :caption: Other info
 
    Actus/IETF-Hackathon-LPWAN
+   General/old-docs

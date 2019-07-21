@@ -1,8 +1,14 @@
 Documenting Guidelines
 **********************
 
-Following the guidelines below when documenting to the project would be appreciated
+Following the guidelines below when documenting to the project would be appreciated.
 
+Syntax
+======
+
+Sphinx's default syntax is called ReStructuredText.
+Sphinx's documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
+The original RST document is avaible `here <http://docutils.sourceforge.net/rst.html>`_.
 
 Building the documentation
 ==========================
@@ -76,7 +82,3 @@ Normally the documentation will be built automatically, you can open it in your 
   $ git commit -m "meaningful comment"
   $ git push
 
-Syntax
-======
-
-Sphinx's default syntax is called ReStructuredText. The documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
