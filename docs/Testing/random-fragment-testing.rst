@@ -43,3 +43,19 @@ Stage 3 validates the expected result is reached. It checks:
 - if an abort condition was reached on one side or both sides
 - if the receiver did not abort, whether the bitbuffer is reassembled correctly up to the expected length
   (extra bits are ignored)
+
+Stage 4
+-------
+
+Stage 4 logs the parameters of the test case, including:
+
+- the generated rule and the timeline of events as experienced by the scheduler
+- whether the test case resulted in the expected outcome
+- whether the expected number of test cases where tried; if not
+  a new test case is scheduled.
+
+
+Hacking the Scheduler
+^^^^^^^^^^^^^^^^^^^^^
+
+
