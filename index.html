@@ -39,13 +39,10 @@
 <h2>What is OpenSCHC ?<a class="headerlink" href="#what-is-openschc" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="openschc">
 <h3>OpenSCHC<a class="headerlink" href="#openschc" title="Permalink to this headline">¶</a></h3>
-<p>OpenSCHC is a OpenSource Implementation of <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/">SCHC (Static Context Header Compression)</a> currently being standardized by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> at the IETF. Oversimplifying, this is essentially IPv6 compression and fragmentation intended for low datarate, long range IoT networks.</p>
-<p>The short/medium term goal is to organize SCHC Hackathons that occur at the IETF meetings.</p>
-<p>The long term wish is to have a stable, open-source, reference codebase for the SCHC protocol (in Python)</p>
-<p>OpenSCHC is developed to work with micropython.</p>
-<p>ToDo - See branches here : <a class="reference external" href="https://github.com/openschc/openschc/network">https://github.com/openschc/openschc/network</a> .</p>
+<p>OpenSCHC is a OpenSource Implementation of <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/">SCHC (Static Context Header Compression)</a> currently being standardized by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> at the IETF. Oversimplifying, this is essentially IP protocl headers compression and fragmentation so that they can be transported by low datarate, long range IoT networks.</p>
+<p>The long term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.</p>
+<p>OpenSCHC is developed to be compatible with micropython, on the device side.</p>
 <p>OpenSCHC is licensed under the <a class="reference external" href="https://github.com/openschc/openschc/blob/master/LICENSE">MIT License</a> .</p>
-<p>Further documentation about OpenSCHC is available following <a class="reference external" href="https://github.com/openschc/openschc/wiki">https://github.com/openschc/openschc/wiki</a> .</p>
 </div>
 <div class="section" id="understanding-the-architecture">
 <h3>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h3>
@@ -66,61 +63,10 @@
 <p><strong>Network Connector</strong> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
 or to a link simulator.</p>
 </div>
-<div class="section" id="installing-the-environment">
-<h3>Installing the environment<a class="headerlink" href="#installing-the-environment" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="setting-up-the-environment-using-python3">
-<h4>Setting up the environment using Python3<a class="headerlink" href="#setting-up-the-environment-using-python3" title="Permalink to this headline">¶</a></h4>
-<p>Step 1 : Make sure you have a Python3 version installed. Check your python version with the following command and update the python version, if necessary:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">--</span><span class="n">version</span>
-</pre></div>
 </div>
-<p>Step 2: Clone the <a class="reference external" href="https://github.com/openschc/openschc">OpenSCHC repository</a> .</p>
-<p>Step 3: For testing a simple example using SCHC under different scenarios, see <a class="reference external" href="https://github.com/openschc/openschc/blob/master/src/README.md">https://github.com/openschc/openschc/blob/master/src/README.rst</a>.</p>
-</div>
-<div class="section" id="setting-up-the-environment-using-micropython">
-<h4>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h4>
-<p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
-<p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
-<ul>
-<li><p class="first">Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p>
-</li>
-<li><p class="first">For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p>
-</li>
-<li><p class="first">On OSX</p>
-<blockquote>
-<div><ul class="simple">
-<li>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</li>
-<li>or install with Brew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></li>
-<li>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-<p>Step 2: download the needed micropython modules.</p>
-<p>Modules to be installed in order to run SCHC are:</p>
-<ul class="simple">
-<li>argparse.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></li>
-<li>copy.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></li>
-<li>types.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></li>
-</ul>
-<p>Libs are located under <code class="docutils literal notranslate"><span class="pre">~/.micropython/lib</span></code></p>
-<p>Step 3: Test the SCHC C/D and F/R</p>
-<p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between the SCHC device and the gateway. The input JSON files are part of the SCHC orchestrator configuration (as you can see in the architecture figure above), and the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
-<p>As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
-Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>micropython $youropenschcdirectory/src/test_newschc.py --context \
-example/context-100.json --rule-comp example/comp-rule-100.json \
---rule-fragin example/frag-rule-101.json --rule-fragout \
-example/frag-rule-102.json --data-file test/icmpv6.dmp \
---loss-mode list --loss-param 1,2
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="file-classification">
-<h3>File classification<a class="headerlink" href="#file-classification" title="Permalink to this headline">¶</a></h3>
-<p>Refer to the <a class="reference internal" href="Source/File_Classification.html"><span class="doc">File Classification</span></a> for an overview of the source code repository.</p>
-</div>
+<div class="section" id="using-openschc">
+<h2>Using OpenSCHC<a class="headerlink" href="#using-openschc" title="Permalink to this headline">¶</a></h2>
+<p>Want to give it a try? See <a class="reference internal" href="General/Installation_guide.html"><span class="doc">Installation Guide</span></a> in order to set up OpenSCHC on your computer and <a class="reference internal" href="General/User_guide.html"><span class="doc">User Guide</span></a> to start running it.</p>
 </div>
 <div class="section" id="contributing">
 <h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
@@ -129,11 +75,6 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 <div class="section" id="our-current-activity">
 <h2>Our current activity<a class="headerlink" href="#our-current-activity" title="Permalink to this headline">¶</a></h2>
 <p>Direct link to the Etherpad for on-line information exchange at the IETF Hackathons : <a class="reference external" href="https://etherpad.tools.ietf.org/p/openschc">https://etherpad.tools.ietf.org/p/openschc</a></p>
-</div>
-<div class="section" id="wiki">
-<h2>Wiki<a class="headerlink" href="#wiki" title="Permalink to this headline">¶</a></h2>
-<p>See the <a class="reference external" href="https://github.com/openschc-attic/doc/wiki">Previous Wiki on Github</a> and <a class="reference external" href="https://github.com/openschc-attic/doc/wiki/External-Ressources--(Code)">OpenSCHC Attic on Github</a> for previous documentation.</p>
-<p>See branches <a class="reference external" href="https://github.com/openschc/openschc/network">here</a> .</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -145,15 +86,15 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 <div class="section" id="table-of-contents">
 <h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Back to Index</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Back to Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_toc.html">Detailed Table of Content</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">General Informations</span></p>
+<p class="caption"><span class="caption-text">General Information</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
@@ -173,13 +114,14 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Testing/testing.html">Testing information</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Testing/random-fragment-testing.html">Random Fragment Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Other information</span></p>
+<p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General/old-docs.html">Olds docs</a></li>
 </ul>
 </div>
 </div>
@@ -212,13 +154,13 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Back to Index</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Back to Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations</span></p>
+<p class="caption"><span class="caption-text">General Information</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
@@ -234,11 +176,12 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Testing/testing.html">Testing information</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Testing/random-fragment-testing.html">Random Fragment Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other information</span></p>
+<p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General/old-docs.html">Olds docs</a></li>
 </ul>
 
 
