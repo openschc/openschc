@@ -1,21 +1,12 @@
 #---------------------------------------------------------------------------
 
 from base_import import *  # used for now for differing modules in py/upy
-
-import schc
-import simsched
-import simlayer2
 import simul
 from rulemanager import *
-
 from stats.statsct import Statsct
-
 from schccomp import *
 from comp_parser import *
 
-import json
-import pprint
-import binascii
 #---------------------------------------------------------------------------
 rule_context = {
     "devL2Addr": "*",
@@ -52,7 +43,7 @@ rm1.Print()
 #--------------------------------------------------
 # General configuration
 
-l2_mtu = 404 # bits
+l2_mtu = 64# bits
 data_size = 14 # bytes
 
 simul_config = {
@@ -86,12 +77,10 @@ node1.layer2.set_mtu(l2_mtu)
 # Information about the devices
 
 print("-------------------------------- SCHC device------------------------")
-print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id,
-                                            rm0.__dict__))
+print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
 print("-------------------------------- SCHC gw ---------------------------")
-print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id,
-                                            rm1.__dict__))
-print("-------------------------------- Rules -----------------------------")                                              
+print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
+print("-------------------------------- Rules -----------------------------")
 print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
 print("")
 

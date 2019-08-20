@@ -36,7 +36,7 @@ class ClientServerSimul:
         self.configuration['l2_mtu'] = 24  # In bits
         # self.configuration['size_message'] = 255# In bytes
         # self.configuration['ack_on_error'] = True
-        self.configuration['time_between_iteration'] = 30
+        self.configuration['time_between_iteration'] = 10
         self.configuration['packet_loss_simulation'] = False
         # self.configuration['payload_file_simulation'] = True
         self.configuration['payload_name_file'] = "testfile_large.txt"
