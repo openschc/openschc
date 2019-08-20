@@ -90,7 +90,11 @@ class ReassembleBase:
 
         # sending sender abort.
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        """
+        Changement à corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
+        """
+        args = (schc_frag.packet.get_content(), '*')
         print("Sent Receiver-Abort.", schc_frag.__dict__)
         print("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
@@ -215,51 +219,105 @@ class ReassemblerAckOnError(ReassembleBase):
             #     # XXX needs to release all resources.
             #     return
             print("XXX need sending ACK back.")
+            self.state = 'ACK_REQ'
             #input('')
             self.resend_ack(schc_frag)
             return
-        
+
         self.fragment_received = True
         # append the payload to the tile list.
         # padding truncation is done later. see below.
-        nb_tiles = schc_frag.payload.count_added_bits()//self.rule["Fragmentation"]["FRModeProfile"]["tileSize"]
+        # nb_tiles = schc_frag.payload.count_added_bits()//self.rule["tileSize"]
+        nb_tiles, last_tile_size = (
+            schc_frag.payload.count_added_bits() // self.rule["Fragmentation"]["FRModeProfile"]["tileSize"],
+            schc_frag.payload.count_added_bits() % self.rule["Fragmentation"]["FRModeProfile"]["tileSize"])
+        print("---------nb_tiles: ", nb_tiles, " -----last_tile_size ", last_tile_size)
+        tiles = [schc_frag.payload.get_bits_as_buffer(self.rule["Fragmentation"]["FRModeProfile"]["tileSize"]) for _ in range(nb_tiles)]
+        print("---------tiles: ", tiles)
+
         # Note that nb_tiles is the number of tiles which is exact number of the
         # size of the tile.  the tile of which the size is less than the size
         # is not included.
         # The tile that is less than a tile size must be included, so a 1 can be added
         # in the bitmap when there is a tile in the all-1 message
-        if schc_frag.payload.count_added_bits()%self.rule["Fragmentation"]["FRModeProfile"]["tileSize"] != 0:
-            #tile found that is smaller than a normal tile
-            print("tile found that is smaller than a normal tile")
-            nb_tiles = 1
-        #tile should only be append if it is not in the list
-        tile_in_list = False
-        for tile in self.tile_list:
-            if tile["w-num"] == schc_frag.win:
-                if tile["t-num"] == schc_frag.fcn:
-                    print("tile is already in tile list")
-                    tile_in_list = True
-        if not tile_in_list:
-            self.tile_list.append({
-                    "w-num": schc_frag.win,
-                    "t-num": schc_frag.fcn,
-                    "nb_tiles": nb_tiles,
-                    "raw_tiles":schc_frag.payload})
-            self.tile_list = sort_tile_list(self.tile_list, self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"])
+
+        win = schc_frag.win
+        fcn = schc_frag.fcn
+        for tile_in_tiles in tiles:
+            idx = tiles.index(tile_in_tiles)
+            if tile_in_tiles.count_added_bits() % self.rule["Fragmentation"]["FRModeProfile"]["tileSize"] != 0:
+                # tile found that is smaller than a normal tile
+                print("tile found that is smaller than a normal tile")
+                # nb_tiles = 1
+            # tile should only be append if it is not in the list
+            tile_in_list = False
+            for tile in self.tile_list:
+                if tile["w-num"] == win:
+                    if tile["t-num"] == fcn - idx:
+                        print("tile is already in tile list")
+                        tile_in_list = True
+            if not tile_in_list:
+                self.tile_list.append({
+                    "w-num": win,
+                    "t-num": fcn - idx,
+                    "nb_tiles": 1,
+                    "raw_tiles": tile_in_tiles})
+                self.tile_list = sort_tile_list(self.tile_list, self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"])
+            if (fcn - idx) == 0:
+                win += 1
+                fcn = self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"] << 1
+                tiles = tiles[(idx + 1):]
+
+        # !IMPORTANT: it's neccesary to change this condition for one more exact which consider the last tile size cases
+        if last_tile_size > 6:
+            last_tile = schc_frag.payload.get_bits_as_buffer(last_tile_size)
+            print('---------tile:', last_tile)
+            tile_in_list = False
+            for tile in self.tile_list:
+                if tile["w-num"] == win:
+                    if tile["t-num"] == 7:
+                        print("tile is already in tile list")
+                        tile_in_list = True
+            if not tile_in_list:
+                self.tile_list.append({
+                    "w-num": win,
+                    "t-num": 7,
+                    "nb_tiles": 1,
+                    "raw_tiles": last_tile})
+                self.tile_list = sort_tile_list(self.tile_list, self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"])
+
+        # if schc_frag.payload.count_added_bits()%self.rule["tileSize"] != 0:
+        #     #tile found that is smaller than a normal tile
+        #     print("tile found that is smaller than a normal tile")
+        #     #nb_tiles = 1
+        # #tile should only be append if it is not in the list
+        # tile_in_list = False
+        # for tile in self.tile_list:
+        #     if tile["w-num"] == schc_frag.win:
+        #         if tile["t-num"] == schc_frag.fcn:
+        #             print("tile is already in tile list")
+        #             tile_in_list = True
+        # if not tile_in_list:
+        #     self.tile_list.append({
+        #             "w-num": schc_frag.win,
+        #             "t-num": schc_frag.fcn,
+        #             "nb_tiles": nb_tiles,
+        #             "raw_tiles":schc_frag.payload})
+        #     self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
         for tile in self.tile_list:
             print("w-num: {} t-num: {} nb_tiles:{}".format(
-                    tile['w-num'],tile['t-num'],tile['nb_tiles']))
+                tile['w-num'], tile['t-num'], tile['nb_tiles']))
         print("")
-            #print("raw_tiles:{}".format(tile['raw_tiles']))
-        #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
- 
+        # print("raw_tiles:{}".format(tile['raw_tiles']))
+        # self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
+
         # self.tile_list.append({
         #         "w-num": schc_frag.win,
         #         "t-num": schc_frag.fcn,
         #         "nb_tiles": nb_tiles,
         #         "raw_tiles":schc_frag.payload})
         # self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
-        #self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
+        # self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
 
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
@@ -273,7 +331,7 @@ class ReassemblerAckOnError(ReassembleBase):
         elif schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
             print("----------------------- ALL1 received -----------------------")
             self.all1_received = True
-            #Statsct.set_msg_type("SCHC_ALL_1")
+            Statsct.set_msg_type("SCHC_ALL_1")
             self.mic_received = schc_frag.mic
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             print("schc_frag.mic: {}, mic_calced: {}".format(schc_frag.mic,mic_calced))
@@ -283,11 +341,12 @@ class ReassemblerAckOnError(ReassembleBase):
                 return
             else:
                 self.mic_missmatched = True
+                self.state = 'ERROR_MIC'
                 print("----------------------- ERROR -----------------------")
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
                 bit_list = find_missing_tiles(self.tile_list,
-                                              self.rule["FCNSize"],
+                                              self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"],
                                               schcmsg.get_fcn_all_1(self.rule))
 
                 assert bit_list is not None
@@ -299,7 +358,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     #if tiles are missing, then the packet is larger, should send a bitmap
                     #that considers the max_fcn and the tiles received
                     bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
-                                                self.rule["FCNSize"],
+                                                self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                     #print("new bit list, should it work???")
                     #input("")
@@ -319,8 +378,11 @@ class ReassemblerAckOnError(ReassembleBase):
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
 
                     print("ACK failure sent:", schc_ack.__dict__)
-                    args = (schc_ack.packet.get_content(),
-                            self.context["devL2Addr"])
+                    """
+                    Changement à corriger
+                    args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
+                    """
+                    args = (schc_ack.packet.get_content(), '*')
                     self.protocol.scheduler.add_event(
                             0, self.protocol.layer2.send_packet, args)
                     # XXX need to keep the ack message for the ack request.
@@ -352,9 +414,9 @@ class ReassemblerAckOnError(ReassembleBase):
             if self.all1_received:
                 print("all-1 received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
-                            self.rule["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
+                            self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"], schcmsg.get_fcn_all_1(self.rule)))
                 bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
-                                                self.rule["FCNSize"],
+                                                self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"],
                                                 schcmsg.get_fcn_all_1(self.rule))
                 for tile in self.tile_list:
                     print("w-num: {} t-num: {} nb_tiles:{}".format(
@@ -431,19 +493,18 @@ class ReassemblerAckOnError(ReassembleBase):
                     print("----------------------- SCHC ACK KO SEND  -----------------------")
  
                     print("ACK failure sent:", schc_ack.__dict__)
- 
- 
- 
- 
+        """
+        Changement à corriger
         args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
-        self.protocol.scheduler.add_event(0,
-                                            self.protocol.layer2.send_packet,
-                                            args)
+        """
+        args = (schc_ack.packet.get_content(), "*")
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
     def finish(self, schc_packet, schc_frag):
         self.state = "DONE"
         print('state DONE -> {}'.format(self.state))
         #input('DONE')
+<<<<<<< HEAD
         print("----------------------- Decompression -----------------------")
         if not self.protocol.config.get("debug-fragment"):
             # XXX
@@ -458,6 +519,11 @@ class ReassemblerAckOnError(ReassembleBase):
         print("debug: ack-on-error FindRuleFromSCHCpacket", rule)
         self.protocol.process_decompress(rule, self.sender_L2addr,
                                          schc_packet)
+=======
+        # decompression
+        self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
+
+>>>>>>> 84256f7... Compression, fragmentation and rulemanager
         # ACK message
         schc_ack = schcmsg.frag_receiver_tx_all1_ack(
                 schc_frag.rule,
@@ -468,10 +534,12 @@ class ReassemblerAckOnError(ReassembleBase):
         if enable_statsct:
             Statsct.set_msg_type("SCHC_ACK_OK")
         print("----------------------- SCHC ACK OK SEND  -----------------------")
+        """
+        Changement à corriger
         args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
-        self.protocol.scheduler.add_event(0,
-                                            self.protocol.layer2.send_packet,
-                                            args)
+        """
+        args = (schc_ack.packet.get_content(), '*')
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
         #the ack is build everytime
         self.schc_ack = schc_ack
@@ -495,11 +563,11 @@ class ReassemblerAckOnError(ReassembleBase):
             for i in self.tile_list[:-2]:
                 # it needs to copy the buffer as it will be reused later.
                 tiles = i["raw_tiles"].copy().get_bits_as_buffer(
-                    i["nb_tiles"]*self.rule["tileSize"])
+                    i["nb_tiles"]*self.rule["Fragmentation"]["FRModeProfile"]["tileSize"])
                 schc_packet += tiles
             # check the size of the padding in the All-1 fragment.
             if (self.tile_list[-1]["raw_tiles"].count_added_bits() <
-                self.rule["L2WordSize"]):
+                self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"]):
                 # the last tile exists in the fragment before the All-1
                 # fragment and the payload has to add as it is.
                 # the All-1 fragment doesn't need to taken into account
@@ -510,7 +578,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 # it needs to truncate the padding in the fragment before that.
                 i = self.tile_list[-2]
                 schc_packet += i["raw_tiles"].copy().get_bits_as_buffer(
-                    i["nb_tiles"]*self.rule["tileSize"])
+                    i["nb_tiles"]*self.rule["Fragmentation"]["FRModeProfile"]["tileSize"])
                 schc_packet += self.tile_list[-1]["raw_tiles"]
         else:
             # len(self.tile_list) == 1
@@ -525,7 +593,11 @@ class ReassemblerAckOnError(ReassembleBase):
         # sending Receiver abort.
         self.state = "ABORT"
         schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        """
+        Changement à  corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
+        """
+        args = (schc_frag.packet.get_content(), '*')
         print("Sent Receiver-Abort.", schc_frag.__dict__)
         print("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 

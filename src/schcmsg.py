@@ -97,13 +97,13 @@ class frag_tx(frag_base):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
         #print("ruleID")
-        #print(self.rule["ruleID"])
+        #print("Make_frag Rule", self.rule)
         if self.rule["RuleID"] is not None and self.rule["RuleIDLength"] is not None:
             buffer.add_bits(self.rule["RuleID"], self.rule["RuleIDLength"])
         if dtag is not None and self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"] is not None:
             assert self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"] != None # CA: sanity check
             buffer.add_bits(dtag, self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"])
-        if win is not None and self.rule.get("WSize") is not None:
+        if win is not None and self.rule["Fragmentation"]["FRModeProfile"]["WSize"] is not None:
             buffer.add_bits(win, self.rule["Fragmentation"]["FRModeProfile"]["WSize"])
         #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
         #buffer.count_padding_bits(),buffer.count_padding_bits()))
@@ -122,9 +122,9 @@ class frag_tx(frag_base):
             #print("buffer after")
             #print(buffer)        
         else:
-            if fcn is not None and self.rule.get("FCNSize") is not None:
+            if fcn is not None and self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"] is not None:
                 buffer.add_bits(fcn, self.rule["Fragmentation"]["FRModeProfile"]["FCNSize"])
-            if mic is not None and self.rule.get("MICAlgorithm") is not None:
+            if mic is not None and self.rule["Fragmentation"]["FRModeProfile"]["MICALgorithm"] is not None:
                 mic_size = get_mic_size(self.rule)
                 assert mic_size % bitarray.BITS_PER_BYTE == 0
                 assert len(mic) == mic_size // 8
@@ -157,9 +157,9 @@ class frag_receiver_tx(frag_base):
                 buffer.add_bits(win, self.rule["Fragmentation"]["FRModeProfile"]["WSize"])
             # c-bit
             buffer.set_bit(1)
-            padding_size = (self.rule["L2WordSize"] -
-                            buffer.count_added_bits()%self.rule["L2WordSize"])
-            padding_size += self.rule["L2WordSize"]
+            padding_size = (self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"] -
+                            buffer.count_added_bits()%self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"])
+            padding_size += self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"]
             # padding bits
             for _ in range(padding_size):
                 buffer.set_bit(1)
@@ -250,7 +250,7 @@ class frag_rx(frag_base):
         if dtagSize in the rule is zero, default dtag is adopted.
         XXX need to be considered.
         """
-        dtag_size = self.rule.get("dtagSize", 0)
+        dtag_size = self.rule["Fragmentation"]["FRModeProfile"]["dtagSize"]
         if dtag_size != 0:
             dtag = self.packet_bbuf.get_bits(dtag_size)
         else:
@@ -264,7 +264,7 @@ class frag_rx(frag_base):
         """ get the value of the window field and set it into self.win.
         if WSize in the rule is zero, self.win is not set (None).
         """
-        win_size = self.rule.get("WSize", 0)
+        win_size = self.rule["Fragmentation"]["FRModeProfile"]["WSize"]
         if win_size != 0:
             self.win = self.packet_bbuf.get_bits(win_size)
         return win_size
@@ -391,7 +391,7 @@ class frag_receiver_rx(frag_rx):
         self.init_param()
         self.set_recvbuf(packet_bbuf)
         self.rule = rule
-        self.rule_id = self.packet_bbuf.get_bits(rule["RuleIDLength"])
+        self.rule_id = self.packet_bbuf.get_bits(self.rule["RuleIDLength"])
         pos = self.rule["RuleIDLength"]
         pos += self.parse_dtag()
         pos += self.parse_win()
@@ -400,7 +400,7 @@ class frag_receiver_rx(frag_rx):
             """ Changement à corriger
             if self.packet_bbuf.count_remaining_bits() < self.rule["L2WordSize"]:
             """
-            if self.packet_bbuf.count_remaining_bits() < 8:
+            if self.packet_bbuf.count_remaining_bits() < self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"]:
                 # this is a Sender Abort message.
                 self.abort = True
                 return
@@ -411,7 +411,7 @@ class frag_receiver_rx(frag_rx):
             """ Changement à corriger
             if self.packet_bbuf.count_remaining_bits() < self.rule["L2WordSize"]:
             """
-            if self.packet_bbuf.count_remaining_bits() < 8:
+            if self.packet_bbuf.count_remaining_bits() < self.rule["Fragmentation"]["FRModeProfile"]["L2WordSize"]:
                 # this is a ACK REQ message
                 self.ack_request = True
                 return

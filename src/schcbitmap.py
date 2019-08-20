@@ -76,7 +76,10 @@ def make_bit_list(tile_list, N, window_size):
             if nbt >= 1:
                 print("a tile in the last fragment")
                 if max_fcn - 1 != tni:
-                    print("tile is the last of the packet, should be number {}".format(tni))    
+                    print("tile is the last of the packet, should be number {}".format(tni))
+                    for _ in range(tni - 1):
+                        # add zeros to all other tiles
+                        bl.append(0)
                 #if more than one tile is in the ALL-1 message
                 for _ in range(nbt):
                     print("append 1")
@@ -299,7 +302,7 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
             if len(sorted_tile_list) == 1:
                 #just the all-1 message was received all other fragments were lost
                 #bitmap sould be [0,0,0,0,0,1]
-                for _ in range(max_fcn-1):
+                for _ in range(max_fcn):
                     #add zeros to all other tiles 
                     bl.append(0)
                 #add the last bit as 1 -> fcn = 7
@@ -363,14 +366,6 @@ def make_bit_list_no_all_1(tile_list, N, window_size):
  
         print("bl:{}".format(bl))
     return bit_list
-
-
-
-
-
-
-
-
 
 def find_missing_tiles_mic_ko_yes_all_1(tile_list, N, window_size):
     """ find missing tiles in the tile_list.
