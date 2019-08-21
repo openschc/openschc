@@ -33,7 +33,7 @@ class ClientServerSimul:
         self.configuration['role'] = role
         self.configuration['ipServer'] = "127.0.0.1"
         self.configuration['portServer'] = 12345
-        self.configuration['l2_mtu'] = 24  # In bits
+        self.configuration['l2_mtu'] = 64  # In bits
         # self.configuration['size_message'] = 255# In bytes
         # self.configuration['ack_on_error'] = True
         self.configuration['time_between_iteration'] = 10
@@ -66,7 +66,7 @@ for param in sys.argv:
 ap = argparse.ArgumentParser(description="a SCHC simulator.",
                              formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 ap.add_argument("--r", action="store", dest="role",
-                default="client",
+                default="server",
                 help="specify a role: client or server.")
 opt = ap.parse_args()
 
