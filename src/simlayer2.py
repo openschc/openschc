@@ -60,17 +60,11 @@ class SimulLayer2:
         print(transmit_callback, "AAAAAAA")
         print("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback))
 
-<<<<<<< HEAD
-        self.sim.send_packet(packet, src_dev_id, dst_dev_id,
-                             self._event_sent_callback, (transmit_callback,))
-        
-=======
         if self.role == "client" or self.role == "server":
             self.sim.send_packetX(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
         else:
             self.sim.send_packet(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
 
->>>>>>> 84256f7... Compression, fragmentation and rulemanager
     def _event_sent_callback(self, transmit_callback, status):
         assert self.is_transmitting
         self.is_transmitting = False

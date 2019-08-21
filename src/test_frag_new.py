@@ -14,7 +14,7 @@ packet_loss_simulation = False
 # --------------------------------------------------
 # General configuration
 
-l2_mtu = 64  # bits
+l2_mtu = 72  # bits
 data_size = 14  # bytes
 SF = 12
 

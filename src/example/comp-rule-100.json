@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 [{
     "RuleID": 5,
     "RuleIDLength": 3,
@@ -40,48 +39,86 @@
 },{
     "RuleID": 6,
     "RuleIDLength": 3,
-    "Action": "ping-proxy",
     "Compression": [
       {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-      {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-      {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+      {"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+      {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
       {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
       {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
       {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-      {"FID": "IPV6.DEV_PREFIX","TV": "2600:70ff:f135::", "MO": "equal","CDA": "not-sent"},
-      {"FID": "IPV6.DEV_IID", "TV": "::1","MO": "equal","CDA": "not-sent"},
-      {"FID": "IPV6.APP_PREFIX",            "MO": "ignore","CDA": "value-sent"},
-      {"FID": "IPV6.APP_IID",               "MO": "ignore","CDA": "value-sent"},
+      {"FID": "IPV6.DEV_PREFIX","TV": ["2001:db8::/64",
+                                       "fe80::/64",
+                                       "2001:0420:c0dc:1002::/64" ],
+                                         "MO": "match-mapping","CDA": "mapping-sent","SB": 1},
+      {"FID": "IPV6.DEV_IID", "TV": "::79","MO": "equal","CDA": "DEVIID"},
+      {"FID": "IPV6.APP_PREFIX","TV": [ "2001:db8:1::/64",
+                                        "fe80::/64",
+                                        "2404:6800:4004:818::/64" ],
+                                         "MO": "match-mapping","CDA": "mapping-sent", "SB": 2},
+      {"FID": "IPV6.APP_IID", "TV": 2004,"MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.TYPE",  "TV": 128,"MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.CODE",  "TV": 0,  "MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.CKSUM", "TV": 0, "MO": "ignore","CDA": "compute-checksum"},
       {"FID": "ICMPV6.IDENT", "TV": [],"MO": "ignore","CDA": "value-sent"},
-      {"FID": "ICMPV6.SEQNB", "TV": [],"MO": "ignore","CDA": "value-sent"}
+      {"FID": "ICMPV6.SEQNO", "TV": [],"MO": "ignore","CDA": "value-sent"}
     ]
-  },{
+},{
     "RuleID": 1,
     "RuleIDLength": 3,
     "Fragmentation" : {
         "FRMode": "ackOnError",
         "FRModeProfile": {
             "dtagSize": 2,
-            "WSize": 5,
+            "WSize": 7,
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
-            "tileSize": 9,
+            "tileSize": 17,
             "MICAlgorithm": "crc32",
-            "MICWordSize": 8
+            "MICWordSize": 8,
+            "L2WordSize": 8
         }
     }
-  }
-]
-=======
-{
-    "ruleLength": 3,
-    "ruleID": 5,
-    "compression": {
-        "rule_set": []
+},{
+    "RuleID": 2,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRMode": "ackOnError",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "WSize": 7,
+            "FCNSize": 3,
+            "ackBehavior": "afterAll1",
+            "tileSize": 16,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8
+        }
+    }
+},{
+    "RuleID": 3,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRMode": "noAck",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8
+        }
+    }
+  },{
+    "RuleID": 4,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRMode": "noAck",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8
+        }
     }
 }
-
->>>>>>> 76c551d... Rule Changes
+]

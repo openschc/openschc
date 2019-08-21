@@ -168,14 +168,11 @@ rm0.add_context(rule_context, compress_rule, frag_rule3, frag_rule4)
 
 rm1 = RuleManager()
 rm1.add_context(rule_context, compress_rule, frag_rule4, frag_rule3)
-<<<<<<< HEAD
 #ack-on-error
 if ack_on_error:  
     
     rm0 = RuleManager()
     rm0.add_context(rule_context, compress_rule, frag_rule1, frag_rule2)
-=======
->>>>>>> 8c5bbc0... Petite correction Mode NoACK
 
     rm1 = RuleManager()
     rm1.add_context(rule_context, compress_rule, frag_rule2, frag_rule1)

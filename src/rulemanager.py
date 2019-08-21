@@ -275,7 +275,7 @@ FIELD__DEFAULT_PROPERTY = {
     T_ICMPV6_CODE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
     T_ICMPV6_CKSUM         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
     T_ICMPV6_IDENT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_ICMPV6_SEQNB         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_SEQNO         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_VERSION         : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_TYPE            : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_TKL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"  },
@@ -523,9 +523,9 @@ class RuleManager:
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
-        if T_ACTION in nrule:
-            print ("Warning: using experimental Action")
-            arule[T_ACTION] = nrule[T_ACTION]    
+        # if T_ACTION in nrule:
+        #     print ("Warning: using experimental Action")
+        #     arule[T_ACTION] = nrule[T_ACTION]
 
 
         arule["Compression"] = []
@@ -788,11 +788,6 @@ class RuleManager:
         return None
 
     def FindFragmentationRule(self, deviceID=None, originalSize=None):
-        import warnings
-        warnings.warn("XXX: remove _db")
-        if self._db is not None:
-           return self._db[0]["fragSender"]
-        
         for d in self._ctxt:
             if d["DeviceID"] == deviceID:
                 for r in d["SoR"]:

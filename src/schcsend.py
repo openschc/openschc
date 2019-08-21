@@ -562,20 +562,17 @@ class FragmentAckOnError(FragmentBase):
         print("EVENT SEND FRAG")
         self.send_frag()
 
-    def receive_frag(self, schc_frag):
+    def receive_frag(self, bbuf, dtag):
         # the ack timer can be cancelled here, because it's been done whether
         # both rule_id and dtag in the fragment are matched to this session
         # at process_received_packet().
-        self.cancel_ack_wait_timer() # the timeout is canceled but has to be set 
+        self.cancel_ack_wait_timer() # the timeout is canceled but has to be set
         # when an ack should be received
         self.resend = False
         #
-        print("-----------------------  Sender Frag Received -----------------------") 
-        if self.dtag != schc_frag.dtag:
-            print("ERROR: dtag mismatched, expected {} != frame {}".format(
-                    self.dtag, schc_frag.dtag))
-            return
-        print("fragment received -> {}".format(schc_frag.__dict__))        
+        schc_frag = schcmsg.frag_sender_rx(self.rule, bbuf)
+        print("-----------------------  Sender Frag Received -----------------------")
+        print("fragment received -> {}".format(schc_frag.__dict__))
         if ((self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] is None or
             schc_frag.win == schcmsg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
@@ -601,15 +598,7 @@ class FragmentAckOnError(FragmentBase):
             return
         if schc_frag.cbit == 0:
             print("----------------------- ACK Failure rid={} dtag={} -----------------------".format(
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    self.rule["RuleID"], self.dtag))
-=======
-                    self.rule['RuleID'], self.dtag))
->>>>>>> 84256f7... Compression, fragmentation and rulemanager
-=======
                     self.rule[T_RULEID], self.dtag))
->>>>>>> d92e34f... pre-integration of packet loss module
             #self.resend = False
             #self.all1_send = False
             self.state = self.ACK_FAILURE

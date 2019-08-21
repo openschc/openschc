@@ -20,18 +20,6 @@ def get_fcn_all_0(rule):
     return (0<<rule[T_FRAG_FCN])-4
 
 def get_win_all_1(rule):
-<<<<<<< HEAD
-    #return (1<<rule["WSize"])-1
-    return (1<<rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])-1
-
-
-def get_max_fcn(rule): #LT: I don't understand this computation
-    #return rule["windowSize"]-1
-    return rule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE]-1
-
-def get_max_dtag(rule):
-    return (1<<rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])-1
-=======
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
     return (1<<rule[T_FRAG_W])-1
 
@@ -42,29 +30,24 @@ def get_max_fcn(rule):
 def get_max_dtag(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
     return (1<<rule[T_FRAG_DTAG])-1
->>>>>>> d92e34f... pre-integration of packet loss module
 
 def get_sender_header_size(rule):
-    """Changement à corriger    
+    """Changement à corriger
     return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG] + rule.get(T_FRAG_W , 0) + rule[T_FRAG_FCN]
     """
     return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]
 
 def get_receiver_header_size(rule):
-    """Changement à corriger 
+    """Changement à corriger
     return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG] + rule.get(T_FRAG_W , 0) + 1
     """
     return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + 1
 
 def get_mic_size(rule):
-<<<<<<< HEAD
-    rule = rule["Fragmentation"]["FRModeProfile"] #ajoute
-    assert rule["MICAlgorithm"] == "crc32"
-=======
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
     assert rule[T_FRAG_MIC] == "crc32"
->>>>>>> d92e34f... pre-integration of packet loss module
     return 32
+
 
 def roundup(v, w=8):
     """ return the size of bits align to the w boundary. """
