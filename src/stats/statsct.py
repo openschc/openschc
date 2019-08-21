@@ -242,14 +242,16 @@ class Statsct(object):
 
         if src_dev_id == Statsct.src_id:
             Statsct.sender_packets['packet_list'].append(Statsct.packet_info)
-            Statsct.get_msg_type(packet, Statsct.device_rule['fragSender'])
+            # Statsct.get_msg_type(packet, Statsct.device_rule['fragSender'])
+            Statsct.get_msg_type(packet, Statsct.device_rule)
             Statsct.channel_occupancy_sender += Statsct.packet_info['toa_packet']
 
             print("packet added to sender list")
             #Statsct.log(Statsct.sender_packets)
         else:
             Statsct.receiver_packets['packet_list'].append(Statsct.packet_info)
-            Statsct.get_msg_type(packet, Statsct.gw_rule['fragSender'])
+            # Statsct.get_msg_type(packet, Statsct.gw_rule['fragSender'])
+            Statsct.get_msg_type(packet, Statsct.gw_rule)
             Statsct.channel_occupancy_receiver += Statsct.packet_info['toa_packet']
             
             print("packet added to receiver list")

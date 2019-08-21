@@ -295,14 +295,14 @@ class SCHCProtocol:
         # !IMPORTANT: This condition has to be changed by a context condition like in the last version
         if dev_L2addr == b"\xaa\xbb\xcc\xee":
 
-            if frag_rule["Fragmentation"]["FRModeProfile"]["dtagSize"] > 0:
-                dtag = packet_bbuf.get_bits(frag_rule["Fragmentation"]["FRModeProfile"]["dtagSize"],
-                                    position=frag_rule["RuleIDLength"])
+            if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
+                dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
+                                    position=frag_rule[T_RULEIDLENGTH])
             else:
                 dtag = None
 
             # find existing session for fragment or reassembly.
-            session = self.reassemble_session.get(frag_rule["RuleID"], frag_rule["RuleIDLength"], dtag)
+            session = self.reassemble_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
             if session is not None:
                 print("Reassembly session found", session)
             else:
@@ -310,7 +310,7 @@ class SCHCProtocol:
                 context = None
                 session = self.new_reassemble_session(context, frag_rule, dtag,
                                                         dev_L2addr)
-                self.reassemble_session.add(frag_rule["RuleID"], frag_rule["RuleIDLength"],
+                self.reassemble_session.add(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH],
                                             dtag, session)
                 print("New reassembly session created", session)
             session.receive_frag(packet_bbuf, dtag)
@@ -319,14 +319,14 @@ class SCHCProtocol:
             self.process_decompress(packet_bbuf, dev_L2addr, direction= T_DIR_UP)
 
         elif dev_L2addr == b"\xaa\xbb\xcc\xdd":
-            if frag_rule["Fragmentation"]["FRModeProfile"]["dtagSize"] > 0:
-                dtag = packet_bbuf.get_bits(frag_rule["Fragmentation"]["FRModeProfile"]["dtagSize"],
-                                    position=frag_rule["RuleIDLength"])
+            if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
+                dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
+                                    position=frag_rule[T_RULEIDLENGTH])
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
-            session = self.fragment_session.get(frag_rule["RuleID"], frag_rule["RuleIDLength"], dtag)
-            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(frag_rule["RuleID"],frag_rule["RuleIDLength"], dtag))
+            session = self.fragment_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
+            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(frag_rule[T_RULEID],frag_rule[T_RULEIDLENGTH], dtag))
             if session is not None:
                 print("Fragmentation session found", session)
                 session.receive_frag(packet_bbuf, dtag)
@@ -408,7 +408,7 @@ class SCHCProtocol:
             return
         print("---------------------- Decompression Process----------------------")
         print("---------------------- Decompression Rule-------------------------")
-        self._log("compression rule_id={}".format(rule["RuleID"]))
+        self._log("compression rule_id={}".format(rule[T_RULEID]))
         # print('rule {}'.format(rule))
         print("------------------------ Decompression ---------------------------")
         raw_packet = self.decompressor.decompress(packet_bbuf, rule, direction)

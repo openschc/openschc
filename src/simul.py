@@ -143,7 +143,7 @@ class Simul:
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet,src_id,dst_id, True)
+                Statsct.add_packet_info(packet, src_id, dst_id, True)
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
             count = 0

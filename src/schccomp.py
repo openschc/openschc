@@ -112,12 +112,12 @@ T_FRAG_FCN = "FCNSize"
 T_FRAG_WINDOW_SIZE = "windowSize"
 T_FRAG_ACK_BEHAVIOR = "ackBehavior"
 T_FRAG_TILE = "tileSize"
-T_FRAG_MIC  = "MICALgorithm"
+T_FRAG_MIC = "MICALgorithm"
 T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 
-from rulemanager import *
+# from rulemanager import *
 
 
 #---------------------------------------------------------------------------
