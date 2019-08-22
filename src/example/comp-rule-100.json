@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [{
     "RuleID": 5,
     "RuleIDLength": 3,
@@ -74,3 +75,13 @@
     }
   }
 ]
+=======
+{
+    "ruleLength": 3,
+    "ruleID": 5,
+    "compression": {
+        "rule_set": []
+    }
+}
+
+>>>>>>> 76c551d... Rule Changes
