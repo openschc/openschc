@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-Simulator and gateway
-=======
 Client-Server Simulation
 ========================
 
@@ -38,7 +35,23 @@ How to run this simulation
     ```
 
 Rulemanager Test
->>>>>>> 04dd828... stable simulation without packet loss module
+=====================
+
+## Example with the simulator
+
+- First Rulemanager test
+
+    ```
+    python3 test_frag_new.py
+    ```
+## Example without the simulator
+
+- First Rulemanager test
+
+    ```
+    python3 test_compress.py
+    ```
+Simulator and gateway
 =====================
 
 ## Example with the simulator
