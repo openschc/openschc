@@ -43,8 +43,8 @@ class SimulLayer3:
     # XXX need to confirm whether this should be here or not.
     def recv_packet(self, dev_L2addr, raw_packet):
         """ Two lines below commented"""
-        self._log("recv-from-L2 Devaddr={} Packet={}".format(
-                dev_L2addr, b2hex(raw_packet.get_content())))
+        # self._log("recv-from-L2 Devaddr={} Packet={}".format(
+        #         dev_L2addr, b2hex(raw_packet.get_content())))
         # XXX do more work
 
     def _set_protocol(self, protocol): # called by SCHCProtocol
@@ -96,6 +96,13 @@ class SimulNullNode(SimulNode):
 
 class Simul:
     def __init__(self, simul_config = {}):
+        self.ACK_SUCCESS = "ACK_SUCCESS"
+        self.ACK_FAILURE = "ACK_FAILURE"
+        self.RECEIVER_ABORT = "RECEIVER_ABORT"
+        self.SEND_ALL_1 = "SEND_ALL_1"
+        self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
+        self.ACK_TIMEOUT = "ACK_TIMEOUT"
+
         self.simul_config = simul_config
         self.node_table = {}
         self.link_set = set()
@@ -136,7 +143,7 @@ class Simul:
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet,src_id,dst_id, True)
+                Statsct.add_packet_info(packet, src_id, dst_id, True)
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
             count = 0
@@ -152,6 +159,60 @@ class Simul:
         #
         if callback != None:
             args = callback_args+(count,) # XXX need to check. - CA:
+            # [CA] the 'count' is now passed as 'status' in:
+            #  SimulLayer2._event_sent_callback(self, transmit_callback, status
+            # the idea is that is transmission fails, at least you can pass
+            # count == 0 (status == 0), and you can do something there.
+            # (in general case, some meta_information need to be sent)
+
+            #args = callback_args
+            callback(*args)
+        return count
+
+    def send_packetX(self, packet, src_id, dst_id=None, callback=None, callback_args=tuple()):
+        """send a message to another device in a client - server Simulation"""
+        self._log("----------------------- SEND PACKET -----------------------")
+        if not self.frame_loss.check(packet):
+            self._log("----------------------- OK -----------------------")
+            self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
+            if enable_statsct:
+                Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
+                Statsct.add_packet_info(packet,src_id,dst_id, True)
+            # if dst_id == None, it is a broadcast
+            # link_list = self.get_link_by_id(src_id, dst_id)
+            count = 1
+            # for link in link_list:
+            #     count += self.send_packet_on_link(link, packet)
+            note_table_list = list(self.node_table.items())[-1][1]
+            #self.node_table[0].protocol.layer2.clientSend.send(packet)
+
+            note_table_list.protocol.layer2.roleSend.send(packet)
+
+            try:
+                number_tiles_send = \
+                    note_table_list.protocol.fragment_session.session_list[0]["session"].current_number_tiles_sent()
+                state = note_table_list.protocol.fragment_session.session_list[0]["session"].state
+                print("STATE : ", state)
+                print("Lenght queue", len(self.scheduler.queue))
+                if (state == self.SEND_ALL_1 or state == self.ACK_FAILURE or state == self.ACK_TIMEOUT) \
+                        and number_tiles_send == 0:
+                    print("------------------------------- RECEIVE PACKET ------------------------------")
+                    message = note_table_list.protocol.layer2.roleSend.Receive()
+                    print("Message from Server", message)
+                    note_table_list.protocol.layer2.event_receive_packet(note_table_list.id, message)
+                    # note_table_list.protocol.fragment_session.session_list[0]["session"].state = 'START'
+            except:
+                print("Not fragment state")
+        else:
+            self._log("----------------------- KO -----------------------")
+            self._log("packet was lost {}->{}".format(src_id, dst_id))
+            if enable_statsct:
+                Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))
+                Statsct.add_packet_info(packet,src_id,dst_id, False)
+            count = 0
+        #
+        if callback != None:
+            args = callback_args + (count,) # XXX need to check. - CA:
             # [CA] the 'count' is now passed as 'status' in:
             #  SimulLayer2._event_sent_callback(self, transmit_callback, status
             # the idea is that is transmission fails, at least you can pass

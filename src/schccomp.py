@@ -9,8 +9,6 @@ import pprint
 T_RULEID = "RuleID"
 T_RULEIDLENGTH = "RuleIDLength"
 
-T_ACTION = "Action"
-
 T_FID = "FID"
 T_FL = "FL"
 T_FP = "FP"
@@ -38,7 +36,7 @@ T_ICMPV6_TYPE = "ICMPV6.TYPE"
 T_ICMPV6_CODE = "ICMPV6.CODE"
 T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
 T_ICMPV6_IDENT = "ICMPV6.IDENT"
-T_ICMPV6_SEQNB = "ICMPV6.SEQNB"
+T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
 
 T_PROTO_UDP = "UDP"
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
@@ -75,8 +73,6 @@ T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
 T_COAP_OPT_END = "COAP.END"
 
-T_ACTION_PPING = "ping-proxy"
-
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
 T_DIR_BI = "BI"
@@ -112,12 +108,12 @@ T_FRAG_FCN = "FCNSize"
 T_FRAG_WINDOW_SIZE = "windowSize"
 T_FRAG_ACK_BEHAVIOR = "ackBehavior"
 T_FRAG_TILE = "tileSize"
-T_FRAG_MIC  = "MICALgorithm"
+T_FRAG_MIC = "MICALgorithm"
 T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 
-from rulemanager import *
+# from rulemanager import *
 
 
 #---------------------------------------------------------------------------

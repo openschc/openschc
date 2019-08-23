@@ -20,7 +20,7 @@ class TileList():
         """Changement à corriger 
         self.t_size = ["tileSize"]
         """
-        self.t_size = rule["Fragmentation"]["FRModeProfile"]["tileSize"]
+        self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
         self.max_fcn = schcmsg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
