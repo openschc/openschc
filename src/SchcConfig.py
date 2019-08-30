@@ -18,7 +18,7 @@ class SchcConfig:
         self.rule = []
         self.node0 = None
         self.sim = None
-        self.rule_comp = "example/comp-rule-100.json"
+        self.rule_comp = None
         self.rule_manager = None
         self.devaddr = None
         self.setAddress()
@@ -34,8 +34,9 @@ class SchcConfig:
         """
         This method set the compression and fragmentation rules in client and server
         """
+        self.rule_comp = self.configuration['rule_name_file']
         self.rule_manager = rulemanager.RuleManager()
-        self.rule_manager.Add(device=self.devaddr, file=self.rule_comp)
+        self.rule_manager.Add(device=self.devaddr, file=self.rule_comp, compression=self.configuration['mode_with_compression'])
 
     def configSim(self):
         """
@@ -93,6 +94,19 @@ class SchcConfig:
         Method to set a payload to send from client to server
         :return payload: message to send from client
         """
-        Payload = bytearray(
-            b"""`\x12\x34\x56\x00\x1e\x11\x1e\xfe\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xfe\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x162\x163\x00\x1e\x00\x00A\x02\x00\x01\n\xb3foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\x82  &Ehello""")
-        return Payload
+        if self.configuration['payload_name_file'] != "":
+            fileToSend = self.configuration['payload_name_file']
+            file = open(fileToSend, 'r')  # 1400 bytes
+            payload = file.read().encode()
+            print("Payload size:", len(payload), "bytes")
+            print("Payload: {}".format(b2hex(payload)))
+            print("")
+        else:
+            payload = bytearray(
+                b"""`\x12\x34\x56\x00\x1e\x11\x1e\xfe\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xfe\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x162\x163\x00\x1e\x00\x00A\x02\x00\x01\n\xb3foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\x82  &Ehello""")
+            print("Payload size:", len(payload), "bytes")
+            print("Payload: {}".format(b2hex(payload)))
+            print("")
+        return payload
+
+

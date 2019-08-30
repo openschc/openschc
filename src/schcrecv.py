@@ -126,11 +126,16 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
     
     """
-    def receive_frag(self, schc_frag):
+    def receive_frag(self, bbuf, dtag):
+        print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
+                                                                     bbuf, self.rule))
+
+        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
+        print(schc_frag)
         #
         if schc_frag.abort == True:
             print("----------------------- Sender-Abort ---------------------------")
@@ -152,19 +157,24 @@ class ReassemblerNoAck(ReassembleBase):
             if schc_frag.mic != mic_calced:
                 print("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
+                self.state = 'ERROR_MIC_NO_ACK'
                 return
+            else:
+                print("SUCCESS: MIC matched. packet {} == result {}".format(
+                    schc_frag.mic, mic_calced))
             # decompression
-            print("----------------------- Decompression -----------------------")
+            # print("----------------------- Decompression -----------------------")
             if not self.protocol.config.get("debug-fragment"):
                 # XXX
                 # XXX in hack105, we have separate databases for C/D and F/R.
                 # XXX need to merge them into one.  Then, here searching database will
                 # XXX be moved into somewhere.
                 # XXX
-                rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
-                print("debug: no-ack FindRuleFromSCHCpacket", rule)
-                self.protocol.process_decompress(rule, self.sender_L2addr,
-                                                schc_packet)
+                #rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+                #print("debug: no-ack FindRuleFromSCHCpacket", rule)
+                self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
+            self.state = 'DONE_NO_ACK'
+            #print(self.state)
             return
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
@@ -341,6 +351,8 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             print("schc_frag.mic: {}, mic_calced: {}".format(schc_frag.mic, mic_calced))
             if schc_frag.mic == mic_calced:
+                print("SUCCESS: MIC matched. packet {} == result {}".format(
+                    schc_frag.mic, mic_calced))
                 self.mic_missmatched = False
                 self.finish(schc_packet, schc_frag)
                 return

@@ -16,12 +16,14 @@ import schcmsg
 from comp_parser import *
 from schccomp import Compressor, Decompressor
 
+
 class Session:
     """ fragmentation/reassembly session manager
     session = [
         { "ruleID": n, "ruleLength", "dtag": n, "session": session }, ...
         ]
     """
+
     def __init__(self, protocol):
         self.protocol = protocol
         self.session_list = []
@@ -29,28 +31,31 @@ class Session:
     def add(self, rule_id, rule_id_size, dtag, session):
         if self.get(rule_id, rule_id_size, dtag) is not None:
             print("ERROR: the session rid={}/{} dtag={} exists already".format(
-                    rule_id, rule_id_size, dtag))
+                rule_id, rule_id_size, dtag))
             return False
         self.session_list.append({"rule_id": rule_id,
                                   "rule_id_size": rule_id_size, "dtag": dtag,
-                                  "session": session })
+                                  "session": session})
         return True
 
     def get(self, rule_id, rule_id_size, dtag):
         for i in self.session_list:
             if (rule_id == i["rule_id"] and
-                rule_id_size == i["rule_id_size"] and dtag == i["dtag"]):
+                    rule_id_size == i["rule_id_size"] and dtag == i["dtag"]):
                 return i["session"]
         return None
+
 
 class debug_protocol:
     def _log(*arg):
         print(*arg)
 
+
 class SCHCProtocol:
     """This class is the entry point for the openschc
     (in this current form, object composition is used)"""
-    #def __init__(self, config, scheduler, schc_layer2, role="sender"):
+
+    # def __init__(self, config, scheduler, schc_layer2, role="sender"):
     def __init__(self, config, system, layer2, layer3):
         self.config = config
         self.system = system
@@ -59,7 +64,7 @@ class SCHCProtocol:
         self.layer3 = layer3
         self.layer2._set_protocol(self)
         self.layer3._set_protocol(self)
-        self.default_frag_rule = None # XXX: to be in  rule_manager
+        self.default_frag_rule = None  # XXX: to be in  rule_manager
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.fragment_session = Session(self)
@@ -93,23 +98,21 @@ class SCHCProtocol:
             # pass        # to be done
             rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction="UP")
             if rule is None:
+                schc_packet = None
                 # reject it.
-                self._log("Rejected. Not for SCHC packet, L3addr={}".format(
-                    dst_L3addr))
-                return
-            # Compression process
-            # packet_bbuf = BitBuffer(raw_packet)
-            # rule = rule["Compression"]
-            # C = Compressor(debug_protocol)
-            print("selected rule is ", rule)
-            # self._log("ompression rule_id={}".format(rule.ruleID))
-        # XXX needs to handl the direction
-        # packet_bbuf = self.compressor.compress(context, packet_bbuf)
-        print("-------------------------------------- Compression Proccess -------------------------------------------")
-        schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], T_DIR_UP)
-
-        print(schc_packet)
-        schc_packet.display("bin")
+                # self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+                #    dst_L3addr))
+                # return
+            else:
+                if rule["Compression"] != []:
+                    print(
+                        "-------------------------------------- Compression Proccess -------------------------------------------")
+                    print("selected rule is ", rule)
+                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], T_DIR_UP)
+                    print(schc_packet)
+                    schc_packet.display("bin")
+                else:
+                    schc_packet = None
 
         if schc_packet == None:
             packet_bbuf = BitBuffer(raw_packet)
@@ -147,12 +150,12 @@ class SCHCProtocol:
     def new_fragment_session(self, context, rule):
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
-            session = FragmentNoAck(self, context, rule) # XXX
+            session = FragmentNoAck(self, context, rule)  # XXX
         elif mode == "ackAlwayw":
             raise NotImplementedError(
-                    "{} is not implemented yet.".format(mode))
+                "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":
-            session = FragmentAckOnError(self, context, rule) # XXX
+            session = FragmentAckOnError(self, context, rule)  # XXX
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         return session
@@ -186,7 +189,7 @@ class SCHCProtocol:
 
             if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
                 dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
-                                    position=frag_rule[T_RULEIDLENGTH])
+                                            position=frag_rule[T_RULEIDLENGTH])
             else:
                 dtag = None
 
@@ -198,30 +201,31 @@ class SCHCProtocol:
                 # no session is found.  create a new reassemble session.
                 context = None
                 session = self.new_reassemble_session(context, frag_rule, dtag,
-                                                        dev_L2addr)
+                                                      dev_L2addr)
                 self.reassemble_session.add(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH],
                                             dtag, session)
                 print("New reassembly session created", session)
             session.receive_frag(packet_bbuf, dtag)
             return
 
-            self.process_decompress(packet_bbuf, dev_L2addr, direction= T_DIR_UP)
+            self.process_decompress(packet_bbuf, dev_L2addr, direction=T_DIR_UP)
 
         elif dev_L2addr == b"\xaa\xbb\xcc\xdd":
             if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
                 dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
-                                    position=frag_rule[T_RULEIDLENGTH])
+                                            position=frag_rule[T_RULEIDLENGTH])
             else:
                 dtag = None
             # find existing session for fragment or reassembly.
             session = self.fragment_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
-            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(frag_rule[T_RULEID],frag_rule[T_RULEIDLENGTH], dtag))
+            print("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(frag_rule[T_RULEID],
+                                                                              frag_rule[T_RULEIDLENGTH], dtag))
             if session is not None:
                 print("Fragmentation session found", session)
                 session.receive_frag(packet_bbuf, dtag)
             else:
                 print("context exists, but no {} session for this packet {}".
-                        format(dev_L2addr))
+                      format(dev_L2addr))
             return
 
     # def schc_recv(self, dev_L2addr, raw_packet):
@@ -287,26 +291,34 @@ class SCHCProtocol:
     #         raise SystemError("should not come here.")
 
     def process_decompress(self, packet_bbuf, dev_L2addr, direction):
-        rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf,dev_L2addr)
+        rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, dev_L2addr)
         if rule is None:
             # reject it.
-            self._log("Rejected. Not for SCHC packet, sender L2addr={}".format(
-                    dev_L2addr))
+            self._log("Rejected. Not rule compression for SCHC packet, sender L2addr={}".format(
+                dev_L2addr))
             return
-        print("---------------------- Decompression Process----------------------")
-        print("---------------------- Decompression Rule-------------------------")
-        self._log("compression rule_id={}".format(rule[T_RULEID]))
-        # print('rule {}'.format(rule))
-        print("------------------------ Decompression ---------------------------")
-        raw_packet = self.decompressor.decompress(packet_bbuf, rule, direction)
-        print("---- Decompression result ----")
-        print(raw_packet)
-        args = (dev_L2addr, raw_packet)
-        self.scheduler.add_event(0, self.layer3.recv_packet, args)
 
-    #def process_decompress(self, context, dev_L2addr, schc_packet):
+        if "Compression" not in rule:
+            # reject it.
+            self._log("Not compression parameters for SCHC packet, sender L2addr={}".format(
+                dev_L2addr))
+            return
+
+        if rule["Compression"]:
+            print("---------------------- Decompression ----------------------")
+            print("---------------------- Decompression Rule-------------------------")
+            self._log("compression rule_id={}".format(rule[T_RULEID]))
+            print("receiver frag received:", packet_bbuf)
+            print('rule {}'.format(rule))
+            print("------------------------ Decompression ---------------------------")
+            raw_packet = self.decompressor.decompress(packet_bbuf, rule, direction)
+            print("---- Decompression result ----")
+            print(raw_packet)
+            args = (dev_L2addr, raw_packet)
+            self.scheduler.add_event(0, self.layer3.recv_packet, args)
+
+    # def process_decompress(self, context, dev_L2addr, schc_packet):
     #    self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
     #    raw_packet = self.decompressor.decompress(context, schc_packet)
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
-

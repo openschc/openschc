@@ -1,0 +1,11 @@
+[{
+   "RuleID" : 12,
+   "RuleIDLength" : 4,
+   "Compression" : []
+ },{
+  "RuleID" : 12,
+  "RuleIDLength" : 6,
+  "Fragmentation" :  {
+    "FRMode": "noAck"
+  }
+}]

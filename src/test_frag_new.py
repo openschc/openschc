@@ -66,13 +66,13 @@ devaddr2 = b"\xaa\xbb\xcc\xee"
 print("---------Rules Device -----------")
 rm0 = RuleManager()
 # rm0.add_context(rule_context, compress_rule1, frag_rule3, frag_rule4)
-rm0.Add(device=devaddr1, file="example/comp-rule-100.json")
+rm0.Add(device=devaddr1, file="rules/rule1.json")
 rm0.Print()
 
 print("---------Rules gw -----------")
 rm1 = RuleManager()
 # rm1.add_context(rule_context, compress_rule1, frag_rule4, frag_rule3)
-rm1.Add(device=devaddr2, file="example/comp-rule-100.json")
+rm1.Add(device=devaddr2, file="rules/rule1.json")
 rm1.Print()
 
 # ---------------------------------------------------------------------------

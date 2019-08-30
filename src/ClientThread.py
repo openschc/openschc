@@ -78,6 +78,9 @@ class ClientThread(threading.Thread):
                 self.send_message_from_socket(0)
                 print("--------------------------- End Iteration ", self.iteration, " --------------------------")
                 self.client_config()
+            elif state == 'DONE_NO_ACK' or state == 'ERROR_MIC_NO_ACK':
+                print("--------------------------- End Iteration ", self.iteration, " --------------------------")
+                self.client_config()
 
         self.clientSocketInServer.close()
 
