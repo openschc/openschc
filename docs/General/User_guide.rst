@@ -173,9 +173,12 @@ applies to. Conversely,
 when the SCHC instance is on the core network side, the set of rules must be associated with
 a device ID.
 
-Rules associated with a Device ID can be directly stored into the rule manager through the **Add** method.
-The JSON structure is the following: ::
+Rules associated with a Device ID can be directly stored into the rule manager through the **Add** method
+as follows: ::
 
+    RM.Add(device="1234567890", dev_info=[rule1100, rule001100])
+
+The JSON structure is the following: ::
 
     {
         "DeviceID": 1234567890,
@@ -185,3 +188,122 @@ The JSON structure is the following: ::
 where the **DeviceID** keyword represents the device ID in a specific technology, for
 instance LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
 the DeviceID literal must be expressed in decimal, not hexadecimal.
+
+Fragmenter/Reassembler
+======================
+
+Using the client-server simulation is possible to observe some important details about noAck mode and
+fragmenter/reassembler. First of all, it is necessary to create a file with any name (e.g. rule1.json)
+into **rules** folder, which will contain our rule as follows: ::
+
+    [{
+       "RuleID" : 12,
+       "RuleIDLength" : 4,
+       "Compression" : []
+     },{
+      "RuleID" : 12,
+      "RuleIDLength" : 6,
+      "Fragmentation" :  {
+        "FRMode": "noAck"
+      }
+    }]
+
+Then, it is possible to define the message which will be sent from client to server. **Payload** folder
+contains some examples that can be used.  In this point, we can execute our simulation as follows:
+
+Run Client on terminal 1 ::
+
+    python3 ClientServerSimul.py --role client --compression false --rule rules/rule1.json --time 20 --payload payload/testfile_small.txt
+
+Run Server on terminal 2 ::
+
+    python3 ClientServerSimul.py --role server --compression false --rule rules/rule1.json
+
+If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
+transmission of the message and we will obtain the following result in server side: ::
+
+    Recv MIC 804779011, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started\x00'), lenght = 194
+    SUCCESS: MIC matched. packet bytearray(b'/\xf7\xf4\x03') == result b'/\xf7\xf4\x03'
+
+where, in the first line we have the value of the RCS sent, the message received by the server which is the same as the
+one sent by the client, and the length of the message in bytes. In second line, whe have a confirmation of successful
+matching between both RCS Values.
+
+On the other hand, to simulate the packet loss in transmission, we can use the **--loss true** argument in the client
+and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
+since the RCS sent by the client is not the same RCS calculated by the server: ::
+
+    Recv MIC 907239817, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (1062\xb2\x00'), lenght = 171
+    ERROR: MIC mismatched. packet bytearray(b'/\xf7\xf4\x03') != result b'6\x13a\x89'
+
+Unlike the successful result, we can notice that the message was not completely received by the server. Besides, the RCS
+sent by the client is not equal to the RCS calculated by the server.
+
+Client-server Simulation
+========================
+
+Introduction
+------------
+
+Client-server Simulation implements the Socket library to perform the communication between a client and a server,
+using the localhost address 127.0.0.1, port 1234, TCP protocol and threads on the server to allow communication
+**from several clients to a server**.
+
+At the end of a successful communication, the simulation records the time in seconds at that instant in the text file
+**client_server_simulation.txt**, and restarts sending the same message from the client to the server.
+
+How to run this simulation
+--------------------------
+
+Run Client on terminal 1 ::
+
+    python3 ClientServerSimul.py --role client
+
+Run Server on terminal 2 ::
+
+    python3 ClientServerSimul.py --role server
+
+
+Option List
+-----------
+We can find some option to modify our client-server simulation: ::
+
+    usage: ClientServerSimul.py [-h] [--role ROLE] [--payload PAYLOAD_NAME_FILE]
+                                [--rule RULE_NAME_FILE]
+                                [--time TIME_BETWEEN_ITERATION]
+                                [--loss [PACKET_LOSS_SIMULATION]]
+                                [--compression [MODE_WITH_COMPRESSION]]
+
+    a SCHC simulator.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --role ROLE           specify a role: client or server. (default: client)
+      --payload PAYLOAD_NAME_FILE
+                            Specify a payload file name. e.g.
+                            payload/testfile_small.txt. (default: )
+      --rule RULE_NAME_FILE
+                            Specify a rule file name. e.g. examples/comp-
+                            rule-100.json. (default: examples/comp-rule-100.json)
+      --time TIME_BETWEEN_ITERATION
+                            Specify a time in seconds between each sending message
+                            . (default: 10)
+      --loss [PACKET_LOSS_SIMULATION]
+                            Simulation using packet loss: True or False. (default:
+                            False)
+      --compression [MODE_WITH_COMPRESSION]
+                            Simulation using compression: True or False. (default:
+                            True)
+
+Some options are defined to be used by both client and server devices, while there are other options that are only
+useful for the client: ::
+
+    Options for Client and Server:
+    --role
+    --rule
+    --compression
+    --loss
+
+    Options only for Client:
+    --time
+    --payload

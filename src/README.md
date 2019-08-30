@@ -25,13 +25,13 @@ How to run this simulation
 - Run Server
 
     ```
-    python3 ClientServerSimul.py --r server
+    python3 ClientServerSimul.py --role server
     ```
 
 - Run Client
 
     ```
-    python3 ClientServerSimul.py --r client
+    python3 ClientServerSimul.py --role client
     ```
 
 Rulemanager Test
