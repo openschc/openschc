@@ -139,30 +139,30 @@ containing the JSON structure is used.
 Set of Rules
 ------------
 
- A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
- a set of rules is an JSON array. The following program has the same behavior as the previous one.::
+A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
+a set of rules is an JSON array. The following program has the same behavior as the previous one.::
 
-     from rulemanager import *
+  from rulemanager import *
 
-     RM = RuleManager()
+  RM = RuleManager()
 
-     rule1100 =   {
-       "RuleID" : 12,
-       "RuleIDLength" : 4,
-       "Compression" : []
-     }
+  rule1100 =   {
+   "RuleID" : 12,
+   "RuleIDLength" : 4,
+   "Compression" : []
+  }
 
-     rule001100 =   {
-       "RuleID" : 12,
-       "RuleIDLength" : 6,
-       "Fragmentation" : {
-         "FRMode": "noAck"
-       }
-     }
+  rule001100 =   {
+   "RuleID" : 12,
+   "RuleIDLength" : 6,
+   "Fragmentation" : {
+     "FRMode": "noAck"
+   }
+  }
 
-     RM.Add(dev_info=[rule1100, rule001100])
+  RM.Add(dev_info=[rule1100, rule001100])
 
-     RM.Print()
+  RM.Print()
 
 Device definition
 -----------------
