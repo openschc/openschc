@@ -131,9 +131,10 @@ class FragmentNoAck(FragmentBase):
         # because draft-18 requires that in No-ACK mode, each fragment must
         # contain exactly one tile and the tile size must be at least the size
         # of an L2 Word.
+        print(self.rule)
         min_size = (schcmsg.get_sender_header_size(self.rule) +
                         schcmsg.get_mic_size(self.rule) +
-                        self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE])
+                        self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE])
         if self.protocol.layer2.get_mtu_size() < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.protocol.layer2.get_mtu_size(), min_size))
 
@@ -213,7 +214,12 @@ class FragmentNoAck(FragmentBase):
             payload=tile)
 
         # send a SCHC fragment
+        """
+        Corriger le chagement
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+        transmit_callback)
+        """
+        args = (schc_frag.packet.get_content(), '*',
                 transmit_callback)
         print("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
@@ -224,7 +230,7 @@ class FragmentNoAck(FragmentBase):
         self.send_frag()
         #input("")
 
-    def receive_frag(self, schc_frag):
+    def receive_frag(self, schc_frag, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         print("sender frag received:", schc_frag.__dict__)
         if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] is 0 or
@@ -250,7 +256,7 @@ class FragmentAckOnError(FragmentBase):
         a = self.all_tiles.get_all_tiles()
 
         if (a[-1]["t-num"] == 0 and
-            a[-1]["tile"].count_added_bits() < self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE]):
+            a[-1]["tile"].count_added_bits() < self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]):
             raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
         # make the bitmap
         #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
@@ -258,8 +264,8 @@ class FragmentAckOnError(FragmentBase):
         #                              schcmsg.get_fcn_all_1(self.rule))
         print("----------------------- Fragmentation process -----------------------")
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
-                                      self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_FCN],
-                                      self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W])
+                                      self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
+                                      self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])
         print("bit_list:", self.bit_list)
         for tile in self.all_tiles.get_all_tiles():
             print("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
@@ -588,7 +594,11 @@ class FragmentAckOnError(FragmentBase):
             #self.resend = False
             self.state = self.ACK_SUCCESS
 
-            f = open("client_server_simulation.txt", "r+")
+            try:
+                f = open("client_server_simulation.txt", "r+")
+            except IOError:
+                f = open("client_server_simulation.txt", "w+")
+                f = open("client_server_simulation.txt", "r+")
             content = f.read()
             seconds = time. time()
             f.seek(0, 0)

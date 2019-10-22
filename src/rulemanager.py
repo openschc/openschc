@@ -362,7 +362,7 @@ class RuleManager:
         else:
             return val
 
-    def Add(self, device= None, dev_info=None, file=None):
+    def Add(self, device= None, dev_info=None, file=None, compression=True):
         """
         Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
         * ruleID/RuleIDLength do not overlap
@@ -419,7 +419,7 @@ class RuleManager:
 
 
             if not overlap:
-                if "Compression" in n_rule:
+                if "Compression" in n_rule and compression:
                     r = self._create_compression_rule(n_rule)
                     d["SoR"].append(r)
                 elif "Fragmentation" in n_rule:
@@ -490,10 +490,13 @@ class RuleManager:
                 _default_value (arule, nrule, T_FRAG_MIC, "crc32")
 
                 if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
+                    _default_value(arule, nrule, T_FRAG_DTAG, 2)
                     _default_value (arule, nrule, T_FRAG_W, 0)
-                    _default_value (arule, nrule, T_FRAG_FCN, 1)
+                    _default_value (arule, nrule, T_FRAG_FCN, 3)
+                    _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
                     _default_value (arule, nrule, T_FRAG_W, 1)
+                    _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
