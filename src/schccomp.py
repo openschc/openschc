@@ -4,6 +4,11 @@
 """
 from base_import import *
 
+import pprint
+
+T_RULEID = "RuleID"
+T_RULEIDLENGTH = "RuleIDLength"
+
 T_FID = "FID"
 T_FL = "FL"
 T_FP = "FP"
@@ -30,12 +35,43 @@ T_PROTO_ICMPV6 = "ICMPV6"
 T_ICMPV6_TYPE = "ICMPV6.TYPE"
 T_ICMPV6_CODE = "ICMPV6.CODE"
 T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
+T_ICMPV6_IDENT = "ICMPV6.IDENT"
+T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
 
 T_PROTO_UDP = "UDP"
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
 T_UDP_APP_PORT = "UDP.APP_PORT"
 T_UDP_LEN = "UDP.LEN"
 T_UDP_CKSUM = "UDP.CKSUM"
+
+T_PROTO_COAP = "COAP"
+T_COAP_VERSION = "COAP.VER"
+T_COAP_TYPE = "COAP.TYPE"
+T_COAP_TKL = "COAP.TKL"
+T_COAP_CODE = "COAP.CODE"
+T_COAP_MID = "COAP.MID"
+T_COAP_TOKEN = "COAP.TOKEN"
+T_COAP_OPT_IF_MATCH =  "COAP.If-Match"
+T_COAP_OPT_URI_HOST = "COAP.Uri-Host"
+T_COAP_OPT_ETAG = "COAP.ETag"
+T_COAP_OPT_IF_NONE_MATCH =  "COAP.If-None-Match"
+T_COAP_OPT_OBS =  "COAP.Observe"
+T_COAP_OPT_URI_PORT =  "COAP.Uri-Port"
+T_COAP_OPT_LOC_PATH = "COAP.Location-Path"
+T_COAP_OPT_URI_PATH =  "COAP.URI-PATH"
+T_COAP_OPT_CONT_FORMAT =  "COAP.CONTENT-FORMAT"
+T_COAP_OPT_MAX_AGE =  "COAP.Max-Age"
+T_COAP_OPT_URI_QUERY =  "COAP.URI-QUERY"
+T_COAP_OPT_ACCEPT =  "COAP.Accept"
+T_COAP_OPT_LOC_QUERY =  "COAP.Location-Query"
+T_COAP_OPT_BLOCK2 =  "COAP.Block2"
+T_COAP_OPT_BLOCK1 =  "COAP.Block1"
+T_COAP_OPT_SIZE2 =  "COAP.Size2"
+T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
+T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
+T_COAP_OPT_SIZE1 =  "COAP.Sizel"
+T_COAP_OPT_NO_RESP = "COAP.No-Response"
+T_COAP_OPT_END = "COAP.END"
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
@@ -55,6 +91,31 @@ T_CDA_COMP_CKSUM = "COMPUTE-CHECKSUM"
 T_CDA_DEVIID = "DEVIID"
 T_CDA_APPIID = "APPIID"
 
+T_ALGO = "ALGO"
+T_ALGO_DIRECT = "DIRECT"
+T_ALGO_COAP_OPT = "COAP_OPTION"
+
+T_META = "META"
+T_UP_RULES = "UP_RULES"
+T_DW_RULES = "DW_RULES"
+
+T_FRAG = "Fragmentation"
+T_FRAG_MODE = "FRMode"
+T_FRAG_PROF = "FRModeProfile"
+T_FRAG_DTAG = "dtagSize"
+T_FRAG_W = "WSize"
+T_FRAG_FCN = "FCNSize"
+T_FRAG_WINDOW_SIZE = "windowSize"
+T_FRAG_ACK_BEHAVIOR = "ackBehavior"
+T_FRAG_TILE = "tileSize"
+T_FRAG_MIC = "MICALgorithm"
+T_FRAG_MAX_RETRY = "maxRetry"
+T_FRAG_TIMEOUT  = "timeout"
+T_FRAG_L2WORDSIZE = "L2WordSize"
+
+# from rulemanager import *
+
+
 #---------------------------------------------------------------------------
 # MO operation
 #   return (True, tv) if matched.
@@ -64,11 +125,11 @@ T_CDA_APPIID = "APPIID"
 
 #---------------------------------------------------------------------------
 # 7.5.  Compression Decompression Actions (CDA)
-# 
+#
 #    The Compression Decompression Action (CDA) describes the actions
 #    taken during the compression of headers fields and the inverse action
 #    taken by the decompressor to restore the original value.
-# 
+#
 #    /--------------------+-------------+----------------------------\
 #    |  Action            | Compression | Decompression              |
 #    |                    |             |                            |
@@ -88,12 +149,7 @@ class Compressor:
 
     def __init__(self, protocol):
         self.protocol = protocol
-        self.__func_tx_mo = {
-            T_MO_EQUAL : self.tx_mo_equal,
-            T_MO_IGNORE : self.tx_mo_ignore,
-            T_MO_MSB : self.tx_mo_msb,
-            T_MO_MMAP: self.tx_mo_mmap,
-            }
+
         self.__func_tx_cda = {
             T_CDA_NOT_SENT : self.tx_cda_not_sent,
             T_CDA_VAL_SENT : self.tx_cda_val_sent,
@@ -108,119 +164,147 @@ class Compressor:
     def init(self):
         pass
 
-    def compare_value(self, rule, hdr_val, target_val):
-        assert isinstance(hdr_val, int)
-        if rule[T_FID] in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]:
-            assert isinstance(target_val, str)
-            # XXX needs to support any bit length.
-            assert rule[T_FL]%8 == 0
-            size = rule[T_FL]//8
-            hv = hdr_val.to_bytes(size, "big")
-            tv = socket.inet_pton(socket.AF_INET6,
-                                  target_val[:target_val.find("/")])[:size]
-        elif rule[T_FID] in [T_IPV6_DEV_IID, T_IPV6_APP_IID]:
-            assert isinstance(target_val, str)
-            # XXX needs to support any bit length.
-            assert rule[T_FL]%8 == 0
-            size = rule[T_FL]//8
-            hv = hdr_val.to_bytes(size, "big")
-            tv = socket.inet_pton(socket.AF_INET6, target_val)[size:]
-        else:
-            hv = hdr_val
-            tv = target_val
-        print("MO {}: {} == {}".format(rule[T_MO], hv, tv))
-        return hv == tv
-
-    def tx_mo_equal(self, rule, pkt):
-        hv = pkt.get_bits(rule[T_FL])
-        tv = rule[T_TV]
-        if self.compare_value(rule, hv, tv):
-            return True, tv
-        return False, None
-
-    def tx_mo_ignore(self, rule, pkt):
-        """ always return True and header value. """
-        # needs to read the bits in order to skip the field.
-        hv = pkt.get_bits(rule[T_FL])
-        print("MO ignore", hv, None)
-        return True, hv
-
-    def tx_mo_msb(self, rule, pkt):
-        hv = pkt.get_bits(rule[T_MO_VAL])
-        tv = rule[T_TV]
-        # needs to read the remaining bits in order to skip the field.
-        pkt.get_bits(rule[T_FL] - rule[T_MO_VAL])
-        print("MO msb({})".format(rule[T_MO_VAL]), hv, tv)
-        if hv == tv:
-            return True, tv
-        return False, None
-
-    def tx_mo_mmap(self, rule, pkt):
-        """ return the index in the mapping table if a header value is matched. """
-        hv = pkt.get_bits(rule[T_FL])
-        for i in range(len(rule[T_TV])):
-            tv = rule[T_TV][i]
-            if self.compare_value(rule, hv, tv):
-                return True, i
-        return False, None
-
-    def tx_cda_not_sent(self, rule, val, bbuf):
+    def tx_cda_not_sent(self, field, rule, output):
         pass
 
-    def tx_cda_val_sent(self, rule, val, bbuf):
-        # XXX not implemented that the variable length size.
-        bbuf.add_bits(val, rule[T_FL])
+    def tx_cda_val_sent(self, field, rule, output):
+        print (field)
+        if rule[T_FL] == "var":
+            print ("VARIABLE")
+            assert (field[1]%8 == 0)
+            size = field[1]//8 # var unit is bytes
+            output.add_length(size)
 
-    def tx_cda_map_sent(self, rule, val, bbuf):
+            if size == 0:
+                return
+
+        if type(field[0]) is int:
+            print ("+++", bin(field[0]), field[1])
+            output.add_bits(field[0], field[1])
+        elif type(field[0]) == str:
+            assert (field[1] % 8 == 0) # string is a number of bytes
+            for i in range(field[1]//8):
+                print (i, field[0][i])
+                output.add_bytes(field[0][i].encode("utf-8"))
+        else:
+            raise ValueError("CA value-sent unknown type")
+
+    def tx_cda_map_sent(self, field, rule, output):
         # 7.5.5.  mapping-sent CDA
         # The number of bits sent is the minimal size for coding all the
         # possible indices.
-        size = len(bin(len(rule[T_TV]))[2:])
-        bbuf.add_bits(val, size)
 
-    def tx_cda_lsb(self, rule, val, bbuf):
+        target_value = rule[T_TV]
+        assert (type(target_value) == list)
+
+        size = len(bin(len(target_value)-1)[2:])
+
+        print ("size of ", target_value, "is ", size)
+
+        pos = 0
+        for tv in target_value:
+            if type(field[0]) == type(tv) and field[0] == tv:
+                output.add_bits(pos, size)
+                return
+            else:
+                pos += 1
+
+        raise ValueError ("value not found in TV")
+
+    def tx_cda_lsb(self, field, rule, output):
         assert rule[T_MO] == T_MO_MSB
-        size = rule[T_FL] - rule[T_MO_VAL]
-        bbuf.add_bits(val, size)
+        size = field[1] - rule[T_MO_VAL]
+        full_value = field[0]
+        print ("size =", size)
 
-    def tx_cda_notyet(self, rule, val, bbuf):
+        if rule[T_FL] == "var":
+            assert (size%8 == 0) #var implies bytes
+
+            output.add_length(size//8)
+
+        if type(full_value) == int:
+            for i in range(size):
+                output.set_bit(full_value & 0x01)
+                full_value >>= 1
+        elif type(full_value) == str:
+            print (rule[T_TV], field[0])
+            for i in range(rule[T_MO_VAL]//8, field[1]//8):
+                print (i, "===>", field[0][i] )
+            pass
+        else:
+            raise ValueError("CA value-sent unknown type")
+
+    def tx_cda_notyet(self, field, rule, output):
         raise NotImplementedError
 
-    def compress(self, context, packet_bbuf, di=T_DIR_UP):
-        """ compress the data in the packet_bbuf according to the rule_set.
-        check if the all of the rules in the rule set are matched with the packet.
-        return the compressed data to be sent if matched.
-        or return None if not.
-        regarding to the di, the address comparion is like below:
-            di     source address      destination address
-            T_DIR_DW  APP_PREFIX/APP_IID  DEV_PREFIX/DEV_IID
-            T_DIR_UP  DEV_PREFIX/DEV_IID  APP_PREFIX/APP_IID
+    # def compress(self, context, packet_bbuf, di=T_DIR_UP):
+    #     """ compress the data in the packet_bbuf according to the rule_set.
+    #     check if the all of the rules in the rule set are matched with the packet.
+    #     return the compressed data to be sent if matched.
+    #     or return None if not.
+    #     regarding to the di, the address comparion is like below:
+    #         di     source address      destination address
+    #         T_DIR_DW  APP_PREFIX/APP_IID  DEV_PREFIX/DEV_IID
+    #         T_DIR_UP  DEV_PREFIX/DEV_IID  APP_PREFIX/APP_IID
+    #     """
+    #     assert isinstance(packet_bbuf, BitBuffer)
+    #     assert di in [T_DIR_UP, T_DIR_DW]
+    #     input_bbuf = packet_bbuf.copy()
+    #     output_bbuf = BitBuffer()
+    #     rule = context["comp"]
+    #     # set ruleID first.
+    #     if rule["ruleID"] is not None and rule["ruleLength"] is not None:
+    #         output_bbuf.add_bits(rule["ruleID"], rule["ruleLength"])
+    #     for r in rule["compression"]["rule_set"]:
+    #         # compare each rule with input_bbuf.
+    #         # XXX need to handle "DI"
+    #         print("rule item:", r)
+    #         result, val = self.__func_tx_mo[r[T_MO]](r, input_bbuf)
+    #         print("result", result, val)
+    #         if result == False:
+    #             # if any of MO functions is failed, return None.
+    #             # this rule should not be applied.
+    #             return None
+    #         # if match the rule, call CDA.
+    #         self.__func_tx_cda[r[T_CDA]](r, val, output_bbuf)
+    #     if input_bbuf.count_remaining_bits() > 0:
+    #         output_bbuf += input_bbuf
+    #     # if all process have been succeeded, return the data.
+    #     self.protocol._log("compress: {}=>{}".format(
+    #         packet_bbuf, output_bbuf))
+    #     return output_bbuf
+
+    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP):
         """
-        assert isinstance(packet_bbuf, BitBuffer)
-        assert di in [T_DIR_UP, T_DIR_DW]
-        input_bbuf = packet_bbuf.copy()
+        Take a compression rule and a parsed packet and return a SCHC pkt
+        """
+        assert direction in [T_DIR_UP, T_DIR_DW]
         output_bbuf = BitBuffer()
-        rule = context["comp"]
         # set ruleID first.
-        if rule["ruleID"] is not None and rule["ruleLength"] is not None:
-            output_bbuf.add_bits(rule["ruleID"], rule["ruleLength"])
-        for r in rule["compression"]["rule_set"]:
-            # compare each rule with input_bbuf.
-            # XXX need to handle "DI"
+        if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
+            output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
+            print("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            output_bbuf.display(format="bin")
+
+        for r in rule["Compression"]:
             print("rule item:", r)
-            result, val = self.__func_tx_mo[r[T_MO]](r, input_bbuf)
-            print("result", result, val)
-            if result == False:
-                # if any of MO functions is failed, return None.
-                # this rule should not be applied.
-                return None
-            # if match the rule, call CDA.
-            self.__func_tx_cda[r[T_CDA]](r, val, output_bbuf)
-        if input_bbuf.count_remaining_bits() > 0:
-            output_bbuf += input_bbuf
-        # if all process have been succeeded, return the data.
-        self.protocol._log("compress: {}=>{}".format(
-            packet_bbuf, output_bbuf))
+
+            if r[T_DI] in [T_DIR_BI, direction]:
+                if (r[T_FID], r[T_FP]) in parsed_packet:
+                    print ("in packet")
+                    self.__func_tx_cda[r[T_CDA]](field=parsed_packet[(r[T_FID], r[T_FP])],
+                                                rule = r,
+                                                output= output_bbuf)
+                else: # not find in packet, but is variable length can be coded as 0
+                    print("send variable length")
+                    self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
+            else:
+                print ("rule skipped, bad direction")
+
+            output_bbuf.display(format="bin")
+
+        output_bbuf.add_bytes(data)
+
         return output_bbuf
 
 #---------------------------------------------------------------------------
@@ -229,7 +313,6 @@ class Decompressor:
 
     def __init__(self, protocol):
         self.protocol = protocol
-        self.init()
         self.__func_rx_cda = {
             T_CDA_NOT_SENT : self.rx_cda_not_sent,
             T_CDA_VAL_SENT : self.rx_cda_val_sent,
@@ -241,14 +324,6 @@ class Decompressor:
             T_CDA_APPIID : self.rx_cda_not_sent,
             }
 
-    def init(self):
-        self.src_prefix = None   # the size must be of 8 bytes.
-        self.src_iid = None
-        self.dst_prefix = None   # the size must be of 8 bytes.
-        self.dst_iid = None
-        self.ipv6_payload = None
-        self.next_proto = None
-        self.cksum_field_offset = 0
 
     def cal_checksum(self, packet):
         # RFC 1071
@@ -279,131 +354,178 @@ class Decompressor:
         phdr[39] = self.next_proto
         return phdr
 
-    def cda_copy_field(self, rule, out_bbuf, target_val):
-        """ copy the appropriate target_val and return it. """
-        if rule[T_FID] in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]:
-            assert isinstance(target_val, str)
-            # inet_pton always expands the taret_val into 128bits.
-            tv = socket.inet_pton(socket.AF_INET6,
-                                  target_val[:target_val.find("/")])[:8]
-            out_bbuf.add_bytes(tv)
-        elif rule[T_FID] in [T_IPV6_DEV_IID, T_IPV6_APP_IID]:
-            assert isinstance(target_val, str)
-            tv = socket.inet_pton(socket.AF_INET6, target_val)[8:]
-            out_bbuf.add_bytes(tv)
-        else:
-            tv = target_val
-            out_bbuf.add_bits(tv, rule[T_FL])
-        self.protocol._log("MO {}: copy {}".format(rule[T_MO], tv))
-        return tv
+    # def cda_copy_field(self, out_bbuf, target_val):
+    #     """ copy the appropriate target_val and return it. """
+    #     if type(target_val) == bytes:
+    #         pass
+    #     else:
+    #         tv = target_val
+    #         out_bbuf.add_bits(tv, rule[T_FL])
+    #     self.protocol._log("MO {}: copy {}".format(rule[T_MO], tv))
+    #     return tv
 
-    def rx_cda_not_sent(self, rule, in_bbuf, out_bbuf):
-        return self.cda_copy_field(rule, out_bbuf, rule[T_TV])
 
-    def rx_cda_val_sent(self, rule, in_bbuf, out_bbuf):
+    def rx_cda_not_sent(self, rule, in_bbuf):
+        return (rule[T_TV], rule[T_FL])
+
+    def rx_cda_val_sent(self, rule, in_bbuf):
         # XXX not implemented that the variable length size.
-        val = in_bbuf.get_bits(rule[T_FL])
-        out_bbuf.add_bits(val, rule[T_FL])
-        return val
 
-    def rx_cda_map_sent(self, rule, in_bbuf, out_bbuf):
+        if rule[T_FL] == "var":
+            size = in_bbuf.get_length()*8
+            print ("siZE = ", size)
+            if size == 0:
+                return (None, 0)
+        elif rule[T_FL] == "tkl":
+            size = self.parsed_packet[(T_COAP_TKL, 1)][0]*8
+            print ("token size", size)
+        elif type (rule[T_FL]) == int:
+            size = rule[T_FL]
+        else:
+            raise ValueError("cannot read field length")
+        in_bbuf.display("bin")
+        val = in_bbuf.get_bits(size)
+
+        return (val, size)
+
+
+    def rx_cda_map_sent(self, rule, in_bbuf):
         # 7.5.5.  mapping-sent CDA
         # The number of bits sent is the minimal size for coding all the
         # possible indices.
-        size = len(bin(len(rule[T_TV]))[2:])
-        val = in_bbuf.get_bits(size)
-        return self.cda_copy_field(rule, out_bbuf, rule[T_TV][val])
 
-    def rx_cda_lsb(self, rule, in_bbuf, out_bbuf):
+
+        size = len(bin(len(rule[T_TV])-1)[2:])
+        val = in_bbuf.get_bits(size)
+
+        print ("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
+
+        if rule[T_FL] == "var":
+            size = len(rule[T_TV][val])
+        else:
+            size = rule[T_FL]
+
+        return (rule[T_TV][val], size)
+
+    def rx_cda_lsb(self, rule, in_bbuf):
         assert rule[T_MO] == T_MO_MSB
         #
-        # the value should consist of:
+        # the value should consist of if FL is fixed:
         #
         #    |<------------ T_FL ------------>|
         #    |<-- T_MO_VAL -->|
         #    |      T_TV      |  field value  |
-        #
-        out_bbuf.add_bits(rule[T_TV], rule[T_MO_VAL])
-        size = rule[T_FL] - rule[T_MO_VAL]
-        val = in_bbuf.get_bits(size)
-        out_bbuf.add_bits(val, size)
-        return val
+        # if FL = var
+        #    |<-- T_MO_VAL -->|<- sent length->|
+        tmp_bbuf = BitBuffer()
 
-    def rx_cda_comp_len(self, rule, in_bbuf, out_bbuf):
+        if rule[T_FL] == "var":
+            send_length = in_bbuf.get_length()
+            total_size = rule[T_MO_VAL] + send_length
+        elif type(rule[T_TV]) == int:
+            total_size = rule[T_FL]
+            send_length = rule[T_FL] - rule[T_MO_VAL]
+
+        tmp_bbuf.add_value(rule[T_TV], rule[T_MO_VAL])
+        val = in_bbuf.get_bits(send_length)
+        tmp_bbuf.add_value(val, send_length)
+
+        return (bytes(tmp_bbuf.get_content()), total_size)
+
+    def rx_cda_comp_len(self, rule, in_bbuf):
         # will update the length field later.
-        out_bbuf.add_bits(0, rule[T_FL])
+        return ("LL"*(rule[T_FL]//8), rule[T_FL] )
 
-    def rx_cda_comp_cksum(self, rule, in_bbuf, out_bbuf):
+    def rx_cda_comp_cksum(self, rule, in_bbuf):
         # will update the length field later.
-        out_bbuf.add_bits(0, rule[T_FL])
+        return ("CC"*(rule[T_FL]//8), rule[T_FL] )
 
-    def decompress(self, context, packet_bbuf, di=T_DIR_DW):
-        """ decompress the data in the packet_bbuf according to the rule_set.
-        return the decompressed data.
-        or return None if any error happens.
-        Note that it saves the content of packet_bbuf.
+    # def decompress(self, context, packet_bbuf, di=T_DIR_DW):
+    #     """ decompress the data in the packet_bbuf according to the rule_set.
+    #     return the decompressed data.
+    #     or return None if any error happens.
+    #     Note that it saves the content of packet_bbuf.
 
-        XXX how to consider the IPv6 extension headers.
-        """
-        assert isinstance(packet_bbuf, BitBuffer)
-        assert di in [T_DIR_UP, T_DIR_DW]
-        input_bbuf = packet_bbuf.copy()
-        output_bbuf = BitBuffer()
-        rule = context["comp"]
-        # skip ruleID if needed.
-        if rule["ruleID"] is not None and rule["ruleLength"] is not None:
-            rule_id = input_bbuf.get_bits(rule["ruleLength"])
-            if rule_id != rule["ruleID"]:
-                self.protocol._log("rule_id doesn't match. {} != {}".format(
-                        rule_id, rule["ruleID"]))
-                return None
-        for r in rule["compression"]["rule_set"]:
-            # XXX need to handle "DI"
-            self.protocol._log("rule item: {}".format(r))
-            # if match the rule, call CDA.
-            val = self.__func_rx_cda[r[T_CDA]](r, input_bbuf, output_bbuf)
-            # update info to build the IPv6 pseudo header.
-            if r[T_FID] == T_IPV6_NXT:
-                self.next_proto = val
-            elif r[T_FID] == T_IPV6_DEV_PREFIX:
-                if di == T_DIR_UP:
-                    self.src_prefix = val
-                else:
-                    self.dst_prefix = val
-            elif r[T_FID] == T_IPV6_DEV_IID:
-                if di == T_DIR_UP:
-                    self.src_iid = val
-                else:
-                    self.dst_iid = val
-            elif r[T_FID] == T_IPV6_APP_PREFIX:
-                if di == T_DIR_UP:
-                    self.dst_prefix = val
-                else:
-                    self.src_prefix = val
-            elif r[T_FID] == T_IPV6_APP_IID:
-                if di == T_DIR_UP:
-                    self.dst_iid = val
-                else:
-                    self.src_iid = val
-            elif r[T_FID].startswith(T_PROTO_ICMPV6):
-                self.cksum_field_offset = 42
-            elif r[T_FID].startswith(T_PROTO_UDP):
-                self.cksum_field_offset = 46
-            #
-        if input_bbuf.count_remaining_bits() > 0:
-            output_bbuf += input_bbuf
-        # update the ipv6 payload.
-        self.ipv6_payload = output_bbuf.get_content()[40:]
-        # update the field of IPv6 length.
-        output_bbuf.add_bits(len(self.ipv6_payload), 16, position=32)
-        # update the checksum field of the upper layer.
-        if self.cksum_field_offset:
-            assert self.ipv6_payload is not None
-            cksum = self.cal_checksum(self.build_ipv6_pseudo_header() + self.ipv6_payload)
-            output_bbuf.add_bits(cksum, 16, position=self.cksum_field_offset)
-        # if all process have been succeeded, return the data.
-        self.protocol._log("decompress: {}=>{}".format(
-            packet_bbuf, output_bbuf))
-        return output_bbuf
+    #     XXX how to consider the IPv6 extension headers.
+    #     """
+    #     assert isinstance(packet_bbuf, BitBuffer)
+    #     assert di in [T_DIR_UP, T_DIR_DW]
+    #     input_bbuf = packet_bbuf.copy()
+    #     output_bbuf = BitBuffer()
+    #     rule = context["comp"]
+    #     # skip ruleID if needed.
+    #     if rule["ruleID"] is not None and rule["ruleLength"] is not None:
+    #         rule_id = input_bbuf.get_bits(rule["ruleLength"])
+    #         if rule_id != rule["ruleID"]:
+    #             self.protocol._log("rule_id doesn't match. {} != {}".format(
+    #                     rule_id, rule["ruleID"]))
+    #             return None
+    #     for r in rule["compression"]["rule_set"]:
+    #         # XXX need to handle "DI"
+    #         self.protocol._log("rule item: {}".format(r))
+    #         # if match the rule, call CDA.
+    #         val = self.__func_rx_cda[r[T_CDA]](r, input_bbuf, output_bbuf)
+    #         # update info to build the IPv6 pseudo header.
+    #         if r[T_FID] == T_IPV6_NXT:
+    #             self.next_proto = val
+    #         elif r[T_FID] == T_IPV6_DEV_PREFIX:
+    #             if di == T_DIR_UP:
+    #                 self.src_prefix = val
+    #             else:
+    #                 self.dst_prefix = val
+    #         elif r[T_FID] == T_IPV6_DEV_IID:
+    #             if di == T_DIR_UP:
+    #                 self.src_iid = val
+    #             else:
+    #                 self.dst_iid = val
+    #         elif r[T_FID] == T_IPV6_APP_PREFIX:
+    #             if di == T_DIR_UP:
+    #                 self.dst_prefix = val
+    #             else:
+    #                 self.src_prefix = val
+    #         elif r[T_FID] == T_IPV6_APP_IID:
+    #             if di == T_DIR_UP:
+    #                 self.dst_iid = val
+    #             else:
+    #                 self.src_iid = val
+    #         elif r[T_FID].startswith(T_PROTO_ICMPV6):
+    #             self.cksum_field_offset = 42
+    #         elif r[T_FID].startswith(T_PROTO_UDP):
+    #             self.cksum_field_offset = 46
+    #         #
+    #     if input_bbuf.count_remaining_bits() > 0:
+    #         output_bbuf += input_bbuf
+    #     # update the ipv6 payload.
+    #     self.ipv6_payload = output_bbuf.get_content()[40:]
+    #     # update the field of IPv6 length.
+    #     output_bbuf.add_bits(len(self.ipv6_payload), 16, position=32)
+    #     # update the checksum field of the upper layer.
+    #     if self.cksum_field_offset:
+    #         assert self.ipv6_payload is not None
+    #         cksum = self.cal_checksum(self.build_ipv6_pseudo_header() + self.ipv6_payload)
+    #         output_bbuf.add_bits(cksum, 16, position=self.cksum_field_offset)
+    #     # if all process have been succeeded, return the data.
+    #     self.protocol._log("decompress: {}=>{}".format(
+    #         packet_bbuf, output_bbuf))
+    #     return output_bbuf
+
+    def decompress(self, schc, rule, direction):
+        assert ("Compression" in rule)
+        schc.set_read_position(0)
+
+        self.parsed_packet = {}
+
+        rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+        assert (rule_send == rule["RuleID"])
+
+        for r in rule["Compression"]:
+            print (r)
+            if r[T_DI] in [T_DIR_BI, direction]:
+                full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
+                print ("<<<", full_field)
+                self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
+                pprint.pprint (self.parsed_packet)
+
+        return self.parsed_packet
 
 #---------------------------------------------------------------------------

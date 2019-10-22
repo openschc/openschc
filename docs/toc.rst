@@ -1,13 +1,14 @@
 .. toctree::
    :maxdepth: 1
-   :caption: Table of Contents:
 
-   Full Table of Content <main_toc>
-   Back to Index <index>
+   Back to Home <index>
+   Detailed Table of Content <main_toc>
+
 .. toctree::
    :maxdepth: 1
-   :caption: General Informations:
+   :caption: General Information
 
+   General/Installation_guide
    General/User_guide
    General/Documenting_Guidelines
    General/Contributing_Guidelines
@@ -15,7 +16,7 @@
 
 .. toctree::
    :maxdepth: 1
-   :caption: Source code in-depth:
+   :caption: Source code in-depth
 
    Source/File_Classification
    Source/rulemanager
@@ -24,6 +25,15 @@
 
 .. toctree::
    :maxdepth: 1
-   :caption: Other informations:
+   :caption: Testing
 
-   Actus/IETF-104-Hackathon-LPWAN
+   Testing/testing
+   Testing/random-fragment-testing
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Other info
+
+   Actus/IETF-Hackathon-LPWAN
+   General/old-docs

@@ -7,6 +7,7 @@
 from base_import import *
 
 import schcmsg
+from schccomp import *
 
 #---------------------------------------------------------------------------
 
@@ -16,7 +17,10 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
-        self.t_size = rule["tileSize"]
+        """Changement à corriger 
+        self.t_size = ["tileSize"]
+        """
+        self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
         self.max_fcn = schcmsg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
@@ -96,24 +100,54 @@ class TileList():
         def unset_sent_flag_do(wn, tn):
             if tn is None:
                 # special case. i.e. the last tile.
-                self.all_tiles[-1]["sent"] = False
+                #dont know why it is a special case, if the ALL-1 is received with a tile
+                #then it should always be one, if the tile is consired received by the method
+                #below, then it should not be false
+
+                #i think the problem is when the sender does not know if it is the last one
+                #so the the bitmap is received with the max_fcn bit on 1, but since there are
+                #less tiles than the max_fcn. it does not look for that bit
+                print("last tile case")
+                #self.all_tiles[-1]["sent"] = False
                 return
             # normal case.
+            counter = 0
+            print('unset_sent_flag_do')
             for t in self.all_tiles:
                 if t["w-num"] == wn:
                     if t["t-num"] == self.max_fcn - tn:
+                        counter += 1
+                        print('counter = {}, t-num {}, tn {}'.format(counter, t["t-num"],tn))
                         t["sent"] = False
-        #
+                    elif t["t-num"] == self.max_fcn:
+                        print("t-num {} == max_fcn {}".format(t["t-num"],self.max_fcn))
+        
+        print("unset_sent_flag")
+        print("bit_list -> {}".format(bit_list))
+        print("self.max_w_num:{} win:{}, len(bit_list[:-1]):{}".format(self.max_w_num, win, len(bit_list[:-1])))
         if self.max_w_num == win:
             # last window
+            print("last window")
+            print("self.all_tiles -> {}".format(self.all_tiles))
+            
             for bi in range(len(bit_list[:-1])):
+                print("bi -> {}".format(bi))
                 if bit_list[bi] == 0:
+                    
                     unset_sent_flag_do(win, bi)
-            unset_sent_flag_do(win, None)
+            #unset_sent_flag_do(win, None)
+            if bit_list[-1] == 1:
+                print("Problem in tx, the last bit is set as 1")
+                print("self.all_tiles -> {}".format(self.all_tiles))
+                self.all_tiles[-1]["sent"] = True
+                #unset_sent_flag_do()        
         else:
+            print("not last window")
             for bi in range(len(bit_list)):
                 if bit_list[bi] == 0:
                     unset_sent_flag_do(win, bi)
+        print("self.all_tiles -> {}".format(self.all_tiles))
+        #input('tiles after for')
 
     @staticmethod
     def get_tile_size(tiles):

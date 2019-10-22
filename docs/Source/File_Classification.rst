@@ -44,11 +44,11 @@ Each of the different components is
 
   * schc.py             ``# start rule manager, cC/D and F/R``
 
-* TEST
+* TEST (under the tests directory)
 
-  * test_bitarray.py
-  * test_bitarray2.py
-  * test_bitmap.py
+  * test_bitarray.py    ``# tests the BitBuffer functionalities``
+  * test_bitarray2.py   ``# more tests of the BitBuffer functionalities``
+  * test_bitmap.py      ``# tests the generation of a BitMap out of the list of tiles received``
   * test_compress.py
   * test_frag.py
   * test_newschc.py
