@@ -1,7 +1,7 @@
 Documenting Guidelines
 **********************
 
-Following the guidelines below when documenting to the project would be appreciated.
+Following the guidelines below when documenting the project would be appreciated.
 
 Syntax
 ======
@@ -17,7 +17,7 @@ The documentation is built using `Sphinx <https://sphinx-doc.org>`_.
 
 The first thing to do when trying to build the documentation is to setup the environment.
 
-We advise you to synchronise the Openschc project in two separate directories. One for the source code synchronised with the branch you want to build and the other with the gh-pages branch on which the documentation will be built.
+We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build, and another one synchronised with the gh-pages branch on which the documentation will be built.
 
 An example of how to do it ::
 
@@ -49,7 +49,7 @@ An example of how to do it ::
           ├ _sources
           └ _static
 
-An important thing to do before building the documentation is to indicate to Sphinx where to build the documentation. This information is provided in the Makefile under the **docs** folder::
+An important thing to do before building the documentation is to tell Sphinx where to build the documentation. This information is provided in the Makefile that is located under the **docs** folder::
 
   $ cd openschc/docs
   $ head -n 10 Makefile

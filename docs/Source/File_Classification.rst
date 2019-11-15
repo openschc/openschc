@@ -1,7 +1,7 @@
 File Classification
 *******************
-=
-Each of the different components is
+
+The different components are
 
 * RULE_MANAGERS
 
