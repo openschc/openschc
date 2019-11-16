@@ -2,8 +2,8 @@ import sys
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
-from rulemanager import RuleManager
-from bitarray import BitBuffer
+from gen_rulemanager import RuleManager
+from gen_bitarray import BitBuffer
 if sys.implementation.name != "micropython":
     import pytest
 

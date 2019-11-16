@@ -5,7 +5,6 @@
 
 """
 
-
 BITS_PER_BYTE = 8
 
 class BitBuffer:
@@ -264,7 +263,8 @@ class BitBuffer:
         buffer is in binary, underline shows its size.
         """
         if format == None or format == "hex":
-            print ("{}/{}".format(self._content.hex(), self._wpos))
+            if hex in dir(self._content):
+                print ("{}/{}".format(self._content.hex(), self._wpos))
 
         if format == "bin":
             for x in self._content:
