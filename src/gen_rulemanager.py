@@ -898,7 +898,7 @@ class RuleManager:
         """ Check rule integrity and uniqueless and add it to the db """
 
         if not T_RULEID in rule:
-           raise ValueError ("Rule ID not defined.")
+           raise ValueError ("Rule ID not defined in {}.".format(self._nameRule(rule)))
 
         if not T_RULEIDLENGTH in rule:
             if rule[T_RULEID] < 255:
