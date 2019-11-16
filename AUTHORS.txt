@@ -1,0 +1,19 @@
+This file lists the authors of openschc.
+This software has been developed in the context of the LPWAN IETF Hackathon project.
+
+---
+Main contributors/developers
+
+Shoichi Sakane ()
+Dominique Barthel ()
+Laurent Toutain (IMT Atlantique, France)
+Cedric Adjih (Inria, France)
+Daniel Orlando Ducuara Beltran ()
+Sergio Aguilar (UPC, Spain)
+[ ... add missing ones ... ]
+
+---
+Additional contributors (alphabetical order)
+
+
+

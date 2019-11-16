@@ -1,6 +1,8 @@
 IETF Hackathon info
 *******************
 
+`IETF106 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/106hackathon>`_
+
 `IETF105 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/105hackathon>`_
 
 `IETF104 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/104hackathon>`_
@@ -12,7 +14,7 @@ Quick links
 Resource
 ===================== ======================================================================
 openschc code         https://github.com/openschc/openschc
-SCHC draft -19        https://tools.ietf.org/html/draft-ietf-lpwan-ipv6-static-context-hc-19
+SCHC draft -22        https://tools.ietf.org/html/draft-ietf-lpwan-ipv6-static-context-hc-22
 Etherpad (live notes) https://etherpad.tools.ietf.org/p/openschc
 ===================== ======================================================================
 
