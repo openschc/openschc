@@ -17,22 +17,22 @@ context2 = {
     "dstIID":"*"
 }
 bogusRule0 = { # bogus rule with no frag or comp
-    "ruleID": 3
+    "RuleID": 3
     }
 rule1 = {
-    "ruleID" : 4,
-    "ruleLength" : 5,
-    "compression" : { "rule_set": [] }
+    "RuleID" : 4,
+    "RuleIDLength" : 5,
+    "Compression" : []
 }
 rule2 = {
-    "ruleID" : 4,
-    "ruleLength" : 3,
+    "RuleID" : 4,
+    "RuleIDLength" : 3,
     "profile": {
         "MICAlgorithm": "crc32",
         "MICWordSize": 8,
         "L2WordSize": 8
     },
-    "fragmentation" : {
+    "Fragmentation" : {
         "dir": "out",
         "FRMode": "ackOnError",
         "FRModeProfile": {
@@ -43,21 +43,21 @@ rule2 = {
     }
 }
 rule3 = {
-    "ruleID" : 7,
-    "ruleLength" : 3,
-    "profile": {
+    "RuleID" : 7,
+    "RuleIDLength" : 3,
+    "Profile": {
         "MICAlgorithm": "crc32",
         "MICWordSize": 8,
         "L2WordSize": 8
     },
-    "fragmentation" : {
+    "Fragmentation" : {
         "dir": "in",
         "FRMode" :"noAck"
     },
 }
 conflictingRule0 = {
-    "ruleID" : 15,
-    "ruleLength" : 4,
+    "RuleID" : 15,
+    "RuleIDLength" : 4,
     "compression" : { "rule_set": [] }
     }
 
