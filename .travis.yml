@@ -1,0 +1,12 @@
+language: python
+
+python:
+  - "3.4" # micropython version
+  - "3.6"
+
+install:
+  - pip install pytest
+  - cd src
+
+script:
+  - python3 -m pytest tests/
