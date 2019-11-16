@@ -87,7 +87,7 @@ class frag_base():
         self.payload = payload
         # check the field size.
         if dtag > get_max_dtag(self.rule):
-            raise ValueError("dtag is too big than the field size.")
+            raise ValueError("dtag is bigger than the field size.")
 
 class frag_tx(frag_base):
 
