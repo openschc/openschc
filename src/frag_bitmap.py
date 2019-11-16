@@ -77,7 +77,7 @@ def make_bit_list(tile_list, N, window_size):
                 print("a tile in the last fragment")
                 if max_fcn - 1 != tni:
                     print("tile is the last of the packet, should be number {}".format(tni))
-                    for _ in range(tni - 1):
+                    for _ in range(tni): # from 0 to tni.
                         # add zeros to all other tiles
                         bl.append(0)
                 #if more than one tile is in the ALL-1 message
