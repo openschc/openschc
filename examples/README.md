@@ -1,7 +1,7 @@
 
 ## export OPENSCHCDIR
 
-`export OPENSCHCDIR=<path_to_openschc_folder>
+`export OPENSCHCDIR=<path_to_openschc_folder>`
 
 ## export PYTHONPATH
 
