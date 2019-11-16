@@ -113,6 +113,7 @@ T_FRAG_MIC = "MICALgorithm"
 T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
+T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
 
 # from gen_rulemanager import *
 

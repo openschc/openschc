@@ -8,10 +8,11 @@ from aiohttp import web
 import ssl
 import logging
 import pcap
+import os
 
 # from base_import import *
 from gen_rulemanager import RuleManager
-import schc
+import protocol
 
 PROG_NAME = "net_gw_lorawan"
 
@@ -259,13 +260,19 @@ if not config.debug_level:
     requests.packages.urllib3.disable_warnings()
 
 # create the schc protocol object.
+rule_manager = RuleManager()
 rule = []
 for k in [config.context_file, config.rule_comp_file, config.rule_fragin_file,
           config.rule_fragout_file]:
+    if os.path.exists(k) is False:
+        new_k = "{}/{}".format(os.environ.get("OPENSCHCDIR",".."),k)
+        if os.path.exists(new_k) is False:
+            raise ValueError("No such file {}".format(k))
+        k = new_k
     with open(k) as fd:
-        rule.append(json.loads(fd.read()))
-rule_manager = RuleManager()
-rule_manager.add_context(rule[0], rule[1], rule[2], rule[3])
+        r = json.loads(fd.read())
+        rule.append(r)
+        rule_manager.Add(rule)
 #
 loop = asyncio.get_event_loop()
 if config.debug_level > 1:

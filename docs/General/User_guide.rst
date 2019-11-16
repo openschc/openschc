@@ -81,7 +81,7 @@ See below for the description of the compression and fragmentation parameters.
 
 The following program adds these 2 basic rules into the rule manager and displays them. ::
 
-    from rulemanager import *
+    from gen_rulemanager import *
 
     RM = RuleManager()
 
@@ -142,7 +142,7 @@ Set of Rules
 A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
 a set of rules is an JSON array. The following program has the same behavior as the previous one.::
 
-  from rulemanager import *
+  from gen_rulemanager import *
 
   RM = RuleManager()
 
@@ -209,15 +209,27 @@ into **rules** folder, which will contain our rule as follows: ::
     }]
 
 Then, it is possible to define the message which will be sent from client to server. **Payload** folder
-contains some examples that can be used.  In this point, we can execute our simulation as follows:
+contains some examples that can be used.  
+
+Go in the **examples/tcp_client_server** directory.
+
+Add the SCHC directory on PYHTONPATH. On sh:
+
+    $ export PYTHONPATH=<YOUR_PATH_TO_SCHC>
+
+on csh:
+
+    $ setenv PYTHONPATH <YOUR_PATH_TO_SCHC>
+
+In the example/tcp_client_server directory, we can execute the code as follows:
 
 Run Client on terminal 1 ::
 
-    python3 ClientServerSimul.py --role client --compression false --rule rules/rule1.json --time 20 --payload payload/testfile_small.txt
+    python3 ClientServerSimul.py --role client --compression false --rule ../configs/rule1.json --time 20 --payload payload/testfile_small.txt
 
 Run Server on terminal 2 ::
 
-    python3 ClientServerSimul.py --role server --compression false --rule rules/rule1.json
+    python3 ClientServerSimul.py --role server --compression false --rule ../configs/rule1.json
 
 If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
 transmission of the message and we will obtain the following result in server side: ::

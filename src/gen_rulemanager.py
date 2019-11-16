@@ -119,6 +119,7 @@ For ackAlways and ackOnError the value must be specified.
 * __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
     * "afterAll1": the bitmap (or Mic OK) is expected only after the reception of a All-1.
     * "afterAll0": the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
+* __lastTileInAll1__: true to append last tile to the All-1 message, false otherwise.
 * __tileSize__ gives the size in bit of a tile.
 * __MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,
 * __MICWordSize__ gives the size of the MIC word.
@@ -141,7 +142,8 @@ For instance:
                 "MICAlgorithm": "crc32",
                 "MICWordSize": 8,
                 "maxRetry": 4,
-                "timeout": 600
+                "timeout": 600,
+                "lastTileInAll1": false
             }
         }
     }
@@ -387,11 +389,11 @@ class RuleManager:
                     device = dev_info["DeviceID"]
                 sor    = dev_info["SoR"]
             else:
-                ValueError("unknown format")
+                raise ValueError("unknown format")
         elif type(dev_info) is list: # a Set of Rule
             sor = dev_info
         else:
-            ValueError("unknown structure")
+            raise ValueError("unknown structure")
 
         # check nature of the info: if "SoR" => device context, if "RuleID" => rule
 
@@ -426,17 +428,17 @@ class RuleManager:
                     r = self._create_fragmentation_rule(n_rule)
                     d["SoR"].append(r)
                 else:
-                    ValueError ("Rule type undefined")
+                    raise ValueError ("Rule type undefined")
 
     def _adapt_value (self, FID, value):
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
             if type(value) != int:
-                ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate")
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == str:
             if type(value) != str:
-                ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate")
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == bytes: # convert string with IPv6 address to bytes
@@ -448,14 +450,14 @@ class RuleManager:
 
                 addr = ipaddress.ip_address(value)
                 if addr.version != 6: # expect an IPv6 address
-                    ValueError ("{} only IPv6 is supported")
+                    raise ValueError ("{} only IPv6 is supported")
 
                 if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
                     return addr.packed[:8]
                 elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
                     return addr.packed[8:]
                 else:
-                    ValueError ("{} Fid not found".format(FID))
+                    raise ValueError ("{} Fid not found".format(FID))
             elif type(value) is int:
                 return (value).to_bytes(8, byteorder="big")
 
@@ -468,7 +470,7 @@ class RuleManager:
 
         def _default_value (ar, nr, idx, default=None, failed=False):
             if failed and not idx in nr[T_FRAG][T_FRAG_PROF]:
-                ValueError ("{} not found".format(idx))
+                raise ValueError ("{} not found".format(idx))
 
             if not T_FRAG_PROF in nr[T_FRAG] or not idx in nr[T_FRAG][T_FRAG_PROF]:
                 ar[T_FRAG][T_FRAG_PROF][idx] = default
@@ -500,6 +502,11 @@ class RuleManager:
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
+                    if not T_FRAG_LAST_TILE_IN_ALL1 in nrule[T_FRAG][T_FRAG_PROF]:
+                        raise ValueError ("LastTileInAll1 boolean must be specified for Ack On Error")
+
+                    if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] == True:
+                        raise NotImplementedError ("Last tile in All-1 is not implemented yet")
 
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
@@ -891,7 +898,7 @@ class RuleManager:
         """ Check rule integrity and uniqueless and add it to the db """
 
         if not T_RULEID in rule:
-           raise ValueError ("Rule ID not defined.")
+           raise ValueError ("Rule ID not defined in {}.".format(self._nameRule(rule)))
 
         if not T_RULEIDLENGTH in rule:
             if rule[T_RULEID] < 255:
