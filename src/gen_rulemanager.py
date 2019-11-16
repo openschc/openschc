@@ -119,6 +119,7 @@ For ackAlways and ackOnError the value must be specified.
 * __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
     * "afterAll1": the bitmap (or Mic OK) is expected only after the reception of a All-1.
     * "afterAll0": the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
+* __lastTileInAll1__: true to append last tile to the All-1 message, false otherwise.
 * __tileSize__ gives the size in bit of a tile.
 * __MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,
 * __MICWordSize__ gives the size of the MIC word.
@@ -141,7 +142,8 @@ For instance:
                 "MICAlgorithm": "crc32",
                 "MICWordSize": 8,
                 "maxRetry": 4,
-                "timeout": 600
+                "timeout": 600,
+                "lastTileInAll1": false
             }
         }
     }
@@ -500,6 +502,11 @@ class RuleManager:
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
+                    if not T_FRAG_LAST_TILE_IN_ALL1 in nrule[T_FRAG][T_FRAG_PROF]:
+                        raise ValueError ("LastTileInAll1 boolean must be specified for Ack On Error")
+
+                    if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] == True:
+                        raise NotImplementedError ("Last tile in All-1 is not implemented yet")
 
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
@@ -891,7 +898,7 @@ class RuleManager:
         """ Check rule integrity and uniqueless and add it to the db """
 
         if not T_RULEID in rule:
-           raise ValueError ("Rule ID not defined.")
+           raise ValueError ("Rule ID not defined in {}.".format(self._nameRule(rule)))
 
         if not T_RULEIDLENGTH in rule:
             if rule[T_RULEID] < 255:
