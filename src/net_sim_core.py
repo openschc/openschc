@@ -8,6 +8,7 @@ from gen_base_import import *
 from net_sim_sched import SimulScheduler as Scheduler
 from net_sim_layer2 import SimulLayer2
 from net_sim_loss import ConditionalTrue
+from gen_utils import dprint
 
 try:
     import utime as time
@@ -119,7 +120,7 @@ class Simul:
         if not self.simul_config.get("log", False):
             return
         line = "{} [{}] ".format(self.scheduler.get_clock(), name) + message
-        print(line)
+        dprint(line)
         if self.log_file != None:
             self.log_file.write(line+"\n")
 
@@ -192,17 +193,17 @@ class Simul:
                 number_tiles_send = \
                     note_table_list.protocol.fragment_session.session_list[0]["session"].current_number_tiles_sent()
                 state = note_table_list.protocol.fragment_session.session_list[0]["session"].state
-                print("STATE : ", state)
-                print("Lenght queue", len(self.scheduler.queue))
+                dprint("STATE : ", state)
+                dprint("Lenght queue", len(self.scheduler.queue))
                 if (state == self.SEND_ALL_1 or state == self.ACK_FAILURE or state == self.ACK_TIMEOUT) \
                         and number_tiles_send == 0:
-                    print("------------------------------- RECEIVE PACKET ------------------------------")
+                    dprint("------------------------------- RECEIVE PACKET ------------------------------")
                     message = note_table_list.protocol.layer2.roleSend.Receive()
-                    print("Message from Server", message)
+                    dprint("Message from Server", message)
                     note_table_list.protocol.layer2.event_receive_packet(note_table_list.id, message)
                     # note_table_list.protocol.fragment_session.session_list[0]["session"].state = 'START'
             except:
-                print("Not fragment state")
+                dprint("Not fragment state")
         else:
             self._log("----------------------- KO -----------------------")
             self._log("packet was lost {}->{}".format(src_id, dst_id))

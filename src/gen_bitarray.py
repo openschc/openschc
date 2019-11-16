@@ -344,6 +344,6 @@ if __name__ == "__main__":
     bb.display()
 
     for i in range(0, 13):
-        print(bb.get_bits(8))
+        dprint(bb.get_bits(8))
 
 #---------------------------------------------------------------------------

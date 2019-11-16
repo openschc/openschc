@@ -7,6 +7,7 @@ from gen_base_import import *  # used for now for differing modules in py/upy
 from compr_core import *
 import gen_bitarray
 from compr_core import *
+from gen_utils import dprint
 
 #---------------------------------------------------------------------------
 
@@ -16,7 +17,7 @@ def get_fcn_all_1(rule):
 
 def get_fcn_all_0(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
-    print((0<<rule[T_FRAG_FCN]))
+    dprint((0<<rule[T_FRAG_FCN]))
     return (0<<rule[T_FRAG_FCN])-4
 
 def get_win_all_1(rule):
@@ -97,8 +98,8 @@ class frag_tx(frag_base):
                   cbit=None, payload=None, abort=False , req = False):
         assert payload is None or isinstance(payload, BitBuffer)
         buffer = BitBuffer()
-        #print(T_RULEID)
-        #print("Make_frag Rule", self.rule)
+        #dprint(T_RULEID)
+        #dprint("Make_frag Rule", self.rule)
         if self.rule[T_RULEID] is not None and self.rule[T_RULEIDLENGTH] is not None:
             buffer.add_bits(self.rule[T_RULEID], self.rule[T_RULEIDLENGTH])
         if dtag is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] is not None:
@@ -106,22 +107,22 @@ class frag_tx(frag_base):
             buffer.add_bits(dtag, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
         if win is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ] is not None:
             buffer.add_bits(win, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ])
-        #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
+        #dprint("buffer before {},{},{}".format(buffer.count_added_bits(), 
         #buffer.count_padding_bits(),buffer.count_padding_bits()))
         if abort == True:
             # XXX for receiver abort, needs to be fixed
             buffer.add_bits(get_fcn_all_1(self.rule), self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
         elif req == True:
-            #print(buffer)
+            #dprint(buffer)
             buffer.add_bits(0, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
-            #print("buffer before {},{},{}".format(buffer.count_added_bits(), 
+            #dprint("buffer before {},{},{}".format(buffer.count_added_bits(), 
             #        buffer.count_padding_bits(),buffer.count_padding_bits()))
  
             #for zero in range(0, self.rule[T_FRAG_FCN]):
-            #    print("{},{}".format(self.rule[T_FRAG_FCN],zero))
+            #    dprint("{},{}".format(self.rule[T_FRAG_FCN],zero))
             #    buffer.set_bit(0)
-            #print("buffer after")
-            #print(buffer)        
+            #dprint("buffer after")
+            #dprint(buffer)        
         else:
             if fcn is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] is not None:
                 buffer.add_bits(fcn, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
@@ -242,7 +243,7 @@ class frag_rx(frag_base):
     recvbuf: str, bytes, bytearray.
     '''
     def set_recvbuf(self, recvbuf):
-        print("set_recvbuf -> {}".format(recvbuf))
+        dprint("set_recvbuf -> {}".format(recvbuf))
         assert isinstance(recvbuf, BitBuffer)
         self.packet_bbuf = recvbuf
 
@@ -361,8 +362,8 @@ class frag_sender_rx(frag_rx):
     """
     def __init__(self, rule, packet_bbuf):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
-        print("frag_sender_rx")
-        print(packet_bbuf)
+        dprint("frag_sender_rx")
+        dprint(packet_bbuf)
         #input("")        
         self.init_param()
         self.set_recvbuf(packet_bbuf)
@@ -386,8 +387,8 @@ class frag_receiver_rx(frag_rx):
     """
     def __init__(self, rule, packet_bbuf):
         """ packet_bbuf: BitBuffer containing the SCHC fragment. """
-        print("frag_receiver_rx")
-        print(packet_bbuf)
+        dprint("frag_receiver_rx")
+        dprint(packet_bbuf)
         
         self.init_param()
         self.set_recvbuf(packet_bbuf)
@@ -408,7 +409,7 @@ class frag_receiver_rx(frag_rx):
             # this is a All-1 message.
             pos += self.parse_mic()
         elif self.fcn == 0:
-            print('FCN ALL-0 found!')
+            dprint('FCN ALL-0 found!')
             """ Changement à corriger
             if self.packet_bbuf.count_remaining_bits() < self.rule[T_FRAG_L2WORDSIZE]:
             """

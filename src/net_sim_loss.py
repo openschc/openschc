@@ -3,6 +3,7 @@
    :platform: Python, Micropython
 """
 from gen_base_import import *
+from gen_utils import dprint
 
 from stats.toa_calculator import get_toa
 enable_statsct = True
@@ -15,16 +16,16 @@ import math
 
 def cond_random(rate):
     if sys.implementation.name == "micropython":
-        #print("micropython")
+        #dprint("micropython")
         random_num = urandom.getrandbits(8)/256
-        print("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
+        dprint("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
         #if random.randint(0,1000) <= (1000 * FER)
         #if random.randint(0,1000) <= FER_RANDOM * 10        
         #if urandom.getrandbits(8)/256 * 100 < rate:
         return random_num * 1000 < rate * 10
     else:
         random_num = random.getrandbits(8)/256
-        print("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
+        dprint("1000*random_num -> {} < 10 *rate  -> {}, Packet Loss Condition is -> {}".format(random_num*1000,10*rate,random_num * 1000 < rate * 10))
         return random_num * 1000 < rate * 10
 
 
@@ -94,7 +95,7 @@ class ConditionalTrue:
                 self.position = Statsct.get_position()
         else:
             self.generate_background_traffic(G,background_frag_size)
-        print("background_frag_size: {}".format(background_frag_size))
+        dprint("background_frag_size: {}".format(background_frag_size))
         #y = 0
         #calculate the background traffic, one packet each 5000ms of 500ms ToA
         #for i in range(10):
@@ -109,14 +110,14 @@ class ConditionalTrue:
         self.background_traffic
         T = get_toa(background_frag_size,Statsct.SF)
         g = G / T['t_packet']
-        print("g: {}, G:{}, T:{}".format(g,G,T['t_packet']))
+        dprint("g: {}, G:{}, T:{}".format(g,G,T['t_packet']))
         for i in range (1000):
             #aleatoire = machine.rng()
             #aleatoire2 = aleatoire/(2**24-1)
  
             aleatoire = urandom.getrandbits(8)/256
             aleatoire2 = aleatoire/(2**24-1)
-            #print(aleatoire2)
+            #dprint(aleatoire2)
             if aleatoire2 != 0:
                 test = -1*math.log(aleatoire2) / 1/g
                 self.background_traffic.append((test,test+T['t_packet']))
@@ -130,25 +131,25 @@ class ConditionalTrue:
         """Calculates if there is a collision"""
         frag_ToA = get_toa(frag_size, Statsct.SF)
         #check if there is a collision at the start of the packet
-        print("current time: {}, position: {}, ToA fragment: {}".format(self.current_time,self.position,frag_ToA['t_packet']))
-        print("background_traffic: {}".format(self.background_traffic[self.position]))
+        dprint("current time: {}, position: {}, ToA fragment: {}".format(self.current_time,self.position,frag_ToA['t_packet']))
+        dprint("background_traffic: {}".format(self.background_traffic[self.position]))
         while self.position < len(self.background_traffic) and self.current_time > self.background_traffic[self.position][0]:           
             self.position += 1
-        print("position: {}, ".format(self.position))
+        dprint("position: {}, ".format(self.position))
         
         if self.position != len(self.background_traffic):
             if self.current_time == self.background_traffic[self.position][0]:
                 #special case when both packet start time is the same
-                print("Collision! -> packet start at same time as the next")
+                dprint("Collision! -> packet start at same time as the next")
                 self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
                 return True
             elif self.position != 0 and self.current_time < self.background_traffic[self.position-1][1]:
-                print("Collision! -> packet start before the end of previous packet")
+                dprint("Collision! -> packet start before the end of previous packet")
                 self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
                 return True
             else:
                 if self.current_time + frag_ToA['t_packet'] > self.background_traffic[self.position][0]:
-                    print("Collision!-> packet ends after next has start")
+                    dprint("Collision!-> packet ends after next has start")
                     self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
                     return True
         self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
@@ -180,10 +181,10 @@ class ConditionalTrue:
 
 if __name__ == "__main__":
     def test(config):
-        print(config["cond"])
+        dprint(config["cond"])
         cond = ConditionalTrue(**config["cond"])
         for i in range(1, 21):
-            print(i, cond.check())
+            dprint(i, cond.check())
 
     test({ "cond": { "mode": "rate", "cycle": 5 } })
     test({ "cond": { "mode": "cycle", "cycle": 3 } })

@@ -5,6 +5,8 @@
 #---------------------------------------------------------------------------
 #from stats.statsct import Statsct
 
+from gen_utils import dprint
+
 class SimulLayer2:
     """
     The layer 2 of LPWA is not symmetry.
@@ -57,8 +59,8 @@ class SimulLayer2:
         self.is_transmitting = True
         (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
-        print(transmit_callback, "AAAAAAA")
-        print("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback))
+        dprint(transmit_callback, "AAAAAAA")
+        dprint("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback))
 
         if self.role == "client" or self.role == "server":
             self.sim.send_packetX(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
@@ -72,7 +74,7 @@ class SimulLayer2:
             transmit_callback(status)
 
     def event_receive_packet(self, other_mac_id, packet):
-        print("Address", self.devaddr)
+        dprint("Address", self.devaddr)
         assert self.protocol != None
         assert self.devaddr is not None
         self.protocol.schc_recv(self.devaddr, packet)

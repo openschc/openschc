@@ -6,6 +6,7 @@
 import math
 
 from gen_base_import import *  # used for now for differing modules in py/upy
+from gen_utils import dprint
 
 import protocol
 import frag_msg
@@ -94,7 +95,7 @@ class FragmentBase():
                                                 self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_MIC]))
         #
         mic = get_mic(mic_base.get_content())
-        print("Send MIC {}, base = {}, lenght = {}".format(mic, mic_base.get_content(), len(mic_base.get_content())))
+        dprint("Send MIC {}, base = {}, lenght = {}".format(mic, mic_base.get_content(), len(mic_base.get_content())))
         return mic.to_bytes(4, "big")
 
     def start_sending(self):
@@ -131,7 +132,7 @@ class FragmentNoAck(FragmentBase):
         # because draft-18 requires that in No-ACK mode, each fragment must
         # contain exactly one tile and the tile size must be at least the size
         # of an L2 Word.
-        print(self.rule)
+        dprint(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
                         frag_msg.get_mic_size(self.rule) +
                         self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE])
@@ -161,7 +162,7 @@ class FragmentNoAck(FragmentBase):
                         frag_msg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
         if remaining_data_size >= payload_size:
-            print("----------------------- Fragmentation process -----------------------")
+            dprint("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
             transmit_callback = self.event_sent_frag
@@ -172,7 +173,7 @@ class FragmentNoAck(FragmentBase):
                 Statsct.set_msg_type("SCHC_FRAG")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         elif remaining_data_size < payload_size:
-            print("----------------------- Fragmentation process -----------------------")
+            dprint("----------------------- Fragmentation process -----------------------")
             if remaining_data_size <= (
                     payload_size - frag_msg.get_mic_size(self.rule)):
                 tile = None
@@ -221,26 +222,26 @@ class FragmentNoAck(FragmentBase):
         """
         args = (schc_frag.packet.get_content(), '*',
                 transmit_callback)
-        print("frag sent:", schc_frag.__dict__)
+        dprint("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
-        print("event_sent_frag")
+        dprint("event_sent_frag")
         self.send_frag()
         #input("")
 
     def receive_frag(self, schc_frag, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
-        print("sender frag received:", schc_frag.__dict__)
+        dprint("sender frag received:", schc_frag.__dict__)
         if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] is 0 or
              schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
-            print("Receiver Abort rid={} dtag={}".format(
+            dprint("Receiver Abort rid={} dtag={}".format(
                     self.rule.ruleID, self.dtag))
             return
         else:
-            print("XXX Unacceptable message has been received.")
+            dprint("XXX Unacceptable message has been received.")
 
 #---------------------------------------------------------------------------
 
@@ -262,49 +263,49 @@ class FragmentAckOnError(FragmentBase):
         #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
         #                              self.rule["FCNSize"],
         #                              frag_msg.get_fcn_all_1(self.rule))
-        print("----------------------- Fragmentation process -----------------------")
+        dprint("----------------------- Fragmentation process -----------------------")
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
                                       self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
                                       self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])
-        print("bit_list:", self.bit_list)
+        dprint("bit_list:", self.bit_list)
         for tile in self.all_tiles.get_all_tiles():
-            print("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
+            dprint("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
         self.all1_send = False
         self.num_of_windows = 0
         for pos in self.bit_list:
-            print("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
+            dprint("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
             if len(self.bit_list[pos]) is not 0:
                 self.num_of_windows += 1
-        print("number of windows = {}".format(self.num_of_windows))
+        dprint("number of windows = {}".format(self.num_of_windows))
         #input("")
 
     def send_frag(self):
         if self.state == self.ACK_SUCCESS:
-            print("-----------------------------------------------------------------------")
+            dprint("-----------------------------------------------------------------------")
             return
-        print("----------------------- Preparing to send a message -----------------------")
-        print("{} send_frag!!!!!!!!!!!!!!!!!".format(time.time()))  # utime.time()
-        print("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
-        print("all tiles unsend -> {}".format(self.all_tiles))
+        dprint("----------------------- Preparing to send a message -----------------------")
+        dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(time.time()))  # utime.time()
+        dprint("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
+        dprint("all tiles unsend -> {}".format(self.all_tiles))
         for tile in self.all_tiles.get_all_tiles():
-            print("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
-        print("")
+            dprint("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
+        dprint("")
         # if self.state == self.ACK_FAILURE and self.num_of_windows != 1 and self.number_of_ack_waits <= self.num_of_windows:
         #     #waiting for the acks of the others windows
         #     self.number_of_ack_waits += 1 #wait depends on the number of windows
         #     #set ack_time_out_timer
-        #     print("waiting for more acks: {}".format(self.number_of_ack_waits))
+        #     dprint("waiting for more acks: {}".format(self.number_of_ack_waits))
         #     return
 
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        print("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
+        dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
                                                                                                 nb_remaining_tiles,
                                                                                                 remaining_size))
 
         if window_tiles is None and self.resend:
-            print("no more tiles to resend")
+            dprint("no more tiles to resend")
             # how to identify that all tiles are resend and that the ack timeout should be set
             # to wait for tha last ok. It should be set after retransmission of the last fragment
             if self.state == self.ACK_FAILURE and self.event_id_ack_wait_timer is None:
@@ -319,21 +320,21 @@ class FragmentAckOnError(FragmentBase):
                 args = (schc_frag, win,)
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                     self.ack_wait_timer, self.ack_timeout, args)
-                print("*******event id {}".format(self.event_id_ack_wait_timer))
+                dprint("*******event id {}".format(self.event_id_ack_wait_timer))
                 # if self.all1_send and self.state == self.ACK_FAILURE:
             #     #case when with the bitmap is not possible to identify the missing tile,
             #     #resend ALL-1 messages
             #     # send a SCHC fragment
             #     args = (self.schc_all_1.packet.get_content(), self.context["devL2Addr"],
             #     self.event_sent_frag)
-            #     print("frag sent:", self.schc_all_1.__dict__)
+            #     dprint("frag sent:", self.schc_all_1.__dict__)
             #     if enable_statsct:
             #         Statsct.set_msg_type("SCHC_ALL_1")
             #         Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule) +
             #             frag_msg.get_mic_size(self.rule))
             #     self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
             #                                     args)
-            #     print("Sending all-1 beacuse there is an ACK FaILURE but cannot find the missing tiles")
+            #     dprint("Sending all-1 beacuse there is an ACK FaILURE but cannot find the missing tiles")
             #     input("")
 
             # win = self.last_window_tiles[0]["w-num"] if self.last_window_tiles[0]["w-num"] is not None else 0
@@ -347,14 +348,14 @@ class FragmentAckOnError(FragmentBase):
             # args = (schc_frag, win,)
             # self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
             #        self.ack_wait_timer, self.ack_timeout, args)
-            # print("*******event id {}".format(self.event_id_ack_wait_timer))
+            # dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # if window_tiles is not None and not self.all1_send and not self.resend:
 
         if window_tiles is not None:
 
-            print("window_tiles is not None -> {}, resend -> {}".format(self.all1_send, self.resend))
-            print("")
+            dprint("window_tiles is not None -> {}, resend -> {}".format(self.all1_send, self.resend))
+            dprint("")
             # even when mic is sent, it comes here in the retransmission.
             if self.all1_send and self.state != self.ACK_FAILURE:
                 # when there is a retransmission, the all-1 is send again and is send before
@@ -365,12 +366,12 @@ class FragmentAckOnError(FragmentBase):
                 # and a receiver abort is send. If it arrives, there is not need to retransmit
                 # the message after the retransmission of the missing fragments)
                 # FIX, all-1 is resend
-                print('All-1 ones already send')
+                dprint('All-1 ones already send')
                 # cancel timer when there is success
                 # if self.event_id_ack_wait_timer and self.state == self.ACK_SUCCESS:
                 #     self.cancel_ack_wait_timer()
                 # else:
-                #    print("how to add a timer without sending a message")
+                #    dprint("how to add a timer without sending a message")
                 # fcn = frag_msg.get_fcn_all_1(self.rule)
                 # args = (schc_frag, window_tiles[0]["w-num"],)
                 # elf.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
@@ -380,7 +381,7 @@ class FragmentAckOnError(FragmentBase):
             elif (nb_remaining_tiles == 0 and
                   len(window_tiles) == 1 and
                   remaining_size >= frag_msg.get_mic_size(self.rule)):
-                print("MESSSAGE TYPE ----> ALL-1 prepared")
+                dprint("MESSSAGE TYPE ----> ALL-1 prepared")
 
                 # make the All-1 frag with this tile.
                 # the All-1 fragment can carry only one tile of which the size
@@ -397,7 +398,7 @@ class FragmentAckOnError(FragmentBase):
                     self.mic_sent = mic
                 else:
                     mic = self.mic_sent
-                print("mic_sent -> {}".format(self.mic_sent))
+                dprint("mic_sent -> {}".format(self.mic_sent))
                 if enable_statsct:
                     Statsct.set_msg_type("SCHC_ALL_1")
                     Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule) +
@@ -405,8 +406,8 @@ class FragmentAckOnError(FragmentBase):
                 self.all1_send = True
                 self.state = self.SEND_ALL_1
             else:
-                print("MESSSAGE TYPE ----> regular SCHC frag")
-                print("")
+                dprint("MESSSAGE TYPE ----> regular SCHC frag")
+                dprint("")
                 # regular fragment.
                 fcn = window_tiles[0]["t-num"]
                 mic = None
@@ -423,24 +424,24 @@ class FragmentAckOnError(FragmentBase):
                 payload=TileList.concat(window_tiles))
 
             if mic is not None:
-                print("mic is not None")
+                dprint("mic is not None")
                 # set ack waiting timer
                 if enable_statsct:
                    Statsct.set_msg_type("SCHC_FRAG")
                    Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
                 args = (schc_frag, window_tiles[0]["w-num"],)
-                print("all ones")
+                dprint("all ones")
                 self.schc_all_1 = schc_frag
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                     self.ack_wait_timer, self.ack_timeout, args)
-                print("*******event id {}".format(self.event_id_ack_wait_timer))
+                dprint("*******event id {}".format(self.event_id_ack_wait_timer))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
-            print("self.last_window_tiles -> {}".format(self.last_window_tiles))
+            dprint("self.last_window_tiles -> {}".format(self.last_window_tiles))
         elif self.mic_sent is not None or self.all1_send:
-            print("self.mic_sent is not None state -> {}".format(self.state))
+            dprint("self.mic_sent is not None state -> {}".format(self.state))
             # it looks that all fragments have been sent.
-            print("----------------------- all tiles have been sent -----------------------",
+            dprint("----------------------- all tiles have been sent -----------------------",
                   window_tiles, nb_remaining_tiles, remaining_size)
             schc_frag = None
             self.all1_send = True
@@ -448,7 +449,7 @@ class FragmentAckOnError(FragmentBase):
                 self.cancel_ack_wait_timer()
             return
         else:
-            print("only mic all tiles send")
+            dprint("only mic all tiles send")
             # Here, only MIC will be sent since all tiles has been sent.
             assert self.last_window_tiles is not None
             # As the MTU would be changed anytime AND the size of the
@@ -479,7 +480,7 @@ class FragmentAckOnError(FragmentBase):
             self.state = self.SEND_ALL_1
             self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
-            print("*******event id {}".format(self.event_id_ack_wait_timer))
+            dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # send a SCHC fragment
         """ Changement à corriger
@@ -487,19 +488,19 @@ class FragmentAckOnError(FragmentBase):
                 self.event_sent_frag)
         """
         args = (schc_frag.packet.get_content(), '*', self.event_sent_frag)
-        print("frag sent:", schc_frag.__dict__)
+        dprint("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
 
     def cancel_ack_wait_timer(self):
         # don't assert here because the receiver sends ACK back anytime.
         #assert self.event_id_ack_wait_timer is not None
-        print('----------------------- cancel_ack_wait_timer -----------------------')
+        dprint('----------------------- cancel_ack_wait_timer -----------------------')
         self.protocol.scheduler.cancel_event(self.event_id_ack_wait_timer)
         self.event_id_ack_wait_timer = None
 
     def ack_timeout(self, *args):
         self.cancel_ack_wait_timer()
-        print("----------------------- ACK timeout -----------------------  ")
+        dprint("----------------------- ACK timeout -----------------------  ")
         self.state = self.ACK_TIMEOUT
         assert len(args) == 2
         assert isinstance(args[0], frag_msg.frag_sender_tx)
@@ -507,7 +508,7 @@ class FragmentAckOnError(FragmentBase):
         schc_frag = args[0]
         win = args[1]
         self.ack_requests_counter += 1
-        print("ack_requests_counter -> {}".format(self.ack_requests_counter))
+        dprint("ack_requests_counter -> {}".format(self.ack_requests_counter))
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag, win)
@@ -515,7 +516,7 @@ class FragmentAckOnError(FragmentBase):
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             """
             args = (schc_frag.packet.get_content(), "*")
-            print("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
+            dprint("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
@@ -526,7 +527,7 @@ class FragmentAckOnError(FragmentBase):
         # set ack waiting timer
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
                 self.ack_wait_timer, self.ack_timeout, args)
-        print("*******event id {}".format(self.event_id_ack_wait_timer))
+        dprint("*******event id {}".format(self.event_id_ack_wait_timer))
         schc_frag = frag_msg.frag_sender_ack_req(self.rule, self.dtag, win)
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
@@ -538,13 +539,13 @@ class FragmentAckOnError(FragmentBase):
         args = (schc_frag.packet.get_content(), '*',
                 self.event_sent_frag)
 
-        print("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
+        dprint("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                         args)
         """ waits for all the acks before sending the ack request
         
         self.number_of_ack_waits += 1
-        print("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
+        dprint("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
         if self.number_of_ack_waits > self.num_of_windows:
             schc_frag = frag_msg.frag_sender_ack_req(self.rule, self.dtag, win)
             if enable_statsct:
@@ -552,7 +553,7 @@ class FragmentAckOnError(FragmentBase):
             # # retransmit MIC.
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                     self.event_sent_frag)
-            print("SCHC ACK REQ frag:", schc_frag.__dict__)
+            dprint("SCHC ACK REQ frag:", schc_frag.__dict__)
             # if enable_statsct:
             #     Statsct.set_msg_type("SCHC_FRAG")
             #     Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
@@ -561,11 +562,11 @@ class FragmentAckOnError(FragmentBase):
             self.number_of_ack_waits = 0
             
         else:
-            print("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
+            dprint("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
         """
                                          
     def event_sent_frag(self, status): # status == nb actually sent (for now)
-        print("EVENT SEND FRAG")
+        dprint("EVENT SEND FRAG")
         self.send_frag()
 
     def receive_frag(self, bbuf, dtag):
@@ -577,19 +578,19 @@ class FragmentAckOnError(FragmentBase):
         self.resend = False
         #
         schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf)
-        print("-----------------------  Sender Frag Received -----------------------")
-        print("fragment received -> {}".format(schc_frag.__dict__))
+        dprint("-----------------------  Sender Frag Received -----------------------")
+        dprint("fragment received -> {}".format(schc_frag.__dict__))
         if ((self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] is None or
             schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
-            print("-----------------------  Receiver Abort rid={} dtag={} -----------------------".format(
+            dprint("-----------------------  Receiver Abort rid={} dtag={} -----------------------".format(
                     self.rule[T_RULEID], self.dtag))
             #self.resend = False
             self.state = self.RECEIVER_ABORT
 
             return
         if schc_frag.cbit == 1:
-            print("----------------------- ACK Success rid={} dtag={} -----------------------".format(
+            dprint("----------------------- ACK Success rid={} dtag={} -----------------------".format(
                     self.rule[T_RULEID], self.dtag))
             #self.resend = False
             self.state = self.ACK_SUCCESS
@@ -607,7 +608,7 @@ class FragmentAckOnError(FragmentBase):
 
             return
         if schc_frag.cbit == 0:
-            print("----------------------- ACK Failure rid={} dtag={} -----------------------".format(
+            dprint("----------------------- ACK Failure rid={} dtag={} -----------------------".format(
                     self.rule[T_RULEID], self.dtag))
             #self.resend = False
             #self.all1_send = False
@@ -617,8 +618,8 @@ class FragmentAckOnError(FragmentBase):
 
     def resend_frag(self, schc_frag):
         self.resend = True
-        print("recv bitmap:", (schc_frag.win, schc_frag.bitmap.to_bit_list()))
-        print("sent bitmap:", (schc_frag.win, self.bit_list[schc_frag.win]))
+        dprint("recv bitmap:", (schc_frag.win, schc_frag.bitmap.to_bit_list()))
+        dprint("sent bitmap:", (schc_frag.win, self.bit_list[schc_frag.win]))
         self.all_tiles.unset_sent_flag(schc_frag.win,
                                        schc_frag.bitmap.to_bit_list())
         self.send_frag()
@@ -628,11 +629,11 @@ class FragmentAckOnError(FragmentBase):
             if not tile['sent']:
                 self.number_tiles_send += 1
         self.number_tiles_send = math.ceil(self.number_tiles_send / (self.protocol.layer2.get_mtu_size() // self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]))
-        print("----------- ", self.number_tiles_send, "tiles to send")
+        dprint("----------- ", self.number_tiles_send, "tiles to send")
 
     def current_number_tiles_sent(self):
         if self.number_tiles_send > 0:
             self.number_tiles_send -= 1
-        print("----------- ", self.number_tiles_send, "tiles to send")
+        dprint("----------- ", self.number_tiles_send, "tiles to send")
         return self.number_tiles_send
 

@@ -5,11 +5,13 @@ import pcap
 import requests
 import argparse
 
+from gen_utils import dprint, dpprint
+
 requests.packages.urllib3.disable_warnings()
 
 
 def cb_debug(ts, pkt, cb_arg):
-    print(ts, pkt.hex())
+    dprint(ts, pkt.hex())
     sys.stdout.flush()
 
 
@@ -40,12 +42,12 @@ class PcapWrapper():
             self._pc = pcap.pcap(input_device, timeout_ms=0)
         # set filter.
         self._pc.setfilter(filter_rules)
-        print("dloff:", self._pc.dloff)
-        print("fd:", self._pc.fd)
-        print("filter:", self._pc.filter)
-        print("name:", self._pc.name)
-        print("snaplen:", self._pc.snaplen)
-        print("nb_blk:", self._pc.getnonblock())
+        dprint("dloff:", self._pc.dloff)
+        dprint("fd:", self._pc.fd)
+        dprint("filter:", self._pc.filter)
+        dprint("name:", self._pc.name)
+        dprint("snaplen:", self._pc.snaplen)
+        dprint("nb_blk:", self._pc.getnonblock())
 
     def run(self, cb=cb_post, cb_arg=None):
         while True:

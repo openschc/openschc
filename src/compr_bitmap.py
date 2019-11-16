@@ -5,6 +5,8 @@
 """
 # XXX need to consider the byte boundary.
 
+from gen_utils import dprint
+
 def compress_bitmap(bbuf):
     """
     N FCN
@@ -28,16 +30,16 @@ def compress_bitmap(bbuf):
         1111110 1111110 b'\xfc'/7 b'\xfc'/7
         1111111 1       b'\xfe'/7 b'\x80'/1
     """
-    #print("x0 b =", bbuf, "rpos=",bbuf._rpos, "wpos=",bbuf._wpos)
+    #dprint("x0 b =", bbuf, "rpos=",bbuf._rpos, "wpos=",bbuf._wpos)
     i = bbuf.count_added_bits()
     while i > 0:
         i -= 1
         if bbuf.get_bits(1,position=i) == 0:
             break
-        #print("x1 =", bbuf.get_bits(1,position=i-1))
+        #dprint("x1 =", bbuf.get_bits(1,position=i-1))
         if bbuf.get_bits(1,position=i-1) == 0:
             break
-    #print("x3 b =", bbuf, "i=", i, "rpos=",bbuf._rpos, "wpos=",bbuf._wpos)
+    #dprint("x3 b =", bbuf, "i=", i, "rpos=",bbuf._rpos, "wpos=",bbuf._wpos)
     return bbuf.get_bits_as_buffer(i+1)
 
 if __name__ == "__main__":
@@ -67,7 +69,7 @@ if __name__ == "__main__":
 
         for n in range(5):
             for i in gen_bits_str(n):
-                print(i, compress_bitmap_str(i))
+                dprint(i, compress_bitmap_str(i))
 
     def test2():
         def gen_bits(N):
@@ -95,9 +97,9 @@ if __name__ == "__main__":
                 yield b
 
         for n in range(5):
-            print("n=",n)
+            dprint("n=",n)
             for i in gen_bits(n):
-                print(i, compress_bitmap(i))
+                dprint(i, compress_bitmap(i))
 
     #test1()
     test2()

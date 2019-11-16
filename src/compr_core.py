@@ -3,6 +3,7 @@
    :platform: Python, Micropython
 """
 from gen_base_import import *
+from gen_utils import dprint
 
 import pprint
 
@@ -168,9 +169,9 @@ class Compressor:
         pass
 
     def tx_cda_val_sent(self, field, rule, output):
-        print (field)
+        dprint(field)
         if rule[T_FL] == "var":
-            print ("VARIABLE")
+            dprint("VARIABLE")
             assert (field[1]%8 == 0)
             size = field[1]//8 # var unit is bytes
             output.add_length(size)
@@ -179,12 +180,12 @@ class Compressor:
                 return
 
         if type(field[0]) is int:
-            print ("+++", bin(field[0]), field[1])
+            dprint("+++", bin(field[0]), field[1])
             output.add_bits(field[0], field[1])
         elif type(field[0]) == str:
             assert (field[1] % 8 == 0) # string is a number of bytes
             for i in range(field[1]//8):
-                print (i, field[0][i])
+                dprint(i, field[0][i])
                 output.add_bytes(field[0][i].encode("utf-8"))
         else:
             raise ValueError("CA value-sent unknown type")
@@ -199,7 +200,7 @@ class Compressor:
 
         size = len(bin(len(target_value)-1)[2:])
 
-        print ("size of ", target_value, "is ", size)
+        dprint("size of ", target_value, "is ", size)
 
         pos = 0
         for tv in target_value:
@@ -215,7 +216,7 @@ class Compressor:
         assert rule[T_MO] == T_MO_MSB
         size = field[1] - rule[T_MO_VAL]
         full_value = field[0]
-        print ("size =", size)
+        dprint("size =", size)
 
         if rule[T_FL] == "var":
             assert (size%8 == 0) #var implies bytes
@@ -227,9 +228,9 @@ class Compressor:
                 output.set_bit(full_value & 0x01)
                 full_value >>= 1
         elif type(full_value) == str:
-            print (rule[T_TV], field[0])
+            dprint(rule[T_TV], field[0])
             for i in range(rule[T_MO_VAL]//8, field[1]//8):
-                print (i, "===>", field[0][i] )
+                dprint(i, "===>", field[0][i] )
             pass
         else:
             raise ValueError("CA value-sent unknown type")
@@ -258,9 +259,9 @@ class Compressor:
     #     for r in rule["compression"]["rule_set"]:
     #         # compare each rule with input_bbuf.
     #         # XXX need to handle "DI"
-    #         print("rule item:", r)
+    #         dprint("rule item:", r)
     #         result, val = self.__func_tx_mo[r[T_MO]](r, input_bbuf)
-    #         print("result", result, val)
+    #         dprint("result", result, val)
     #         if result == False:
     #             # if any of MO functions is failed, return None.
     #             # this rule should not be applied.
@@ -283,23 +284,23 @@ class Compressor:
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            print("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
             output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            print("rule item:", r)
+            dprint("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
-                    print ("in packet")
+                    dprint("in packet")
                     self.__func_tx_cda[r[T_CDA]](field=parsed_packet[(r[T_FID], r[T_FP])],
                                                 rule = r,
                                                 output= output_bbuf)
                 else: # not find in packet, but is variable length can be coded as 0
-                    print("send variable length")
+                    dprint("send variable length")
                     self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
             else:
-                print ("rule skipped, bad direction")
+                dprint("rule skipped, bad direction")
 
             output_bbuf.display(format="bin")
 
@@ -373,12 +374,12 @@ class Decompressor:
 
         if rule[T_FL] == "var":
             size = in_bbuf.get_length()*8
-            print ("siZE = ", size)
+            dprint("siZE = ", size)
             if size == 0:
                 return (None, 0)
         elif rule[T_FL] == "tkl":
             size = self.parsed_packet[(T_COAP_TKL, 1)][0]*8
-            print ("token size", size)
+            dprint("token size", size)
         elif type (rule[T_FL]) == int:
             size = rule[T_FL]
         else:
@@ -398,7 +399,7 @@ class Decompressor:
         size = len(bin(len(rule[T_TV])-1)[2:])
         val = in_bbuf.get_bits(size)
 
-        print ("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
+        dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
 
         if rule[T_FL] == "var":
             size = len(rule[T_TV][val])
@@ -519,10 +520,10 @@ class Decompressor:
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:
-            print (r)
+            dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-                print ("<<<", full_field)
+                dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
                 pprint.pprint (self.parsed_packet)
 

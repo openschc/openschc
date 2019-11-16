@@ -413,7 +413,7 @@ class RuleManager:
             for e_rule in d["SoR"]: # check no overlaps on RuleID
                 left_aligned_e_ruleID = e_rule[T_RULEID] << (32 - e_rule[T_RULEIDLENGTH])
                 if left_aligned_e_ruleID == left_aligned_n_ruleID:
-                    print ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
+                    dprint ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
                     overlap = True
                     break
 
@@ -598,11 +598,11 @@ class RuleManager:
     def _smart_print(self, v):
         if type(v) is str:
             v = '"'+v+'"'
-            print ('{:<30}'.format(v), end="")
+            dprint ('{:<30}'.format(v), end="")
         elif type(v) is int:
-            print ('{:>30}'.format(v), end="")
+            dprint ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            print ('{:>30}'.format(v.hex()), end="")
+            dprint ('{:>30}'.format(v.hex()), end="")
 
     def printBin(self, v, l):
         txt = ""
@@ -617,43 +617,43 @@ class RuleManager:
         Print a context
         """
         for dev in self._ctxt:
-            print ("*"*40)
-            print ("Device:", dev["DeviceID"])
+            dprint ("*"*40)
+            dprint ("Device:", dev["DeviceID"])
 
             for rule in dev["SoR"]:
-                print ("/" + "-"*25 + "\\")
+                dprint ("/" + "-"*25 + "\\")
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
-                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
+                dprint ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if "Compression" in rule:
-                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
+                    dprint ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
                     for e in rule["Compression"]:
-                        print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                        dprint ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
                         if 'TV' in e:
                             if type(e[T_TV]) is list:
                                 self._smart_print(e[T_TV][0])
                             else:
                                 self._smart_print(e[T_TV])
                         if not T_TV in e or e[T_TV] == None:
-                            print ("-"*30, end="")
+                            dprint ("-"*30, end="")
 
                         txt = e[T_MO]
                         if T_MO_VAL in e:
                             txt = txt+ '(' + str(e[T_MO_VAL])+')'
 
-                        print ("|{:13}|{:16}|".format(txt, e[T_CDA]))
+                        dprint ("|{:13}|{:16}|".format(txt, e[T_CDA]))
 
                         if (T_TV in e) and (type (e[T_TV]) is list):
                             for i in range (1, len(e[T_TV])):
-                                print (":{:^15s}:{:^3}:{:^2}:{:^2}:".format(".", ".", ".","."), end='')
+                                dprint (":{:^15s}:{:^3}:{:^2}:{:^2}:".format(".", ".", ".","."), end='')
                                 self._smart_print(e[T_TV][i])
-                                print (":{:^13}:{:^16}:".format(".", "."))
+                                dprint (":{:^13}:{:^16}:".format(".", "."))
 
 
-                    print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
+                    dprint ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
-                    print ("!" + "="*25 + "+" + "="*61 +"\\")
-                    print ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:22} !!"
+                    dprint ("!" + "="*25 + "+" + "="*61 +"\\")
+                    dprint ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:22} !!"
                         .format(
                             rule[T_FRAG][T_FRAG_MODE],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
@@ -666,23 +666,23 @@ class RuleManager:
                         txt = "Tile size: "+ str(rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE])
                     else:
                         txt = "No Tile size specified"
-                    print ("!! {:<84}!!".format(txt))
+                    dprint ("!! {:<84}!!".format(txt))
 
 
-                    print ("!! MIC Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
+                    dprint ("!! MIC Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
 
                     if rule[T_FRAG][T_FRAG_MODE] != "noAck":
-                        print ("!!" + "-"*85 +"!!")
+                        dprint ("!!" + "-"*85 +"!!")
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
                             print ("!! {:<84}!!".format(txt))
 
-                        print ("!! Max Retry : {:4}   Timeout {:5} seconds {:42} !!".format(
+                        dprint ("!! Max Retry : {:4}   Timeout {:5} seconds {:42} !!".format(
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT], ""
                         ))
 
-                    print ("\\" + "="*87 +"/")
+                    dprint ("\\" + "="*87 +"/")
 
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True
@@ -698,8 +698,8 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg):
-        print ("MSB")
-        print (TV, FV, rlength, flength, arg)
+        dprint ("MSB")
+        dprint (TV, FV, rlength, flength, arg)
 
         if type (TV) != type (FV):
             return False
@@ -716,7 +716,7 @@ class RuleManager:
                 raise ValueError("MO arg should be an Interget multiple of 8")
 
             for i in range(0, arg // 8):
-                print ("=", TV[i], FV[i], TV[i] == FV[i])
+                dprint ("=", TV[i], FV[i], TV[i] == FV[i])
                 if TV[i] != FV[i]:
                     return False
 
@@ -739,7 +739,7 @@ class RuleManager:
         beginning of the SCHC packet.
         """
         for d in self._ctxt:
-            print (d["DeviceID"])
+            dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
@@ -747,7 +747,7 @@ class RuleManager:
 
                     tested_rule = schc.get_bits(ruleLength, position=0)
 
-                    print (tested_rule, ruleID)
+                    dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
 
@@ -762,9 +762,9 @@ class RuleManager:
                 if "Compression" in rule:
                     matches = 0
                     for r in rule["Compression"]:
-                        print(r)
+                        dprint(r)
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
-                            print (r)
+                            dprint (r)
                             if (r[T_FID], r[T_FP]) in pkt:
                                 if T_MO_VAL in r:
                                     arg = r[T_MO_VAL]
@@ -781,11 +781,11 @@ class RuleManager:
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
-                                    print("Suboptimal rule")
+                                    dprint("Suboptimal rule")
                                 else:
                                     break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            dprint ("->", matches)
+                    dprint("-"*10, matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None

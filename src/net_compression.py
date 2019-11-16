@@ -9,7 +9,7 @@ import pprint
 
 from gen_rulemanager import *
 from compr_parser import *
-
+from gen_utils import dprint, dpprint
 
 
 # ----- scapy -----
@@ -20,7 +20,7 @@ import ipaddress
 
 class debug_protocol:
     def _log(*arg):
-        print(*arg)
+        dprint(*arg)
 
 P = Parser(debug_protocol)
 RM = RuleManager()
@@ -28,7 +28,7 @@ RM = RuleManager()
 def AnalyzePkt(packet):
     global RM
     
-    print(len(packet), bytes(packet).hex())
+    dprint(len(packet), bytes(packet).hex())
 
     withoutL2 = bytes(packet)
 
@@ -39,8 +39,8 @@ def AnalyzePkt(packet):
         print ("not a parsable packet")
         return
         
-    pprint.pprint(fields)
-    print(data)
+    dpprint(fields)
+    dprint(data)
     
     rule = RM.FindRuleFromPacket(fields, direction=T_DIR_DW)
     pprint.pprint (rule)

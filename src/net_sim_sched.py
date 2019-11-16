@@ -5,6 +5,7 @@
 #---------------------------------------------------------------------------
 
 from gen_base_import import *  # used for now for differing modules in py/upy
+from gen_utils import dprint
 
 # XXX: this scheduler can be optimized by not sorting every time
 class SimulScheduler:
@@ -26,13 +27,13 @@ class SimulScheduler:
             self.queue.sort()
             self.clock, event_id, callback, args = self.queue.pop(0)
             callback(*args)
-            print("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
+            dprint("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
 
     # external API
 
     def add_event(self, rel_time, callback, args):
-        print("Add event {}".format(self.queue))
-        print("callback set -> {}".format(callback.__name__))
+        dprint("Add event {}".format(self.queue))
+        dprint("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
