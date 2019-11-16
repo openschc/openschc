@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 if sys.implementation.name != "micropython":
     import pytest
 
