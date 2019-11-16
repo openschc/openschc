@@ -1,7 +1,7 @@
 OpenSCHC Rule Manager Module
 ****************************
 
-.. automodule:: rulemanager
+.. automodule:: gen_rulemanager
 
 .. autoclass:: DictToAttrDeep
    :members:

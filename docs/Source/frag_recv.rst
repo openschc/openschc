@@ -1,9 +1,7 @@
 OpenSCHC Reception Module
 *************************
 
-.. automodule:: schcrecv
-
-.. automodule:: schcrecv
+.. automodule:: frag_recv
 
 .. autoclass:: ReassembleBase
    :members: get_mic

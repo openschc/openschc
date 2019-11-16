@@ -1,7 +1,7 @@
 OpenSCHC Bit Buffer Management Module
 *************************************
 
-.. automodule:: bitarray
+.. automodule:: gen_bitarray
 
 .. autoclass:: BitBuffer
    :members:
