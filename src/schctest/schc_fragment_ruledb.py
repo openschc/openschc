@@ -27,7 +27,7 @@ class schc_runtime_fragment_rule:
         #
         # sanity check the base values
         if self.rid > (2**self.C.rid_size)-1:
-            raise ValueError("rule_id is too big than the field size.")
+            raise ValueError("rule_id is bigger than the field size.")
         if self.fcn_size == 0:
             raise ValueError("fcn_size must be more than 0, but %d" %
                              self.fcn_size)
