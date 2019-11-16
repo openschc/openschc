@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>OpenSCHC Bit Buffer Management Module &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,8 +14,8 @@
     <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="OpenSCHC Reception Module" href="schcrecv.html" />
-    <link rel="prev" title="OpenSCHC Rule Manager Module" href="rulemanager.html" />
+    <link rel="next" title="OpenSCHC Reception Module" href="frag_recv.html" />
+    <link rel="prev" title="OpenSCHC Rule Manager Module" href="gen_rulemanager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -34,14 +32,14 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-bitarray">
-<span id="openschc-bit-buffer-management-module"></span><h1>OpenSCHC Bit Buffer Management Module<a class="headerlink" href="#module-bitarray" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-bitarray"></span><dl class="class">
-<dt id="bitarray.BitBuffer">
-<em class="property">class </em><code class="descclassname">bitarray.</code><code class="descname">BitBuffer</code><span class="sig-paren">(</span><em>content=b''</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer" title="Permalink to this definition">¶</a></dt>
+  <div class="section" id="module-gen_bitarray">
+<span id="openschc-bit-buffer-management-module"></span><h1>OpenSCHC Bit Buffer Management Module<a class="headerlink" href="#module-gen_bitarray" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-gen_bitarray"></span><dl class="class">
+<dt id="gen_bitarray.BitBuffer">
+<em class="property">class </em><code class="sig-prename descclassname">gen_bitarray.</code><code class="sig-name descname">BitBuffer</code><span class="sig-paren">(</span><em class="sig-param">content=b''</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="bitarray.BitBuffer.add_bits">
-<code class="descname">add_bits</code><span class="sig-paren">(</span><em>bits_as_long</em>, <em>nb_bits</em>, <em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.add_bits" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.add_bits">
+<code class="sig-name descname">add_bits</code><span class="sig-paren">(</span><em class="sig-param">bits_as_long</em>, <em class="sig-param">nb_bits</em>, <em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.add_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>write a nb_bits less significant bits of an integer in the buffer.
 if position is not specified, the nb_bits are added at the end of the
 buffer.  if position is specified the nb_bits are set at the buffer
@@ -49,67 +47,67 @@ position. Position defines the position if the most significant bit.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.add_bytes">
-<code class="descname">add_bytes</code><span class="sig-paren">(</span><em>bytes_data</em>, <em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.add_bytes" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.add_bytes">
+<code class="sig-name descname">add_bytes</code><span class="sig-paren">(</span><em class="sig-param">bytes_data</em>, <em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.add_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>write bytes_data as a bytearray into the buffer.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.add_length">
-<code class="descname">add_length</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.add_length" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.add_length">
+<code class="sig-name descname">add_length</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.add_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>add to the buffer the length with the draft coding:</p>
 <p>The size (using the unit defined in the FL) is encoded as follows:</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>o  If the size is between 0 and 14, it is sent as a 4-bits unsigned</dt>
-<dd>integer.</dd>
-<dt>o  For values between 15 and 254, 0b1111 is transmitted and then the</dt>
-<dd>size is sent as an 8 bits unsigned integer.</dd>
-<dt>o  For larger values of the size, 0xfff is transmitted and then the</dt>
-<dd>next two bytes contain the size value as a 16 bits unsigned
-integer.</dd>
+<div><dl class="simple">
+<dt>o  If the size is between 0 and 14, it is sent as a 4-bits unsigned</dt><dd><p>integer.</p>
+</dd>
+<dt>o  For values between 15 and 254, 0b1111 is transmitted and then the</dt><dd><p>size is sent as an 8 bits unsigned integer.</p>
+</dd>
+<dt>o  For larger values of the size, 0xfff is transmitted and then the</dt><dd><p>next two bytes contain the size value as a 16 bits unsigned
+integer.</p>
+</dd>
 </dl>
 </div></blockquote>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.allones">
-<code class="descname">allones</code><span class="sig-paren">(</span><em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.allones" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.allones">
+<code class="sig-name descname">allones</code><span class="sig-paren">(</span><em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.allones" title="Permalink to this definition">¶</a></dt>
 <dd><p>check whether the bits from the position set all 1 or not.
 if they are all ones, return True.  Otherwise, return False.
 if the position is not set, it will checks from _rpos.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>return BitBuffer like get_bits_as_buffer(),
 but _rpos doesn’t change.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.count_added_bits">
-<code class="descname">count_added_bits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.count_added_bits" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.count_added_bits">
+<code class="sig-name descname">count_added_bits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.count_added_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the number of significant bits from the most left bit.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.count_remaining_bits">
-<code class="descname">count_remaining_bits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.count_remaining_bits" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.count_remaining_bits">
+<code class="sig-name descname">count_remaining_bits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.count_remaining_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the number of the remaining bits from
 the position of self._rpos to _wpos.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.display">
-<code class="descname">display</code><span class="sig-paren">(</span><em>format=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.display" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.display">
+<code class="sig-name descname">display</code><span class="sig-paren">(</span><em class="sig-param">format=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.display" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display the content, if format is set to “bin” the 
 buffer is in binary, underline shows its size.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.get_bits">
-<code class="descname">get_bits</code><span class="sig-paren">(</span><em>nb_bits=1</em>, <em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.get_bits" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.get_bits">
+<code class="sig-name descname">get_bits</code><span class="sig-paren">(</span><em class="sig-param">nb_bits=1</em>, <em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.get_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>return an integer containinng nb_bits from the position.
 The most left bit is 0.
 if position is not specified, _rpos is incremented so that next
@@ -117,23 +115,23 @@ calling get_bits() without position automatically takes the next bit.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.get_bits_as_buffer">
-<code class="descname">get_bits_as_buffer</code><span class="sig-paren">(</span><em>nb_bits=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.get_bits_as_buffer" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.get_bits_as_buffer">
+<code class="sig-name descname">get_bits_as_buffer</code><span class="sig-paren">(</span><em class="sig-param">nb_bits=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.get_bits_as_buffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>_rpos does change.
 If nb_bits is None, return all remaining bits.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.get_content">
-<code class="descname">get_content</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.get_content" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.get_content">
+<code class="sig-name descname">get_content</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.get_content" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a bytearray containing the remaining bits in _content aligned
 to the byte boundary.
 Note that the number of remaining bits will be lost.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.set_bit">
-<code class="descname">set_bit</code><span class="sig-paren">(</span><em>bit</em>, <em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.set_bit" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.set_bit">
+<code class="sig-name descname">set_bit</code><span class="sig-paren">(</span><em class="sig-param">bit</em>, <em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.set_bit" title="Permalink to this definition">¶</a></dt>
 <dd><p>if bit is not 0, set a bit on at the specified position.
 Otherwise, set a bit off.
 if position is not specified, the target bit is the bit specified by
@@ -142,8 +140,8 @@ incremented.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bitarray.BitBuffer.to_bit_list">
-<code class="descname">to_bit_list</code><span class="sig-paren">(</span><em>position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bitarray.BitBuffer.to_bit_list" title="Permalink to this definition">¶</a></dt>
+<dt id="gen_bitarray.BitBuffer.to_bit_list">
+<code class="sig-name descname">to_bit_list</code><span class="sig-paren">(</span><em class="sig-param">position=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_bitarray.BitBuffer.to_bit_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the content in a list of bits.</p>
 </dd></dl>
 
@@ -162,20 +160,18 @@ incremented.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
-      <li>Previous: <a href="rulemanager.html" title="previous chapter">OpenSCHC Rule Manager Module</a></li>
-      <li>Next: <a href="schcrecv.html" title="next chapter">OpenSCHC Reception Module</a></li>
+      <li>Previous: <a href="gen_rulemanager.html" title="previous chapter">OpenSCHC Rule Manager Module</a></li>
+      <li>Next: <a href="frag_recv.html" title="next chapter">OpenSCHC Reception Module</a></li>
   </ul></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -195,9 +191,9 @@ incremented.</p>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rulemanager.html">OpenSCHC Rule Manager Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gen_rulemanager.html">OpenSCHC Rule Manager Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">OpenSCHC Bit Buffer Management Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="schcrecv.html">OpenSCHC Reception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frag_recv.html">OpenSCHC Reception Module</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
@@ -207,7 +203,6 @@ incremented.</p>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../General/old-docs.html">Olds docs</a></li>
 </ul>
 
 
@@ -219,11 +214,11 @@ incremented.</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../_sources/Source/bitarray.rst.txt"
+      <a href="../_sources/Source/gen_bitarray.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

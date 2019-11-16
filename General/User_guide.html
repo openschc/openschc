@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>User Guide &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -41,9 +39,9 @@
 <p>This document explains how to run the openSCHC fragmentation and compression code.</p>
 <p>This entails the following steps:</p>
 <ul class="simple">
-<li>installing the “context” that will be used for compressing and fragmenting the traffic flows.</li>
-<li>establishing the flows of traffic to be compressed/decompressed and fragmented/reassembled,
-and potentially setup the channel characteristics (in link simulation mode)</li>
+<li><p>installing the “context” that will be used for compressing and fragmenting the traffic flows.</p></li>
+<li><p>establishing the flows of traffic to be compressed/decompressed and fragmented/reassembled,
+and potentially setup the channel characteristics (in link simulation mode)</p></li>
 </ul>
 </div>
 <div class="section" id="rule-manager">
@@ -105,7 +103,7 @@ different fragment SCHC header fields.</p>
 </div>
 <p>See below for the description of the compression and fragmentation parameters.</p>
 <p>The following program adds these 2 basic rules into the rule manager and displays them.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rulemanager</span> <span class="k">import</span> <span class="o">*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gen_rulemanager</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">RM</span> <span class="o">=</span> <span class="n">RuleManager</span><span class="p">()</span>
 
@@ -160,7 +158,7 @@ containing the JSON structure is used.</p>
 <h3>Set of Rules<a class="headerlink" href="#set-of-rules" title="Permalink to this headline">¶</a></h3>
 <p>A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
 a set of rules is an JSON array. The following program has the same behavior as the previous one.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rulemanager</span> <span class="k">import</span> <span class="o">*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gen_rulemanager</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">RM</span> <span class="o">=</span> <span class="n">RuleManager</span><span class="p">()</span>
 
@@ -227,13 +225,23 @@ into <strong>rules</strong> folder, which will contain our rule as follows:</p>
 </pre></div>
 </div>
 <p>Then, it is possible to define the message which will be sent from client to server. <strong>Payload</strong> folder
-contains some examples that can be used.  In this point, we can execute our simulation as follows:</p>
+contains some examples that can be used.</p>
+<p>Go in the <strong>examples/tcp_client_server</strong> directory.</p>
+<p>Add the SCHC directory on PYHTONPATH. On sh:</p>
+<blockquote>
+<div><p>$ export PYTHONPATH=&lt;YOUR_PATH_TO_SCHC&gt;</p>
+</div></blockquote>
+<p>on csh:</p>
+<blockquote>
+<div><p>$ setenv PYTHONPATH &lt;YOUR_PATH_TO_SCHC&gt;</p>
+</div></blockquote>
+<p>In the example/tcp_client_server directory, we can execute the code as follows:</p>
 <p>Run Client on terminal 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="n">rules</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>Run Server on terminal 2</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="n">rules</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span>
 </pre></div>
 </div>
 <p>If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
@@ -342,13 +350,11 @@ useful for the client:</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -380,7 +386,6 @@ useful for the client:</p>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
-<li class="toctree-l1"><a class="reference internal" href="old-docs.html">Olds docs</a></li>
 </ul>
 
 
@@ -392,7 +397,7 @@ useful for the client:</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

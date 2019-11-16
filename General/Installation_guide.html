@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Installation Guide &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -50,16 +48,14 @@
 <p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
 <p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
 <ul>
-<li><p class="first">Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p>
-</li>
-<li><p class="first">For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p>
-</li>
-<li><p class="first">On OSX</p>
+<li><p>Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p></li>
+<li><p>For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p></li>
+<li><p>On OSX</p>
 <blockquote>
 <div><ul class="simple">
-<li>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</li>
-<li>or install with Brew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></li>
-<li>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></li>
+<li><p>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</p></li>
+<li><p>or install with Brew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></p></li>
+<li><p>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -67,22 +63,13 @@
 <p>Step 2: download the needed micropython modules.</p>
 <p>Modules to be installed in order to run SCHC are:</p>
 <ul class="simple">
-<li>argparse.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></li>
-<li>copy.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></li>
-<li>types.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></li>
+<li><p>argparse.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></p></li>
+<li><p>copy.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></p></li>
+<li><p>types.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></p></li>
 </ul>
 <p>Libs are located under <code class="docutils literal notranslate"><span class="pre">~/.micropython/lib</span></code></p>
 <p>Step 3: Test the SCHC C/D and F/R</p>
-<p>The following command line will simulate a simple ICMPv6 echo request/response using the SCHC protocol between the SCHC device and the gateway. The input JSON files are part of the SCHC orchestrator configuration (as you can see in the architecture figure above), and the loss parameters configure the link simulator to simulate packet drops on the radio link.</p>
-<p>As you can see from the results of the below command, the 1st and the 2nd SCHC fragments are lost. Therefore, when the sender transmits the last fragment that includes the MIC, the receiver MIC check fails.
-Consequently, the sender retransmits the 1st and 2nd fragments and when the receiver receives all the fragments with the MIC, the transmission is successful:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>micropython $youropenschcdirectory/src/test_newschc.py --context \
-example/context-100.json --rule-comp example/comp-rule-100.json \
---rule-fragin example/frag-rule-101.json --rule-fragout \
-example/frag-rule-102.json --data-file test/icmpv6.dmp \
---loss-mode list --loss-param 1,2
-</pre></div>
-</div>
+<p>To be added</p>
 </div>
 </div>
 
@@ -104,13 +91,11 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -142,7 +127,6 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
-<li class="toctree-l1"><a class="reference internal" href="old-docs.html">Olds docs</a></li>
 </ul>
 
 
@@ -154,7 +138,7 @@ example/frag-rule-102.json --data-file test/icmpv6.dmp \
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

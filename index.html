@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Welcome to OpenSCHC’s documentation! &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -51,8 +49,8 @@
 <p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retreive Rules.</p>
 <p>Rules are composed of two elements:</p>
 <ul class="simple">
-<li>A <strong>RuleID</strong> which identifies the Rule by its number, and</li>
-<li>A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></li>
+<li><p>A <strong>RuleID</strong> which identifies the Rule by its number, and</p></li>
+<li><p>A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1">SCHC protocol</a></p></li>
 </ul>
 <p>The <strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
 <p><strong>Compression</strong> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
@@ -79,9 +77,9 @@ or to a link simulator.</p>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 <div class="section" id="table-of-contents">
 <h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
@@ -105,9 +103,9 @@ or to a link simulator.</p>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Source/File_Classification.html">File Classification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/rulemanager.html">OpenSCHC Rule Manager Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/schcrecv.html">OpenSCHC Reception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/gen_rulemanager.html">OpenSCHC Rule Manager Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/gen_bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/frag_recv.html">OpenSCHC Reception Module</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -142,13 +140,11 @@ or to a link simulator.</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -168,9 +164,9 @@ or to a link simulator.</p>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Source/File_Classification.html">File Classification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/rulemanager.html">OpenSCHC Rule Manager Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/schcrecv.html">OpenSCHC Reception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/gen_rulemanager.html">OpenSCHC Rule Manager Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/gen_bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/frag_recv.html">OpenSCHC Reception Module</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
@@ -191,7 +187,7 @@ or to a link simulator.</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

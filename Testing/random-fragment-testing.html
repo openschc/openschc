@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Fragm. Random Test &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -43,47 +41,47 @@
 <h3>Stage 1<a class="headerlink" href="#stage-1" title="Permalink to this headline">¶</a></h3>
 <p>Stage 1 prepares the test case to be run. it generates:</p>
 <ul class="simple">
-<li>a bitbuffer of a random length that represents a compressed packet.
+<li><p>a bitbuffer of a random length that represents a compressed packet.
 Since the compression is not part of the test,
-all bits are randomly selected as well.</li>
-<li>A fragmentation rule where all parameters are individually a randomly selected
-from all cases that SCHC supports</li>
+all bits are randomly selected as well.</p></li>
+<li><p>A fragmentation rule where all parameters are individually a randomly selected
+from all cases that SCHC supports</p></li>
 </ul>
 </div>
 <div class="section" id="stage-2">
 <h3>Stage 2<a class="headerlink" href="#stage-2" title="Permalink to this headline">¶</a></h3>
 <p>Stage 2 runs the fragmentation procedure and injects random transmission errors.</p>
 <ul class="simple">
-<li>The procedure randomly decides at which times in the transmission the transmission
-errors are injected</li>
-<li>The error being injected might be a number of packets in a row or a black out period,
+<li><p>The procedure randomly decides at which times in the transmission the transmission
+errors are injected</p></li>
+<li><p>The error being injected might be a number of packets in a row or a black out period,
 i.e., all packets in a direction or in both directions are dropped for a selected
-duration.</li>
-<li>whether the injection of errors should exceed the maximum number of retries
+duration.</p></li>
+<li><p>whether the injection of errors should exceed the maximum number of retries
 in which case it sets the expected result as an abort, else it sets the expected
-result as a validation</li>
-<li>the test runs till both sides are complete or a simulated maximum time is reached</li>
+result as a validation</p></li>
+<li><p>the test runs till both sides are complete or a simulated maximum time is reached</p></li>
 </ul>
 </div>
 <div class="section" id="stage-3">
 <h3>Stage 3<a class="headerlink" href="#stage-3" title="Permalink to this headline">¶</a></h3>
 <p>Stage 3 validates the expected result is reached. It checks:</p>
 <ul class="simple">
-<li>if both sides ran to completion or if one side is still waiting or still
-has resources locked for this fragment</li>
-<li>if an abort condition was reached on one side or both sides</li>
-<li>if the receiver did not abort, whether the bitbuffer is reassembled correctly up to the expected length
-(extra bits are ignored)</li>
+<li><p>if both sides ran to completion or if one side is still waiting or still
+has resources locked for this fragment</p></li>
+<li><p>if an abort condition was reached on one side or both sides</p></li>
+<li><p>if the receiver did not abort, whether the bitbuffer is reassembled correctly up to the expected length
+(extra bits are ignored)</p></li>
 </ul>
 </div>
 <div class="section" id="stage-4">
 <h3>Stage 4<a class="headerlink" href="#stage-4" title="Permalink to this headline">¶</a></h3>
 <p>Stage 4 logs the parameters of the test case, including:</p>
 <ul class="simple">
-<li>the generated rule and the timeline of events as experienced by the scheduler</li>
-<li>whether the test case resulted in the expected outcome</li>
-<li>whether the expected number of test cases where tried; if not
-a new test case is scheduled.</li>
+<li><p>the generated rule and the timeline of events as experienced by the scheduler</p></li>
+<li><p>whether the test case resulted in the expected outcome</p></li>
+<li><p>whether the expected number of test cases where tried; if not
+a new test case is scheduled.</p></li>
 </ul>
 </div>
 </div>
@@ -110,13 +108,11 @@ a new test case is scheduled.</li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -148,7 +144,6 @@ a new test case is scheduled.</li>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../General/old-docs.html">Olds docs</a></li>
 </ul>
 
 
@@ -160,7 +155,7 @@ a new test case is scheduled.</li>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
