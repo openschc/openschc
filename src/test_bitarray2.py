@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
-from bitarray import BitBuffer
+from gen_bitarray import BitBuffer
 if sys.implementation.name != "micropython":
     import pytest
 
