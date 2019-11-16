@@ -34,4 +34,4 @@ OpenSCHC Project Complete Content
    :caption: Other information
 
    Actus/IETF-Hackathon-LPWAN
-   General/old-docs
+
