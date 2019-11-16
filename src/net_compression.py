@@ -28,11 +28,11 @@ RM = RuleManager()
 def AnalyzePkt(packet):
     global RM
     
-    dprint(len(packet), bytes(packet).hex())
+    dprint(len(packet), b2hex(bytes(packet)))
 
     withoutL2 = bytes(packet)
 
-    print (withoutL2.hex())
+    print (b2hex(withoutL2)))
     try:
         fields, data = P.parse(withoutL2, direction=T_DIR_DW)
     except:

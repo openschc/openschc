@@ -21,7 +21,7 @@
       {"FID": "UDP.DEV_PORT",  "TV": 5680,"MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
       {"FID": "UDP.APP_PORT",  "TV": 5680,"MO": "MSB", "MO.VAL": 12, "CDA" : "LSB"},
       {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore","CDA": "compute-length"},
-      {"FID": "UDP.CKSUM",     "TV": [],  "MO": "ignore","CDA": "compute-checksum"},
+      {"FID": "UDP.CKSUM",     "TV": 0,  "MO": "ignore","CDA": "compute-checksum"},
       {"FID": "COAP.VER", "TV": 1,    "MO": "equal","CDA": "not-sent"},
       {"FID": "COAP.TYPE",                "MO": "ignore","CDA": "value-sent"},
       {"FID": "COAP.TKL",                 "MO": "ignore","CDA": "value-sent"},
@@ -59,8 +59,8 @@
       {"FID": "ICMPV6.TYPE",  "TV": 128,"MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.CODE",  "TV": 0,  "MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.CKSUM", "TV": 0, "MO": "ignore","CDA": "compute-checksum"},
-      {"FID": "ICMPV6.IDENT", "TV": [],"MO": "ignore","CDA": "value-sent"},
-      {"FID": "ICMPV6.SEQNO", "TV": [],"MO": "ignore","CDA": "value-sent"}
+      {"FID": "ICMPV6.IDENT", "TV": 0,"MO": "ignore","CDA": "value-sent"},
+      {"FID": "ICMPV6.SEQNO", "TV": 0,"MO": "ignore","CDA": "value-sent"}
     ]
 },{
     "RuleID": 1,
@@ -75,7 +75,8 @@
             "tileSize": 17,
             "MICAlgorithm": "crc32",
             "MICWordSize": 8,
-            "L2WordSize": 8
+            "L2WordSize": 8,
+            "lastTileInAll1": false
         }
     }
 },{
@@ -91,7 +92,8 @@
             "tileSize": 16,
             "MICAlgorithm": "crc32",
             "MICWordSize": 8,
-            "L2WordSize": 8
+            "L2WordSize": 8,
+            "lastTileInAll1": false
         }
     }
 },{

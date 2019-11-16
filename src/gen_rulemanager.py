@@ -434,12 +434,12 @@ class RuleManager:
     def _adapt_value (self, FID, value):
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
             if type(value) != int:
-                raise ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate for field {}".format(value, FID))
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == str:
             if type(value) != str:
-                raise ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate for field {}".format(value, FID))
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == bytes: # convert string with IPv6 address to bytes
@@ -451,7 +451,7 @@ class RuleManager:
 
                 addr = ipaddress.ip_address(value)
                 if addr.version != 6: # expect an IPv6 address
-                    raise ValueError ("{} only IPv6 is supported")
+                    raise ValueError ("only IPv6 is supported, can not support {}".format(addr.version))
 
                 if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
                     return addr.packed[:8]
@@ -504,7 +504,7 @@ class RuleManager:
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
                     if not T_FRAG_LAST_TILE_IN_ALL1 in nrule[T_FRAG][T_FRAG_PROF]:
-                        raise ValueError ("LastTileInAll1 boolean must be specified for Ack On Error")
+                        raise ValueError ("lastTileInAll1 boolean must be specified for Ack On Error")
 
                     if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] == True:
                         raise NotImplementedError ("Last tile in All-1 is not implemented yet")
@@ -610,7 +610,7 @@ class RuleManager:
         elif type(v) is int:
             dprint ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            dprint ('{:>30}'.format(v.hex()), end="")
+            dprint ('{:>30}'.format(b2hex(v), end=""))
 
     def printBin(self, v, l):
         txt = ""

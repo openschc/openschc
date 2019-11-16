@@ -263,8 +263,7 @@ class BitBuffer:
         buffer is in binary, underline shows its size.
         """
         if format == None or format == "hex":
-            if hex in dir(self._content):
-                print ("{}/{}".format(self._content.hex(), self._wpos))
+            print ("{}/{}".format("".join(["%02x"%_ for _ in self._content]), self._wpos))
 
         if format == "bin":
             for x in self._content:
