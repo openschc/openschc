@@ -68,7 +68,8 @@ class FragmentBase():
                 penultimate_size=0):
         assert isinstance(mic_base, BitBuffer)
 
-        if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1]:
+        if (self.rule[T_FRAG][T_FRAG_MODE] == "ackOnError"
+            and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1]):
             # calculate the significant padding bits.
             # 1. get the extra bits.
             #
