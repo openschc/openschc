@@ -59,7 +59,7 @@ pprint.pprint(v[0])
 # print(binascii.hexlify(v[1]))
 
 RM = RuleManager(log=debug_protocol)
-RM.Add(file="examples/comp-rule-100.json")
+RM.Add(file="../examples/configs/comp-rule-100.json")
 RM.Print()
 
 C = Compressor(debug_protocol)
