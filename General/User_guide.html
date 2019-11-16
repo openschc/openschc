@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Documenting Guidelines" href="Documenting_Guidelines.html" />
-    <link rel="prev" title="OpenSCHC Project Complete Content" href="../main_toc.html" />
+    <link rel="prev" title="Installation Guide" href="Installation_guide.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -158,25 +158,24 @@ containing the JSON structure is used.</p>
 </div>
 <div class="section" id="set-of-rules">
 <h3>Set of Rules<a class="headerlink" href="#set-of-rules" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div><p>A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
+<p>A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
 a set of rules is an JSON array. The following program has the same behavior as the previous one.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rulemanager</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">RM</span> <span class="o">=</span> <span class="n">RuleManager</span><span class="p">()</span>
 
 <span class="n">rule1100</span> <span class="o">=</span>   <span class="p">{</span>
-  <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-  <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-  <span class="s2">&quot;Compression&quot;</span> <span class="p">:</span> <span class="p">[]</span>
+ <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+ <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+ <span class="s2">&quot;Compression&quot;</span> <span class="p">:</span> <span class="p">[]</span>
 <span class="p">}</span>
 
 <span class="n">rule001100</span> <span class="o">=</span>   <span class="p">{</span>
-  <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-  <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-  <span class="s2">&quot;Fragmentation&quot;</span> <span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;FRMode&quot;</span><span class="p">:</span> <span class="s2">&quot;noAck&quot;</span>
-  <span class="p">}</span>
+ <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+ <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+ <span class="s2">&quot;Fragmentation&quot;</span> <span class="p">:</span> <span class="p">{</span>
+   <span class="s2">&quot;FRMode&quot;</span><span class="p">:</span> <span class="s2">&quot;noAck&quot;</span>
+ <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="n">RM</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">dev_info</span><span class="o">=</span><span class="p">[</span><span class="n">rule1100</span><span class="p">,</span> <span class="n">rule001100</span><span class="p">])</span>
@@ -184,7 +183,6 @@ a set of rules is an JSON array. The following program has the same behavior as 
 <span class="n">RM</span><span class="o">.</span><span class="n">Print</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
 </div>
 <div class="section" id="device-definition">
 <h3>Device definition<a class="headerlink" href="#device-definition" title="Permalink to this headline">¶</a></h3>
@@ -193,8 +191,12 @@ when SCHC is instantiated on a device, since there is no ambiguity as to which d
 applies to. Conversely,
 when the SCHC instance is on the core network side, the set of rules must be associated with
 a device ID.</p>
-<p>Rules associated with a Device ID can be directly stored into the rule manager through the <strong>Add</strong> method.
-The JSON structure is the following:</p>
+<p>Rules associated with a Device ID can be directly stored into the rule manager through the <strong>Add</strong> method
+as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RM</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s2">&quot;1234567890&quot;</span><span class="p">,</span> <span class="n">dev_info</span><span class="o">=</span><span class="p">[</span><span class="n">rule1100</span><span class="p">,</span> <span class="n">rule001100</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The JSON structure is the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;DeviceID&quot;</span><span class="p">:</span> <span class="mi">1234567890</span><span class="p">,</span>
     <span class="s2">&quot;SoR&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="o">.....</span> <span class="p">]</span>
@@ -204,6 +206,120 @@ The JSON structure is the following:</p>
 <p>where the <strong>DeviceID</strong> keyword represents the device ID in a specific technology, for
 instance LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
 the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
+</div>
+</div>
+<div class="section" id="fragmenter-reassembler">
+<h2>Fragmenter/Reassembler<a class="headerlink" href="#fragmenter-reassembler" title="Permalink to this headline">¶</a></h2>
+<p>Using the client-server simulation is possible to observe some important details about noAck mode and
+fragmenter/reassembler. First of all, it is necessary to create a file with any name (e.g. rule1.json)
+into <strong>rules</strong> folder, which will contain our rule as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span>
+   <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+   <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+   <span class="s2">&quot;Compression&quot;</span> <span class="p">:</span> <span class="p">[]</span>
+ <span class="p">},{</span>
+  <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+  <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+  <span class="s2">&quot;Fragmentation&quot;</span> <span class="p">:</span>  <span class="p">{</span>
+    <span class="s2">&quot;FRMode&quot;</span><span class="p">:</span> <span class="s2">&quot;noAck&quot;</span>
+  <span class="p">}</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+<p>Then, it is possible to define the message which will be sent from client to server. <strong>Payload</strong> folder
+contains some examples that can be used.  In this point, we can execute our simulation as follows:</p>
+<p>Run Client on terminal 1</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="n">rules</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Run Server on terminal 2</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="n">rules</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p>If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
+transmission of the message and we will obtain the following result in server side:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">804779011</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">194</span>
+<span class="n">SUCCESS</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">matched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p>where, in the first line we have the value of the RCS sent, the message received by the server which is the same as the
+one sent by the client, and the length of the message in bytes. In second line, whe have a confirmation of successful
+matching between both RCS Values.</p>
+<p>On the other hand, to simulate the packet loss in transmission, we can use the <strong>–loss true</strong> argument in the client
+and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
+since the RCS sent by the client is not the same RCS calculated by the server:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">907239817</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (1062</span><span class="se">\xb2\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">171</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">mismatched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;6</span><span class="se">\x13</span><span class="s1">a</span><span class="se">\x89</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p>Unlike the successful result, we can notice that the message was not completely received by the server. Besides, the RCS
+sent by the client is not equal to the RCS calculated by the server.</p>
+</div>
+<div class="section" id="client-server-simulation">
+<h2>Client-server Simulation<a class="headerlink" href="#client-server-simulation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Introduction<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Client-server Simulation implements the Socket library to perform the communication between a client and a server,
+using the localhost address 127.0.0.1, port 1234, TCP protocol and threads on the server to allow communication
+<strong>from several clients to a server</strong>.</p>
+<p>At the end of a successful communication, the simulation records the time in seconds at that instant in the text file
+<strong>client_server_simulation.txt</strong>, and restarts sending the same message from the client to the server.</p>
+</div>
+<div class="section" id="how-to-run-this-simulation">
+<h3>How to run this simulation<a class="headerlink" href="#how-to-run-this-simulation" title="Permalink to this headline">¶</a></h3>
+<p>Run Client on terminal 1</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span>
+</pre></div>
+</div>
+<p>Run Server on terminal 2</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="option-list">
+<h3>Option List<a class="headerlink" href="#option-list" title="Permalink to this headline">¶</a></h3>
+<p>We can find some option to modify our client-server simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">role</span> <span class="n">ROLE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">payload</span> <span class="n">PAYLOAD_NAME_FILE</span><span class="p">]</span>
+                            <span class="p">[</span><span class="o">--</span><span class="n">rule</span> <span class="n">RULE_NAME_FILE</span><span class="p">]</span>
+                            <span class="p">[</span><span class="o">--</span><span class="n">time</span> <span class="n">TIME_BETWEEN_ITERATION</span><span class="p">]</span>
+                            <span class="p">[</span><span class="o">--</span><span class="n">loss</span> <span class="p">[</span><span class="n">PACKET_LOSS_SIMULATION</span><span class="p">]]</span>
+                            <span class="p">[</span><span class="o">--</span><span class="n">compression</span> <span class="p">[</span><span class="n">MODE_WITH_COMPRESSION</span><span class="p">]]</span>
+
+<span class="n">a</span> <span class="n">SCHC</span> <span class="n">simulator</span><span class="o">.</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">--</span><span class="n">role</span> <span class="n">ROLE</span>           <span class="n">specify</span> <span class="n">a</span> <span class="n">role</span><span class="p">:</span> <span class="n">client</span> <span class="ow">or</span> <span class="n">server</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">client</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">payload</span> <span class="n">PAYLOAD_NAME_FILE</span>
+                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">payload</span> <span class="n">file</span> <span class="n">name</span><span class="o">.</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span>
+                        <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="p">)</span>
+  <span class="o">--</span><span class="n">rule</span> <span class="n">RULE_NAME_FILE</span>
+                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">rule</span> <span class="n">file</span> <span class="n">name</span><span class="o">.</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">examples</span><span class="o">/</span><span class="n">comp</span><span class="o">-</span>
+                        <span class="n">rule</span><span class="o">-</span><span class="mf">100.</span><span class="n">json</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">examples</span><span class="o">/</span><span class="n">comp</span><span class="o">-</span><span class="n">rule</span><span class="o">-</span><span class="mf">100.</span><span class="n">json</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">time</span> <span class="n">TIME_BETWEEN_ITERATION</span>
+                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">seconds</span> <span class="n">between</span> <span class="n">each</span> <span class="n">sending</span> <span class="n">message</span>
+                        <span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">10</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">loss</span> <span class="p">[</span><span class="n">PACKET_LOSS_SIMULATION</span><span class="p">]</span>
+                        <span class="n">Simulation</span> <span class="n">using</span> <span class="n">packet</span> <span class="n">loss</span><span class="p">:</span> <span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
+                        <span class="kc">False</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">compression</span> <span class="p">[</span><span class="n">MODE_WITH_COMPRESSION</span><span class="p">]</span>
+                        <span class="n">Simulation</span> <span class="n">using</span> <span class="n">compression</span><span class="p">:</span> <span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
+                        <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Some options are defined to be used by both client and server devices, while there are other options that are only
+useful for the client:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Options</span> <span class="k">for</span> <span class="n">Client</span> <span class="ow">and</span> <span class="n">Server</span><span class="p">:</span>
+<span class="o">--</span><span class="n">role</span>
+<span class="o">--</span><span class="n">rule</span>
+<span class="o">--</span><span class="n">compression</span>
+<span class="o">--</span><span class="n">loss</span>
+
+<span class="n">Options</span> <span class="n">only</span> <span class="k">for</span> <span class="n">Client</span><span class="p">:</span>
+<span class="o">--</span><span class="n">time</span>
+<span class="o">--</span><span class="n">payload</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -219,7 +335,7 @@ the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
-      <li>Previous: <a href="../main_toc.html" title="previous chapter">OpenSCHC Project Complete Content</a></li>
+      <li>Previous: <a href="Installation_guide.html" title="previous chapter">Installation Guide</a></li>
       <li>Next: <a href="Documenting_Guidelines.html" title="next chapter">Documenting Guidelines</a></li>
   </ul></li>
   </ul></li>
@@ -237,13 +353,13 @@ the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main_toc.html">Full Table of Content</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Back to Index</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations</span></p>
+<p class="caption"><span class="caption-text">General Information</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing_Guidelines.html">Contributing Guidelines</a></li>
@@ -259,10 +375,12 @@ the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other information</span></p>
+<p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="old-docs.html">Olds docs</a></li>
 </ul>
 
 

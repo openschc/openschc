@@ -36,7 +36,7 @@
             
   <div class="section" id="documenting-guidelines">
 <h1>Documenting Guidelines<a class="headerlink" href="#documenting-guidelines" title="Permalink to this headline">¶</a></h1>
-<p>Following the guidelines below when documenting to the project would be appreciated.</p>
+<p>Following the guidelines below when documenting the project would be appreciated.</p>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>Sphinx’s default syntax is called ReStructuredText.
@@ -47,7 +47,7 @@ The original RST document is avaible <a class="reference external" href="http://
 <h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>The documentation is built using <a class="reference external" href="https://sphinx-doc.org">Sphinx</a>.</p>
 <p>The first thing to do when trying to build the documentation is to setup the environment.</p>
-<p>We advise you to synchronise the Openschc project in two separate directories. One for the source code synchronised with the branch you want to build and the other with the gh-pages branch on which the documentation will be built.</p>
+<p>We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build, and another one synchronised with the gh-pages branch on which the documentation will be built.</p>
 <p>An example of how to do it</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/openschc/openschc.git
 $ cd openschc
@@ -78,7 +78,7 @@ $ tree
         └ _static
 </pre></div>
 </div>
-<p>An important thing to do before building the documentation is to indicate to Sphinx where to build the documentation. This information is provided in the Makefile under the <strong>docs</strong> folder:</p>
+<p>An important thing to do before building the documentation is to tell Sphinx where to build the documentation. This information is provided in the Makefile that is located under the <strong>docs</strong> folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd openschc/docs
 $ head -n 10 Makefile
 # Minimal makefile for Sphinx documentation
@@ -143,13 +143,13 @@ $ git push
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Informations</span></p>
+<p class="caption"><span class="caption-text">General Information</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="User_guide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing_Guidelines.html">Contributing Guidelines</a></li>
@@ -165,11 +165,12 @@ $ git push
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing information</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Testing/random-fragment-testing.html">Random Fragment Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other information</span></p>
+<p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon specific information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="old-docs.html">Olds docs</a></li>
 </ul>
 
 
