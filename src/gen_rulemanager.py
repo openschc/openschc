@@ -387,11 +387,11 @@ class RuleManager:
                     device = dev_info["DeviceID"]
                 sor    = dev_info["SoR"]
             else:
-                ValueError("unknown format")
+                raise ValueError("unknown format")
         elif type(dev_info) is list: # a Set of Rule
             sor = dev_info
         else:
-            ValueError("unknown structure")
+            raise ValueError("unknown structure")
 
         # check nature of the info: if "SoR" => device context, if "RuleID" => rule
 
@@ -426,17 +426,17 @@ class RuleManager:
                     r = self._create_fragmentation_rule(n_rule)
                     d["SoR"].append(r)
                 else:
-                    ValueError ("Rule type undefined")
+                    raise ValueError ("Rule type undefined")
 
     def _adapt_value (self, FID, value):
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
             if type(value) != int:
-                ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate")
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == str:
             if type(value) != str:
-                ValueError ("{} TV type not appropriate")
+                raise ValueError ("{} TV type not appropriate")
             else:
                 return value
         if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == bytes: # convert string with IPv6 address to bytes
@@ -448,14 +448,14 @@ class RuleManager:
 
                 addr = ipaddress.ip_address(value)
                 if addr.version != 6: # expect an IPv6 address
-                    ValueError ("{} only IPv6 is supported")
+                    raise ValueError ("{} only IPv6 is supported")
 
                 if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
                     return addr.packed[:8]
                 elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
                     return addr.packed[8:]
                 else:
-                    ValueError ("{} Fid not found".format(FID))
+                    raise ValueError ("{} Fid not found".format(FID))
             elif type(value) is int:
                 return (value).to_bytes(8, byteorder="big")
 
@@ -468,7 +468,7 @@ class RuleManager:
 
         def _default_value (ar, nr, idx, default=None, failed=False):
             if failed and not idx in nr[T_FRAG][T_FRAG_PROF]:
-                ValueError ("{} not found".format(idx))
+                raise ValueError ("{} not found".format(idx))
 
             if not T_FRAG_PROF in nr[T_FRAG] or not idx in nr[T_FRAG][T_FRAG_PROF]:
                 ar[T_FRAG][T_FRAG_PROF][idx] = default
@@ -891,7 +891,7 @@ class RuleManager:
         """ Check rule integrity and uniqueless and add it to the db """
 
         if not T_RULEID in rule:
-           raise ValueError ("Rule ID not defined.")
+            raise ValueError ("Rule ID not defined in {}.".format(rule))
 
         if not T_RULEIDLENGTH in rule:
             if rule[T_RULEID] < 255:
