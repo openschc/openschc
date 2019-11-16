@@ -1,3 +1,4 @@
+from gen_base_import import b2hex
 from compr_core import *
 from compr_parser import *
 from gen_rulemanager import *
@@ -52,7 +53,7 @@ coap = bytearray(b"""`\
 foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 \x82  &Ehello""")
 
-print (coap.hex())
+print (b2hex(coap))
 
 v= p.parse(coap, T_DIR_UP)  # or T_DIR_DW
 pprint.pprint(v[0])
