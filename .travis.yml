@@ -1,0 +1,26 @@
+language: python
+
+python:
+  - "3.4" # micropython version
+
+install:
+  # First install python dependencies
+  - pip install pytest
+  # At the end move to src folder in order to avoid PYTHONPATH issues
+  - cd src
+
+stages:
+  # Launch all "test" stages from the jobs list
+  - test
+
+jobs:
+  include:
+    - stage: "test"
+      name: "Pytest"
+      script: python3 -m pytest tests/
+    - stage: "test"
+      name: "test_frag_new"
+      script: python3 test_frag_new.py
+    - stage: "test"
+      name: "test_compress"
+      script: python3 test_compress.py
