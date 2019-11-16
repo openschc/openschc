@@ -10,10 +10,10 @@ import logging
 import pcap
 
 # from base_import import *
-from rulemanager import RuleManager
+from gen_rulemanager import RuleManager
 import schc
 
-PROG_NAME = "schcgw"
+PROG_NAME = "net_gw_lorawan"
 
 config_default = {
     "debug_level": 0,

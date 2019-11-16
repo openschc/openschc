@@ -229,14 +229,14 @@ Given the first bits received from the LPWAN, returns either a fragmentation or 
 
 """
 
-from base_import import *
+from gen_base_import import *
 from copy import deepcopy
-from schccomp import *
+from compr_core import *
 import ipaddress
 
 
 """
-.. module:: rulemanager
+.. module:: gen_rulemanager
    :platform: Python, Micropython
    :synopsis: This module is used to manage rules.
 """

@@ -2,7 +2,7 @@
 .. module:: comp_true 
    :platform: Python, Micropython
 """
-from base_import import *
+from gen_base_import import *
 
 from stats.toa_calculator import get_toa
 enable_statsct = True

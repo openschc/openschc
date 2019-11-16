@@ -4,17 +4,17 @@
 """
 # ---------------------------------------------------------------------------
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
 # ---------------------------------------------------------------------------
 
-from schcrecv import ReassemblerAckOnError
-from schcrecv import ReassemblerNoAck
-from schcsend import FragmentAckOnError
-from schcsend import FragmentNoAck
-import schcmsg
-from comp_parser import *
-from schccomp import Compressor, Decompressor
+from frag_recv import ReassemblerAckOnError
+from frag_recv import ReassemblerNoAck
+from frag_send import FragmentAckOnError
+from frag_send import FragmentNoAck
+import frag_msg
+from compr_parser import *
+from compr_core import Compressor, Decompressor
 
 
 class Session:

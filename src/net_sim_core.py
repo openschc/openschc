@@ -4,17 +4,17 @@
 """
 #---------------------------------------------------------------------------
 
-from base_import import *
-from simsched import SimulScheduler as Scheduler
-from simlayer2 import SimulLayer2
-from cond_true import ConditionalTrue
+from gen_base_import import *
+from net_sim_sched import SimulScheduler as Scheduler
+from net_sim_layer2 import SimulLayer2
+from net_sim_loss import ConditionalTrue
 
 try:
     import utime as time
 except ImportError:
     import time
     
-import schc
+import protocol
 
 from stats.statsct import Statsct
 
@@ -70,7 +70,7 @@ class SimulSCHCNode(SimulNode):
 
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
-        self.protocol = schc.SCHCProtocol(
+        self.protocol = protocol.SCHCProtocol(
             self.config, self, self.layer2, self.layer3)
         self.id = self.layer2.mac_id
         self.sim._add_node(self)

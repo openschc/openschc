@@ -1,5 +1,5 @@
 """
-.. module:: bitarray
+.. module:: gen_bitarray
     :platform: Code running on MicroPython
     :synopsis: SCHC Bit Buffer Management
 

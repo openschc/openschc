@@ -1,9 +1,9 @@
 """Schc configuration
 This file configure a schc simulation for clients and server
 """
-from base_import import *
-import simul
-import rulemanager
+from gen_base_import import *
+import net_sim_core
+import gen_rulemanager
 
 
 class SchcConfig:
@@ -35,7 +35,7 @@ class SchcConfig:
         This method set the compression and fragmentation rules in client and server
         """
         self.rule_comp = self.configuration['rule_name_file']
-        self.rule_manager = rulemanager.RuleManager()
+        self.rule_manager = gen_rulemanager.RuleManager()
         self.rule_manager.Add(device=self.devaddr, file=self.rule_comp, compression=self.configuration['mode_with_compression'])
 
     def configSim(self):
@@ -64,7 +64,7 @@ class SchcConfig:
             simul_config["loss"] = loss_config
 
         # Simul and node instance
-        self.sim = simul.Simul(simul_config)
+        self.sim = net_sim_core.Simul(simul_config)
         self.node0 = self.make_node(self.sim, self.rule_manager, self.devaddr)
         self.node0.layer2.set_mtu(self.configuration['l2_mtu'])
         self.node0.layer2.set_role(self.configuration['role'], self.roleSend)
@@ -82,7 +82,7 @@ class SchcConfig:
         :param extra_config: extra information to configure node instance
         :return node: node instance
         """
-        node = simul.SimulSCHCNode(sim, extra_config)
+        node = net_sim_core.SimulSCHCNode(sim, extra_config)
         node.protocol.set_rulemanager(rule_manager)
         if devaddr is None:
             devaddr = node.id

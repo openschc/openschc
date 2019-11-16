@@ -1,19 +1,19 @@
 """
-.. module:: schctile
+.. module:: frag_tile
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
 
-from base_import import *
+from gen_base_import import *
 
-import schcmsg
-from schccomp import *
+import frag_msg
+from compr_core import *
 
 #---------------------------------------------------------------------------
 
 class TileList():
 
-    # XXX it is almost about the sender side, should be moved into schcsend.py.
+    # XXX it is almost about the sender side, should be moved into frag_send.py.
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
@@ -21,7 +21,7 @@ class TileList():
         self.t_size = ["tileSize"]
         """
         self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
-        self.max_fcn = schcmsg.get_max_fcn(rule)
+        self.max_fcn = frag_msg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
         t_num = self.max_fcn
@@ -52,11 +52,11 @@ class TileList():
                 w_num += 1
             else:
                 t_num -= 1
-        if schcmsg.get_win_all_1(rule) < w_num:
+        if frag_msg.get_win_all_1(rule) < w_num:
             # win_all_1() is assumed to be equal to the max window number.
             raise ValueError(
                     "ERROR: the packet size > WSize. {} > {}".format(
-                            w_num, schcmsg.get_win_all_1(rule)))
+                            w_num, frag_msg.get_win_all_1(rule)))
         self.max_w_num = w_num
         #print("DEBUG: all_tiles:")
         #for i in self.all_tiles:
@@ -67,7 +67,7 @@ class TileList():
         return the tiles containing the contiguous tiles fitting in mtu_size.
         And, remaiing nb_tiles to be sent in all_tiles.
         '''
-        remaining_size = mtu_size - schcmsg.get_sender_header_size(self.rule)
+        remaining_size = mtu_size - frag_msg.get_sender_header_size(self.rule)
         max_tiles = remaining_size // self.t_size
         tiles = []
         t_prev = None

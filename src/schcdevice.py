@@ -1,4 +1,4 @@
-from rulemanager import *
+from gen_rulemanager import *
 
 devaddr = b"\xaa\xbb\xcc\xdd"
 print("---------Rules Device -----------")

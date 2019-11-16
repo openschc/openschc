@@ -1,5 +1,5 @@
 """
-.. module:: simlayer2
+.. module:: net_sim_layer2
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------

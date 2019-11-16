@@ -1,12 +1,12 @@
 """
-.. module:: schcbitmap
+.. module:: frag_bitmap
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
 
-from base_import import *
+from gen_base_import import *
 
-import schcmsg
+import frag_msg
 
 #---------------------------------------------------------------------------
 

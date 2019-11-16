@@ -1,6 +1,6 @@
-from schccomp import *
-from comp_parser import *
-from rulemanager import *
+from compr_core import *
+from compr_parser import *
+from gen_rulemanager import *
 
 import json
 

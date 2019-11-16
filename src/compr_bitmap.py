@@ -1,5 +1,5 @@
 """
-.. module:: comp_bitmap
+.. module:: compr_bitmap
    :platform: Python, Micropython
 
 """
@@ -41,7 +41,7 @@ def compress_bitmap(bbuf):
     return bbuf.get_bits_as_buffer(i+1)
 
 if __name__ == "__main__":
-    from bitarray import BitBuffer
+    from gen_bitarray import BitBuffer
 
     def test1():
         def compress_bitmap_str(b):

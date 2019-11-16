@@ -1,7 +1,7 @@
 """ Server connection and configuration
 This file create a connection with a client
 """
-from base_import import *
+from gen_base_import import *
 import socket
 import ClientThread
 

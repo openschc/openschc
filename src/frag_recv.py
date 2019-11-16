@@ -3,11 +3,11 @@
 """
 #---------------------------------------------------------------------------
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
-import schcmsg
-from schcbitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1, find_missing_tiles_mic_ko_yes_all_1
-from schccomp import *
+import frag_msg
+from frag_bitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1, find_missing_tiles_mic_ko_yes_all_1
+from compr_core import *
 
 enable_statsct = True
 if enable_statsct:
@@ -16,7 +16,7 @@ if enable_statsct:
 #---------------------------------------------------------------------------
 
 """
-.. module:: schcrecv
+.. module:: frag_recv
     :platform: Code Running on MicroPython
     :synopsis: SCHC Reception Module
 
@@ -77,7 +77,7 @@ class ReassembleBase:
     def event_inactive(self):
         """ event_inactive
         
-        // TODO : Redaction (here is schcrecv.py)
+        // TODO : Redaction (here is frag_recv.py)
         
         
         """
@@ -89,7 +89,7 @@ class ReassembleBase:
             return
 
         # sending sender abort.
-        schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
         """
         Changement à corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
@@ -100,7 +100,7 @@ class ReassembleBase:
 
         if enable_statsct:
             Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
-            Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+            Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         self.state = "ABORT"
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
@@ -110,7 +110,7 @@ class ReassembleBase:
     def cancel_inactive_timer(self):
         """ cancel_inactive_timer
         
-        // TODO : Redaction (here is schcrecv.py)
+        // TODO : Redaction (here is frag_recv.py)
         
         """
         if self.event_id_inactive_timer is None:
@@ -130,7 +130,7 @@ class ReassemblerNoAck(ReassembleBase):
         print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
-        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
+        schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
@@ -143,7 +143,7 @@ class ReassemblerNoAck(ReassembleBase):
             return
         self.tile_list.append(schc_frag.payload)
         #
-        if schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
+        if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
             print("----------------------- Final Reassembly -----------------------")
             print("ALL1 received")
             # MIC calculation
@@ -198,7 +198,7 @@ class ReassemblerAckOnError(ReassembleBase):
         print('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
-        schc_frag = schcmsg.frag_receiver_rx(self.rule, bbuf)
+        schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
@@ -220,14 +220,14 @@ class ReassemblerAckOnError(ReassembleBase):
             #     #this can happen when the ALL-1 is not received, so the state is
             #     #not done and the sender is requesting an ACK.
             #     # sending Receiver abort.
-            #     schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+            #     schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
             #     args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             #     print("Sent Receiver-Abort.", schc_frag.__dict__)
             #     print("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
             #     if enable_statsct:
             #         Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
-            #         #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+            #         #Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
             #     self.protocol.scheduler.add_event(0,
             #                                 self.protocol.layer2.send_packet, args)
             #     # XXX needs to release all resources.
@@ -343,7 +343,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
                 print("waiting for more fragments.")
-        elif schc_frag.fcn == schcmsg.get_fcn_all_1(self.rule):
+        elif schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
             print("----------------------- ALL1 received -----------------------")
             self.all1_received = True
             Statsct.set_msg_type("SCHC_ALL_1")
@@ -364,7 +364,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 bit_list = find_missing_tiles(self.tile_list,
                                               self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                              schcmsg.get_fcn_all_1(self.rule))
+                                              frag_msg.get_fcn_all_1(self.rule))
 
                 assert bit_list is not None
                 if len(bit_list) == 0:
@@ -376,7 +376,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     # that considers the max_fcn and the tiles received
                     bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                                    self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                                                   schcmsg.get_fcn_all_1(self.rule))
+                                                                   frag_msg.get_fcn_all_1(self.rule))
                     # print("new bit list, should it work???")
                     # input("")
                 for bl_index in range(len(bit_list)):
@@ -384,7 +384,7 @@ class ReassemblerAckOnError(ReassembleBase):
                                                            bit_list[bl_index][1]))
                     # XXX compress bitmap if needed.
                     # ACK failure message
-                    schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+                    schc_ack = frag_msg.frag_receiver_tx_all1_ack(
                         schc_frag.rule,
                         schc_frag.dtag,
                         win=bit_list[bl_index][0],
@@ -419,7 +419,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 self.state = "DONE"
         if self.state == "DONE":
             # ACK message
-            schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+            schc_ack = frag_msg.frag_receiver_tx_all1_ack(
                 schc_frag.rule,
                 schc_frag.dtag,
                 schc_frag.win,
@@ -432,10 +432,10 @@ class ReassemblerAckOnError(ReassembleBase):
             if self.all1_received:
                 print("all-1 received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
-                            self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN], schcmsg.get_fcn_all_1(self.rule)))
+                            self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN], frag_msg.get_fcn_all_1(self.rule)))
                 bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                                schcmsg.get_fcn_all_1(self.rule))
+                                                frag_msg.get_fcn_all_1(self.rule))
                 for tile in self.tile_list:
                     print("w-num: {} t-num: {} nb_tiles:{}".format(
                         tile['w-num'],tile['t-num'],tile['nb_tiles']))
@@ -449,7 +449,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     print("bit list empty")
                     bit_list = find_missing_tiles_mic_ko_yes_all_1(self.tile_list,
                                                 self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                                schcmsg.get_fcn_all_1(self.rule))
+                                                frag_msg.get_fcn_all_1(self.rule))
                     print("new bit list, should it work???")
  
                 for bl_index in range(len(bit_list)):
@@ -457,7 +457,7 @@ class ReassemblerAckOnError(ReassembleBase):
                                                             bit_list[bl_index][1]))
                     # XXX compress bitmap if needed.
                     # ACK failure message
-                    schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+                    schc_ack = frag_msg.frag_receiver_tx_all1_ack(
                             schc_frag.rule,
                             schc_frag.dtag,
                             win=bit_list[bl_index][0],
@@ -479,7 +479,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     return
                 print("all-1 not received, building ACK")
                 print('send ack before done {},{},{}'.format(self.tile_list,
-                            self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN], schcmsg.get_fcn_all_1(self.rule)))
+                            self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN], frag_msg.get_fcn_all_1(self.rule)))
                 for tile in self.tile_list:
                     print("w-num: {} t-num: {} nb_tiles:{}".format(
                         tile['w-num'],tile['t-num'],tile['nb_tiles']))
@@ -488,19 +488,19 @@ class ReassemblerAckOnError(ReassembleBase):
                 
                 bit_list = find_missing_tiles_no_all_1(self.tile_list,
                                                 self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                                schcmsg.get_fcn_all_1(self.rule))
+                                                frag_msg.get_fcn_all_1(self.rule))
                 print('send ack before done {}'.format(bit_list))
                 assert bit_list is not None
                 if len(bit_list) == 0:
                     bit_list = find_missing_tiles_no_all_1(self.tile_list,
                                                 self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                                schcmsg.get_fcn_all_1(self.rule))
+                                                frag_msg.get_fcn_all_1(self.rule))
                 for bl_index in range(len(bit_list)):
                     print("missing wn={} bitmap={}".format(bit_list[bl_index][0],
                                                             bit_list[bl_index][1]))
                     # XXX compress bitmap if needed.
                     # ACK failure message
-                    schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+                    schc_ack = frag_msg.frag_receiver_tx_all1_ack(
                             schc_frag.rule,
                             schc_frag.dtag,
                             win=bit_list[bl_index][0],
@@ -526,7 +526,7 @@ class ReassemblerAckOnError(ReassembleBase):
         self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
 
         # ACK message
-        schc_ack = schcmsg.frag_receiver_tx_all1_ack(
+        schc_ack = frag_msg.frag_receiver_tx_all1_ack(
                 schc_frag.rule,
                 schc_frag.dtag,
                 schc_frag.win,
@@ -593,7 +593,7 @@ class ReassemblerAckOnError(ReassembleBase):
     def send_receiver_abort(self):
         # sending Receiver abort.
         self.state = "ABORT"
-        schc_frag = schcmsg.frag_receiver_tx_abort(self.rule, self.dtag)
+        schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
         """
         Changement à  corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
@@ -604,7 +604,7 @@ class ReassemblerAckOnError(ReassembleBase):
 
         if enable_statsct:
             Statsct.set_msg_type("SCHC_RECEIVER_ABORT")
-            #Statsct.set_header_size(schcmsg.get_sender_header_size(self.rule))
+            #Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
 #---------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 """
-.. module:: schcmsg
+.. module:: frag_msg
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
-from base_import import *  # used for now for differing modules in py/upy
-from schccomp import *
-import bitarray
-from schccomp import *
+from gen_base_import import *  # used for now for differing modules in py/upy
+from compr_core import *
+import gen_bitarray
+from compr_core import *
 
 #---------------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ class frag_tx(frag_base):
                 buffer.add_bits(fcn, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
             if mic is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] is not None:
                 mic_size = get_mic_size(self.rule)
-                assert mic_size % bitarray.BITS_PER_BYTE == 0
+                assert mic_size % gen_bitarray.BITS_PER_BYTE == 0
                 assert len(mic) == mic_size // 8
                 buffer.add_bytes(mic)
             if cbit is not None:

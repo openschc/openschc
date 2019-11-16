@@ -25,10 +25,10 @@ except ImportError:
     
 import sys
 from .toa_calculator import get_toa
-import schcmsg
+import frag_msg
 
 sys.path.append("..")
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
 #from ..bitarray import BitBuffer
 SCHC_FRAG = "SCHC_FRAG"

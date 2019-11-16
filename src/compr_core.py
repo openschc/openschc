@@ -1,8 +1,8 @@
 """
-.. module:: schccomp
+.. module:: compr_core
    :platform: Python, Micropython
 """
-from base_import import *
+from gen_base_import import *
 
 import pprint
 
@@ -113,7 +113,7 @@ T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 
-# from rulemanager import *
+# from gen_rulemanager import *
 
 
 #---------------------------------------------------------------------------

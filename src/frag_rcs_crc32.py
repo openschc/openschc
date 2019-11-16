@@ -1,5 +1,5 @@
 """
-.. module::mic_crc32 
+.. module::frag_rcs_crc32 
    :platform: Python, Micropython
 
 """

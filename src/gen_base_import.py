@@ -1,5 +1,5 @@
 """
-.. module: base_import
+.. module: gen_base_import
    :platform: Micropython/Python
    :synopsis: Common import file providing differentiation between python and micropython
 
@@ -37,8 +37,8 @@ else:
 
 # --- default imports
 
-from bitarray import BitBuffer
-from mic_crc32 import get_mic, get_mic_size
+from gen_bitarray import BitBuffer
+from frag_rcs_crc32 import get_mic, get_mic_size
 
 def b2hex(b):
     """This function replace the bytes.hex() function provided in Python3.5 and later

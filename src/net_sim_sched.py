@@ -1,10 +1,10 @@
 """
-.. module:: simsched
+.. module:: net_sim_sched
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
 # XXX: this scheduler can be optimized by not sorting every time
 class SimulScheduler:

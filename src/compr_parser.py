@@ -1,5 +1,5 @@
 """
-comp_parser.py transforms a packet dump into a dictionnary. Dictionnary
+compr_parser.py transforms a packet dump into a dictionnary. Dictionnary
 format is the following:
 {
 ("field ID", position) : [value, field length in bits, fixed or variable ]
@@ -7,8 +7,8 @@ format is the following:
 since field ID can be repeated, the index is the tuple field ID and position.
 """
 
-from base_import import *
-from schccomp import *  # for common variable describing rules (no function called from this module)
+from gen_base_import import *
+from compr_core import *  # for common variable describing rules (no function called from this module)
 from binascii import hexlify, unhexlify
 from struct import pack, unpack
 

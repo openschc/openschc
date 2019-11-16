@@ -3,13 +3,13 @@
 import random
 random.seed(1)
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
-import schc
-import simsched
-import simlayer2
-import simul
-from rulemanager import RuleManager
+import protocol
+import net_sim_sched
+import net_sim_layer2
+import net_sim_core
+from gen_rulemanager import RuleManager
 
 from stats.statsct import Statsct
 
@@ -128,7 +128,7 @@ if loss_config is not None:
 #---------------------------------------------------------------------------
 
 def make_node(sim, rule_manager, devaddr=None, extra_config={}):
-    node = simul.SimulSCHCNode(sim, extra_config)
+    node = net_sim_core.SimulSCHCNode(sim, extra_config)
     node.protocol.set_rulemanager(rule_manager)
     if devaddr is None:
         devaddr = node.id
@@ -165,7 +165,7 @@ if ack_on_error:
 #---------------------------------------------------------------------------
 # Configuration of the simulation
 Statsct.get_results() 
-sim = simul.Simul(simul_config)
+sim = net_sim_core.Simul(simul_config)
 
 devaddr = b"\xaa\xbb\xcc\xdd"
 node0 = make_node(sim, rm0, devaddr)                   # SCHC device

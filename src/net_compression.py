@@ -7,8 +7,8 @@ import pprint
 # -----   SCHC ------
 
 
-from rulemanager import *
-from comp_parser import *
+from gen_rulemanager import *
+from compr_parser import *
 
 
 
