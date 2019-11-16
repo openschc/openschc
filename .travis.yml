@@ -2,11 +2,19 @@ language: python
 
 python:
   - "3.4" # micropython version
-  - "3.6"
 
 install:
   - pip install pytest
   - cd src
 
-script:
-  - python3 -m pytest tests/
+stages:
+  - test
+
+jobs:
+  include:
+    - stage: "test"
+      name: "Pytest"
+      script: python3 -m pytest tests/
+    - stage: "test"
+      name: "test_frag_new"
+      script: python3 test_frag_new.py
