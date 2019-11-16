@@ -19,9 +19,9 @@
    :caption: Source code in-depth
 
    Source/File_Classification
-   Source/rulemanager
-   Source/bitarray
-   Source/schcrecv
+   Source/gen_rulemanager
+   Source/gen_bitarray
+   Source/frag_recv
 
 .. toctree::
    :maxdepth: 1
@@ -36,4 +36,3 @@
    :caption: Other info
 
    Actus/IETF-Hackathon-LPWAN
-   General/old-docs
