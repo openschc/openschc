@@ -609,7 +609,7 @@ class RuleManager:
         elif type(v) is int:
             dprint ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            dprint ('{:>30}'.format(v.hex()), end="")
+            dprint ('{:>30}'.format(b2hex(v), end=""))
 
     def printBin(self, v, l):
         txt = ""

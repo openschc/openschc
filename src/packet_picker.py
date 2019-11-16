@@ -5,13 +5,14 @@ import pcap
 import requests
 import argparse
 
+from gen_base_import import b2hex
 from gen_utils import dprint, dpprint
 
 requests.packages.urllib3.disable_warnings()
 
 
 def cb_debug(ts, pkt, cb_arg):
-    dprint(ts, pkt.hex())
+    dprint(ts, b2hex(pkt))
     sys.stdout.flush()
 
 
