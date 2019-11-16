@@ -11,7 +11,7 @@ import pcap
 import os
 
 # from base_import import *
-from gen_rulemanager import RuleManager
+from gen_rulemanager import *
 import protocol
 
 PROG_NAME = "net_gw_lorawan"
@@ -27,11 +27,17 @@ config_default = {
     "downlink_url": None,
     "ssl_verify": True,
     "my_cert": None,
-    "context_file": None,
-    "rule_comp_file": None,
-    "rule_fragin_file": None,
-    "rule_fragout_file": None,
+    "rule_file": None,
     }
+
+def find_file(file_name):
+    if os.path.exists(file_name) is False:
+        file_path = "{}/{}".format(os.environ.get("OPENSCHCDIR",".."),file_name)
+        if os.path.exists(file_path) is False:
+            raise ValueError("No such file {}".format(file_name))
+        return file_path
+    else:
+        return file_name
 
 
 def post_data(url, data, verify):
@@ -167,13 +173,27 @@ async def app_downlink(request):
 async def app_uplink(request):
     """ check the message posted. process it as a uplink message.
     """
-    if request.content_type == "text/json":
+    def get_json_data(body, key_list):
+        for k in key_list:
+            if k in body:
+                return body[k]
+        else:
+            logger.debug("no data for {}".format(key_list))
+            return None
+    #
+    if request.content_type == "application/json":
         if request.can_read_body:
             body = await request.json()
             logger.debug(body)
-            dev_l2addr = body["devL2Addr"]
-            payload = bytearray.fromhex(body["hexSCHCData"])
-            protocol.schc_recv(dev_l2addr, payload)
+            l2_addr = get_json_data(body, ["devL2Addr", "L2Addr", "DevAddr"])
+            if l2_addr is None:
+                return
+            app_data = get_json_data(body, ["hex_payload", "hexSCHCData",
+                                            "Data", "data"])
+            if app_data is None:
+                return
+            app_data = bytearray.fromhex(app_data)
+            protocol.schc_recv(l2_addr, app_data)
             return web.json_response({"Status": "OK"}, status=202)
         else:
             logger.debug("http request body is not ready.")
@@ -238,17 +258,6 @@ ap.add_argument("--my-cert", action="store", dest="my_cert",
 ap.add_argument("--untrust", action="store_false", dest="ssl_verify",
                 default=None,
                 help="disable to check the server certificate.")
-ap.add_argument("--context", action="store", dest="context_file",
-                help="specify a file name containing a context in JSON.")
-ap.add_argument("--rule-comp", action="store", dest="rule_comp_file",
-                help="""specify a file name containing a compression rule
-                in JSON.""")
-ap.add_argument("--rule-fragin", action="store", dest="rule_fragin_file",
-                help="""specify a file name containing an inbound fragment
-                rule in JSON.""")
-ap.add_argument("--rule-fragout", action="store", dest="rule_fragout_file",
-                help="""specify a file name containing a outbound fragment
-                rule in JSON.""")
 ap.add_argument("-d", action="store_true", dest="debug_level", default=None,
                 help="specify debug level.")
 config = ap.parse_args()
@@ -261,18 +270,7 @@ if not config.debug_level:
 
 # create the schc protocol object.
 rule_manager = RuleManager()
-rule = []
-for k in [config.context_file, config.rule_comp_file, config.rule_fragin_file,
-          config.rule_fragout_file]:
-    if os.path.exists(k) is False:
-        new_k = "{}/{}".format(os.environ.get("OPENSCHCDIR",".."),k)
-        if os.path.exists(new_k) is False:
-            raise ValueError("No such file {}".format(k))
-        k = new_k
-    with open(k) as fd:
-        r = json.loads(fd.read())
-        rule.append(r)
-        rule_manager.Add(rule)
+rule_manager.Add(file=find_file(config.rule_file))
 #
 loop = asyncio.get_event_loop()
 if config.debug_level > 1:
@@ -280,11 +278,11 @@ if config.debug_level > 1:
 system = System(loop, logger=logger, config=config)
 layer2 = gwLayer2(system, config=config)
 layer3 = gwLayer3(system, config=config)
-protocol = schc.SCHCProtocol(config, system, layer2, layer3)
+protocol = protocol.SCHCProtocol(config, system, layer2, layer3)
 protocol.set_rulemanager(rule_manager)
 #
 ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-ctx.load_cert_chain(config.my_cert)
+ctx.load_cert_chain(find_file(config.my_cert))
 app = web.Application(loop=loop, debug=True)
 app.router.add_route("POST", "/ul", app_uplink)
 app.router.add_route("POST", "/dl", app_downlink)
