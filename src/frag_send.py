@@ -6,7 +6,7 @@
 import math
 
 from gen_base_import import *  # used for now for differing modules in py/upy
-from gen_utils import dprint
+from gen_utils import dprint, dtrace
 
 import protocol
 import frag_msg
@@ -226,6 +226,34 @@ class FragmentNoAck(FragmentBase):
         args = (schc_frag.packet.get_content(), '*',
                 transmit_callback)
         dprint("frag sent:", schc_frag.__dict__)
+        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
+            w_dtag = '-'
+        else:
+            w_dtag = schc_frag.dtag
+
+        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
+            w_w = '-'
+        else:
+            w_w = schc_frag.win
+
+        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+        if schc_frag.fcn == all1:
+            w_fcn = "All-1"
+        elif schc_frag.fcn == 0:
+            w_fcn = "All-0"
+        else:
+            w_fcn = schc_frag.fcn
+        print (all1)
+
+        dtrace ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+            self.rule[T_RULEID], 
+            self.rule[T_RULEIDLENGTH], 
+            w_dtag, 
+            w_w,
+            w_fcn
+            ))
+        dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
+
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 

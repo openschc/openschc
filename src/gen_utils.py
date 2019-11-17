@@ -3,7 +3,7 @@
 import sys
 import pprint
 
-enable_debug_print = True
+enable_debug_print = False
 
 def dprint(*args, **kw):
     """Debug print"""

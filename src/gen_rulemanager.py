@@ -422,7 +422,7 @@ class RuleManager:
 
 
             if not overlap:
-                if "Compression" in n_rule and compression:
+                if "Compression" in n_rule:
                     r = self._create_compression_rule(n_rule)
                     d["SoR"].append(r)
                 elif "Fragmentation" in n_rule:
