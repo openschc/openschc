@@ -8,8 +8,56 @@ from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint, set_debug_output
 import io
+import pytest
 import sys
 import tempfile
+
+@pytest.fixture
+def rule_no_ack():
+    file_rules = tempfile.NamedTemporaryFile()
+    file_rules.write("""
+[
+   {
+      "RuleID":12,
+      "RuleIDLength":6,
+      "Fragmentation":{
+         "FRMode":"noAck"
+      }
+   }
+]   
+    """.encode("utf-8"))
+    file_rules.seek(0)
+    # Use yield instead of return so the temp file survives
+    yield file_rules.name
+
+@pytest.fixture
+def rule_ack_on_error():
+    file_rules = tempfile.NamedTemporaryFile()
+    file_rules.write("""
+[
+   {
+      "RuleID":12,
+      "RuleIDLength":6,
+      "Fragmentation":{
+         "FRMode":"ackOnError",
+         "FRModeProfile":{
+            "dtagSize":2,
+            "WSize":3,
+            "FCNSize":3,
+            "ackBehavior":"afterAll1",
+            "tileSize":392,
+            "MICAlgorithm":"crc32",
+            "MICWordSize":8,
+            "lastTileInAll1":false
+         }
+      }
+   }
+]
+    """.encode("utf-8"))
+    file_rules.seek(0)
+    # Use yield instead of return so the temp file survives
+    yield file_rules.name
+
 
 def frag_generic(rules_filename, packet_loss):
      # --------------------------------------------------
@@ -134,48 +182,22 @@ def frag_generic(rules_filename, packet_loss):
 
 
 
-def test_frag_ack_on_error_no_loss():
-    file_rules = tempfile.NamedTemporaryFile()
-    file_rules.write("""
-[
-   {
-      "RuleID":12,
-      "RuleIDLength":6,
-      "Fragmentation":{
-         "FRMode":"ackOnError",
-         "FRModeProfile":{
-            "dtagSize":2,
-            "WSize":3,
-            "FCNSize":3,
-            "ackBehavior":"afterAll1",
-            "tileSize":392,
-            "MICAlgorithm":"crc32",
-            "MICWordSize":8,
-            "lastTileInAll1":false
-         }
-      }
-   }
-]   
-    """.encode("utf-8"))
-    file_rules.seek(0)
-    stdout = frag_generic(file_rules.name, packet_loss=False)
-    
+def test_frag_ack_on_error_no_loss(rule_ack_on_error):
+    stdout = frag_generic(rule_ack_on_error, packet_loss=False)
     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
     assert "----------------------- ACK Success" in stdout
 
-def test_frag_no_ack_no_loss():
-    file_rules = tempfile.NamedTemporaryFile()
-    file_rules.write("""
-[
-   {
-      "RuleID":12,
-      "RuleIDLength":6,
-      "Fragmentation":{
-         "FRMode":"noAck"
-      }
-   }
-]   
-    """.encode("utf-8"))
-    file_rules.seek(0)
-    stdout = frag_generic(file_rules.name, packet_loss=False)
+# TODO - It seems that packet loss is not working yet, MIC issues
+# def test_frag_ack_on_error_loss(rule_ack_on_error):
+#     stdout = frag_generic(rule_ack_on_error, packet_loss=True)
+#     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
+#     assert "----------------------- ACK Success" in stdout
+
+def test_frag_no_ack_no_loss(rule_no_ack):
+    stdout = frag_generic(rule_no_ack, packet_loss=False)
     assert "SUCCESS: MIC matched" in stdout
+
+# TODO - It seems that packet loss is not working yet, MIC issues
+# def test_frag_no_ack_loss(rule_no_ack):
+#     stdout = frag_generic(rule_no_ack, packet_loss=True)
+#     assert "SUCCESS: MIC matched" in stdout
