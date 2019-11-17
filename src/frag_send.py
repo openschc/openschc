@@ -68,27 +68,25 @@ class FragmentBase():
                 penultimate_size=0):
         assert isinstance(mic_base, BitBuffer)
 
-        if (self.rule[T_FRAG][T_FRAG_MODE] == "ackOnError"
-            and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1]):
-            # calculate the significant padding bits.
-            # 1. get the extra bits.
-            #
-            #   |<------------ last SCHC frag ------------->|
-            #   |<- header ->|<- payload ->|<--- padding -->|
-            #   |<---- frag base size ---->|<- extra bits-->|
-            #                                      L2Word ->|
+        # calculate the significant padding bits.
+        # 1. get the extra bits.
+        #
+        #   |<------------ last SCHC frag ------------->|
+        #   |<- header ->|<- payload ->|<--- padding -->|
+        #   |<---- frag base size ---->|<- extra bits-->|
+        #                                      L2Word ->|
 
-            extra_bits = (frag_msg.roundup(last_frag_base_size,
-                                        self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE]) -
-                            last_frag_base_size)
+        extra_bits = (frag_msg.roundup(last_frag_base_size,
+                                    self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE]) -
+                        last_frag_base_size)
 
-            # 2. round up the payload of all SCHC fragments
-            #    to the MIC word size.
-            #
-            #   |<----------------- input data  ----------------->|
-            #   |<- a SCHC packet ->|<- extra bits->|<- padding ->|
-            #            MIC Word ->|                  MIC Word ->|
-            mic_base.add_bits(0, extra_bits)
+        # 2. round up the payload of all SCHC fragments
+        #    to the MIC word size.
+        #
+        #   |<----------------- input data  ----------------->|
+        #   |<- a SCHC packet ->|<- extra bits->|<- padding ->|
+        #            MIC Word ->|                  MIC Word ->|
+        mic_base.add_bits(0, extra_bits)
         # XXX
         if penultimate_size != 0:
             extra_bits = (frag_msg.roundup(penultimate_size,
