@@ -36,269 +36,254 @@
 <span id="openschc-rule-manager-module"></span><h1>OpenSCHC Rule Manager Module<a class="headerlink" href="#module-gen_rulemanager" title="Permalink to this headline">¶</a></h1>
 <p>The Rule Manager manages the context(s) for a specific device or a set of devices.
 It maintains the context database and ensures its consistency. The hierarchy is the
-following:
-+ context_database</p>
-<blockquote>
-<div><ul>
-<li><p>device_context
-+ set_of_rules</p>
-<blockquote>
-<div><ul>
-<li><p>rule_id/rule_id_length
-+ rules</p>
-<blockquote>
-<div><ul class="simple">
+following:</p>
+<ul class="simple">
+<li><p>context_database</p>
+<ul>
+<li><p>device_context</p>
+<ul>
+<li><p>set_of_rules</p>
+<ul>
+<li><p>rule_id/rule_id_length</p>
+<ul>
+<li><p>rules</p>
+<ul>
 <li><p>Fragmentation</p></li>
 <li><p>Compression</p></li>
 </ul>
-</div></blockquote>
 </li>
 </ul>
-</div></blockquote>
 </li>
 </ul>
-</div></blockquote>
-<p># Introduction</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The context includes a set of rules shared by both ends.
 Identical Rules are used on both ends. They can be simply
 copied/pasted from one end to the other end, if both ends use the same format for describing them.</p>
 <p>This document specifies the OpenSCHC rule data model, which is based on JSON.</p>
-<p># Rule definition</p>
+</div>
+<div class="section" id="rule-definition">
+<h2>Rule definition<a class="headerlink" href="#rule-definition" title="Permalink to this headline">¶</a></h2>
 <p>A rule is described as a JSON dictionary.</p>
 <p>A rule is identified by its RuleID.</p>
 <p>The size of the RuleID representation can change from one rule to
 the next. Therefore, the rule description includes a RuleIDLength that indicates the length of the RuleID, in bits.</p>
-<p>Both fields are integer numbers.</p>
-<blockquote>
-<div><p>{
-“RuleID” : 12,
-“RuleIDLength” : 4
-# notice that RuleID 12 represented on 6 bits is different from RuleID 12 on 4 bits!
-}</p>
-</div></blockquote>
+<p>Both fields are integer numbers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+<span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span>
+<span class="c1"># notice that RuleID 12 represented on 6 bits is different from RuleID 12 on 4 bits!</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 <p>In SCHC, rules are used either for compression or fragmentation. Therefore, one and only one of the two keywords “fragmentation” or “compression” must be specified, per rule.</p>
-<p>## Compression Rules</p>
+<div class="section" id="compression-rules">
+<h3>Compression Rules<a class="headerlink" href="#compression-rules" title="Permalink to this headline">¶</a></h3>
 <p>As defined in the SCHC specification, compression rules are composed of Field Descriptions.
 The order in which the Field Descriptions appear in the rule is significant (e.g. it defines the order in which the compression residues are sent), therefore a compression rule is represented as an array.</p>
-<p>The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:
-* “<strong>FID</strong>”: a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. “IPV6.VER”. &lt;&lt;&lt; why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!&gt;&gt;&gt;
-* “<strong>FL</strong>”: if the value is a number, that value expresses the length of the field, in bits. If the
-value is a string, it designates a function that can compute the field length. The functions currently defined are:</p>
+<p>The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:</p>
+<ul>
+<li><p><strong>FID</strong>: a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. “IPV6.VER”. &lt;&lt;&lt; why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!&gt;&gt;&gt;</p></li>
+<li><p><strong>FL</strong>: if the value is a number, that value expresses the length of the field, in bits. If the value is a string, it designates a function that can compute the field length. The functions currently defined are:</p>
+<ul class="simple">
+<li><p><em>var</em>: the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.</p></li>
+<li><p><em>tkl</em>: this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.</p></li>
+</ul>
+</li>
+<li><p><strong>FP</strong>: an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.</p></li>
+<li><p><strong>DI</strong>: tells the direction to which this Field Description applies:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>“_**var**_”: the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.</p></li>
-<li><p>“_**tkl**_”: this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.</p></li>
+<li><p><em>Up</em>: only to uplink messages (i.e. from device to network)</p></li>
+<li><p><em>Dw</em>: only to downlink messages (i.e. from network to device)</p></li>
+<li><p><em>Bi</em>: to both directions</p></li>
 </ul>
 </div></blockquote>
-<ul class="simple">
-<li><p>“<strong>FP</strong>”: an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.</p></li>
-<li><dl class="simple">
-<dt>“<strong>DI</strong>”: tells the direction to which this Field Description applies:</dt><dd><ul>
-<li><p>“_**Up**_”: only to uplink messages (i.e. from device to network)</p></li>
-<li><p>“_**Dw**_”: only to downlink messages (i.e. from network to device)</p></li>
-<li><p>“_**Bi**_”: to both directions</p></li>
-</ul>
-</dd>
-</dl>
 </li>
-<li><p>“<strong>TV</strong>”: specifies the Target Value. The value is a number, a string or an array of these types. The “TV” key can be omitted or its value set to null if there is no value to check, for instance together with the “ignore” MO. If the Target Value is an array, then the value null among the array elements indicates that</p></li>
+<li><p><strong>TV</strong>: specifies the Target Value. The value is a number, a string or an array of these types. The “TV” key can be omitted or its value set to null if there is no value to check, for instance together with the “ignore” MO. If the Target Value is an array, then the value null among the array elements indicates that the Field Descriptor matches the case where the field is not present in the header being compressed.</p></li>
+<li><p><strong>MO</strong>: specifies the Matching Operator. It is a string that can take the following values:</p>
+<ul class="simple">
+<li><p><em>ignore</em>: the field must be present in the header, but the value is not checked.</p></li>
+<li><p><em>equal</em>: type and value must check between the field value and the Target Value &lt;&lt;&lt; il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? &gt;&gt;</p></li>
+<li><p><em>MSB</em>: the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the “MOa” field.</p></li>
+<li><p><em>match-mapping</em>: with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.</p></li>
 </ul>
-<p>the Field Descriptor matches the case where the field is not present in the header being compressed.
-* “<strong>MO</strong>”: specifies the Matching Operator. It is a string that can take the following values:</p>
+</li>
+<li><p><strong>MOa</strong>: specifies, if applicable, an argument to the MO. This currently only applies to the “MSB” MO, where the argument specifies the length of the matching, in bits.</p></li>
+<li><p><strong>CDA</strong>: designates the Compression/Decompression Action. It is a string that can take the following values:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>“_**ignore**_”: the field must be present in the header, but the value is not checked.</p></li>
-<li><p>“_**equal**_”: type and value must check between the field value and the Target Value &lt;&lt;&lt; il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? &gt;&gt;</p></li>
-<li><p>“_**MSB**_”: the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the “MOa” field.</p></li>
-<li><p>“_**match-mapping**_”: with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.</p></li>
+<li><p><em>not-sent</em>: the field value is not sent as a residue.</p></li>
+<li><p><em>value-sent</em>: the field value is sent in extenso in the residue.</p></li>
+<li><p><em>LSB</em>: the bits remaining after the MSB comparison are sent in the residue.</p></li>
+<li><p><em>mapping-sent</em>: the index of the matching element in the array is sent.</p></li>
+<li><p><em>compute</em>: the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.</p></li>
 </ul>
 </div></blockquote>
-<ul class="simple">
-<li><p>“<strong>MOa</strong>”: specifies, if applicable, an argument to the MO. This currently only applies to the “MSB” MO, where the argument specifies the length of the matching, in bits.</p></li>
-<li><dl class="simple">
-<dt>“<strong>CDA</strong>”: designates the Compression/Decompression Action. It is a string that can take the following values:</dt><dd><ul>
-<li><p>“_**not-sent**_”: the field value is not sent as a residue.</p></li>
-<li><p>“_**value-sent**_”: the field value is sent in extenso in the residue.</p></li>
-<li><p>“_**LSB**_”: the bits remaining after the MSB comparison are sent in the residue.</p></li>
-<li><p>“_**mapping-sent**_”: the index of the matching element in the array is sent.</p></li>
-<li><p>“_**compute**_”: the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.</p></li>
-</ul>
-</dd>
-</dl>
 </li>
-<li><p>“<strong>CDAa</strong>”: represents the argument of the CDA. Currently, no CDAa is defined.</p></li>
+<li><p><strong>CDAa</strong>: represents the argument of the CDA. Currently, no CDAa is defined.</p></li>
 </ul>
 <p>For example:</p>
-<dl>
-<dt>{</dt><dd><p>“ruleID”: 12,
-“ruleLength”: 4,
-“compression”: [</p>
-<blockquote>
-<div><p>{“FID”: “IPV6.VER”, “FL”: 4, “FP”: 1, “DI”: “Bi”, “TV”: 6, “MO”: “equal”, “CDA”: “not-sent”},
-{“FID”: “IPV6.TC”,  “FL”: 8, “FP”: 1, “DI”: “Bi”, “TV”: 0, “MO”: “equal”, “CDA”: “not-sent”},
-{“FID”: “IPV6.FL”,  “FL”: 20,”FP”: 1, “DI”: “Bi”, “TV”: 0, “MO”: “ignore”,”CDA”: “not-sent”},
-{“FID”: “IPV6.LEN”, “FL”: 16,”FP”: 1, “DI”: “Bi”,          “MO”: “ignore”,”CDA”: “compute-length”},
-{“FID”: “IPV6.NXT”, “FL”: 8, “FP”: 1, “DI”: “Bi”, “TV”: 58, “MO”: “equal”, “CDA”: “not-sent”},
-{“FID”: “IPV6.HOP_LMT”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 255,”MO”: “ignore”,”CDA”: “not-sent”},
-{“FID”: “IPV6.DEV_PREFIX”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: [“2001:db8::/64”,</p>
-<blockquote>
-<div><blockquote>
-<div><p>“fe80::/64”,
-“2001:0420:c0dc:1002::/64” ],</p>
-</div></blockquote>
-<p>“MO”: “match-mapping”,”CDA”: “mapping-sent”,”SB”: 1},</p>
-</div></blockquote>
-<p>{“FID”: “IPV6.DEV_IID”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: “::79”,”MO”: “equal”,”CDA”: “DEVIID”},
-{“FID”: “IPV6.APP_PREFIX”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: [ “2001:db8:1::/64”,</p>
-<blockquote>
-<div><blockquote>
-<div><p>“fe80::/64”,
-“2404:6800:4004:818::/64” ],</p>
-</div></blockquote>
-<p>“MO”: “match-mapping”,”CDA”: “mapping-sent”, “SB”: 2},</p>
-</div></blockquote>
-<p>{“FID”: “IPV6.APP_IID”,”FL”: 64,”FP”: 1,”DI”: “Bi”,”TV”: “::2004”,”MO”: “equal”,”CDA”: “not-sent”},
-{“FID”: “ICMPV6.TYPE”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 128,”MO”: “equal”,”CDA”: “not-sent”},
-{“FID”: “ICMPV6.CODE”,”FL”: 8,”FP”: 1,”DI”: “Bi”,”TV”: 0,  “MO”: “equal”,”CDA”: “not-sent”},
-{“FID”: “ICMPV6.CKSUM”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: 0,”MO”: “ignore”,”CDA”: “compute-checksum”},
-{“FID”: “ICMPV6.IDENT”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: [],”MO”: “ignore”,”CDA”: “value-sent”},
-{“FID”: “ICMPV6.SEQNB”,”FL”: 16,”FP”: 1,”DI”: “Bi”,”TV”: [],”MO”: “ignore”,”CDA”: “value-sent”}</p>
-</div></blockquote>
-<p>]</p>
-</dd>
-</dl>
-<p>}</p>
-<p>## Fragmentation Rules</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;ruleID&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+  <span class="s2">&quot;ruleLength&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+  <span class="s2">&quot;compression&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.VER&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span> <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.TC&quot;</span><span class="p">,</span>  <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span> <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.FL&quot;</span><span class="p">,</span>  <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span> <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.LEN&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span>          <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;compute-length&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.NXT&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span> <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">58</span><span class="p">,</span> <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.HOP_LMT&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">255</span><span class="p">,</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.DEV_PREFIX&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2001:db8::/64&quot;</span><span class="p">,</span>
+                                                                 <span class="s2">&quot;fe80::/64&quot;</span><span class="p">,</span>
+                                                                 <span class="s2">&quot;2001:0420:c0dc:1002::/64&quot;</span> <span class="p">],</span>
+                                                                <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;match-mapping&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;mapping-sent&quot;</span><span class="p">,</span><span class="s2">&quot;SB&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.DEV_IID&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="s2">&quot;::79&quot;</span><span class="p">,</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;DEVIID&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.APP_PREFIX&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;2001:db8:1::/64&quot;</span><span class="p">,</span>
+                                                                  <span class="s2">&quot;fe80::/64&quot;</span><span class="p">,</span>
+                                                                  <span class="s2">&quot;2404:6800:4004:818::/64&quot;</span> <span class="p">],</span>
+                                                                <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;match-mapping&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;mapping-sent&quot;</span><span class="p">,</span> <span class="s2">&quot;SB&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.APP_IID&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="s2">&quot;::2004&quot;</span><span class="p">,</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;ICMPV6.TYPE&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;ICMPV6.CODE&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;ICMPV6.CKSUM&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;compute-checksum&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;ICMPV6.IDENT&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="p">[],</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;value-sent&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;ICMPV6.SEQNB&quot;</span><span class="p">,</span><span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span><span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span><span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="p">[],</span><span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span><span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;value-sent&quot;</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fragmentation-rules">
+<h3>Fragmentation Rules<a class="headerlink" href="#fragmentation-rules" title="Permalink to this headline">¶</a></h3>
 <p>Fragmentation rules define how the compression and decompression must be performed.</p>
-<p>The keyword  __Fragmentation__ is followed by a dictionnary containing the different parameters used.
-Inside the keyword __FRMode__ indicates which Fragmentation mode is used (__noAck__, __ackAlways__, __ackOnError__).
-Then the keyword __FRModeParamter__ gives the information needed to create the SCHC fragmentation header and mode profile:</p>
-<ul class="simple">
-<li><p>__dtagSize__ gives in bit the size of the dtag field. &lt;&lt;if not present or set to 0, this field is not present</p></li>
-</ul>
-<p>in the SCHC fragmentation header&gt;&gt;. This keyword can be used by all the fragmentation modes.
-* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in
-noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
-* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck.
-For ackAlways and ackOnError the value must be specified.
-* __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:</p>
+<p>The keyword  <strong>Fragmentation</strong> is followed by a dictionnary containing the different parameters used.
+Inside the keyword <strong>FRMode</strong> indicates which Fragmentation mode is used (<strong>noAck</strong>, <strong>ackAlways</strong>, <strong>ackOnError</strong>).
+Then the keyword <strong>FRModeProfiler</strong> gives the information needed to create the SCHC fragmentation header and mode profile:</p>
+<ul>
+<li><p><strong>dtagSize</strong> gives in bit the size of the dtag field. &lt;&lt;if not present or set to 0, this field is not present in the SCHC fragmentation header&gt;&gt;. This keyword can be used by all the fragmentation modes.</p></li>
+<li><p><strong>WSize</strong> gives in bit the size of Window field. If not present, the default value is 0 (no window) in noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.</p></li>
+<li><p><strong>FCNSize</strong> gives in bit the size of the FCN field. If not present, by default, the value is 1 for noAck.For ackAlways and ackOnError the value must be specified.</p></li>
+<li><p><strong>ackBehavior</strong> this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>“afterAll1”: the bitmap (or Mic OK) is expected only after the reception of a All-1.</p></li>
-<li><p>“afterAll0”: the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)</p></li>
+<li><p><em>afterAll1</em>: the bitmap (or RCS OK) is expected only after the reception of a All-1.</p></li>
+<li><p><em>afterAll0</em>: the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)</p></li>
 </ul>
 </div></blockquote>
-<ul class="simple">
-<li><p>__lastTileInAll1__: true to append last tile to the All-1 message, false otherwise.</p></li>
-<li><p>__tileSize__ gives the size in bit of a tile.</p></li>
-<li><p>__MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,</p></li>
-<li><p>__MICWordSize__ gives the size of the MIC word.</p></li>
-<li><p>__maxRetry__ indicates to the sender how many time a fragment or ack request can be sent.</p></li>
-<li><p>__timeout__ indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.</p></li>
+</li>
+<li><p><strong>lastTileInAll1</strong>: true to append last tile to the All-1 message, false otherwise.</p></li>
+<li><p><strong>tileSize</strong> gives the size in bit of a tile.</p></li>
+<li><p><strong>MICAlgorithm</strong> gives the algorithm used to compute the MIB, by default <strong>crc32</strong>,</p></li>
+<li><p><strong>MICWordSize</strong> gives the size of the RCS word.</p></li>
+<li><p><strong>maxRetry</strong> indicates to the sender how many time a fragment or ack request can be sent.</p></li>
+<li><p><strong>timeout</strong> indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.</p></li>
 </ul>
 <p>For instance:</p>
-<blockquote>
-<div><dl>
-<dt>{</dt><dd><p>“RuleID”: 1,
-“RuleLength”: 3,
-“Fragmentation” : {</p>
-<blockquote>
-<div><p>“FRMode”: “ackOnError”,
-“FRModeProfile”: {</p>
-<blockquote>
-<div><p>“dtagSize”: 2,
-“WSize”: 5,
-“FCNSize”: 3,
-“ackBehavior”: “afterAll1”,
-“tileSize”: 9,
-“MICAlgorithm”: “crc32”,
-“MICWordSize”: 8,
-“maxRetry”: 4,
-“timeout”: 600,
-“lastTileInAll1”: false</p>
-</div></blockquote>
-<p>}</p>
-</div></blockquote>
-<p>}</p>
-</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p># Context</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;RuleID&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;RuleLength&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;Fragmentation&quot;</span> <span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;FRMode&quot;</span><span class="p">:</span> <span class="s2">&quot;ackOnError&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FRModeProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtagSize&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;WSize&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;FCNSize&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;ackBehavior&quot;</span><span class="p">:</span> <span class="s2">&quot;afterAll1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tileSize&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+            <span class="s2">&quot;MICAlgorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;crc32&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;MICWordSize&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s2">&quot;maxRetry&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">600</span><span class="p">,</span>
+            <span class="s2">&quot;lastTileInAll1&quot;</span><span class="p">:</span> <span class="n">false</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="context">
+<h2>Context<a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h2>
 <p>A context is associated with a specific device, which may be identified by a unique LPWAN
 identifier, for instance a LoRaWAN devEUI.</p>
-<p>The context also includes a set of rules. The rule description is defined [above](#rule-definition).</p>
-<blockquote>
-<div><dl>
-<dt>[</dt><dd><dl class="simple">
-<dt>{</dt><dd><p>“DeviceID”: 0x1234567890,
-“SoR” : [ ….. ]</p>
-</dd>
-</dl>
-<p>},
-{</p>
-<blockquote>
-<div><p>“DeviceID”: 0xDEADBEEF,
-“SoR” : [ ….. ]</p>
-</div></blockquote>
-</dd>
-</dl>
-<p>]</p>
-</div></blockquote>
+<p>The context also includes a set of rules. The rule description is defined [above](#rule-definition):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;DeviceID&quot;</span><span class="p">:</span> <span class="mh">0x1234567890</span><span class="p">,</span>
+        <span class="s2">&quot;SoR&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="o">.....</span> <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;DeviceID&quot;</span><span class="p">:</span> <span class="mh">0xDEADBEEF</span><span class="p">,</span>
+        <span class="s2">&quot;SoR&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="o">.....</span> <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
 <p>DeviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted or set to null. In the core network, the DeviceIDs must be specified.</p>
-<p>The set of rules itself expands as shown below.</p>
-<blockquote>
-<div><dl>
-<dt>[</dt><dd><p>{
-“RuleID” : 12,
-“RuleIDLength” : 4,
-“compression”: [</p>
-<blockquote>
-<div><blockquote>
-<div><p>{
-“FID”: “IPV6.VER”,
-“FL”: 4,
-“FP”: 1,
-“DI”: “Bi”,
-“TV”: 6,
-“MO”: “equal”,
-“CDA”: “not-sent”
-},
-{
-“FID”: “IPV6.DEV_PREFIX”,
-“FL”: 64,
-“FP”: 1,
-“DI”: “Bi”,
-“TV”: [ “2001:db8::/64”, “fe80::/64”, “2001:0420:c0dc:1002::/64” ],
-“MO”: “match-mapping”,
-“CDA”: “mapping-sent”,
-},</p>
-</div></blockquote>
-<p>]</p>
-</div></blockquote>
-<p>},
-{
-“RuleID” : 13,
-“RuleIDLength” : 4,
-“fragmentation” : ….
-},
-…..</p>
-</dd>
-</dl>
-<p>]</p>
-</div></blockquote>
-<p>### Remove</p>
-<p>Suppresses a rule for a specific device &lt;&lt;&lt; only one, or a set of rules? &gt;&gt;&gt;. If no rule is specified, all rules for that device are removed from the context.</p>
-<blockquote>
-<div><p>RM.remove ({“DeviceID”: 0x1234567, “SoR”: {{“ruleID”:12, “ruleLength”:4}}})
-RM.remove ({“DeviceID”: 0x1234567})</p>
-</div></blockquote>
-<p>### FindRuleFromPacket</p>
+<p>The set of rules itself expands as shown below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+    <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;compression&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+        <span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.VER&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;not-sent&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+        <span class="s2">&quot;FID&quot;</span><span class="p">:</span> <span class="s2">&quot;IPV6.DEV_PREFIX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="s2">&quot;FP&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;DI&quot;</span><span class="p">:</span> <span class="s2">&quot;Bi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;TV&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;2001:db8::/64&quot;</span><span class="p">,</span> <span class="s2">&quot;fe80::/64&quot;</span><span class="p">,</span> <span class="s2">&quot;2001:0420:c0dc:1002::/64&quot;</span> <span class="p">],</span>
+        <span class="s2">&quot;MO&quot;</span><span class="p">:</span> <span class="s2">&quot;match-mapping&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;CDA&quot;</span><span class="p">:</span> <span class="s2">&quot;mapping-sent&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+    <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
+    <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;fragmentation&quot;</span> <span class="p">:</span> <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="o">.....</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="remove">
+<h3>Remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h3>
+<p>Suppresses a rule for a specific device &lt;&lt;&lt; only one, or a set of rules? &gt;&gt;&gt;. If no rule is specified, all rules for that device are removed from the context:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RM</span><span class="o">.</span><span class="n">remove</span> <span class="p">({</span><span class="s2">&quot;DeviceID&quot;</span><span class="p">:</span> <span class="mh">0x1234567</span><span class="p">,</span> <span class="s2">&quot;SoR&quot;</span><span class="p">:</span> <span class="p">{{</span><span class="s2">&quot;ruleID&quot;</span><span class="p">:</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;ruleLength&quot;</span><span class="p">:</span><span class="mi">4</span><span class="p">}}})</span>
+<span class="n">RM</span><span class="o">.</span><span class="n">remove</span> <span class="p">({</span><span class="s2">&quot;DeviceID&quot;</span><span class="p">:</span> <span class="mh">0x1234567</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="findrulefrompacket">
+<h3>FindRuleFromPacket<a class="headerlink" href="#findrulefrompacket" title="Permalink to this headline">¶</a></h3>
 <p>This method returns a rule and a DeviceID that match a packet description given by the protocol analyzer.</p>
-<p>### FindFragmentationRule (size)</p>
+</div>
+<div class="section" id="findfragmentationrule-size">
+<h3>FindFragmentationRule (size)<a class="headerlink" href="#findfragmentationrule-size" title="Permalink to this headline">¶</a></h3>
 <p>Returns a fragmentation rule compatible with the packet size passed as parameter.</p>
-<p>### FindRuleFromID</p>
+</div>
+<div class="section" id="findrulefromid">
+<h3>FindRuleFromID<a class="headerlink" href="#findrulefromid" title="Permalink to this headline">¶</a></h3>
 <p>Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.</p>
+</div>
+</div>
 <dl class="class">
 <dt id="gen_rulemanager.DictToAttrDeep">
 <em class="property">class </em><code class="sig-prename descclassname">gen_rulemanager.</code><code class="sig-name descname">DictToAttrDeep</code><span class="sig-paren">(</span><em class="sig-param">**entries</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.DictToAttrDeep" title="Permalink to this definition">¶</a></dt>
@@ -316,18 +301,22 @@ RM.remove ({“DeviceID”: 0x1234567})</p>
 <dd><p># Class RuleManager</p>
 <p>A RuleManager object is created this way:</p>
 <blockquote>
-<div><p>from RuleManager import *
-RM = RuleManager()</p>
-<p>arguments:
-- file: the RuleManager takes a file to upload rule_set
-- log:  display debugging events</p>
+<div><p>from RuleManager import *</p>
+<p>RM = RuleManager()</p>
+<p>arguments:</p>
+<ul class="simple">
+<li><p>file: the RuleManager takes a file to upload rule_set</p></li>
+<li><p>log:  display debugging events</p></li>
+</ul>
 </div></blockquote>
 <dl class="method">
 <dt id="gen_rulemanager.RuleManager.Add">
 <code class="sig-name descname">Add</code><span class="sig-paren">(</span><em class="sig-param">device=None</em>, <em class="sig-param">dev_info=None</em>, <em class="sig-param">file=None</em>, <em class="sig-param">compression=True</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.Add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
-* ruleID/RuleIDLength do not overlap
-* the rule contains either one of a fragmentation and a compression description.</p>
+<dd><p>Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:</p>
+<ul class="simple">
+<li><p>ruleID/RuleIDLength do not overlap</p></li>
+<li><p>the rule contains either one of a fragmentation and a compression description.</p></li>
+</ul>
 <p>If the DeviceID already exists in the context, the new rule is added to that context, providing no conflict on the RuleID is found.</p>
 <blockquote>
 <div><p>RM.Add ({“DeviceID”: 0x1234567, “sor”: {…..}})</p>
