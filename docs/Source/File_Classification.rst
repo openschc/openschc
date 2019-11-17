@@ -8,18 +8,18 @@ The different components are
   * gen_base_import.py  ``# imports module for python or upython``
   * gen_bitarray.py     ``# bit aligned buffer management``
   * gen_rulemanager.py  ``# stores and retrieves contexts``
-  * gen_utils.py        ``# ``
+  * gen_utils.py        ``# ?``
 
 * COMPRESSION/DECOMPRESSION prefix
 
   * compr_core.py       ``# core compression/decompression fct``
-  * compr_bitmap.py     ``# ``
-  * compr_parser.py     ``# ``
+  * compr_bitmap.py     ``# ?``
+  * compr_parser.py     ``# ?``
 
 * FRAGMENTATION/REASSEMBLY prefix
 
   * frag_all.py         ``# imports all frag code``
-  * frag_bitmap.py      ``# ``
+  * frag_bitmap.py      ``# ?``
   * frag_msg.py         ``# manages frag header``
   * frag_rcs_crc32.py   ``# RCS computation/check``
   * frag_recv.py        ``# reassembles fragments``
@@ -39,7 +39,7 @@ The different components are
 
 * ORCHESTRATION
 
-  * protocol.py             ``# start rule manager, cC/D and F/R``
+  * protocol.py         ``# start rule manager, cC/D and F/R``
 
 * RUNNERS
 
