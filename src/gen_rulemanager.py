@@ -422,7 +422,7 @@ class RuleManager:
 
 
             if not overlap:
-                if "Compression" in n_rule and compression:
+                if "Compression" in n_rule:
                     r = self._create_compression_rule(n_rule)
                     d["SoR"].append(r)
                 elif "Fragmentation" in n_rule:
@@ -503,11 +503,6 @@ class RuleManager:
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
-                    if not T_FRAG_LAST_TILE_IN_ALL1 in nrule[T_FRAG][T_FRAG_PROF]:
-                        raise ValueError ("lastTileInAll1 boolean must be specified for Ack On Error")
-
-                    if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] == True:
-                        raise NotImplementedError ("Last tile in All-1 is not implemented yet")
 
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
@@ -515,6 +510,10 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
                     _default_value (arule, nrule, T_FRAG_L2WORDSIZE, 8)
+                    _default_value (arule, nrule, T_FRAG_LAST_TILE_IN_ALL1, None, True)
+
+                    if nrule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] == True:
+                        raise NotImplementedError ("Last tile in All-1 is not implemented yet")
 
                 # the size include All-*, Max_VLAUE is WINDOW_SIZE-1
                 _default_value(arule, nrule, T_FRAG_WINDOW_SIZE, (0x01 <<(arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]))-1)
