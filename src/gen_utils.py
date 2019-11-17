@@ -17,4 +17,7 @@ def dpprint(*args, **kw):
     if enable_debug_print:
         pprint(*args, **kw)
 
+def dtrace(*args, **kw):
+    print(*args, **kw)
+    
 #---------------------------------------------------------------------------
