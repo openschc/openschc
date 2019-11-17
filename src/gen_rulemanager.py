@@ -364,7 +364,7 @@ class RuleManager:
         else:
             return val
 
-    def Add(self, device= None, dev_info=None, file=None, compression=True):
+    def Add(self, device=None, dev_info=None, file=None, compression=True):
         """
         Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
         * ruleID/RuleIDLength do not overlap
