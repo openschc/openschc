@@ -241,7 +241,6 @@ class FragmentNoAck(FragmentBase):
             w_fcn = "All-0"
         else:
             w_fcn = schc_frag.fcn
-        print (all1)
 
         dtrace ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
             self.rule[T_RULEID], 

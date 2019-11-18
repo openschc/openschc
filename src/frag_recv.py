@@ -9,6 +9,9 @@ import frag_msg
 from frag_bitmap import find_missing_tiles, sort_tile_list, find_missing_tiles_no_all_1, find_missing_tiles_mic_ko_yes_all_1, make_bit_list_mic_ko
 from compr_core import *
 
+from gen_utils import dtrace
+import binascii
+
 enable_statsct = True
 if enable_statsct:
     from stats.statsct import Statsct
@@ -127,11 +130,38 @@ class ReassemblerNoAck(ReassembleBase):
     
     """
     def receive_frag(self, bbuf, dtag):
-        dprint('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
+        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         dprint("receiver frag received:", schc_frag.__dict__)
+
+        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
+            w_dtag = '-'
+        else:
+            w_dtag = schc_frag.dtag
+
+        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
+            w_w = '-'
+        else:
+            w_w = schc_frag.win
+
+        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+        if schc_frag.fcn == all1:
+            w_fcn = "All-1"
+        elif schc_frag.fcn == 0:
+            w_fcn = "All-0"
+        else:
+            w_fcn = schc_frag.fcn
+
+        dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
+            schc_frag.rule[T_RULEID], 
+            schc_frag.rule[T_RULEIDLENGTH], 
+            w_dtag, 
+            w_w,
+            w_fcn
+            ))
+
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
@@ -153,14 +183,16 @@ class ReassemblerNoAck(ReassembleBase):
             schc_packet = BitBuffer()
             for i in self.tile_list:
                 schc_packet += i
+            dtrace (binascii.hexlify(schc_packet.get_content()))
+
             mic_calced = self.get_mic(schc_packet.get_content())
             if schc_frag.mic != mic_calced:
-                dprint("ERROR: MIC mismatched. packet {} != result {}".format(
+                dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
                 self.state = 'ERROR_MIC_NO_ACK'
                 return
             else:
-                dprint("SUCCESS: MIC matched. packet {} == result {}".format(
+                dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
                     schc_frag.mic, mic_calced))
             # decompression
             # dprint("----------------------- Decompression -----------------------")
