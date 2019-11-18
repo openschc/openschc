@@ -8,13 +8,16 @@ from gen_base_import import *
 from net_sim_sched import SimulScheduler as Scheduler
 from net_sim_layer2 import SimulLayer2
 from net_sim_loss import ConditionalTrue
+import net_sim_record
 from gen_utils import dprint
+import gen_utils
 
 try:
     import utime as time
 except ImportError:
     import time
-    
+
+import random
 import protocol
 
 from stats.statsct import Statsct
@@ -90,6 +93,9 @@ class SimulSCHCNode(SimulNode):
     def log(self, name, message):
         self.sim.log(name, "@{} {}".format(self.layer2.mac_id, message))
 
+    def get_state(self):
+        return self.protocol.get_state()
+
 
 class SimulNullNode(SimulNode):
     pass
@@ -110,8 +116,23 @@ class Simul:
         self.event_id = 0
         self.scheduler = Scheduler()
         self.log_file = None
+        self.observer = None        
+        self.init_from_config()
+
+    def init_from_config(self):
+        if self.simul_config.get("seed") is not None:
+            random.seed(self.simul_config["seed"])
+        
         self.frame_loss = ConditionalTrue(
                 **self.simul_config.get("loss", {"mode":"cycle"}))
+        
+        record_file_name = self.simul_config.get("record-file")        
+        if record_file_name is not None:
+            obs = net_sim_record.SimulRecordingObserver(self, record_file_name)
+            self.set_observer(obs)
+
+        if self.simul_config.get("disable-print"):
+            gen_utils.set_debug_output(False)
 
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")
@@ -121,8 +142,21 @@ class Simul:
             return
         line = "{} [{}] ".format(self.scheduler.get_clock(), name) + message
         dprint(line)
-        if self.log_file != None:
+        if self.log_file is not None:
             self.log_file.write(line+"\n")
+        if self.observer is not None:
+            self.record_log_list.append(line)
+
+    def _get_and_reset_record_log_list(self):
+        result = self.record_log_list
+        self.record_log_list = []
+        return result
+
+    def set_observer(self, observer):
+        assert self.observer is None
+        self.observer = observer
+        self.scheduler.set_observer(observer.sched_observer_func)
+        self.record_log_list = []
 
     def _log(self, message):
         self.log("sim", message)
@@ -255,5 +289,15 @@ class Simul:
 
     def run(self):
         self.scheduler.run()
+        if self.observer is not None:
+            self.observer.close()
 
+    def get_all_state(self):
+        return {
+            "node_table": {
+                node_id: node.get_state()
+                for node_id, node in self.node_table.items()
+            }
+        }
+            
 #---------------------------------------------------------------------------

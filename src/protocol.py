@@ -330,3 +330,8 @@ class SCHCProtocol:
     #    raw_packet = self.decompressor.decompress(context, schc_packet)
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
+
+    def get_state(self):
+        return {
+            #"rule-manager": self.rule_manager.get_state()
+        }

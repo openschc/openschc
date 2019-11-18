@@ -7,10 +7,11 @@ from stats.statsct import Statsct
 from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint
+import net_sim_record
 
 # --------------------------------------------------
 # Main configuration
-packet_loss_simulation = False
+packet_loss_simulation = True
 
 # --------------------------------------------------
 # General configuration
@@ -20,7 +21,11 @@ data_size = 14  # bytes
 SF = 12
 
 simul_config = {
-    "log": True,
+    "log": True, 
+    "record-file": "recorded-test.log",
+    "record.format": "pprint", # or "json"
+    "seed": 2,
+    "disable-print": True
 }
 
 # ---------------------------------------------------------------------------
@@ -120,7 +125,6 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # Simnulation
 
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, coap)
-
 sim.run()
 
 dprint('-------------------------------- Simulation ended -----------------------|')
