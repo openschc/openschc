@@ -32,15 +32,15 @@ class ReassembleBase:
 
     def __init__(self, protocol, context, rule, dtag, sender_L2addr):
         """
-        
+
         Args :
             protocol : protocol
             context : context
             rule : rule can be either "comp" for compression, "fragSender" for fragmentation from sender and "fragReceiver" for fragmentation from receiver
             dtag : ?
             sender_L2addr : None or 'int' containing the sender's address
-     
-                
+
+
         """
         self.protocol = protocol
         self.context = context
@@ -67,9 +67,9 @@ class ReassembleBase:
 
     def get_mic(self, mic_target, extra_bits=0):
         """This gets the mic
-        
+
         This function gets the mic and display it in a 4 byte format
-        
+
         """
 
         assert isinstance(mic_target, bytearray)
@@ -79,14 +79,14 @@ class ReassembleBase:
 
     def event_inactive(self):
         """ event_inactive
-        
+
         // TODO : Redaction (here is frag_recv.py)
-        
-        
+
+
         """
         #if the ack-ok was received, no ACK REQ will be received,
         #check for state == "DONE" and return, this means that the ack-ok
-        #was send, before the system returns after sending the ack-ok, now it 
+        #was send, before the system returns after sending the ack-ok, now it
         #waits for one inactivity timer before closing session
         if self.state == "DONE":
             return
@@ -112,9 +112,9 @@ class ReassembleBase:
 
     def cancel_inactive_timer(self):
         """ cancel_inactive_timer
-        
+
         // TODO : Redaction (here is frag_recv.py)
-        
+
         """
         if self.event_id_inactive_timer is None:
             return
@@ -125,9 +125,9 @@ class ReassembleBase:
 
 class ReassemblerNoAck(ReassembleBase):
     """ ReassemblerNoAck class
-    
+
     // Todo : Redaction
-    
+
     """
     def receive_frag(self, bbuf, dtag):
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
@@ -155,9 +155,9 @@ class ReassemblerNoAck(ReassembleBase):
             w_fcn = schc_frag.fcn
 
         dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            schc_frag.rule[T_RULEID], 
-            schc_frag.rule[T_RULEIDLENGTH], 
-            w_dtag, 
+            schc_frag.rule[T_RULEID],
+            schc_frag.rule[T_RULEIDLENGTH],
+            w_dtag,
             w_w,
             w_fcn
             ))
@@ -213,16 +213,25 @@ class ReassemblerNoAck(ReassembleBase):
                 self.inactive_timer, self.event_inactive, tuple())
         dprint("---", schc_frag.fcn)
 
+
+    def get_state(self, **kw):
+        result = {
+            "type": "no-ack",
+            "state": "XXX - need to be added"
+        }
+        return result
+
+
 #---------------------------------------------------------------------------
 
 class ReassemblerAckOnError(ReassembleBase):
     """ ReassemblerAckOnError class
-    
+
     Todo : Redaction
-    
+
     """
     # In ACK-on-Error, a fragment contains tiles belonging to different window.
-    # A type of data structure holding tiles in each window is not suitable.  
+    # A type of data structure holding tiles in each window is not suitable.
     # So, here just appends a fragment into the tile_list like No-ACK.
 
     def receive_frag(self, bbuf, dtag):
@@ -445,7 +454,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 if self.fragment_received is False:
                     dprint("no fragments received yet, abort")
                     self.send_receiver_abort()
-                
+
                     return
                 dprint("all-1 not received, building ACK")
                 dprint('send ack before done {},{},{}'.format(self.tile_list,
@@ -454,8 +463,8 @@ class ReassemblerAckOnError(ReassembleBase):
                     dprint("w-num: {} t-num: {} nb_tiles:{}".format(
                         tile['w-num'],tile['t-num'],tile['nb_tiles']))
                     dprint("raw_tiles:{}".format(tile['raw_tiles']))
-                
-                
+
+
                 bit_list = find_missing_tiles_no_all_1(self.tile_list,
                                                 self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
                                                 frag_msg.get_fcn_all_1(self.rule))
@@ -479,7 +488,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     if enable_statsct:
                         Statsct.set_msg_type("SCHC_ACK_KO")
                     dprint("----------------------- SCHC ACK KO SEND  -----------------------")
- 
+
                     dprint("ACK failure sent:", schc_ack.__dict__)
         """
         Changement à corriger
@@ -577,7 +586,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
-    
+
     def create_ack_schc_ko(self, schc_frag):
         """Create schc_ack packet in case of wrong RCS (C=0)
             return schc_ack packet
@@ -626,4 +635,12 @@ class ReassemblerAckOnError(ReassembleBase):
         dprint("----------------------- SCHC ACK KO SEND  -----------------------")
         dprint("ACK failure sent:", schc_ack.__dict__)
         return schc_ack
+
+
+    def get_state(self, **kw):
+        result = {
+            "type": "ack-on-error",
+            "state": "XXX - need to be added"
+        }
+        return result
 #---------------------------------------------------------------------------

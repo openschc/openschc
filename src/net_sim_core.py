@@ -8,13 +8,16 @@ from gen_base_import import *
 from net_sim_sched import SimulScheduler as Scheduler
 from net_sim_layer2 import SimulLayer2
 from net_sim_loss import ConditionalTrue
+import net_sim_record
 from gen_utils import dprint
+import gen_utils
 
 try:
     import utime as time
 except ImportError:
     import time
-    
+
+import random
 import protocol
 
 from stats.statsct import Statsct
@@ -32,7 +35,7 @@ class SimulLayer3:
     def __init__(self, sim):
         self.sim = sim
         self.protocol = None
-        self.L3addr = SimulLayer3.__get_unique_addr()        
+        self.L3addr = SimulLayer3.__get_unique_addr()
 
     def send_later(self, rel_time, dst_L3addr, raw_packet):
         self._log("send-later Devaddr={} Packet={}".format(
@@ -90,6 +93,16 @@ class SimulSCHCNode(SimulNode):
     def log(self, name, message):
         self.sim.log(name, "@{} {}".format(self.layer2.mac_id, message))
 
+    def get_state(self, **kw):
+        result = {
+            "state": self.protocol.get_state(**kw)
+        }
+        if kw.get("is_init") == True:
+            result["config"] = self.config.copy()
+            result["id"] = self.id
+            # XXX: L2 and L3 logs
+        return result
+
 
 class SimulNullNode(SimulNode):
     pass
@@ -110,8 +123,28 @@ class Simul:
         self.event_id = 0
         self.scheduler = Scheduler()
         self.log_file = None
+        self.observer = None
+        self.init_from_config()
+
+    def init_from_config(self):
+        if self.simul_config.get("seed") is not None:
+            random.seed(self.simul_config["seed"])
+
         self.frame_loss = ConditionalTrue(
                 **self.simul_config.get("loss", {"mode":"cycle"}))
+
+        if self.simul_config.get("disable-print"):
+            gen_utils.set_debug_output(False)
+        if self.simul_config.get("disable-trace"):
+            gen_utils.set_trace_function(None)
+
+        record_file_name = self.simul_config.get("record.file")
+        should_record = not self.simul_config.get("record.disable", False)
+        if (record_file_name is not None) and should_record:
+            obs = net_sim_record.SimulRecordingObserver(self)
+            self.set_observer(obs)
+            obs.start_record(record_file_name) # XXX: should be at sim start.
+
 
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")
@@ -121,8 +154,15 @@ class Simul:
             return
         line = "{} [{}] ".format(self.scheduler.get_clock(), name) + message
         dprint(line)
-        if self.log_file != None:
+        if self.log_file is not None:
             self.log_file.write(line+"\n")
+        if self.observer is not None:
+            self.observer.record_log(line)
+
+    def set_observer(self, observer):
+        assert self.observer is None
+        self.observer = observer
+        self.scheduler.set_observer(observer.sched_observer_func)
 
     def _log(self, message):
         self.log("sim", message)
@@ -154,7 +194,7 @@ class Simul:
             self._log("----------------------- KO -----------------------")
             self._log("packet was lost {}->{}".format(src_id, dst_id))
             if enable_statsct:
-                Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))            
+                Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))
                 Statsct.add_packet_info(packet,src_id,dst_id, False)
             count = 0
         #
@@ -201,7 +241,7 @@ class Simul:
                     message = note_table_list.protocol.layer2.roleSend.Receive()
                     dprint("Message from Server", message)
                     note_table_list.protocol.layer2.event_receive_packet(note_table_list.id, message)
-                    # note_table_list.protocol.fragment_session.session_list[0]["session"].state = 'START'
+                    # note_table_list1.protocol.fragment_session.session_list[0]["session"].state = 'START'
             except:
                 dprint("Not fragment state")
         else:
@@ -255,5 +295,24 @@ class Simul:
 
     def run(self):
         self.scheduler.run()
+        if self.observer is not None:
+            self.observer.stop_record()
+
+    def get_all_state(self, **kw):
+        result = {
+            "node_table": {
+                node_id: node.get_state(**kw)
+                for node_id, node in self.node_table.items()
+            }
+        }
+        if kw.get("is_init") == True:
+            result["init"] = {
+                "links": [link_as_dict(link) for link in self.link_set]
+                # XXX: extra initialization info
+            }
+        return result
+
+def link_as_dict(link):
+    return {"to": link.to_id, "from": link.from_id, "delay": link.delay}
 
 #---------------------------------------------------------------------------

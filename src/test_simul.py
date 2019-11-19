@@ -14,6 +14,27 @@ import net_sim_record
 packet_loss_simulation = True
 
 # --------------------------------------------------
+# Rule copied from tests/test_frag.py - and modified
+
+frag_rule = {
+    "RuleID":12,
+    "RuleIDLength":6,
+    "Fragmentation":{
+        "FRMode":"ackOnError",
+        "FRModeProfile":{
+            "dtagSize":2,
+            "WSize":3,
+            "FCNSize":3,
+            "ackBehavior":"afterAll1",
+            "tileSize":30,
+            "MICAlgorithm":"crc32",
+            "MICWordSize":8,
+            "lastTileInAll1":False
+        }
+    }
+}
+
+# --------------------------------------------------
 # General configuration
 
 l2_mtu = 72  # bits
@@ -24,8 +45,8 @@ simul_config = {
     "seed": 2,
 
     "log": True,
-    "disable-print": True,
-    "disable-trace": False,
+    "disable-print": False,
+    "disable-trace": True,
 
     "record.disable": False,
     "record.file": "recorded-test.log",
@@ -75,13 +96,15 @@ devaddr2 = b"\xaa\xbb\xcc\xee"
 dprint("---------Rules Device -----------")
 rm0 = RuleManager()
 # rm0.add_context(rule_context, compress_rule1, frag_rule3, frag_rule4)
-rm0.Add(device=devaddr1, file="../examples/configs/rule1.json")
+#rm0.Add(device=devaddr1, file="../examples/configs/rule1.json")
+rm0.Add(device=devaddr1, dev_info=frag_rule)
 rm0.Print()
 
 dprint("---------Rules gw -----------")
 rm1 = RuleManager()
 # rm1.add_context(rule_context, compress_rule1, frag_rule4, frag_rule3)
-rm1.Add(device=devaddr2, file="../examples/configs/rule1.json")
+#rm1.Add(device=devaddr2, file="../examples/configs/rule1.json")
+rm1.Add(device=devaddr2, dev_info=frag_rule)
 rm1.Print()
 
 # ---------------------------------------------------------------------------

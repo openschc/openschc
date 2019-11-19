@@ -50,6 +50,15 @@ class Session:
         return None
 
 
+    def get_state(self, **kw):
+        result = []
+        for session in self.session_list:
+            session_state = session.copy()
+            session_state["session"] = session["session"].get_state(**kw)
+            result.append(session_state)
+        return result
+
+
 class debug_protocol:
     def _log(*arg):
         dprint(*arg)
@@ -158,7 +167,7 @@ class SCHCProtocol:
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule)  # XXX
-        elif mode == "ackAlwayw":
+        elif mode == "ackAlwayw": #XXX
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":
@@ -190,7 +199,7 @@ class SCHCProtocol:
         # dprint("raw_packet", raw_packet)
         # dprint("schc packet", packet_bbuf)
         # dprint("frag_rule", frag_rule)
-        
+
         # !IMPORTANT: This condition has to be changed by a context condition like in the last version
 
         dtrace('>', binascii.hexlify(packet_bbuf.get_content()), ' ')
@@ -333,3 +342,13 @@ class SCHCProtocol:
     #    raw_packet = self.decompressor.decompress(context, schc_packet)
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
+
+    def get_state(self, **kw):
+        result =  {
+            "reassemble": self.reassemble_session.get_state(**kw),
+            "fragment": self.fragment_session.get_state(**kw),
+            "state": "XXX - need to be added"
+        }
+        if kw.get("is_init") == True:
+            result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
+        return result
