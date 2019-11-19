@@ -624,16 +624,17 @@ class FragmentAckOnError(FragmentBase):
             #self.resend = False
             self.state = self.ACK_SUCCESS
 
-            try:
-                f = open("client_server_simulation.txt", "r+")
-            except IOError:
-                f = open("client_server_simulation.txt", "w+")
-                f = open("client_server_simulation.txt", "r+")
-            content = f.read()
-            seconds = time. time()
-            f.seek(0, 0)
-            f.write(str(int(seconds)) + '\n' + content)
-            f.close()
+            # XXX needs to be reviewed.  at least, no one need this log.
+            # try:
+            #     f = open("client_server_simulation.txt", "r+")
+            # except IOError:
+            #     f = open("client_server_simulation.txt", "w+")
+            #     f = open("client_server_simulation.txt", "r+")
+            # content = f.read()
+            # seconds = time. time()
+            # f.seek(0, 0)
+            # f.write(str(int(seconds)) + '\n' + content)
+            # f.close()
 
             return
         if schc_frag.cbit == 0:
