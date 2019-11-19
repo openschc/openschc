@@ -96,8 +96,8 @@ class SchcConfig:
         """
         if self.configuration['payload_name_file'] != "":
             fileToSend = self.configuration['payload_name_file']
-            file = open(fileToSend, 'r')  # 1400 bytes
-            payload = file.read().encode()
+            file = open(fileToSend, 'rb')  # 1400 bytes
+            payload = file.read()
             print("Payload size:", len(payload), "bytes")
             print("Payload: {}".format(b2hex(payload)))
             print("")

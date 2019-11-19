@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 
 from gen_base_import import *  # used for now for differing modules in py/upy
-from gen_utils import dprint
+from gen_utils import dprint, dpprint, set_debug_output
 
 # ---------------------------------------------------------------------------
 
@@ -82,9 +82,8 @@ class SCHCProtocol:
         self.decompressor = Decompressor(self)
         self.fragment_session = Session(self)
         self.reassemble_session = Session(self)
-        #warnings.warn()
-        # XXX: should put the format
-        # XXX: should put the role: sender or receiver for each L2
+        if hasattr(config, "debug_level"):
+            set_debug_output(True)
 
     def _log(self, message):
         self.log("schc", message)
@@ -95,28 +94,29 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
-    def schc_send(self, dst_L3addr, raw_packet):
+    def schc_send(self, dst_L3addr, raw_packet, direction="UP"):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
         dprint("raw_packet", raw_packet)
+        if direction in ["UP", "up"]:
+            t_dir = T_DIR_UP
+        elif direction in ["DOWN", "down", "DW", "dw"]:
+            t_dir = T_DIR_DW
+        else:
+            raise ValueError("direction must be UP or DOWN, but {}"
+                             .format(direction))
 
         P = Parser(debug_protocol)
+        parsed_packet = P.parse(raw_packet, t_dir)
+        dpprint(parsed_packet)
 
-        try:
-            parsed_packet = P.parse(raw_packet, T_DIR_UP)
-            dpprint(parsed_packet[0])
-        except:
-            dprint("no parsing, try fragmentation")
-            parsed_packet = None
-            schc_packet = None
-
-        if parsed_packet != None:
+        if parsed_packet is not None:
             # pass        # to be done
-            rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction="UP")
+            rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction=t_dir)
             if rule is None:
                 schc_packet = None
                 # reject it.
-                # self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+                # self._log("Rejected. Not for SCHC packet, L4addr={}".format(
                 #    dst_L3addr))
                 # return
             else:
@@ -124,7 +124,7 @@ class SCHCProtocol:
                     dprint(
                         "-------------------------------------- Compression Proccess -------------------------------------------")
                     dprint("selected rule is ", rule)
-                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], T_DIR_UP)
+                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], t_dir)
                     dprint(schc_packet)
                     schc_packet.display("bin")
                 else:

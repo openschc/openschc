@@ -51,8 +51,8 @@ Rulemanager Test
     ```
     python3 test_compress.py
     ```
-Simulator and gateway
-=====================
+Simulator
+=========
 
 ## Example with the simulator
 
@@ -114,37 +114,4 @@ You can define three mode of unstable link with the --loss-mode option.
     It causes the 10% framges will drop.
 
 ----
-
-schcgw.py
-=========
-
-SCHC GW implementation.
-
-## Requirement
-
-- Python 3.6
-- requests
-- aiohttp
-- [pypcap][https://github.com/pynetwork/pypcap#installation-from-sources]
-- you may need to install libpcap.
-
-## Example with two gateways.
-
-- ACK-on-Error with 
-
-You need 3 terminals.
-
-    ./schcgw.py -c example/testgw1-config.json
-    ./schcgw.py -c example/testgw2-config.json
-    ./packet_picker.py --untrust -f test/icmpv6.dmp 'https://[::1]:51225/dl'
-
-## Create your certificates.
-
-e.g. the below command will create a file named "testgw2-cert.pem"
-containing the certificate and private key in PEM format for "testgw2".
-    
-    openssl req -new -x509 -newkey rsa:2048 -days 7300 -nodes \
-        -out testgw2-cert.pem \
-        -keyout testgw2-cert.pem \
-        -subj "/CN=testgw2"
 

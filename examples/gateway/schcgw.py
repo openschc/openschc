@@ -12,6 +12,8 @@ import os
 
 # from base_import import *
 from gen_rulemanager import *
+from net_compression import AnalyzePkt
+from net_sim_core import SimulLayer2, Simul
 import protocol
 
 PROG_NAME = "net_gw_lorawan"
@@ -45,11 +47,12 @@ def post_data(url, data, verify):
     requests.post(url, headers=headers, data=data, verify=verify)
 
 
-class gwLayer2:
+class gwLayer2():
 
     def __init__(self, system, config=None):
         self.system = system
         self.config = config
+        self.devaddr = b"\x00\x11\x22\x33"
 
     def send_packet(self, data, dev_L2addr, callback=None,
                     callback_args=tuple()):
@@ -153,34 +156,49 @@ class System:
         # XXX should set a logging level.
         self.logger.debug("{} {}".format(name, message))
 
+def get_json_data(body, key_list):
+    for k in key_list:
+        if k in body:
+            return body[k]
+    else:
+        logger.debug("no data for {}".format(key_list))
+        return None
 
 async def app_downlink(request):
     """ downlink """
     if request.content_type == "application/x-rawip":
         if request.can_read_body:
-            packet = await request.read()
-            logger.debug(packet)
-            protocol.schc_send(packet[24:40], packet)
-            return web.json_response({"Status": "OK"}, status=202)
+            packet_hex = await request.read()
+            logger.debug(packet_hex)
+        else:
+            logger.debug("http request body is not ready.")
+            return web.json_response({"Status": "Error"}, status=503)
+    elif request.content_type == "application/json":
+        if request.can_read_body:
+            body = await request.json()
+            logger.debug(body)
+            packet_hex = get_json_data(body, ["hex_payload", "hexIPData",
+                                              "Data", "data"])
+            if packet_hex is None:
+                logger.debug("no IP data found.")
+                return
         else:
             logger.debug("http request body is not ready.")
             return web.json_response({"Status": "Error"}, status=503)
     else:
-        logger.debug("content-type must be JSON")
-        return web.json_response("Error", status=405)
+        logger.debug("content-type must be json or x-raw, but {}"
+                     .format(request.content_type))
+        return web.json_response({"Status": "Error"}, status=405)
+    #
+    logger.debug(packet_hex)
+    packet = bytearray.fromhex(packet_hex)
+    protocol.schc_send(packet[24:40], packet, direction="down")
+    return web.json_response({"Status": "OK"}, status=202)
 
 
 async def app_uplink(request):
     """ check the message posted. process it as a uplink message.
     """
-    def get_json_data(body, key_list):
-        for k in key_list:
-            if k in body:
-                return body[k]
-        else:
-            logger.debug("no data for {}".format(key_list))
-            return None
-    #
     if request.content_type == "application/json":
         if request.can_read_body:
             body = await request.json()
@@ -270,13 +288,16 @@ if not config.debug_level:
 
 # create the schc protocol object.
 rule_manager = RuleManager()
-rule_manager.Add(file=find_file(config.rule_file))
+rule_manager.Add(device=b"\x00\x11\x22\x33",
+                 file=find_file(config.rule_file),
+                 compression=True)
 #
 loop = asyncio.get_event_loop()
 if config.debug_level > 1:
     loop.set_debug(True)
 system = System(loop, logger=logger, config=config)
 layer2 = gwLayer2(system, config=config)
+print("xxx", dir(layer2))
 layer3 = gwLayer3(system, config=config)
 protocol = protocol.SCHCProtocol(config, system, layer2, layer3)
 protocol.set_rulemanager(rule_manager)
