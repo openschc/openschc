@@ -368,7 +368,7 @@ class Decompressor:
 
 
     def rx_cda_not_sent(self, rule, in_bbuf):
-        return (rule[T_TV], rule[T_FL])
+        return [rule[T_TV], rule[T_FL]]
 
     def rx_cda_val_sent(self, rule, in_bbuf):
         # XXX not implemented that the variable length size.
@@ -388,7 +388,7 @@ class Decompressor:
         in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
 
-        return (val, size)
+        return [val, size]
 
 
     def rx_cda_map_sent(self, rule, in_bbuf):
@@ -407,7 +407,7 @@ class Decompressor:
         else:
             size = rule[T_FL]
 
-        return (rule[T_TV][val], size)
+        return [rule[T_TV][val], size]
 
     def rx_cda_lsb(self, rule, in_bbuf):
         assert rule[T_MO] == T_MO_MSB
@@ -432,7 +432,7 @@ class Decompressor:
         val = in_bbuf.get_bits(send_length)
         tmp_bbuf.add_value(val, send_length)
 
-        return (bytes(tmp_bbuf.get_content()), total_size)
+        return [bytes(tmp_bbuf.get_content()), total_size]
 
     def rx_cda_comp_len(self, rule, in_bbuf):
         # will update the length field later.

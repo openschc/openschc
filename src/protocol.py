@@ -17,6 +17,9 @@ import frag_msg
 from compr_parser import *
 from compr_core import Compressor, Decompressor
 
+from gen_utils import dtrace
+import binascii
+
 
 class Session:
     """ fragmentation/reassembly session manager
@@ -187,8 +190,12 @@ class SCHCProtocol:
         # dprint("raw_packet", raw_packet)
         # dprint("schc packet", packet_bbuf)
         # dprint("frag_rule", frag_rule)
-
+        
         # !IMPORTANT: This condition has to be changed by a context condition like in the last version
+
+        dtrace('>', binascii.hexlify(packet_bbuf.get_content()), ' ')
+        dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
+
         if dev_L2addr == b"\xaa\xbb\xcc\xee":
 
             if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
