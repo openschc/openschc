@@ -287,7 +287,7 @@ class FragmentAckOnError(FragmentBase):
 
         if (a[-1]["t-num"] == 0 and
             a[-1]["tile"].count_added_bits() < self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]):
-            raise ValueError("The size of the last tile with the tile number 0 must be equal to or greater than L2 word size.")
+            raise ValueError("The size {} of the last tile with the tile number 0 must be equal to or greater than L2 word size {}.".format(a[-1]["tile"].count_added_bits(), self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]))
         # make the bitmap
         #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
         #                              self.rule["FCNSize"],
