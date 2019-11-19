@@ -71,7 +71,7 @@ class SimulRecordingObserver:
 
     def trace_function(self, *args, **kw):
         content = io.StringIO()
-        print(*args, **kw, file=content, end="")
+        print(*args, file=content, end="", **kw)
         self.trace_line_list.append(content.getvalue())
         if self.previous_dtrace is not None:
             self.previous_dtrace(content.getvalue())
