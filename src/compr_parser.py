@@ -64,7 +64,7 @@ class Parser:
 
             assert len(pkt) >= 40  # IPv6 Header is 40 byte long
             firstBytes = unpack('!BBHHBBQQQQ', pkt[:40]) # IPv6 \ UDP \ CoAP header
-            self.protocol._log(firstBytes)
+            self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
 
             #                                         Value           size nature
             self.header_fields[T_IPV6_VER, 1]      = [firstBytes[0] >> 4, 4, 'fixed']

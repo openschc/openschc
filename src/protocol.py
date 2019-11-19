@@ -83,13 +83,13 @@ class SCHCProtocol:
     def schc_send(self, dst_L3addr, raw_packet):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
-        dprint("raw_packet", raw_packet)
+        dprint("raw_packet in schc_send", raw_packet)
 
         P = Parser(debug_protocol)
 
         try:
             parsed_packet = P.parse(raw_packet, T_DIR_UP)
-            dpprint(parsed_packet[0])
+            dpprint("parsed_packet[0]", parsed_packet[0])
         except:
             dprint("no parsing, try fragmentation")
             parsed_packet = None
