@@ -21,11 +21,15 @@ data_size = 14  # bytes
 SF = 12
 
 simul_config = {
-    "log": True, 
-    "record-file": "recorded-test.log",
-    "record.format": "pprint", # or "json"
     "seed": 2,
-    "disable-print": True
+
+    "log": True,
+    "disable-print": True,
+    "disable-trace": False,
+
+    "record.disable": False,
+    "record.file": "recorded-test.log",
+    "record.format": "pprint" # "pprint" or "json"
 }
 
 # ---------------------------------------------------------------------------
@@ -47,7 +51,6 @@ else:
 # Init packet loss
 if loss_config is not None:
     simul_config["loss"] = loss_config
-
 
 # ---------------------------------------------------------------------------
 

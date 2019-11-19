@@ -17,7 +17,7 @@ try:
     import utime as time
 except ImportError:
     import time
- 
+
 enable_statsct = True
 if enable_statsct:
     from stats.statsct import Statsct
@@ -116,7 +116,7 @@ class FragmentNoAck(FragmentBase):
 #    The other SCHC Fragments are intrinsically aligned to L2 Words.
 #
 # 8.4.1.1.  Sender behavior
-# 
+#
 #    Each SCHC Fragment MUST contain exactly one tile in its Payload.  The
 #    tile MUST be at least the size of an L2 Word.  The sender MUST
 #    transmit the SCHC Fragments messages in the order that the tiles
@@ -243,9 +243,9 @@ class FragmentNoAck(FragmentBase):
             w_fcn = schc_frag.fcn
 
         dtrace ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            self.rule[T_RULEID], 
-            self.rule[T_RULEIDLENGTH], 
-            w_dtag, 
+            self.rule[T_RULEID],
+            self.rule[T_RULEIDLENGTH],
+            w_dtag,
             w_w,
             w_fcn
             ))
@@ -270,6 +270,13 @@ class FragmentNoAck(FragmentBase):
             return
         else:
             dprint("XXX Unacceptable message has been received.")
+
+    def get_state(self, **kw):
+        result = {
+            "type": "no-ack"
+        }
+        return result
+
 
 #---------------------------------------------------------------------------
 
@@ -548,7 +555,7 @@ class FragmentAckOnError(FragmentBase):
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
-            
+
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
             return
@@ -560,7 +567,7 @@ class FragmentAckOnError(FragmentBase):
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
         # # retransmit MIC.
-        """Changement à corriger 
+        """Changement à corriger
         args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
                 self.event_sent_frag)
         """
@@ -571,7 +578,7 @@ class FragmentAckOnError(FragmentBase):
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                         args)
         """ waits for all the acks before sending the ack request
-        
+
         self.number_of_ack_waits += 1
         dprint("number_of_ack_waits -> {}".format(self.number_of_ack_waits))
         if self.number_of_ack_waits > self.num_of_windows:
@@ -588,11 +595,11 @@ class FragmentAckOnError(FragmentBase):
             self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                             args)
             self.number_of_ack_waits = 0
-            
+
         else:
             dprint("Do no send ACK REQ, waiting for more ACKS")        #the idea is that if the ack did not arrive, to send a SCHC ACK REQ
         """
-                                         
+
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         dprint("EVENT SEND FRAG")
         self.send_frag()
@@ -665,3 +672,15 @@ class FragmentAckOnError(FragmentBase):
         dprint("----------- ", self.number_tiles_send, "tiles to send")
         return self.number_tiles_send
 
+    def get_state(self, **kw):
+        result = {
+            "type": "ack-on-error",
+            "state": self.state,
+            "mic-sent": self.mic_sent,
+            "resend": self.resend,
+            "all1-send": self.all1_send,
+            "sent-tiles": self.number_tiles_send,
+            "ack-req-counter": self.ack_requests_counter,
+            "tiles": self.all_tiles.get_state(**kw)
+        }
+        return result
