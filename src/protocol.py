@@ -346,7 +346,8 @@ class SCHCProtocol:
     def get_state(self, **kw):
         result =  {
             "reassemble": self.reassemble_session.get_state(**kw),
-            "fragment": self.fragment_session.get_state(**kw)
+            "fragment": self.fragment_session.get_state(**kw),
+            "state": "XXX - need to be added"
         }
         if kw.get("is_init") == True:
             result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)

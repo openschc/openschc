@@ -216,7 +216,8 @@ class ReassemblerNoAck(ReassembleBase):
 
     def get_state(self, **kw):
         result = {
-            "type": "no-ack"
+            "type": "no-ack",
+            "state": "XXX - need to be added"
         }
         return result
 
@@ -638,7 +639,8 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def get_state(self, **kw):
         result = {
-            "type": "ack-on-error"
+            "type": "ack-on-error",
+            "state": "XXX - need to be added"
         }
         return result
 #---------------------------------------------------------------------------

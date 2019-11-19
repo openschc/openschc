@@ -273,7 +273,8 @@ class FragmentNoAck(FragmentBase):
 
     def get_state(self, **kw):
         result = {
-            "type": "no-ack"
+            "type": "no-ack",
+            "state": "XXX - need to be added"
         }
         return result
 
@@ -681,6 +682,7 @@ class FragmentAckOnError(FragmentBase):
             "all1-send": self.all1_send,
             "sent-tiles": self.number_tiles_send,
             "ack-req-counter": self.ack_requests_counter,
-            "tiles": self.all_tiles.get_state(**kw)
+            "tiles": self.all_tiles.get_state(**kw),
+            "state": "XXX - need to be added"
         }
         return result
