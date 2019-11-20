@@ -36,13 +36,16 @@ class TileList():
         if last_tile_size >= l2word:
             tiles = [ bbuf.get_bits_as_buffer(self.t_size)
                     for _ in range(nb_full_size_tiles) ]
-        elif nb_full_size_tiles >= 1:    # and last_tile_size < l2word
-            tiles = [ bbuf.get_bits_as_buffer(self.t_size)
-                    for _ in range(nb_full_size_tiles-1) ]
-            tiles.append(bbuf.get_bits_as_buffer(self.t_size-l2word))
-            tiles.append(bbuf.get_bits_as_buffer(last_tile_size+l2word))
-        else:   # nb_full_size_tiles == 0:
             tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
+        else:
+            # and last_tile_size < l2word
+            if nb_full_size_tiles >= 1:
+                tiles = [ bbuf.get_bits_as_buffer(self.t_size)
+                        for _ in range(nb_full_size_tiles-1) ]
+                tiles.append(bbuf.get_bits_as_buffer(self.t_size-l2word))
+                tiles.append(bbuf.get_bits_as_buffer(last_tile_size+l2word))
+            else:   # nb_full_size_tiles == 0:
+                tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
         # make a all_tiles
         for t in tiles:
             tile_obj = {
