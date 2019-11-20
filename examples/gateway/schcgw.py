@@ -297,7 +297,6 @@ if config.debug_level > 1:
     loop.set_debug(True)
 system = System(loop, logger=logger, config=config)
 layer2 = gwLayer2(system, config=config)
-print("xxx", dir(layer2))
 layer3 = gwLayer3(system, config=config)
 protocol = protocol.SCHCProtocol(config, system, layer2, layer3)
 protocol.set_rulemanager(rule_manager)
