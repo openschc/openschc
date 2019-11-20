@@ -97,7 +97,7 @@ class SCHCProtocol:
     def schc_send(self, dst_L3addr, raw_packet, direction="UP"):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
-        dprint("raw_packet", raw_packet)
+        dprint("raw_packet in schc_send", raw_packet)
         if direction in ["UP", "up"]:
             t_dir = T_DIR_UP
         elif direction in ["DOWN", "down", "DW", "dw"]:
@@ -109,6 +109,14 @@ class SCHCProtocol:
         P = Parser(debug_protocol)
         parsed_packet = P.parse(raw_packet, t_dir)
         dpprint(parsed_packet)
+
+        try:
+            parsed_packet = P.parse(raw_packet, T_DIR_UP)
+            dpprint("parsed_packet[0]", parsed_packet[0])
+        except:
+            dprint("no parsing, try fragmentation")
+            parsed_packet = None
+            schc_packet = None
 
         if parsed_packet is not None:
             # pass        # to be done

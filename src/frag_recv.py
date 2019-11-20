@@ -534,7 +534,9 @@ class ReassemblerAckOnError(ReassembleBase):
         # because the padding of the last tile must be included into the
         # MIC calculation.  However, the fact that the last tile is
         # received can be known after the All-1 fragment is received.
-        assert len(self.tile_list) > 0
+        if not self.tile_list: # All tiles before all-1 not received
+            dprint("frag_recv - Unable to compute MIC: not tile received before All-1")
+            return [], 0
         dprint("tile_list:")
         for _ in self.tile_list:
             dprint(_)
@@ -613,6 +615,15 @@ class ReassemblerAckOnError(ReassembleBase):
                     win=bit_list[0][0],
                     cbit=0,
                     bitmap=bit_list[0][1])
+        elif not self.tile_list:
+            dprint("No tile received before All-1, sending empty bitmap")
+            # ACK failure message
+            schc_ack = frag_msg.frag_receiver_tx_all1_ack(
+                    schc_frag.rule,
+                    schc_frag.dtag,
+                    win=0,
+                    cbit=0,
+                    bitmap=BitBuffer([]))
         else:
             window_list = make_bit_list_mic_ko(self.tile_list,
                                         self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
