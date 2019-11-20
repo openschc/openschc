@@ -13,7 +13,12 @@ class SimulScheduler:
         self.queue = []
         self.clock = 0
         self.next_event_id = 0
+        self.observer = None
 
+    def set_observer(self, observer):
+        assert self.observer is None
+        self.observer = observer
+        
     # sched.scheduler API
 
     def get_clock(self):
@@ -25,8 +30,13 @@ class SimulScheduler:
     def run(self):
         while len(self.queue) > 0:
             self.queue.sort()
-            self.clock, event_id, callback, args = self.queue.pop(0)
+            event_info = self.queue.pop(0)
+            self.clock, event_id, callback, args = event_info
+            if self.observer is not None:
+                self.observer("sched-pre-event", event_info)
             callback(*args)
+            if self.observer is not None:
+                self.observer("sched-post-event", event_info)
             dprint("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
 
     # external API

@@ -18,7 +18,7 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf):
         self.rule = rule
-        """Changement à corriger 
+        """Changement à corriger
         self.t_size = ["tileSize"]
         """
         self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
@@ -122,7 +122,7 @@ class TileList():
                         t["sent"] = False
                     elif t["t-num"] == self.max_fcn:
                         dprint("t-num {} == max_fcn {}".format(t["t-num"],self.max_fcn))
-        
+
         dprint("unset_sent_flag")
         dprint("bit_list -> {}".format(bit_list))
         dprint("self.max_w_num:{} win:{}, len(bit_list[:-1]):{}".format(self.max_w_num, win, len(bit_list[:-1])))
@@ -130,18 +130,18 @@ class TileList():
             # last window
             dprint("last window")
             dprint("self.all_tiles -> {}".format(self.all_tiles))
-            
+
             for bi in range(len(bit_list[:-1])):
                 dprint("bi -> {}".format(bi))
                 if bit_list[bi] == 0:
-                    
+
                     unset_sent_flag_do(win, bi)
             #unset_sent_flag_do(win, None)
             if bit_list[-1] == 1:
                 dprint("Problem in tx, the last bit is set as 1")
                 dprint("self.all_tiles -> {}".format(self.all_tiles))
                 self.all_tiles[-1]["sent"] = True
-                #unset_sent_flag_do()        
+                #unset_sent_flag_do()
         else:
             dprint("not last window")
             for bi in range(len(bit_list)):
@@ -163,5 +163,9 @@ class TileList():
         for t in tiles:
             bbuf += t["tile"]
         return bbuf
+
+    def get_state(self, **kw):
+        result = self.all_tiles.copy()
+        return result
 
 #---------------------------------------------------------------------------

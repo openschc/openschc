@@ -2,15 +2,23 @@
 The Rule Manager manages the context(s) for a specific device or a set of devices.
 It maintains the context database and ensures its consistency. The hierarchy is the
 following:
+
 + context_database
+
   + device_context
+
     + set_of_rules
+
       + rule_id/rule_id_length
+
         + rules
+
           + Fragmentation
           + Compression
 
-# Introduction
+------------
+Introduction
+------------
 
 The context includes a set of rules shared by both ends.
 Identical Rules are used on both ends. They can be simply
@@ -18,7 +26,9 @@ copied/pasted from one end to the other end, if both ends use the same format fo
 
 This document specifies the OpenSCHC rule data model, which is based on JSON.
 
-# Rule definition
+---------------
+Rule definition
+---------------
 
 A rule is described as a JSON dictionary.
 
@@ -27,8 +37,7 @@ A rule is identified by its RuleID.
 The size of the RuleID representation can change from one rule to
 the next. Therefore, the rule description includes a RuleIDLength that indicates the length of the RuleID, in bits.
 
-Both fields are integer numbers.
-
+Both fields are integer numbers::
 
     {
     "RuleID" : 12,
@@ -38,42 +47,51 @@ Both fields are integer numbers.
 
 In SCHC, rules are used either for compression or fragmentation. Therefore, one and only one of the two keywords "fragmentation" or "compression" must be specified, per rule.
 
-## Compression Rules
+Compression Rules
+-----------------
 
 As defined in the SCHC specification, compression rules are composed of Field Descriptions.
 The order in which the Field Descriptions appear in the rule is significant (e.g. it defines the order in which the compression residues are sent), therefore a compression rule is represented as an array.
 
 The Field Description is a dictionary containing the key+data pairs as defined in the SCHC specification:
-* "**FID**": a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. "IPV6.VER". <<< why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!>>>
-* "**FL**": if the value is a number, that value expresses the length of the field, in bits. If the
+
+* **FID**: a string identifying the field of the protocol header that is being compressed. The value of this string is the one returned by the protocol analyzer when encountering said field. E.g. "IPV6.VER". <<< why is this not IP.VER instead? It seems to me that IPV6.VER will always be 6!>>>
+* **FL**: if the value is a number, that value expresses the length of the field, in bits. If the \
 value is a string, it designates a function that can compute the field length. The functions currently defined are:
-  * "_**var**_": the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.
-  * "_**tkl**_": this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
-* "**FP**": an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.
-* "**DI**": tells the direction to which this Field Description applies:
-    * "_**Up**_": only to uplink messages (i.e. from device to network)
-    * "_**Dw**_": only to downlink messages (i.e. from network to device)
-    * "_**Bi**_": to both directions
 
-* "**TV**": specifies the Target Value. The value is a number, a string or an array of these types. The "TV" key can be omitted or its value set to null if there is no value to check, for instance together with the "ignore" MO. If the Target Value is an array, then the value null among the array elements indicates that
+  * *var*: the field is of variable length. It will be determined at run time by the protocol analyzer. The length (expressed in bytes) will be transmitted as part of the compression residue. The encoding is described in the SCHC specification.
+  * *tkl*: this function is specific for compressing the CoAP Token field. The length of the Token is determined at run time by the protocol analyzer by looking at the Token Length field of he CoAP header.
+
+* **FP**: an integer specifying the position in the header of the field this Field Description applies to. The default value is 1. For each recurrence of the same field in the header, the value is increased by 1.
+* **DI**: tells the direction to which this Field Description applies:
+
+    * *Up*: only to uplink messages (i.e. from device to network)
+    * *Dw*: only to downlink messages (i.e. from network to device)
+    * *Bi*: to both directions
+
+* **TV**: specifies the Target Value. The value is a number, a string or an array of these types. The "TV" key can be omitted or its value set to null if there is no value to check, for instance together with the "ignore" MO. If the Target Value is an array, then the value null among the array elements indicates that \
 the Field Descriptor matches the case where the field is not present in the header being compressed.
-* "**MO**": specifies the Matching Operator. It is a string that can take the following values:
-  * "_**ignore**_": the field must be present in the header, but the value is not checked.
-  * "_**equal**_": type and value must check between the field value and the Target Value <<< il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? >>
-  * "_**MSB**_": the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the "MOa" field.
-  * "_**match-mapping**_": with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.
-* "**MOa**": specifies, if applicable, an argument to the MO. This currently only applies to the "MSB" MO, where the argument specifies the length of the matching, in bits.
-* "**CDA**": designates the Compression/Decompression Action. It is a string that can take the following values:
-   * "_**not-sent**_": the field value is not sent as a residue.
-   * "_**value-sent**_": the field value is sent in extenso in the residue.
-   * "_**LSB**_": the bits remaining after the MSB comparison are sent in the residue.
-   * "_**mapping-sent**_": the index of the matching element in the array is sent.
-   * "_**compute**_": the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.
-* "**CDAa**": represents the argument of the CDA. Currently, no CDAa is defined.
+* **MO**: specifies the Matching Operator. It is a string that can take the following values:
 
-For example:
+  * *ignore*: the field must be present in the header, but the value is not checked.
+  * *equal*: type and value must check between the field value and the Target Value <<< il y a des champs avec des descriptions explicites de type dans les protocoles considérés ? >>
+  * *MSB*: the most significant bits of the Target Value are checked against the most significant bits of the field value. The number of bits to be checked is given by the "MOa" field.
+  * *match-mapping*: with this MO, the Target Value must be an array. This MO matches when one element of the Target Value array matches the field, in type and value.
 
-{
+* **MOa**: specifies, if applicable, an argument to the MO. This currently only applies to the "MSB" MO, where the argument specifies the length of the matching, in bits.
+* **CDA**: designates the Compression/Decompression Action. It is a string that can take the following values:
+
+   * *not-sent*: the field value is not sent as a residue.
+   * *value-sent*: the field value is sent in extenso in the residue.
+   * *LSB*: the bits remaining after the MSB comparison are sent in the residue.
+   * *mapping-sent*: the index of the matching element in the array is sent.
+   * *compute*: the field is not sent in the residue and the receiver knows how to recover the value from other information. This is generally used for length and checksum.
+
+* **CDAa**: represents the argument of the CDA. Currently, no CDAa is defined.
+
+For example::
+
+  {
     "ruleID": 12,
     "ruleLength": 4,
     "compression": [
@@ -99,34 +117,37 @@ For example:
       {"FID": "ICMPV6.IDENT","FL": 16,"FP": 1,"DI": "Bi","TV": [],"MO": "ignore","CDA": "value-sent"},
       {"FID": "ICMPV6.SEQNB","FL": 16,"FP": 1,"DI": "Bi","TV": [],"MO": "ignore","CDA": "value-sent"}
     ]
-}
+  }
 
 
-## Fragmentation Rules
+Fragmentation Rules
+-------------------
 
 Fragmentation rules define how the compression and decompression must be performed.
 
-The keyword  __Fragmentation__ is followed by a dictionnary containing the different parameters used.
-Inside the keyword __FRMode__ indicates which Fragmentation mode is used (__noAck__, __ackAlways__, __ackOnError__).
-Then the keyword __FRModeParamter__ gives the information needed to create the SCHC fragmentation header and mode profile:
+The keyword  **Fragmentation** is followed by a dictionnary containing the different parameters used.
+Inside the keyword **FRMode** indicates which Fragmentation mode is used (**noAck**, **ackAlways**, **ackOnError**).
+Then the keyword **FRModeProfiler** gives the information needed to create the SCHC fragmentation header and mode profile:
 
-* __dtagSize__ gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present
+* **dtagSize** gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present \
 in the SCHC fragmentation header>>. This keyword can be used by all the fragmentation modes.
-* __WSize__ gives in bit the size of Window field. If not present, the default value is 0 (no window) in
+* **WSize** gives in bit the size of Window field. If not present, the default value is 0 (no window) in \
 noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
-* __FCNSize__ gives in bit the size of the FCN field. if not present, by default, the value is 1 for noAck.
+* **FCNSize** gives in bit the size of the FCN field. If not present, by default, the value is 1 for noAck.\
 For ackAlways and ackOnError the value must be specified.
-* __ackBehavior__ this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
-    * "afterAll1": the bitmap (or Mic OK) is expected only after the reception of a All-1.
-    * "afterAll0": the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
-* __lastTileInAll1__: true to append last tile to the All-1 message, false otherwise.
-* __tileSize__ gives the size in bit of a tile.
-* __MICAlgorithm__ gives the algorithm used to compute the MIB, by default __crc32__,
-* __MICWordSize__ gives the size of the MIC word.
-* __maxRetry__ indicates to the sender how many time a fragment or ack request can be sent.
-* __timeout__ indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.
+* **ackBehavior** this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
 
-For instance:
+    * *afterAll1*: the bitmap (or RCS OK) is expected only after the reception of a All-1.
+    * *afterAll0*: the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
+
+* **lastTileInAll1**: true to append last tile to the All-1 message, false otherwise.
+* **tileSize** gives the size in bit of a tile.
+* **MICAlgorithm** gives the algorithm used to compute the MIB, by default **crc32**,
+* **MICWordSize** gives the size of the RCS word.
+* **maxRetry** indicates to the sender how many time a fragment or ack request can be sent.
+* **timeout** indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.
+
+For instance::
 
     {
         "RuleID": 1,
@@ -148,13 +169,14 @@ For instance:
         }
     }
 
-
-# Context
+-------
+Context
+-------
 
 A context is associated with a specific device, which may be identified by a unique LPWAN
 identifier, for instance a LoRaWAN devEUI.
 
-The context also includes a set of rules. The rule description is defined [above](#rule-definition).
+The context also includes a set of rules. The rule description is defined [above](#rule-definition)::
 
 
     [
@@ -171,7 +193,7 @@ The context also includes a set of rules. The rule description is defined [above
 
 DeviceID is a numerical value that must be unique in the context. If the context is used on a device, the deviceID may be omitted or set to null. In the core network, the DeviceIDs must be specified.
 
-The set of rules itself expands as shown below.
+The set of rules itself expands as shown below::
 
     [
         {
@@ -208,23 +230,27 @@ The set of rules itself expands as shown below.
 
 
 
-### Remove
+Remove
+------
 
-Suppresses a rule for a specific device <<< only one, or a set of rules? >>>. If no rule is specified, all rules for that device are removed from the context.
+Suppresses a rule for a specific device <<< only one, or a set of rules? >>>. If no rule is specified, all rules for that device are removed from the context::
 
       RM.remove ({"DeviceID": 0x1234567, "SoR": {{"ruleID":12, "ruleLength":4}}})
       RM.remove ({"DeviceID": 0x1234567})
 
-### FindRuleFromPacket
+FindRuleFromPacket
+------------------
 
 This method returns a rule and a DeviceID that match a packet description given by the protocol analyzer.
 
-### FindFragmentationRule (size)
+FindFragmentationRule (size)
+----------------------------
 
 Returns a fragmentation rule compatible with the packet size passed as parameter.
 
 
-### FindRuleFromID
+FindRuleFromID
+--------------
 
 Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.
 
@@ -351,11 +377,14 @@ class RuleManager:
     A RuleManager object is created this way:
 
           from RuleManager import *
+
           RM = RuleManager()
 
           arguments:
+
           - file: the RuleManager takes a file to upload rule_set
           - log:  display debugging events
+
     """
 
     def _return_default(self, elm, idx, val):
@@ -367,6 +396,7 @@ class RuleManager:
     def Add(self, device=None, dev_info=None, file=None, compression=True):
         """
         Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:
+
         * ruleID/RuleIDLength do not overlap
         * the rule contains either one of a fragmentation and a compression description.
 
@@ -376,8 +406,7 @@ class RuleManager:
 
         """
 
-        #assert (dev_info == None or file == None)
-        # XXX should it be like assert (dev_info != None or file != None)
+        assert (dev_info is not None or file is not None)
 
         if file != None:
             dev_info = json.loads(open(file).read())
@@ -388,7 +417,7 @@ class RuleManager:
             elif "SoR" in dev_info:
                 if "DeviceID" in dev_info:
                     device = dev_info["DeviceID"]
-                sor    = dev_info["SoR"]
+                sor = dev_info["SoR"]
             else:
                 raise ValueError("unknown format")
         elif type(dev_info) is list: # a Set of Rule
@@ -676,7 +705,7 @@ class RuleManager:
                     dprint ("!! {:<84}!!".format(txt))
 
 
-                    dprint ("!! MIC Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
+                    dprint ("!! RCS Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
 
                     if rule[T_FRAG][T_FRAG_MODE] != "noAck":
                         dprint ("!!" + "-"*85 +"!!")

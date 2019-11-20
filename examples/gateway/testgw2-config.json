@@ -8,6 +8,6 @@
     "eth_src": "ac:bc:32:ba:1c:9f",
     "downlink_url": "https://[::1]:51225/ul",
     "ssl_verify": false,
-    "my_cert": "examples/certs/testgw2-cert.pem",
-    "rule_file": "examples/configs/comp-rule-100.json"
+    "my_cert": "testgw2-cert.pem",
+    "rule_file": "comp-rule-100.json"
 }

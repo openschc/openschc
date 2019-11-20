@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 
 from gen_base_import import *  # used for now for differing modules in py/upy
-from gen_utils import dprint
+from gen_utils import dprint, dpprint, set_debug_output
 
 # ---------------------------------------------------------------------------
 
@@ -16,6 +16,9 @@ from frag_send import FragmentNoAck
 import frag_msg
 from compr_parser import *
 from compr_core import Compressor, Decompressor
+
+from gen_utils import dtrace
+import binascii
 
 
 class Session:
@@ -47,6 +50,15 @@ class Session:
         return None
 
 
+    def get_state(self, **kw):
+        result = []
+        for session in self.session_list:
+            session_state = session.copy()
+            session_state["session"] = session["session"].get_state(**kw)
+            result.append(session_state)
+        return result
+
+
 class debug_protocol:
     def _log(*arg):
         dprint(*arg)
@@ -70,6 +82,8 @@ class SCHCProtocol:
         self.decompressor = Decompressor(self)
         self.fragment_session = Session(self)
         self.reassemble_session = Session(self)
+        if hasattr(config, "debug_level"):
+            set_debug_output(True)
 
     def _log(self, message):
         self.log("schc", message)
@@ -80,12 +94,21 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
-    def schc_send(self, dst_L3addr, raw_packet):
+    def schc_send(self, dst_L3addr, raw_packet, direction="UP"):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
         dprint("raw_packet in schc_send", raw_packet)
+        if direction in ["UP", "up"]:
+            t_dir = T_DIR_UP
+        elif direction in ["DOWN", "down", "DW", "dw"]:
+            t_dir = T_DIR_DW
+        else:
+            raise ValueError("direction must be UP or DOWN, but {}"
+                             .format(direction))
 
         P = Parser(debug_protocol)
+        parsed_packet = P.parse(raw_packet, t_dir)
+        dpprint(parsed_packet)
 
         try:
             parsed_packet = P.parse(raw_packet, T_DIR_UP)
@@ -95,13 +118,13 @@ class SCHCProtocol:
             parsed_packet = None
             schc_packet = None
 
-        if parsed_packet != None:
+        if parsed_packet is not None:
             # pass        # to be done
-            rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction="UP")
+            rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction=t_dir)
             if rule is None:
                 schc_packet = None
                 # reject it.
-                # self._log("Rejected. Not for SCHC packet, L3addr={}".format(
+                # self._log("Rejected. Not for SCHC packet, L4addr={}".format(
                 #    dst_L3addr))
                 # return
             else:
@@ -109,7 +132,7 @@ class SCHCProtocol:
                     dprint(
                         "-------------------------------------- Compression Proccess -------------------------------------------")
                     dprint("selected rule is ", rule)
-                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], T_DIR_UP)
+                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], t_dir)
                     dprint(schc_packet)
                     schc_packet.display("bin")
                 else:
@@ -152,7 +175,7 @@ class SCHCProtocol:
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule)  # XXX
-        elif mode == "ackAlwayw":
+        elif mode == "ackAlwayw": #XXX
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":
@@ -186,6 +209,10 @@ class SCHCProtocol:
         # dprint("frag_rule", frag_rule)
 
         # !IMPORTANT: This condition has to be changed by a context condition like in the last version
+
+        dtrace('>', binascii.hexlify(packet_bbuf.get_content()), ' ')
+        dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
+
         if dev_L2addr == b"\xaa\xbb\xcc\xee":
 
             if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
@@ -323,3 +350,13 @@ class SCHCProtocol:
     #    raw_packet = self.decompressor.decompress(context, schc_packet)
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
+
+    def get_state(self, **kw):
+        result =  {
+            "reassemble": self.reassemble_session.get_state(**kw),
+            "fragment": self.fragment_session.get_state(**kw),
+            "state": "XXX - need to be added"
+        }
+        if kw.get("is_init") == True:
+            result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
+        return result

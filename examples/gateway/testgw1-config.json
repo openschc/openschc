@@ -8,9 +8,6 @@
     "eth_src": "ac:bc:32:ba:1c:9f",
     "downlink_url": "https://[::1]:51226/ul",
     "ssl_verify": false,
-    "my_cert": "example/testgw1-cert.pem",
-    "context_file": "example/context-100.json",
-    "rule_comp_file": "example/comp-rule-100.json",
-    "rule_fragin_file": "example/frag-rule-101.json",
-    "rule_fragout_file": "example/frag-rule-102.json"
+    "my_cert": "testgw1-cert.pem",
+    "rule_file": "comp-rule-100.json"
 }

@@ -28,7 +28,7 @@ An example of how to do it ::
   # create directory for compiled documentation
   $ mkdir openschc_doc
   $ cd openschc_doc
-  $ git clone --depth 1 https://github.com/openschc/openschc.git html
+  $ git clone https://github.com/openschc/openschc.git html
   $ cd html
   $ git checkout gh-pages
   $ cd ../..
