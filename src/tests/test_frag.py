@@ -191,10 +191,10 @@ def test_frag_ack_on_error_no_loss(rule_ack_on_error):
     assert "----------------------- ACK Success" in stdout
 
 # TODO - It seems that packet loss is not working yet, MIC issues
-# def test_frag_ack_on_error_loss(rule_ack_on_error):
-#     stdout = frag_generic(rule_ack_on_error, packet_loss=True)
-#     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
-#     assert "----------------------- ACK Success" in stdout
+def test_frag_ack_on_error_loss(rule_ack_on_error):
+    stdout = frag_generic(rule_ack_on_error, packet_loss=True)
+    assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
+    assert "----------------------- ACK Success" in stdout
 
 def test_frag_no_ack_no_loss(rule_no_ack):
     stdout = frag_generic(rule_no_ack, packet_loss=False)
