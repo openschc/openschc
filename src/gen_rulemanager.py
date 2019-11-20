@@ -711,7 +711,7 @@ class RuleManager:
                         dprint ("!!" + "-"*85 +"!!")
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
-                            print ("!! {:<84}!!".format(txt))
+                            dprint ("!! {:<84}!!".format(txt))
 
                         dprint ("!! Max Retry : {:4}   Timeout {:5} seconds {:42} !!".format(
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY],
