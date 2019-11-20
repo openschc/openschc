@@ -152,12 +152,17 @@ class TileList():
 
     def pprint(self, print_func=None):
         """print tiles formatted.
+        print_func: like write() method.
+            e.g.
+            output_buffer = io.StringIO()
+            all_tiles.pprint(print_func=output_buffer.write)
+            output = output_buffer.getvalue()
         """
         for t in self.all_tiles:
             if len(t) == 0:
                 break
             if print_func is not None:
-                print_func(t)
+                print_func(str(t))
             else:
                 print(t)
 
