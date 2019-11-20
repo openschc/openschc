@@ -150,6 +150,17 @@ class TileList():
         dprint("self.all_tiles -> {}".format(self.all_tiles))
         #input('tiles after for')
 
+    def pprint(self, print_func=None):
+        """print tiles formatted.
+        """
+        for t in self.all_tiles:
+            if len(t) == 0:
+                break
+            if print_func is not None:
+                print_func(t)
+            else:
+                print(t)
+
     @staticmethod
     def get_tile_size(tiles):
         size = 0
