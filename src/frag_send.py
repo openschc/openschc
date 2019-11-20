@@ -32,6 +32,7 @@ class FragmentBase():
         self.protocol = protocol
         self.context = context
         self.rule = rule
+        self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = 0
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
@@ -76,8 +77,7 @@ class FragmentBase():
         #   |<---- frag base size ---->|<- extra bits-->|
         #                                      L2Word ->|
 
-        extra_bits = (frag_msg.roundup(last_frag_base_size,
-                                    self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE]) -
+        extra_bits = (frag_msg.roundup(last_frag_base_size, self.l2word) -
                         last_frag_base_size)
 
         # 2. round up the payload of all SCHC fragments
@@ -89,8 +89,7 @@ class FragmentBase():
         mic_base.add_bits(0, extra_bits)
         # XXX
         if penultimate_size != 0:
-            extra_bits = (frag_msg.roundup(penultimate_size,
-                                        self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE]) -
+            extra_bits = (frag_msg.roundup(penultimate_size, self.l2word) -
                             penultimate_size)
             mic_base.add_bits(0, frag_msg.roundup(extra_bits,
                                                 self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_MIC]))
@@ -135,8 +134,7 @@ class FragmentNoAck(FragmentBase):
         # of an L2 Word.
         dprint(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
-                        frag_msg.get_mic_size(self.rule) +
-                        self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE])
+                        frag_msg.get_mic_size(self.rule) + self.l2word)
         if self.protocol.layer2.get_mtu_size() < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.protocol.layer2.get_mtu_size(), min_size))
 
@@ -200,7 +198,7 @@ class FragmentNoAck(FragmentBase):
                 # put the size of the complements of the header to L2 Word.
                 tile_size = (remaining_data_size -
                              (frag_msg.get_sender_header_size(self.rule) +
-                              remaining_data_size) % self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_L2WORDSIZE])
+                              remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
                 transmit_callback = self.event_sent_frag
                 fcn = 0
@@ -285,7 +283,7 @@ class FragmentAckOnError(FragmentBase):
 
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
-        self.all_tiles = TileList(self.rule, packet_bbuf)
+        self.all_tiles = TileList(self.rule, packet_bbuf, self.l2word)
         # XXX
         # check whether the size of the last tile is less than L2 word
         # AND the tile number is zero
@@ -293,8 +291,8 @@ class FragmentAckOnError(FragmentBase):
         a = self.all_tiles.get_all_tiles()
 
         if (a[-1]["t-num"] == 0 and
-            a[-1]["tile"].count_added_bits() < self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]):
-            raise ValueError("The size {} of the last tile with the tile number 0 must be equal to or greater than L2 word size {}.".format(a[-1]["tile"].count_added_bits(), self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]))
+            a[-1]["tile"].count_added_bits() < self.l2word):
+            raise ValueError("The size {} of the last tile with the tile number 0 must be equal to or greater than L2 word size {}.".format(a[-1]["tile"].count_added_bits(), self.l2word))
         # make the bitmap
         #self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
         #                              self.rule["FCNSize"],

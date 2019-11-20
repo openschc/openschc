@@ -16,12 +16,10 @@ class TileList():
 
     # XXX it is almost about the sender side, should be moved into frag_send.py.
     # XXX may it be used in NO-ACK ?
-    def __init__(self, rule, packet_bbuf):
+    def __init__(self, rule, packet_bbuf, l2word=8):
         self.rule = rule
-        """Changement à corriger
-        self.t_size = ["tileSize"]
-        """
         self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
+        assert self.t_size >= l2word
         self.max_fcn = frag_msg.get_max_fcn(rule)
         self.all_tiles = []
         w_num = 0
@@ -31,13 +29,19 @@ class TileList():
         # into the tiles, which are a set of bit buffers too.
         # logically, it doesn't need when tileSize is well utilized.
         bbuf = packet_bbuf.copy()
+        bbuf_bits_size = bbuf.count_added_bits()
         nb_full_size_tiles, last_tile_size = (
-                bbuf.count_added_bits() // self.t_size,
-                bbuf.count_added_bits() % self.t_size)
-        assert last_tile_size >= 0
-        tiles = [ bbuf.get_bits_as_buffer(self.t_size)
-                 for _ in range(nb_full_size_tiles) ]
-        if last_tile_size > 0:
+                bbuf_bits_size // self.t_size,
+                bbuf_bits_size % self.t_size)
+        if last_tile_size >= l2word:
+            tiles = [ bbuf.get_bits_as_buffer(self.t_size)
+                    for _ in range(nb_full_size_tiles) ]
+        elif nb_full_size_tiles >= 1:    # and last_tile_size < l2word
+            tiles = [ bbuf.get_bits_as_buffer(self.t_size)
+                    for _ in range(nb_full_size_tiles-1) ]
+            tiles.append(bbuf.get_bits_as_buffer(self.t_size-l2word))
+            tiles.append(bbuf.get_bits_as_buffer(last_tile_size+l2word))
+        else:   # nb_full_size_tiles == 0:
             tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
         # make a all_tiles
         for t in tiles:
