@@ -406,8 +406,7 @@ class RuleManager:
 
         """
 
-        #assert (dev_info == None or file == None)
-        # XXX should it be like assert (dev_info != None or file != None)
+        assert (dev_info is not None or file is not None)
 
         if file != None:
             dev_info = json.loads(open(file).read())
