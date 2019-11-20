@@ -418,7 +418,7 @@ class RuleManager:
             elif "SoR" in dev_info:
                 if "DeviceID" in dev_info:
                     device = dev_info["DeviceID"]
-                sor    = dev_info["SoR"]
+                sor = dev_info["SoR"]
             else:
                 raise ValueError("unknown format")
         elif type(dev_info) is list: # a Set of Rule
