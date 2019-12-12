@@ -1,6 +1,7 @@
-from schccomp import *
-from comp_parser import *
-from rulemanager import *
+from gen_base_import import b2hex
+from compr_core import *
+from compr_parser import *
+from gen_rulemanager import *
 
 import json
 
@@ -52,14 +53,14 @@ coap = bytearray(b"""`\
 foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 \x82  &Ehello""")
 
-print (coap.hex())
+print (b2hex(coap))
 
 v= p.parse(coap, T_DIR_UP)  # or T_DIR_DW
 pprint.pprint(v[0])
 # print(binascii.hexlify(v[1]))
 
 RM = RuleManager(log=debug_protocol)
-RM.Add(file="examples/comp-rule-100.json")
+RM.Add(file="../examples/configs/comp-rule-100.json")
 RM.Print()
 
 C = Compressor(debug_protocol)

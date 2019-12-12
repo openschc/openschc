@@ -20,4 +20,4 @@ See :doc:`../General/Installation_guide`.
 Test you code using pytest
 ==========================
 
-See :doc:`../Testing`.
+See :doc:`../Testing/testing`.

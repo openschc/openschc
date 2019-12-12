@@ -7,9 +7,9 @@ import pprint
 # -----   SCHC ------
 
 
-from rulemanager import *
-from comp_parser import *
-
+from gen_rulemanager import *
+from compr_parser import *
+from gen_utils import dprint, dpprint
 
 
 # ----- scapy -----
@@ -20,7 +20,7 @@ import ipaddress
 
 class debug_protocol:
     def _log(*arg):
-        print(*arg)
+        dprint(*arg)
 
 P = Parser(debug_protocol)
 RM = RuleManager()
@@ -28,19 +28,19 @@ RM = RuleManager()
 def AnalyzePkt(packet):
     global RM
     
-    print(len(packet), bytes(packet).hex())
+    dprint(len(packet), "".join(["%02x"%_ for _ in bytes(packet)]))
 
     withoutL2 = bytes(packet)
 
-    print (withoutL2.hex())
+    print ("".join(["%02x"%_ for _ in withoutL2]))
     try:
         fields, data = P.parse(withoutL2, direction=T_DIR_DW)
     except:
         print ("not a parsable packet")
         return
         
-    pprint.pprint(fields)
-    print(data)
+    dpprint(fields)
+    dprint(data)
     
     rule = RM.FindRuleFromPacket(fields, direction=T_DIR_DW)
     pprint.pprint (rule)

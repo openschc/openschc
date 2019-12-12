@@ -1,15 +1,17 @@
 # ---------------------------------------------------------------------------
 
-from base_import import *  # used for now for differing modules in py/upy
-import simul
-from rulemanager import *
+from gen_base_import import *  # used for now for differing modules in py/upy
+import net_sim_core
+from gen_rulemanager import *
 from stats.statsct import Statsct
-from schccomp import *
-from comp_parser import *
+from compr_core import *
+from compr_parser import *
+from gen_utils import dprint, dpprint
+import net_sim_record
 
 # --------------------------------------------------
 # Main configuration
-packet_loss_simulation = False
+packet_loss_simulation = True
 
 # --------------------------------------------------
 # General configuration
@@ -19,7 +21,15 @@ data_size = 14  # bytes
 SF = 12
 
 simul_config = {
+    "seed": 2,
+
     "log": True,
+    "disable-print": True,
+    "disable-trace": False,
+
+    "record.disable": False,
+    "record.file": "recorded-test.log",
+    "record.format": "pprint" # "pprint" or "json"
 }
 
 # ---------------------------------------------------------------------------
@@ -42,11 +52,10 @@ else:
 if loss_config is not None:
     simul_config["loss"] = loss_config
 
-
 # ---------------------------------------------------------------------------
 
 def make_node(sim, rule_manager, devaddr=None, extra_config={}):
-    node = simul.SimulSCHCNode(sim, extra_config)
+    node = net_sim_core.SimulSCHCNode(sim, extra_config)
     node.protocol.set_rulemanager(rule_manager)
     if devaddr is None:
         devaddr = node.id
@@ -63,22 +72,22 @@ Statsct.set_SF(SF)
 # ---------------------------------------------------------------------------
 devaddr1 = b"\xaa\xbb\xcc\xdd"
 devaddr2 = b"\xaa\xbb\xcc\xee"
-print("---------Rules Device -----------")
+dprint("---------Rules Device -----------")
 rm0 = RuleManager()
 # rm0.add_context(rule_context, compress_rule1, frag_rule3, frag_rule4)
-rm0.Add(device=devaddr1, file="rules/rule1.json")
+rm0.Add(device=devaddr1, file="../examples/configs/rule1.json")
 rm0.Print()
 
-print("---------Rules gw -----------")
+dprint("---------Rules gw -----------")
 rm1 = RuleManager()
 # rm1.add_context(rule_context, compress_rule1, frag_rule4, frag_rule3)
-rm1.Add(device=devaddr2, file="rules/rule1.json")
+rm1.Add(device=devaddr2, file="../examples/configs/rule1.json")
 rm1.Print()
 
 # ---------------------------------------------------------------------------
 # Configuration of the simulation
 Statsct.get_results()
-sim = simul.Simul(simul_config)
+sim = net_sim_core.Simul(simul_config)
 
 node0 = make_node(sim, rm0, devaddr1)  # SCHC device
 node1 = make_node(sim, rm1, devaddr2)  # SCHC gw
@@ -89,13 +98,13 @@ node1.layer2.set_mtu(l2_mtu)
 # ---------------------------------------------------------------------------
 # Information about the devices
 
-print("-------------------------------- SCHC device------------------------")
-print("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
-print("-------------------------------- SCHC gw ---------------------------")
-print("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
-print("-------------------------------- Rules -----------------------------")
-print("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
-print("")
+dprint("-------------------------------- SCHC device------------------------")
+dprint("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
+dprint("-------------------------------- SCHC gw ---------------------------")
+dprint("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
+dprint("-------------------------------- Rules -----------------------------")
+dprint("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
+dprint("")
 
 # ---------------------------------------------------------------------------
 # Statistic configuration
@@ -119,30 +128,29 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # Simnulation
 
 node0.protocol.layer3.send_later(1, node1.layer3.L3addr, coap)
-
 sim.run()
 
-print('-------------------------------- Simulation ended -----------------------|')
+dprint('-------------------------------- Simulation ended -----------------------|')
 # ---------------------------------------------------------------------------
 # Results
-print("")
-print("")
-print("-------------------------------- Statistics -----------------------------")
+dprint("")
+dprint("")
+dprint("-------------------------------- Statistics -----------------------------")
 
-print('---- Sender Packet list ')
+dprint('---- Sender Packet list ')
 Statsct.print_packet_list(Statsct.sender_packets)
-print('')
+dprint('')
 
-print('---- Receiver Packet list ')
+dprint('---- Receiver Packet list ')
 Statsct.print_packet_list(Statsct.receiver_packets)
-print('')
+dprint('')
 
-print('---- Packet lost Results (Status -> True = Received, False = Failed) ')
+dprint('---- Packet lost Results (Status -> True = Received, False = Failed) ')
 Statsct.print_ordered_packets()
-print('')
+dprint('')
 
-print('---- Performance metrics')
+dprint('---- Performance metrics')
 params = Statsct.calculate_tx_parameters()
-print('')
+dprint('')
 
-print("---- General result of the simulation {}".format(params))
+dprint("---- General result of the simulation {}".format(params))

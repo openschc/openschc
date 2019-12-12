@@ -25,10 +25,13 @@ except ImportError:
     
 import sys
 from .toa_calculator import get_toa
-import schcmsg
+import frag_msg
+from gen_utils import dprint, dpprint
+
 
 sys.path.append("..")
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
+from gen_utils import dprint, dpprint
 
 #from ..bitarray import BitBuffer
 SCHC_FRAG = "SCHC_FRAG"
@@ -72,7 +75,7 @@ class Statsct(object):
     def initialize():
         """Class to initializa the static class
         creates the file to write and the instance of the class """
-        print('Init statsct module')        
+        dprint('Init statsct module')        
         Statsct.results['init_time'] = time.time()#utime.time() -->exception
         Statsct.results['packet_list'] = []
         Statsct.sender_packets['packet_list'] = []
@@ -129,19 +132,19 @@ class Statsct(object):
         Statsct.msg_type = schc_msg_type
         #Statsct.packet_info['msg_type'] = schc_msg_type
         Statsct.msg_type_queue.append(schc_msg_type)
-        print("msg_type -> {}, msg_queue -> {}".format(Statsct.msg_type, Statsct.msg_type_queue))
+        dprint("msg_type -> {}, msg_queue -> {}".format(Statsct.msg_type, Statsct.msg_type_queue))
         # input("")
 
 
     @staticmethod
     def set_header_size(header_size):
         Statsct.packet_info['header_size'] = header_size
-        print("header_size -> {}".format(Statsct.packet_info))
+        dprint("header_size -> {}".format(Statsct.packet_info))
         #input("header size")
 
     @staticmethod
     def log(message):
-        print("[statsct] {}".format(message))
+        dprint("[statsct] {}".format(message))
         
     @staticmethod
     def set_SF(SF):
@@ -164,7 +167,7 @@ class Statsct(object):
         Statsct.src_id = schcSenderAddress
         Statsct.log("src_id -> {}".format(Statsct.src_id))
         Statsct.results['src_id'] = Statsct.src_id
-        #print(str(Statsct.results))
+        #dprint(str(Statsct.results))
 
     @staticmethod
     def setDestinationAddress(schcDestinationAddress):
@@ -173,14 +176,14 @@ class Statsct(object):
         Statsct.dst_id = schcDestinationAddress
         Statsct.log("dst_id -> {}".format(Statsct.dst_id))
         Statsct.results['dst_id'] = Statsct.dst_id 
-        #print(str(Statsct.results))
+        #dprint(str(Statsct.results))
  
 
     @staticmethod    
     def addInfo(key, value):
         Statsct.log("{}, {}".format(key,value))
         Statsct.results[key] = value
-        #print(str(Statsct.results))
+        #dprint(str(Statsct.results))
         
 
     @staticmethod
@@ -218,14 +221,14 @@ class Statsct(object):
         Statsct.packet_info['msg_type'] =''
         if len(Statsct.msg_type_queue) != 0:
             Statsct.packet_info['msg_type'] = Statsct.msg_type_queue.pop(0)
-            print(Statsct.packet_info['msg_type'])
-            print("msg_type_queue -> {}".format(Statsct.msg_type_queue))
+            dprint(Statsct.packet_info['msg_type'])
+            dprint("msg_type_queue -> {}".format(Statsct.msg_type_queue))
             #input('')
         else:
-            print("all elements should have a msg_type")
+            dprint("all elements should have a msg_type")
             #input('')
         # if 'msg_type' not in Statsct.packet_info:
-        #     print("No message type found, asuming retx")
+        #     dprint("No message type found, asuming retx")
 
         #     #Statsct.packet_info['msg_type'] = Statsct.last_msg_type
         #     Statsct.packet_info['msg_type'] = ''
@@ -234,11 +237,11 @@ class Statsct(object):
         #     Statsct.last_msg_type = Statsct.packet_info['msg_type']    
        
         Statsct.results['packet_list'].append(Statsct.packet_info)
-        #print('Statsct.results: ',Statsct.results)
+        #dprint('Statsct.results: ',Statsct.results)
         #calculate performace metrics
         Statsct.addChannelOccupancy(Statsct.packet_info['toa_packet'])
         #Statsct.log(str(Statsct.results))
-        print("src_dev_id {} , Statsct.src_id {}".format(src_dev_id,Statsct.src_id))
+        dprint("src_dev_id {} , Statsct.src_id {}".format(src_dev_id,Statsct.src_id))
 
         if src_dev_id == Statsct.src_id:
             Statsct.sender_packets['packet_list'].append(Statsct.packet_info)
@@ -246,7 +249,7 @@ class Statsct(object):
             Statsct.get_msg_type(packet, Statsct.device_rule)
             Statsct.channel_occupancy_sender += Statsct.packet_info['toa_packet']
 
-            print("packet added to sender list")
+            dprint("packet added to sender list")
             #Statsct.log(Statsct.sender_packets)
         else:
             Statsct.receiver_packets['packet_list'].append(Statsct.packet_info)
@@ -254,7 +257,7 @@ class Statsct(object):
             Statsct.get_msg_type(packet, Statsct.gw_rule)
             Statsct.channel_occupancy_receiver += Statsct.packet_info['toa_packet']
             
-            print("packet added to receiver list")
+            dprint("packet added to receiver list")
             #Statsct.log(Statsct.receiver_packets)
         #input('')
         #calcute the time off of each packet
@@ -272,7 +275,7 @@ class Statsct(object):
         goodput of the transmission -> packet size / total data send 
         reliability # of data packets / received 
         """
-        print('print_ordered_fragments')
+        dprint('print_ordered_fragments')
         for i,k in enumerate(Statsct.results['packet_list']):
             
             if "status" in k:
@@ -282,7 +285,7 @@ class Statsct(object):
                     Statsct.fail_packets +=1
         nb_packet = (Statsct.fail_packets + Statsct.succ_packets)
         ratio = Statsct.succ_packets / max(nb_packet, 1)
-            #print('{},toa_packet: {},status: {}, packet_length:{}, msg_type: {}'.format(i,k['toa_packet'], k['status'],k['packet_length'],k['msg_type']))
+            #dprint('{},toa_packet: {},status: {}, packet_length:{}, msg_type: {}'.format(i,k['toa_packet'], k['status'],k['packet_length'],k['msg_type']))
         packet_status = None
         for k in Statsct.results['packet_list']:
             if "msg_type" in k:
@@ -304,7 +307,7 @@ class Statsct(object):
 
                 sender_toa += k['toa_packet']
         
-        print("total_time_off -> {}, sender_toa -> {}".format(total_time_off,sender_toa))
+        dprint("total_time_off -> {}, sender_toa -> {}".format(total_time_off,sender_toa))
         
         total_time_off_receiver = 0
         receiver_toa = 0
@@ -316,7 +319,7 @@ class Statsct(object):
             if "toa_packet" in k:
                 if i == (len(Statsct.receiver_packets['packet_list'])):
                     toa_last_receiver_frag = k['toa_packet']
-                    print("toa_last_receiver_frag -> {}".format(toa_last_receiver_frag))
+                    dprint("toa_last_receiver_frag -> {}".format(toa_last_receiver_frag))
                     input("")
                 receiver_toa += k['toa_packet']
         
@@ -335,15 +338,15 @@ class Statsct(object):
                 elif k['msg_type'] == SCHC_ACK_KO:
                     assert 'toa_packet' in k
                     ACK_KO_TOA += k['toa_packet']
-        print("ACK_OK_TOA: {}, ACK_KO_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
+        dprint("ACK_OK_TOA: {}, ACK_KO_TOA: {}, RECEIVER_ABORT_TOA: {} => Total GW Time: {}".format(
                     ACK_OK_TOA, ACK_KO_TOA,RECEIVER_ABORT_TOA, ACK_OK_TOA + RECEIVER_ABORT_TOA))     
-        print("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
+        dprint("total_time_off_receiver -> {} receiver_toa -> {}".format(total_time_off_receiver,receiver_toa))
         #input('')
         total_delay = sender_toa + total_time_off + ACK_OK_TOA + RECEIVER_ABORT_TOA
         total_delay_app = sender_toa + total_time_off
         
-        print("Channel Ocuppancy -> {}".format(Statsct.channel_occupancy))
-        print("total_data_send -> {}, packet_length -> {}".format(Statsct.total_data_send,Statsct.packet_length))
+        dprint("Channel Ocuppancy -> {}".format(Statsct.channel_occupancy))
+        dprint("total_data_send -> {}, packet_length -> {}".format(Statsct.total_data_send,Statsct.packet_length))
         
         goodput = Statsct.packet_length / max(Statsct.total_data_send, 1)
 
@@ -363,12 +366,12 @@ class Statsct(object):
     @staticmethod
     def addChannelOccupancy(toa):
         Statsct.channel_occupancy += toa
-        print("channel_occupancy -> {}".format(Statsct.channel_occupancy))
+        dprint("channel_occupancy -> {}".format(Statsct.channel_occupancy))
 
     @staticmethod
     def set_total_data_send(data):
         Statsct.total_data_send += data
-        print("total_data_send -> {}".format(Statsct.total_data_send))
+        dprint("total_data_send -> {}".format(Statsct.total_data_send))
 
     @staticmethod
     def addGoodput():
@@ -377,7 +380,7 @@ class Statsct(object):
     @staticmethod
     def addTotalDelay(time):
         Statsct.total_delay += time
-        print("total_delay -> {}".format(Statsct.total_delay))
+        dprint("total_delay -> {}".format(Statsct.total_delay))
     
     @staticmethod
     def addReliability():
@@ -390,42 +393,42 @@ class Statsct(object):
     @staticmethod
     def get_msg_type(payload, rule):
         """ 
-        print("get message type -> {}, rule -> {}".format(payload, rule))
+        dprint("get message type -> {}, rule -> {}".format(payload, rule))
         
         packet_bbuf = BitBuffer(payload)
-        print(packet_bbuf)
+        dprint(packet_bbuf)
         try:
             schc_frag = schcmsg.frag_receiver_rx(rule, packet_bbuf)
-            print(schc_frag.__dict__)
+            dprint(schc_frag.__dict__)
             if 'packet_bbuf' in schc_frag.__dict__:
-                print("packet_bbuf len-> {}".format(schc_frag.__dict__['packet_bbuf']))
+                dprint("packet_bbuf len-> {}".format(schc_frag.__dict__['packet_bbuf']))
                 #input('frag_receiver_rx')
 
             return schc_frag.__dict__
         except Exception as e:
-            print(e)
-        print("rule:{}".format(rule))
+            dprint(e)
+        dprint("rule:{}".format(rule))
         
         
         packet_bbuf = BitBuffer(payload)
-        print(packet_bbuf)
+        dprint(packet_bbuf)
         try:
             schc_frag = schcmsg.frag_sender_rx(rule, packet_bbuf)
-            print(schc_frag.__dict__)
+            dprint(schc_frag.__dict__)
             #input('frag_sender_rx')
             return schc_frag.__dict__
         except Exception as e:
-            print(e)
+            dprint(e)
         # try:
         #     schc_frag_2 = schcmsg.frag_sender_rx(Statsct.device_rule['fragReceiver'], packet_bbuf)
-        #     print(schc_frag_2.__dict__)
+        #     dprint(schc_frag_2.__dict__)
         # except Exception as e:
-        #     print(e)
+        #     dprint(e)
         # try:
         #     schc_frag_2 = schcmsg.frag_sender_rx(Statsct.device_rule['fragReceiver'], packet_bbuf)
-        #     print(schc_frag_2.__dict__)
+        #     dprint(schc_frag_2.__dict__)
         # except Exception as e:
-        #     print(e)
+        #     dprint(e)
         #input('')
 
         """
@@ -442,15 +445,15 @@ class Statsct(object):
     @staticmethod
     def print_packet_list(packet_list):
         """Prints the info of each packet """
-        print('print_packet_list ')
+        dprint('print_packet_list ')
         for i,k in enumerate(packet_list['packet_list']):
-            print('{},{}'.format(i,k))
+            dprint('{},{}'.format(i,k))
 
     @staticmethod
     def print_ordered_packets():
-        print('print_ordered_packets ')
+        dprint('print_ordered_packets ')
         for i,k in enumerate(Statsct.results['packet_list']):
-            print('{}:{}:,source:{},toa_packet: {}, time off: {},status: {}, packet_length:{}, msg_type: {}'.format(i,k['time'],k['src_dev_id'],k['toa_packet'],k['time_off'], k['status'],k['packet_length'],k['msg_type']))
+            dprint('{}:{}:,source:{},toa_packet: {}, time off: {},status: {}, packet_length:{}, msg_type: {}'.format(i,k['time'],k['src_dev_id'],k['toa_packet'],k['time_off'], k['status'],k['packet_length'],k['msg_type']))
         
         
 

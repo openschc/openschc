@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
-from simsched import SimulScheduler
+from net_sim_sched import SimulScheduler
 if sys.implementation.name != "micropython":
     import pytest
 

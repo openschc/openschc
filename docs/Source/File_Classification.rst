@@ -3,54 +3,54 @@ File Classification
 
 The different components are
 
-* RULE_MANAGERS
+* Generic functionality
 
-  * rulemanager.py      ``# store and retrieve contexts``
-
-* COMMON TO C/D & F/R
-
-  * bitarray.py         ``# bit aligned buffer management``
+  * gen_base_import.py  ``# imports module for python or upython``
+  * gen_bitarray.py     ``# bit aligned buffer management``
+  * gen_rulemanager.py  ``# stores and retrieves contexts``
+  * gen_utils.py        ``# ?``
 
 * COMPRESSION/DECOMPRESSION prefix
 
-  * schccomp.py         ``# basic compression/decompression fct``
+  * compr_core.py       ``# core compression/decompression fct``
+  * compr_bitmap.py     ``# ?``
+  * compr_parser.py     ``# ?``
 
 * FRAGMENTATION/REASSEMBLY prefix
 
-  * mic_crc32.py        ``# MIC computation/check``
-  * schcmsg.py          ``# manage frag header``
-  * schcrecv.py         ``# reassemble fragments``
-  * schcsend.py         ``# send fragments``
-  * schctile.py         ``# manage tiles``
+  * frag_all.py         ``# imports all frag code``
+  * frag_bitmap.py      ``# ?``
+  * frag_msg.py         ``# manages frag header``
+  * frag_rcs_crc32.py   ``# RCS computation/check``
+  * frag_recv.py        ``# reassembles fragments``
+  * frag_send.py        ``# sends fragments``
+  * frag_tile.py        ``# manages tiles``
 
-* SYSTEM
+* NETWORK interface/sim
 
-  * base_import.py      ``# import module for python or upython``
-
-* LPWAN Interface prefix
-* SIMULATION            ``# Code for simulation only``
-
-  * simlayer2.py        ``# emulate a L2``
-  * simsched.py         ``# schedule transmission in simulated network ?``
-  * simul.py            ``# eumulate L2 ?``
-  * cond_true.py        ``# used to emulate transmission errors``
+  * net_sim_core.py     ``# ?``
+  * net_sim_layer2.py   ``# simulates an L2``
+  * net_sim_loss.py     ``# simulates packet loss on L2``
+  * net_sim_sched.py    ``# schedules transmission in simulated network ?``
 
 * APPLICATION
 
   * packet_picker.py    ``# read a pcap file to get packet``
-  * schcgw.py           ``# interface with LPWAN``
 
 * ORCHESTRATION
 
-  * schc.py             ``# start rule manager, cC/D and F/R``
+  * protocol.py         ``# start rule manager, cC/D and F/R``
+
+* RUNNERS
+
+  * test_compress.py    ``# run a SCHC compression example``
+  * test_frag_new.py    ``# run a SCHC fragmentation example``
 
 * TEST (under the tests directory)
 
   * test_bitarray.py    ``# tests the BitBuffer functionalities``
   * test_bitarray2.py   ``# more tests of the BitBuffer functionalities``
   * test_bitmap.py      ``# tests the generation of a BitMap out of the list of tiles received``
-  * test_compress.py
-  * test_frag.py
   * test_newschc.py
   * test_oschc.py
   * test_ruleman.py
@@ -58,4 +58,4 @@ The different components are
 
 * UNKNOWN STATUS
 
-  * comp_bitmap.py       ``# this is test implementation for bitmap compression``
+

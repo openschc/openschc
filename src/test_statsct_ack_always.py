@@ -1,12 +1,12 @@
 #---------------------------------------------------------------------------
 
-from base_import import *  # used for now for differing modules in py/upy
+from gen_base_import import *  # used for now for differing modules in py/upy
 
-import schc
-import simsched
-import simlayer2
-import simul
-from rulemanager import RuleManager
+import protocol
+import net_sim_sched
+import net_sim_layer2
+import net_sim_core
+from gen_rulemanager import RuleManager
 import math
 #import statsct static class 
 from stats.statsct import Statsct
@@ -107,7 +107,7 @@ frag_rule4 = {
 #---------------------------------------------------------------------------
 
 def make_node(sim, rule_manager, devaddr=None, extra_config={}):
-    node = simul.SimulSCHCNode(sim, extra_config)
+    node = net_sim_core.SimulSCHCNode(sim, extra_config)
     node.protocol.set_rulemanager(rule_manager)
     if devaddr is None:
         devaddr = node.id
@@ -229,7 +229,7 @@ for packet_size in packet_sizes:
         Statsct.set_packet_size(send_data)
         #---------------------------------------------------------------------------
         Statsct.get_results()
-        sim = simul.Simul(simul_config)
+        sim = net_sim_core.Simul(simul_config)
         devaddr = b"\xaa\xbb\xcc\xdd"
         node0 = make_node(sim, rm0, devaddr)    # SCHC device
         node1 = make_node(sim, rm1, devaddr)    # SCHC gw
@@ -406,7 +406,7 @@ for packet_size in total_results:
         print("({},{})".format(int(packet_size), total_results[packet_size]['ratio']))
 print("}; \\addlegendentry{method=ack-on-error - S}")
 
-# sim = simul.Simul(simul_config)
+# sim = net_sim_core.Simul(simul_config)
 # devaddr = b"\xaa\xbb\xcc\xdd"
 # node0 = make_node(sim, rm0, devaddr)    # SCHC device
 # node1 = make_node(sim, rm1, devaddr)    # SCHC gw

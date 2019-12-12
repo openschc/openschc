@@ -21,7 +21,11 @@ pytest:
 	pytest -v
 
 all-tests:
-	@echo "Please move into the tests directory, and type make all-tests."
+	$(PY) test_bitarray.py
+	$(PY) test_bitarray2.py
+	$(PY) test_bitmap.py
+	$(PY) test_ruleman.py
+	$(PY) test_simsched.py
 
 #test-simsched: ; ${PY} test_simsched.py
 #test-oschc: ; ${PY} test_oschc.py
