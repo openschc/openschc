@@ -172,8 +172,3 @@ def test_bitarray2():
     a.add_bytes(bytearray([3,4]))
     print(a)
     assert str(a) == r"b'\x50\x30\x40'/20"
-
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_bitarray2()
