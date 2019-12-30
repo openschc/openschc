@@ -143,9 +143,10 @@ class Simul:
         record_dir_name = self.simul_config.get("record.directory")
         should_record = bool(self.simul_config.get("record.enable", False))
         if (record_dir_name is not None) and should_record:
+            record_quiet = bool(self.simul_config.get("record.quiet"))
             obs = net_sim_record.SimulRecordingObserver(self)
             self.set_observer(obs)
-            obs.start_record(record_dir_name) # XXX: should be at sim start.
+            obs.start_record(record_dir_name, record_quiet) # XXX: should be at sim start.
 
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")

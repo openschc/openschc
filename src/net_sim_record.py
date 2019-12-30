@@ -45,9 +45,11 @@ class SimulRecordingObserver:
     def __init__(self, simul):
         self.simul = simul
         self.manager = None
+        self.quiet = False
 
-    def start_record(self, dir_name):
+    def start_record(self, dir_name, quiet=False):
         self.manager = SimulResultManager(dir_name)
+        self.quiet = quiet
         self.dir_name = dir_name
         self.has_initial_state = False
         self.previous_dtrace = gen_utils.set_trace_function(self.trace_function)
@@ -103,7 +105,7 @@ class SimulRecordingObserver:
         print(*args, file=content, **kw)
         self.trace_line_list.append(content.getvalue())
         self.trace_file.write(content.getvalue())
-        if self.previous_dtrace is not None:
+        if self.previous_dtrace is not None and not self.quiet:
             self.previous_dtrace(content.getvalue(), end="")
 
     def print_function(self, *args, **kw):
@@ -116,7 +118,8 @@ class SimulRecordingObserver:
         self.record_file.close()
         self.log_file.close()
         self.trace_file.close()
-        print("+ recorded all state in '{}'".format(self.manager.get_file_name("")))
+        if not self.quiet:
+            print("> recorded all state in '{}'".format(self.manager.get_file_name("")))
 
     def __del__(self):
         self.print_file.close() # XXX: this is done implicitly anyway
