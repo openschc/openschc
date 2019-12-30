@@ -7,7 +7,6 @@ from stats.statsct import Statsct
 from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint
-import net_sim_record
 
 # --------------------------------------------------
 # Main configuration
@@ -26,13 +25,25 @@ frag_rule = {
             "WSize":3,
             "FCNSize":3,
             "ackBehavior":"afterAll1",
-            "tileSize":30,
+            "tileSize":10,
             "MICAlgorithm":"crc32",
             "MICWordSize":8,
             "lastTileInAll1":False
         }
     }
 }
+
+frag_rule = [{
+   "RuleID" : 12,
+   "RuleIDLength" : 4,
+   "Compression" : []
+ },{
+  "RuleID" : 12,
+  "RuleIDLength" : 6,
+  "Fragmentation" :  {
+    "FRMode": "noAck"
+  }
+}]
 
 # --------------------------------------------------
 # General configuration
@@ -45,11 +56,11 @@ simul_config = {
     "seed": 2,
 
     "log": True,
-    "disable-print": False,
-    "disable-trace": True,
+    "enable-print": True,
+    "enable-trace": True,
 
-    "record.disable": False,
-    "record.file": "recorded-test.log",
+    "record.enable": True,
+    "record.directory": "recorded-test",
     "record.format": "pprint" # "pprint" or "json"
 }
 

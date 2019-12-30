@@ -29,6 +29,7 @@ Link = namedtuple("Link", "from_id to_id delay")
 SimulNode = SimulLayer2
 
 class SimulLayer3:
+    # Using prefix 2001:DB8::/32, as it is reserved for documentation (see RFC 3849):
     __v6addr_prefix = "2001:0db8:85a3:0000:0000:0000:0000:000"
     __v6addr_base = 0
 
@@ -59,6 +60,7 @@ class SimulLayer3:
 
     @classmethod
     def __get_unique_addr(cls):
+        assert cls.__v6addr_base < 10 # XXX: should never be larger than 10
         result = "{}{}".format(cls.__v6addr_prefix, cls.__v6addr_base)
         cls.__v6addr_base += 1
         return result
@@ -110,7 +112,7 @@ class SimulNullNode(SimulNode):
 
 class Simul:
     def __init__(self, simul_config = {}):
-        self.ACK_SUCCESS = "ACK_SUCCESS"
+        self.ACK_SUCCESS = "ACK_SUCCESS" # XXX: this should not be here
         self.ACK_FAILURE = "ACK_FAILURE"
         self.RECEIVER_ABORT = "RECEIVER_ABORT"
         self.SEND_ALL_1 = "SEND_ALL_1"
@@ -133,18 +135,17 @@ class Simul:
         self.frame_loss = ConditionalTrue(
                 **self.simul_config.get("loss", {"mode":"cycle"}))
 
-        if self.simul_config.get("disable-print"):
-            gen_utils.set_debug_output(False)
-        if self.simul_config.get("disable-trace"):
+        with_dprint = bool(self.simul_config.get("enable-print", True))
+        gen_utils.set_debug_output(with_dprint)
+        if not self.simul_config.get("enable-trace", True):
             gen_utils.set_trace_function(None)
 
-        record_file_name = self.simul_config.get("record.file")
-        should_record = not self.simul_config.get("record.disable", False)
-        if (record_file_name is not None) and should_record:
+        record_dir_name = self.simul_config.get("record.directory")
+        should_record = bool(self.simul_config.get("record.enable", False))
+        if (record_dir_name is not None) and should_record:
             obs = net_sim_record.SimulRecordingObserver(self)
             self.set_observer(obs)
-            obs.start_record(record_file_name) # XXX: should be at sim start.
-
+            obs.start_record(record_dir_name) # XXX: should be at sim start.
 
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")
@@ -210,6 +211,7 @@ class Simul:
             callback(*args)
         return count
 
+    # XXX: this method should be removed, and object oriented style should be used:
     def send_packetX(self, packet, src_id, dst_id=None, callback=None, callback_args=tuple()):
         """send a message to another device in a client - server Simulation"""
         self._log("----------------------- SEND PACKET -----------------------")
@@ -227,7 +229,7 @@ class Simul:
             note_table_list = list(self.node_table.items())[-1][1]
             #self.node_table[0].protocol.layer2.clientSend.send(packet)
 
-            note_table_list.protocol.layer2.roleSend.send(packet)
+            note_table_list.protocol.layer2.roleSend.send(packet) # XXX: should not be changed
 
             try:
                 number_tiles_send = \
@@ -238,7 +240,7 @@ class Simul:
                 if (state == self.SEND_ALL_1 or state == self.ACK_FAILURE or state == self.ACK_TIMEOUT) \
                         and number_tiles_send == 0:
                     dprint("------------------------------- RECEIVE PACKET ------------------------------")
-                    message = note_table_list.protocol.layer2.roleSend.Receive()
+                    message = note_table_list.protocol.layer2.roleSend.Receive() # XXX: should not be here
                     dprint("Message from Server", message)
                     note_table_list.protocol.layer2.event_receive_packet(note_table_list.id, message)
                     # note_table_list1.protocol.fragment_session.session_list[0]["session"].state = 'START'

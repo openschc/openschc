@@ -12,17 +12,26 @@ def set_debug_output(state):
     else:
         enable_debug_print = False
 
+print_function = print
+
+def set_print_function(new_print_function):
+    global print_function
+    result = print_function
+    print_function = new_print_function
+    return result
+
 def dprint(*args, **kw):
     """Debug print"""
     global enable_debug_print
     if enable_debug_print:
-        print(*args, **kw)
+        print_function(*args, **kw)
 
 def dpprint(*args, **kw):
     """Debug print"""
     global enable_debug_print
     if enable_debug_print:
-        pprint.pprint(*args, **kw)
+        text = pprint.pformat(*args, **kw)
+        print_function(text, end="")
 
 trace_print_function = print
 
