@@ -224,7 +224,7 @@ class SCHCProtocol:
             # find existing session for fragment or reassembly.
             session = self.reassemble_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
             if session is not None:
-                dprint("Reassembly session found", session)
+                dprint("Reassembly session found", session.__class__.__name__)
             else:
                 # no session is found.  create a new reassemble session.
                 context = None
@@ -232,7 +232,7 @@ class SCHCProtocol:
                                                       dev_L2addr)
                 self.reassemble_session.add(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH],
                                             dtag, session)
-                dprint("New reassembly session created", session)
+                dprint("New reassembly session created", session.__class__.__name__)
             session.receive_frag(packet_bbuf, dtag)
             return
 
