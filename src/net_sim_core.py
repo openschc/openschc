@@ -188,7 +188,8 @@ class Simul:
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet, src_id, dst_id, True)
+                clock = self.scheduler.get_clock()
+                Statsct.add_packet_info(clock, packet, src_id, dst_id, True)
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
             count = 0
@@ -199,7 +200,8 @@ class Simul:
             self._log("packet was lost {}->{}".format(src_id, dst_id))
             if enable_statsct:
                 Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet,src_id,dst_id, False)
+                clock = self.scheduler.get_clock()
+                Statsct.add_packet_info(clock, packet, src_id, dst_id, False)
             count = 0
         #
         if callback != None:
@@ -223,7 +225,8 @@ class Simul:
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet,src_id,dst_id, True)
+                clock = self.scheduler.get_clock()
+                Statsct.add_packet_info(clock, packet, src_id, dst_id, True)
             # if dst_id == None, it is a broadcast
             # link_list = self.get_link_by_id(src_id, dst_id)
             count = 1
@@ -254,7 +257,8 @@ class Simul:
             self._log("packet was lost {}->{}".format(src_id, dst_id))
             if enable_statsct:
                 Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))
-                Statsct.add_packet_info(packet,src_id,dst_id, False)
+                clock = self.scheduler.get_clock()
+                Statsct.add_packet_info(clock, packet, src_id, dst_id, False)
             count = 0
         #
         if callback != None:

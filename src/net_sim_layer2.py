@@ -59,7 +59,7 @@ class SimulLayer2:
         self.is_transmitting = True
         (packet, src_dev_id, dst_dev_id, transmit_callback
         ) = self.packet_queue.pop(0)
-        dprint("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback))
+        dprint("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback is None))
 
         if self.role == "client" or self.role == "server":
             self.sim.send_packetX(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))

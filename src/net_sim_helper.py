@@ -134,7 +134,7 @@ class SimulHelper:
     def init_stat(self):
         # Statistic module
         radio_config = self.simul_config["radio"]
-        Statsct.initialize()
+        Statsct.initialize(init_time=0)
         Statsct.log("Statsct test")
         Statsct.set_packet_size(radio_config["data_size"])
         Statsct.set_SF(radio_config["SF"])
