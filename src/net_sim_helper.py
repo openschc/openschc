@@ -17,18 +17,24 @@ from gen_utils import dprint, dpprint
 # ---------------------------------------------------------------------------
 # Default config
 
-# --------------------------------------------------
-# Main configuration
-packet_loss_simulation = False
+DEFAULT_RADIO_CONFIG = {
+    "l2_mtu": 72, # bits
+    "data_size": 14, # bytes
+    "SF": 12,
+}
 
-# --------------------------------------------------
-# General configuration
+DEFAULT_LOSS_CONFIG = {
+    "mode": "rate",
+    "cycle": 15, # packet loss rate in %
+}
 
-l2_mtu = 72  # bits
-data_size = 14  # bytes
-SF = 12
+DEFAULT_COLLISION_LOSS_CONFIG = {
+    "mode": "collision",
+    "G": 0.1, # collision_lambda
+    "background_frag_size": 54,
+}
 
-default_simul_config = {
+DEFAULT_SIMUL_CONFIG = {
     "seed": 2,
 
     "log": True,
@@ -39,42 +45,18 @@ default_simul_config = {
     "record.directory": "recorded-test",
     "record.format": "pprint", # "pprint" or "json"
     "record.quiet": False,
+
+    "radio": DEFAULT_RADIO_CONFIG,
 }
 
-# --------------------------------------------------
-# Configuration packets loss
-
-if packet_loss_simulation:
-    # Configuration with packet loss in noAck and ack-on-error
-    loss_rate = 15  # in %
-    collision_lambda = 0.1
-    background_frag_size = 54
-    loss_config = {"mode": "rate", "cycle": loss_rate}
-    # loss_config = {"mode":"collision", "G":collision_lambda, "background_frag_size":background_frag_size}
-else:
-    # Configuration without packet loss in noAck and ack-on-error
-    loss_rate = None
-    loss_config = None
-
-# ---------------------------------------------------------------------------
-# Init packet loss
-if loss_config is not None:
-    default_simul_config["loss"] = loss_config
-
-devaddr1 = b"\xaa\xbb\xcc\xdd"
-devaddr2 = b"\xaa\xbb\xcc\xee"
-
 # ---------------------------------------------------------------------------
 
-def make_node(sim, rule_manager, devaddr=None, extra_config={}):
-    node = net_sim_core.SimulSCHCNode(sim, extra_config)
-    node.protocol.set_rulemanager(rule_manager)
-    if devaddr is None:
-        devaddr = node.id
-    node.layer2.set_devaddr(devaddr)
-    return node
+# XXX: this should be removed
+DEFAULT_MAC_ADDRESS_TABLE = {
+    "device": b"\xaa\xbb\xcc\xdd",
+    "gateway":  b"\xaa\xbb\xcc\xee"
+}
 
-#  ^^^ XXX: All the above needs refactoring
 # ---------------------------------------------------------------------------
 
 class SimulHelper:
@@ -84,14 +66,95 @@ class SimulHelper:
         self.device_rule_manager = None
         self.gateway_rule_manager = None
 
-    def pre_init(self):
+    def create_gateway(self, rules):
+        dprint("---------Rules gw -----------")
+        rm1 = RuleManager()
+        devaddr2 = DEFAULT_MAC_ADDRESS_TABLE["gateway"]
+        rm1.Add(device=devaddr2, dev_info=rules)
+        rm1.Print()
+        self.gateway_rule_manager = rm1
+
+    def create_device(self, rules):
+        dprint("---------Rules Device -----------")
+        rm0 = RuleManager()
+        devaddr1 = DEFAULT_MAC_ADDRESS_TABLE["device"]
+        rm0.Add(device=devaddr1, dev_info=rules)
+        rm0.Print()
+        self.device_rule_manager = rm0
+
+    def make_device_send_data(self, clock, packet=None, packet_size=None):
+        self.node0.protocol.layer3.send_later(clock, self.node1.layer3.L3addr, packet)
+
+    def set_config(self, simul_config, loss_config=None):
+        simul_config = simul_config.copy()
+        if loss_config is not None:
+            simul_config["loss"] = loss_config
+        self.simul_config = simul_config
+        # --------------------------------
+        # Configuration of the simulation
+        self.init_stat()
+        Statsct.get_results()
+        sim = net_sim_core.Simul(simul_config)
+        self.sim = sim
+
+        devaddr1 = DEFAULT_MAC_ADDRESS_TABLE["device"]
+        devaddr2 = DEFAULT_MAC_ADDRESS_TABLE["gateway"]
+        l2_mtu = simul_config["radio"]["l2_mtu"]
+
+        rm0 = self.device_rule_manager
+        rm1 = self.gateway_rule_manager
+        node0 = self._make_schc_node(sim, rm0, devaddr1)  # SCHC device
+        node1 = self._make_schc_node(sim, rm1, devaddr2)  # SCHC gw
+        sim.add_sym_link(node0, node1)
+        node0.layer2.set_mtu(l2_mtu)
+        node1.layer2.set_mtu(l2_mtu)
+        self.node0 = node0
+        self.node1 = node1
+
+        self.update_stat(node1, rm0, rm1, node0)
+
+    def create_simul(self):
+        if self.simul_config is None:
+            self.set_config(DEFAULT_SIMUL_CONFIG.copy())
+
+    def run_simul(self):
+        self.sim.run()
+        self.show_stat()
+
+    def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={}):
+        node = net_sim_core.SimulSCHCNode(sim, extra_config)
+        node.protocol.set_rulemanager(rule_manager)
+        if devaddr is None:
+            devaddr = node.id
+        node.layer2.set_devaddr(devaddr)
+        return node
+
+    # ------------------------------
+
+    def init_stat(self):
         # Statistic module
+        radio_config = self.simul_config["radio"]
         Statsct.initialize()
         Statsct.log("Statsct test")
-        Statsct.set_packet_size(data_size)
-        Statsct.set_SF(SF)
+        Statsct.set_packet_size(radio_config["data_size"])
+        Statsct.set_SF(radio_config["SF"])
 
-    def post_run(self):
+    def update_stat(self, node1, rm0, rm1, node0):
+        # ---------------------------------
+        # Information about the devices
+        dprint("-------------------------------- SCHC device------------------------")
+        dprint("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
+        dprint("-------------------------------- SCHC gw ---------------------------")
+        dprint("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
+        dprint("-------------------------------- Rules -----------------------------")
+        dprint("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
+        dprint("")
+        # ----------------------------------
+        # Statistic configuration
+        Statsct.setSourceAddress(node0.id)
+        Statsct.setDestinationAddress(node1.id)
+
+    def show_stat(self):
         dprint('-------------------------------- Simulation ended -----------------------|')
         # ---------------------------------------------------------------------------
         # Results
@@ -116,66 +179,5 @@ class SimulHelper:
         dprint('')
 
         dprint("---- General result of the simulation {}".format(params))
-
-    def create_gateway(self, rules):
-        dprint("---------Rules gw -----------")
-        rm1 = RuleManager()
-        rm1.Add(device=devaddr2, dev_info=rules)
-        rm1.Print()
-        self.gateway_rule_manager = rm1
-
-    def create_device(self, rules):
-        dprint("---------Rules Device -----------")
-        rm0 = RuleManager()
-        rm0.Add(device=devaddr1, dev_info=rules)
-        rm0.Print()
-        self.device_rule_manager = rm0
-
-    def make_device_send_data(self, clock, packet):
-        self.node0.protocol.layer3.send_later(clock, self.node1.layer3.L3addr, packet)
-
-    def set_config(self, simul_config):
-        self.simul_config = simul_config
-        # --------------------------------
-        # Configuration of the simulation
-        Statsct.get_results()
-        sim = net_sim_core.Simul(simul_config)
-        self.sim = sim
-
-        rm0 = self.device_rule_manager
-        rm1 = self.gateway_rule_manager
-        node0 = make_node(sim, rm0, devaddr1)  # SCHC device
-        node1 = make_node(sim, rm1, devaddr2)  # SCHC gw
-        sim.add_sym_link(node0, node1)
-        node0.layer2.set_mtu(l2_mtu)
-        node1.layer2.set_mtu(l2_mtu)
-        self.node0 = node0
-        self.node1 = node1
-
-        # ---------------------------------
-        # Information about the devices
-
-        dprint("-------------------------------- SCHC device------------------------")
-        dprint("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
-        dprint("-------------------------------- SCHC gw ---------------------------")
-        dprint("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
-        dprint("-------------------------------- Rules -----------------------------")
-        dprint("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
-        dprint("")
-
-        # ----------------------------------
-        # Statistic configuration
-
-        Statsct.setSourceAddress(node0.id)
-        Statsct.setDestinationAddress(node1.id)
-
-    def create_simul(self):
-        self.pre_init()
-        if self.simul_config is None:
-            self.set_config(default_simul_config.copy())
-
-    def run_simul(self):
-        self.sim.run()
-        self.post_run()
 
 # ---------------------------------------------------------------------------

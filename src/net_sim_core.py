@@ -22,6 +22,8 @@ import protocol
 
 from stats.statsct import Statsct
 
+#---------------------------------------------------------------------------
+
 enable_statsct = True
 
 Link = namedtuple("Link", "from_id to_id delay")
