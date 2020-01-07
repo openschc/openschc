@@ -1,11 +1,11 @@
-
+THIS.CODE.IS.UNDER.CONSTRUCTION
 
 import tcp_helper as helper
 import rule_manager
 #import protocol
 
 helper_config = {
-    "mode": "client"
+    "mode": "client",
     "address": None, # or IPv4/IPv6 address
     "port": None, # TCP port,
     "compression": False,
@@ -13,7 +13,7 @@ helper_config = {
 }
 
 rule_manager = XXX
-rule_manager.Add({ <rule(s)> })
+rule_manager.Add({ rule_set })
 
 helper  = helper.helper(helper_config)
 #tcp_layer2 = helper.create_tcp_connector()
@@ -31,10 +31,10 @@ scheduler.run()
 
 #---------------------------------------------------------
 
-...
+XXX
 
 class MyUpperLayer3(helper.TcpUpperLayer3):
-    def __init__(self, ... scheeduler):
+    def __init__(self, XXX, scheduler):
         self.scheduler -= scheduler
     
     def receive(self, packet, meta):
@@ -43,7 +43,7 @@ class MyUpperLayer3(helper.TcpUpperLayer3):
 
 #helper.set_tcp_layer3_factory(MyLayer3)
 
-my_upper_layer3 = MyLayer3(...)
+my_upper_layer3 = MyLayer3(XXX)
 helper.set_upper_layer3(my_upper_layer3)
-...
+XXX
 
