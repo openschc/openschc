@@ -85,6 +85,8 @@ class gwLayer2():
     def _set_protocol(self, protocol):
         self.protocol = protocol
 
+    def get_address(self):
+        return self.devaddr
 
 class gwLayer3:
     def __init__(self, system, config=None):

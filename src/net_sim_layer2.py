@@ -87,6 +87,9 @@ class SimulLayer2:
     def set_devaddr(self, devaddr):
         self.devaddr = devaddr
 
+    def get_address(self):
+        return self.devaddr
+
     def set_mtu(self, mtu):
         self.mtu = mtu
 

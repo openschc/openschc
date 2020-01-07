@@ -155,7 +155,8 @@ class SCHCProtocol:
             return
 
         # fragmentation is required.
-        frag_rule = self.rule_manager.FindFragmentationRule(self.layer2.devaddr)
+        lower_addr = self.layer2.get_address()
+        frag_rule = self.rule_manager.FindFragmentationRule(lower_addr)
         if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
