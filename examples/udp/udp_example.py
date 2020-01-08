@@ -36,12 +36,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("role", choices=["device", "gateway"])
 args = parser.parse_args()
 
+ip_address = "127.0.0.1"
+
 if args.role == "device":
-    udp_src = ("", 33300)
-    udp_dst = ("", 33333)
+    udp_src = (ip_address, 33300)
+    udp_dst = (ip_address, 33333)
 else:
-    udp_src = ("", 33333)
-    udp_dst = ("", 33300)
+    udp_src = (ip_address, 33333)
+    udp_dst = (ip_address, 33300)
 
 # --------------------------------------------------
 # Actually run SCHC
