@@ -83,7 +83,8 @@ class SimulHelper:
         self.device_rule_manager = rm0
 
     def make_device_send_data(self, clock, packet=None, packet_size=None):
-        self.node0.protocol.layer3.send_later(clock, self.node1.layer3.L3addr, packet)
+        self.node0.protocol.layer3.send_later(
+            clock, self.node1.layer3.L3addr, packet)
 
     def set_config(self, simul_config, loss_config=None):
         simul_config = simul_config.copy()
@@ -142,11 +143,13 @@ class SimulHelper:
     def update_stat(self, node1, rm0, rm1, node0):
         # ---------------------------------
         # Information about the devices
-        dprint("-------------------------------- SCHC device------------------------")
-        dprint("SCHC device L3={} L2={} RM={}".format(node0.layer3.L3addr, node0.id, rm0.__dict__))
-        dprint("-------------------------------- SCHC gw ---------------------------")
-        dprint("SCHC gw     L3={} L2={} RM={}".format(node1.layer3.L3addr, node1.id, rm1.__dict__))
-        dprint("-------------------------------- Rules -----------------------------")
+        dprint(32*"-"+" SCHC device------------------------")
+        dprint("SCHC device L3={} L2={} RM={}".format(
+            node0.layer3.L3addr, node0.id, rm0.__dict__))
+        dprint(32*"-"+" SCHC gw ---------------------------")
+        dprint("SCHC gw     L3={} L2={} RM={}".format(
+            node1.layer3.L3addr, node1.id, rm1.__dict__))
+        dprint(32*"-"+" Rules -----------------------------")
         dprint("rules -> {}, {}".format(rm0.__dict__, rm1.__dict__))
         dprint("")
         # ----------------------------------
@@ -155,12 +158,11 @@ class SimulHelper:
         Statsct.setDestinationAddress(node1.id)
 
     def show_stat(self):
-        dprint('-------------------------------- Simulation ended -----------------------|')
-        # ---------------------------------------------------------------------------
+        dprint(32*'-'+' Simulation ended -----------------------|')
         # Results
         dprint("")
         dprint("")
-        dprint("-------------------------------- Statistics -----------------------------")
+        dprint(32*"-"+" Statistics -----------------------------")
 
         dprint('---- Sender Packet list ')
         Statsct.print_packet_list(Statsct.sender_packets)
@@ -170,7 +172,8 @@ class SimulHelper:
         Statsct.print_packet_list(Statsct.receiver_packets)
         dprint('')
 
-        dprint('---- Packet lost Results (Status -> True = Received, False = Failed) ')
+        dprint('---- Packet lost Results '
+               +'(Status -> True = Received, False = Failed) ')
         Statsct.print_ordered_packets()
         dprint('')
 

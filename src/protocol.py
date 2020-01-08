@@ -94,6 +94,9 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
+    def get_system(self):
+        return self.system
+
     def schc_send(self, dst_L3addr, raw_packet, direction="UP"):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)

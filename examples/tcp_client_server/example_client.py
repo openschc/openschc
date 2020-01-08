@@ -1,7 +1,7 @@
 THIS.CODE.IS.UNDER.CONSTRUCTION
 
 import tcp_helper as helper
-import rule_manager
+import gen_rulemanager
 #import protocol
 
 helper_config = {
