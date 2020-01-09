@@ -22,7 +22,7 @@ MAX_PACKET_SIZE = 1024*1024
 
 def address_to_string(address):
     host,port = address
-    return "{}|{}".format(host, address)
+    return "{}|{}".format(host, port)
 
 def string_to_address(string_address):
     str_host, str_port = string_address.split("|")
@@ -78,7 +78,7 @@ class UdpLowerLayer:
             transmit_callback(1)
 
     def get_mtu_size(self):
-        return 100 # XXX
+        return 72 # XXX
 
     def get_address(self):
         return address_to_string(self.udp_src)

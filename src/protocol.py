@@ -203,7 +203,6 @@ class SCHCProtocol:
 
     def schc_recv(self, dev_L2addr, raw_packet):
         # self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
-
         frag_rule = self.rule_manager.FindFragmentationRule(dev_L2addr)
 
         # dprint(dev_L2addr)
@@ -259,6 +258,9 @@ class SCHCProtocol:
                 dprint("context exists, but no {} session for this packet {}".
                       format(dev_L2addr))
             return
+
+        else:
+            raise RuntimeError("Not implemented properly", dev_L2addr)
 
     # def schc_recv(self, dev_L2addr, raw_packet):
     #     self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
