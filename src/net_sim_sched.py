@@ -42,7 +42,7 @@ class SimulScheduler:
     # external API
 
     def add_event(self, rel_time, callback, args):
-        dprint("Add event {}".format(self.queue))
+        dprint("Add event {}".format([e[:-2]+(e[-2].__name__,)+e[-1:] for e in self.queue]))
         dprint("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id

@@ -16,6 +16,13 @@
 
 .. toctree::
    :maxdepth: 1
+   :caption: Internals
+
+   Internals/Architecture
+   Internals/Simulator
+
+.. toctree::
+   :maxdepth: 1
    :caption: Source code in-depth
 
    Source/File_Classification

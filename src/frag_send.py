@@ -318,7 +318,8 @@ class FragmentAckOnError(FragmentBase):
             dprint("-----------------------------------------------------------------------")
             return
         dprint("----------------------- Preparing to send a message -----------------------")
-        dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(time.time()))  # utime.time()
+        scheduler = self.protocol.system.get_scheduler()
+        dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(scheduler.get_clock()))  # utime.time()
         dprint("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
         dprint("all tiles unsend -> {}".format(self.all_tiles))
         for tile in self.all_tiles.get_all_tiles():

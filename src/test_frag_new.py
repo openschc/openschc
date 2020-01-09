@@ -7,7 +7,6 @@ from stats.statsct import Statsct
 from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint
-import net_sim_record
 
 # --------------------------------------------------
 # Main configuration
@@ -24,11 +23,11 @@ simul_config = {
     "seed": 2,
 
     "log": True,
-    "disable-print": True,
-    "disable-trace": False,
+    "enable-print": False,
+    "enable-trace": True,
 
-    "record.disable": False,
-    "record.file": "recorded-test.log",
+    "record.enable": True,
+    "record.directory": "recorded-test",
     "record.format": "pprint" # "pprint" or "json"
 }
 

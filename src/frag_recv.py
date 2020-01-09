@@ -165,7 +165,7 @@ class ReassemblerNoAck(ReassembleBase):
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
-        dprint(schc_frag)
+        dprint(schc_frag.__class__.__name__)
         #
         if schc_frag.abort == True:
             dprint("----------------------- Sender-Abort ---------------------------")

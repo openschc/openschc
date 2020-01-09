@@ -94,6 +94,9 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
+    def get_system(self):
+        return self.system
+
     def schc_send(self, dst_L3addr, raw_packet, direction="UP"):
         self._log("recv-from-L3 -> {} {}".format(dst_L3addr, raw_packet))
         context = self.rule_manager.find_context_bydstiid(dst_L3addr)
@@ -155,7 +158,8 @@ class SCHCProtocol:
             return
 
         # fragmentation is required.
-        frag_rule = self.rule_manager.FindFragmentationRule(self.layer2.devaddr)
+        lower_addr = self.layer2.get_address()
+        frag_rule = self.rule_manager.FindFragmentationRule(lower_addr)
         if frag_rule is None:
             self._log("Rejected the packet due to no fragmenation rule.")
             return
@@ -199,7 +203,6 @@ class SCHCProtocol:
 
     def schc_recv(self, dev_L2addr, raw_packet):
         # self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
-
         frag_rule = self.rule_manager.FindFragmentationRule(dev_L2addr)
 
         # dprint(dev_L2addr)
@@ -224,7 +227,7 @@ class SCHCProtocol:
             # find existing session for fragment or reassembly.
             session = self.reassemble_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
             if session is not None:
-                dprint("Reassembly session found", session)
+                dprint("Reassembly session found", session.__class__.__name__)
             else:
                 # no session is found.  create a new reassemble session.
                 context = None
@@ -232,7 +235,7 @@ class SCHCProtocol:
                                                       dev_L2addr)
                 self.reassemble_session.add(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH],
                                             dtag, session)
-                dprint("New reassembly session created", session)
+                dprint("New reassembly session created", session.__class__.__name__)
             session.receive_frag(packet_bbuf, dtag)
             return
 
@@ -255,6 +258,9 @@ class SCHCProtocol:
                 dprint("context exists, but no {} session for this packet {}".
                       format(dev_L2addr))
             return
+
+        else:
+            raise RuntimeError("Not implemented properly", dev_L2addr)
 
     # def schc_recv(self, dev_L2addr, raw_packet):
     #     self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))

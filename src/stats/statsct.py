@@ -72,11 +72,13 @@ class Statsct(object):
     position = None
     current_time = None
     @staticmethod
-    def initialize():
+    def initialize(init_time=None):
         """Class to initializa the static class
         creates the file to write and the instance of the class """
-        dprint('Init statsct module')        
-        Statsct.results['init_time'] = time.time()#utime.time() -->exception
+        dprint('Init statsct module')
+        if init_time is None:
+            init_time = time.time() # XXX: need refactor, should be obtained from Scheduler
+        Statsct.results['init_time'] = init_time #utime.time() -->exception
         Statsct.results['packet_list'] = []
         Statsct.sender_packets['packet_list'] = []
         Statsct.receiver_packets['packet_list'] = []
@@ -199,13 +201,13 @@ class Statsct(object):
             Statsct.log("{}, {}".format(key,Statsct.receiver_packets[key]))
     
     @staticmethod
-    def add_packet_info(packet,src_dev_id,dst_dev_id, status):
+    def add_packet_info(clock, packet,src_dev_id,dst_dev_id, status):
         """ Add the information of the packet to the results dict 
         :param packet: packet send
         :param src_dev_id: device source id
         :param dst_dev_id: device destination id
         :param status: if the message was send successful (True) or not (False) """
-        Statsct.packet_info['time'] = time.time() # utime.time()
+        Statsct.packet_info['time'] = clock # time.time() # utime.time()
         Statsct.packet_info['src_dev_id'] = src_dev_id
         Statsct.packet_info['dst_dev_id'] = dst_dev_id
         Statsct.packet_info['packet'] = packet

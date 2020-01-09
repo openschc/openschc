@@ -15,6 +15,13 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
+   :caption: Internals
+
+   Internals/Architecture
+   Internals/Simulator
+
+.. toctree::
+   :maxdepth: 2
    :caption: Source code in-depth
 
    Source/File_Classification
