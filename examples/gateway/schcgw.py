@@ -300,7 +300,7 @@ if config.debug_level > 1:
 system = System(loop, logger=logger, config=config)
 layer2 = gwLayer2(system, config=config)
 layer3 = gwLayer3(system, config=config)
-protocol = protocol.SCHCProtocol(config, system, layer2, layer3)
+protocol = protocol.SCHCProtocol(config, system, layer2, layer3, role="core")
 protocol.set_rulemanager(rule_manager)
 #
 ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)

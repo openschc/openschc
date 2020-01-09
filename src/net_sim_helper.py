@@ -104,8 +104,8 @@ class SimulHelper:
 
         rm0 = self.device_rule_manager
         rm1 = self.gateway_rule_manager
-        node0 = self._make_schc_node(sim, rm0, devaddr1)  # SCHC device
-        node1 = self._make_schc_node(sim, rm1, devaddr2)  # SCHC gw
+        node0 = self._make_schc_node(sim, rm0, devaddr1, role="device")
+        node1 = self._make_schc_node(sim, rm1, devaddr2, role="core")
         sim.add_sym_link(node0, node1)
         node0.layer2.set_mtu(l2_mtu)
         node1.layer2.set_mtu(l2_mtu)
@@ -122,8 +122,9 @@ class SimulHelper:
         self.sim.run()
         self.show_stat()
 
-    def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={}):
-        node = net_sim_core.SimulSCHCNode(sim, extra_config)
+    def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={},
+                        role="undefined"):
+        node = net_sim_core.SimulSCHCNode(sim, extra_config, role)
         node.protocol.set_rulemanager(rule_manager)
         if devaddr is None:
             devaddr = node.id

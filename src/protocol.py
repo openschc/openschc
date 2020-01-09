@@ -66,10 +66,12 @@ class debug_protocol:
 
 class SCHCProtocol:
     """This class is the entry point for the openschc
-    (in this current form, object composition is used)"""
+    (in this current form, object composition is used)
 
-    # def __init__(self, config, scheduler, schc_layer2, role="sender"):
-    def __init__(self, config, system, layer2, layer3):
+    """
+
+    def __init__(self, config, system, layer2, layer3, role):
+        assert role in ["device", "core"]
         self.config = config
         self.system = system
         self.scheduler = system.get_scheduler()
@@ -77,7 +79,6 @@ class SCHCProtocol:
         self.layer3 = layer3
         self.layer2._set_protocol(self)
         self.layer3._set_protocol(self)
-        self.default_frag_rule = None  # XXX: to be in  rule_manager
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.fragment_session = Session(self)
@@ -179,7 +180,7 @@ class SCHCProtocol:
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
             session = FragmentNoAck(self, context, rule)  # XXX
-        elif mode == "ackAlwayw": #XXX
+        elif mode == "ackAlways": #XXX
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":

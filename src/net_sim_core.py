@@ -71,7 +71,7 @@ class SimulNode: # object
     pass
 
 class SimulSCHCNode(SimulNode):
-    def __init__(self, sim, extra_config={}):
+    def __init__(self, sim, extra_config={}, role="undefined"):
         self.sim = sim
         self.config = sim.simul_config.get("node-config", {}).copy()
         self.config.update(extra_config)
@@ -79,7 +79,7 @@ class SimulSCHCNode(SimulNode):
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
         self.protocol = protocol.SCHCProtocol(
-            self.config, self, self.layer2, self.layer3)
+            self.config, self, self.layer2, self.layer3, role)
         self.id = self.layer2.mac_id
         self.sim._add_node(self)
 
