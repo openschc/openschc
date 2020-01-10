@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+#---------------------------------------------------------------------------
+
+import argparse
+import subprocess
+import os
+import sys
+sys.path.append("../../src") # XXX: temporary hack
+
+import net_sim_builder
+#---------------------------------------------------------------------------
+
+
+def get_test_scenarios():
+    scenario_spec = {
+        "rule-id-length": 4,
+        "packet-size": 100
+    }
+    scenario_table = {
+        "base": scenario_spec
+    }
+    return scenario_table
+
+#---------------------------------------------------------------------------
+
+def cmd_list(args):
+    scenario_table = get_test_scenarios()
+    print("List of name of scenarios:")
+    for name in sorted(scenario_table.keys()):
+        print("    "+name)
+
+def make_cmd_list_parser(arg_subparser):
+    list_parser = subparser.add_parser("list")
+    list_parser.set_defaults(cmd_func = cmd_list)
+    return list_parser
+
+#---------------------------------------------------------------------------
+
+DEFAULT_RULEID_LENGTH = 4
+DEFAULT_PACKET_SIZE = 10
+
+# XXX: what should be done with non-IPv6 +UDP packets?
+DEFAULT_PACKET = bytearray(b"""`\
+\x12\x34\x56\x00\x1e\x11\x1e\xfe\x80\x00\
+\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
+\x00\x00\x01\xfe\x80\x00\x00\x00\x00\x00\
+\x00\x00\x00\x00\x00\x00\x00\x00\x02\x16\
+2\x163\x00\x1e\x00\x00A\x02\x00\x01\n\xb3\
+foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
+\x82  &Ehello""")
+
+def get_record_dir_name_from_spec(name, spec):
+    return "test-"+name
+
+def run_scenario(name, spec, prefix):
+    compr_rule = { "RuleID": 1,
+                   "RuleIDLength": spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+                   "Compression": [] }
+    frag_rule = { "RuleID": 2,
+                  "RuleIDLength": spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+                   "Fragmentation": {"FRMode": "noAck"}}
+    rules = [compr_rule, frag_rule]
+
+    simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
+    #loss_config = net_sim_builder.DEFAULT_LOSS_CONFIG
+    record_dir_name = get_record_dir_name_from_spec(name, spec)
+    if len(prefix)>0:
+        record_dir_name = prefix+"-"+record_dir_name
+    simul_config["record.directory"] = record_dir_name
+    simul_config["record.quiet"] = True
+
+    builder = net_sim_builder.SimulBuilder()
+    builder.create_device(rules.copy())
+    builder.create_gateway(rules.copy())
+    builder.set_config(simul_config, None)
+    builder.create_simul()
+    packet = DEFAULT_PACKET + b"\x00" * spec.get("packet-size", DEFAULT_PACKET_SIZE)
+    builder.make_device_send_data(clock=1, packet=packet)
+    builder.run_simul()
+
+def cmd_run(args):
+    scenario = args.scenario
+    prefix = args.prefix
+    scenario_table = get_test_scenarios()
+    if scenario not in scenario_table:
+        print("Error: cannot find scenario '{}'".format(scenario), file=sys.stderr)
+        sys.exit(1)
+    run_scenario(scenario, scenario_table[scenario], prefix)
+
+def make_cmd_run_parser(arg_subparser):
+    run_parser = subparser.add_parser("run")
+    run_parser.add_argument("scenario")
+    run_parser.add_argument("--prefix", type=str, default="")
+    run_parser.set_defaults(cmd_func = cmd_run)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+def cmd_run_all(args):
+    prefix = args.prefix
+    scenario_table = get_test_scenarios()
+    for scenario in sorted(scenario_table.keys()):
+        cmd = "./simtool run"
+        if len(prefix) > 0:
+            cmd += " --prefix "+prefix
+        cmd += " " + scenario
+        print("> "+cmd)
+        subprocess.run(cmd.split(" "), check=True)
+
+def make_cmd_run_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("run-all")
+    run_parser.add_argument("--prefix", type=str, default="")
+    run_parser.set_defaults(cmd_func = cmd_run_all)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+def cmd_compare_all(args):
+    prefix = args.prefix
+    scenario_table = get_test_scenarios()
+    for scenario in sorted(scenario_table.keys()):
+        spec = scenario_table[scenario]
+        record_dir_name = get_record_dir_name_from_spec(scenario, spec)
+        for log_file_name in os.listdir(record_dir_name):
+            new_file_name = os.path.join(record_dir_name, log_file_name)
+            ref_file_name = os.path.join(prefix+"-"+record_dir_name, log_file_name)
+            cmd = "cmp {} {}".format(new_file_name, ref_file_name)
+            print("> "+cmd)
+            subprocess.run(cmd.split(" "), check=True)
+
+def make_cmd_compare_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("compare-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+#----------------------------------------
+
+def cmd_recheck_all(args):
+    #subprocess.run("./simtool run-all".split(), check=True)
+    #subprocess.run("./simtool compare-all".split(), check=True)
+    cmd_run_all(args)
+    cmd_compare_all(args)
+
+def make_cmd_recheck_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("recheck-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.set_defaults(cmd_func = cmd_recheck_all)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+subparser = parser.add_subparsers()
+
+cmd_list_parser = make_cmd_list_parser(subparser)
+cmd_run_parser = make_cmd_run_parser(subparser)
+cmd_run_all_parser = make_cmd_run_all_parser(subparser)
+cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
+cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)
+
+args = parser.parse_args()
+if args.cmd_func is not None:
+    args.cmd_func(args)
+else:
+    raise RuntimeError("Cannot find function for command", dict(args))
+
+#--------------------------------------------------------------------------

@@ -24,7 +24,7 @@ frag_rule_noack = {
 }
 # ---------------------------------------------------------------------------
 
-gateway_rules = [compression_rule.copy(), frag_rule_noack.copy()]
+core_rules = [compression_rule.copy(), frag_rule_noack.copy()]
 device_rules = [compression_rule.copy(), frag_rule_noack.copy()]
 
 # --------------------------------------------------
@@ -43,8 +43,8 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 
 builder = net_sim_builder.SimulBuilder()
 builder.create_device(device_rules)
-builder.create_gateway(gateway_rules)
-#helper.set_config(net_sim_helper.DEFAULT_SIMUL_CONFIG, net_sim_helper.DEFAULT_LOSS_CONFIG)
+builder.create_gateway(core_rules)
+#builder.set_config(net_sim_builder.DEFAULT_SIMUL_CONFIG, net_sim_builder.DEFAULT_LOSS_CONFIG)
 builder.create_simul()
 
 # ---------------------------------------------------------------------------
