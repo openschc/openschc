@@ -19,13 +19,21 @@ frag_rule_noack = {
     "RuleID" : 12,
     "RuleIDLength" : 6,
     "Fragmentation" : {
-        "FRMode": "noAck"
+        "FRMode": "noAck",
+        "FRDirection" : "DW"
     }
 }
+
+no_compression = {
+    "RuleID" : 13,
+    "RuleIDLength": 4,
+    "NoCompression" : []
+}
+
 # ---------------------------------------------------------------------------
 
-core_rules = [compression_rule.copy(), frag_rule_noack.copy()]
-device_rules = [compression_rule.copy(), frag_rule_noack.copy()]
+core_rules = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
+device_rules = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
 
 # --------------------------------------------------
 # Message

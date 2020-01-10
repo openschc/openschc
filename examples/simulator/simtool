@@ -58,7 +58,7 @@ def run_scenario(name, spec, prefix):
                    "Compression": [] }
     frag_rule = { "RuleID": 2,
                   "RuleIDLength": spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
-                   "Fragmentation": {"FRMode": "noAck"}}
+                   "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
     rules = [compr_rule, frag_rule]
 
     simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
@@ -118,15 +118,16 @@ def make_cmd_run_all_parser(arg_subparser):
 def cmd_compare_all(args):
     prefix = args.prefix
     scenario_table = get_test_scenarios()
+    prog, check = "diff -u", False
     for scenario in sorted(scenario_table.keys()):
         spec = scenario_table[scenario]
         record_dir_name = get_record_dir_name_from_spec(scenario, spec)
         for log_file_name in os.listdir(record_dir_name):
             new_file_name = os.path.join(record_dir_name, log_file_name)
             ref_file_name = os.path.join(prefix+"-"+record_dir_name, log_file_name)
-            cmd = "cmp {} {}".format(new_file_name, ref_file_name)
+            cmd = "{} {} {}".format(prog, new_file_name, ref_file_name)
             print("> "+cmd)
-            subprocess.run(cmd.split(" "), check=True)
+            subprocess.run(cmd.split(" "), check=check)
 
 def make_cmd_compare_all_parser(arg_subparser):
     run_parser = subparser.add_parser("compare-all")

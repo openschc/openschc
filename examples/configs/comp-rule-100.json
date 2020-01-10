@@ -67,6 +67,7 @@
     "RuleIDLength": 3,
     "Fragmentation" : {
         "FRMode": "ackOnError",
+        "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,
@@ -84,6 +85,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "ackOnError",
+        "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,
@@ -101,6 +103,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "noAck",
+        "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
@@ -114,6 +117,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "noAck",
+        "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
