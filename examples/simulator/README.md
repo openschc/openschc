@@ -11,3 +11,30 @@ An short simple example is provided how to use it:
  How to run it: `./run_test_simul.sh`
 
 
+## Automated Simulation Tool
+
+The program `simtool` provides a way to run, and compare the output of simulations
+
+* `./simtool list`:
+
+  List the available scenario names
+  
+* `./simtool run <scenario name> [--prefix <prefix>]`
+
+  Run a the scenario `<scenario name>` and output the result (logs) in the directory name corresponding 
+ to the scenario (prefixed by `"<prefix>-"` if specified on the command line)
+ 
+ * `./simtool run-all [--prefix <prefix>]`
+   
+   Run all the available scenario (prefixed by `"<prefix>-"` if specified on the command line options)
+  
+  * `./simtool compare-all [--prefix <prefix>]`
+ 
+   Compare the output of each existing scenario in its default output directory to the one prefixed
+   by `<prefix>-` (or by default by `ref-`)
+  
+  * `./simtool recheck-all [--prefix <prefix>]`
+
+   Re-run each existing scenario, and theyn compare the output of each scenario in its default output 
+   directory to the one prefixed by `<prefix>-` (or by default by `ref-`)
+ 
