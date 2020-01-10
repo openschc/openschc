@@ -2,8 +2,8 @@
 .. module:: simul
    :platform: Python
 
-A set of helper function to create a simulation more easily.
-XXX: this is moved from test_simul.py, with the intent of cleaning later
+A set of builder/helper functions to create a simulation more easily.
+XXX: one iteration if cleaning is still needed.
 """
 
 from gen_base_import import *  # used for now for differing modules in py/upy
@@ -59,7 +59,7 @@ DEFAULT_MAC_ADDRESS_TABLE = {
 
 # ---------------------------------------------------------------------------
 
-class SimulHelper:
+class SimulBuilder:
     def __init__(self):
         self.simul = None
         self.simul_config = None

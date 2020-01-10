@@ -4,7 +4,7 @@ An example of simulation using only basic rules
 
 # ---------------------------------------------------------------------------
 
-import net_sim_helper
+import net_sim_builder
 
 # --------------------------------------------------
 # Rule as in documentation
@@ -41,16 +41,16 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 
 # ---------------------------------------------------------------------------
 
-helper = net_sim_helper.SimulHelper()
-helper.create_device(device_rules)
-helper.create_gateway(gateway_rules)
+builder = net_sim_builder.SimulBuilder()
+builder.create_device(device_rules)
+builder.create_gateway(gateway_rules)
 #helper.set_config(net_sim_helper.DEFAULT_SIMUL_CONFIG, net_sim_helper.DEFAULT_LOSS_CONFIG)
-helper.create_simul()
+builder.create_simul()
 
 # ---------------------------------------------------------------------------
 # Simnulation
 
-helper.make_device_send_data(clock=1, packet=coap_ip_packet)
-helper.run_simul()
+builder.make_device_send_data(clock=1, packet=coap_ip_packet)
+builder.run_simul()
 
 # ---------------------------------------------------------------------------
