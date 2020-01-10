@@ -24,7 +24,8 @@ def rule_no_ack():
       "RuleID":12,
       "RuleIDLength":6,
       "Fragmentation":{
-         "FRMode":"noAck"
+         "FRMode":"noAck",
+         "FRDirection" : "DW"
       }
    }
 ]   
@@ -43,6 +44,7 @@ def rule_ack_on_error():
       "RuleIDLength":6,
       "Fragmentation":{
          "FRMode":"ackOnError",
+         "FRDirection" : "DW",
          "FRModeProfile":{
             "dtagSize":2,
             "WSize":3,
