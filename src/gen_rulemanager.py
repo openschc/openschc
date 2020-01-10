@@ -457,9 +457,19 @@ class RuleManager:
                 if "Compression" in n_rule:
                     r = self._create_compression_rule(n_rule)
                     d["SoR"].append(r)
-                elif "Fragmentation" in n_rule:
+                elif T_FRAG in n_rule:
                     r = self._create_fragmentation_rule(n_rule)
                     d["SoR"].append(r)
+                elif T_NO_COMP in n_rule:
+                    already_exists = self.FindNoCompressionRule(deviceID=device)
+                    if already_exists == None:
+                        arule = {}
+                        arule[T_RULEID] = n_rule[T_RULEID]
+                        arule[T_RULEIDLENGTH] = n_rule[T_RULEIDLENGTH]
+                        arule[T_NO_COMP] = []
+                        d["SoR"].append(arule)
+                    else:
+                        print ("Warning 'no compression' rule already exists")
                 else:
                     raise ValueError ("Rule type undefined")
 
@@ -510,7 +520,6 @@ class RuleManager:
             else:
                 ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx]
 
-        print (">>>>", nrule)
         if not T_FRAG_DIRECTION in nrule[T_FRAG]:
             raise ValueError ("Keyword {} must be specified with {} or {}".format(T_FRAG_DIRECTION, T_DIR_UP, T_DIR_DW))
 
@@ -578,12 +587,12 @@ class RuleManager:
         #     arule[T_ACTION] = nrule[T_ACTION]
 
 
-        arule["Compression"] = []
+        arule[T_COMP] = []
 
         up_rules = 0
         dw_rules = 0
 
-        for r in nrule["Compression"]:
+        for r in nrule[T_COMP]:
             if not r["FID"] in FIELD__DEFAULT_PROPERTY:
                 raise ValueError( "Unkwown field id {} in rule {}/{}".format(
                     r["FID"], arule[T_RULEID],  arule[T_RULEIDLENGTH]
@@ -625,7 +634,7 @@ class RuleManager:
                 raise ValueError("{} CDA not found".format(CDA))
             entry[T_CDA] = CDA
 
-            arule["Compression"].append(entry)
+            arule[T_COMP].append(entry)
 
         if not T_META in arule:
             arule[T_META] = {}
@@ -672,9 +681,9 @@ class RuleManager:
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
                 dprint ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
-                if "Compression" in rule:
+                if T_COMP in rule:
                     dprint ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
-                    for e in rule["Compression"]:
+                    for e in rule[T_COMP]:
                         dprint ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
                         if 'TV' in e:
                             if type(e[T_TV]) is list:
@@ -730,6 +739,8 @@ class RuleManager:
                         ))
 
                     dprint ("\\" + "="*87 +"/")
+                elif T_NO_COMP in rule:
+                    dprint ("NO COMPRESSION RULE")
 
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True
@@ -837,11 +848,27 @@ class RuleManager:
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
 
-    def FindFragmentationRule(self, deviceID=None, originalSize=None):
+    def FindNoCompressionRule(self, deviceID=None):
         for d in self._ctxt:
             if d["DeviceID"] == deviceID:
                 for r in d["SoR"]:
-                    if "Fragmentation" in r:
+                    if T_NO_COMP in r:
+                        return r
+
+        return None        
+
+    def FindFragmentationRule(self, deviceID=None, originalSize=None, reliability=T_FRAG_NO_ACK, direction=T_DIR_UP):
+        """
+        Find a fragmentation rule regarding parameters:
+        * original SCHC packet size
+        * reliability NoAck, AckOnError, AckAlways
+        * direction (UP or DOWN)
+        NOTE: Not yet implemented, returns the first fragmentation rule.  
+        """
+        for d in self._ctxt:
+            if d["DeviceID"] == deviceID:
+                for r in d["SoR"]:
+                    if T_FRAG in r:
                         return r
 
         return None
