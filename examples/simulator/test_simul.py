@@ -19,7 +19,8 @@ frag_rule_noack = {
     "RuleID" : 12,
     "RuleIDLength" : 6,
     "Fragmentation" : {
-        "FRMode": "noAck"
+        "FRMode": "noAck",
+        "FRDirection" : "DW"
     }
 }
 # ---------------------------------------------------------------------------

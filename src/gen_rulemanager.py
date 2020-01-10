@@ -127,6 +127,8 @@ Fragmentation rules define how the compression and decompression must be perform
 
 The keyword  **Fragmentation** is followed by a dictionnary containing the different parameters used.
 Inside the keyword **FRMode** indicates which Fragmentation mode is used (**noAck**, **ackAlways**, **ackOnError**).
+**FRDirection** give the direction of the fragmentation rule. **UP** means that data fragments are sent by the device,
+**DW** for the opposite direction. This entry is mandatory.
 Then the keyword **FRModeProfiler** gives the information needed to create the SCHC fragmentation header and mode profile:
 
 * **dtagSize** gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present \
@@ -154,6 +156,7 @@ For instance::
         "RuleLength": 3,
         "Fragmentation" : {
             "FRMode": "ackOnError",
+            "FRDirection": "UP",
             "FRModeProfile": {
                 "dtagSize": 2,
                 "WSize": 5,
@@ -507,6 +510,14 @@ class RuleManager:
             else:
                 ar[T_FRAG][T_FRAG_PROF][idx] = nr[T_FRAG][T_FRAG_PROF][idx]
 
+        print (">>>>", nrule)
+        if not T_FRAG_DIRECTION in nrule[T_FRAG]:
+            raise ValueError ("Keyword {} must be specified with {} or {}".format(T_FRAG_DIRECTION, T_DIR_UP, T_DIR_DW))
+
+        if not nrule[T_FRAG][T_FRAG_DIRECTION] in [T_DIR_UP, T_DIR_DW]:
+            raise ValueError ("Keyword {} must be {} or {}".format(T_FRAG_DIRECTION, T_DIR_UP, T_DIR_DW))
+
+        arule[T_FRAG][T_FRAG_DIRECTION] = nrule[T_FRAG][T_FRAG_DIRECTION] 
 
 
         if  T_FRAG_MODE in nrule[T_FRAG]:

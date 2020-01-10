@@ -102,6 +102,7 @@ T_DW_RULES = "DW_RULES"
 
 T_FRAG = "Fragmentation"
 T_FRAG_MODE = "FRMode"
+T_FRAG_DIRECTION = "FRDirection"
 T_FRAG_PROF = "FRModeProfile"
 T_FRAG_DTAG = "dtagSize"
 T_FRAG_W = "WSize"
