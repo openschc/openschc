@@ -70,10 +70,11 @@ def run_scenario(name, spec, prefix):
     simul_config["record.quiet"] = True
 
     builder = net_sim_builder.SimulBuilder()
-    builder.create_device(rules.copy())
-    builder.create_gateway(rules.copy())
     builder.set_config(simul_config, None)
     builder.create_simul()
+    builder.create_device(rules.copy())
+    builder.create_core(rules.copy())
+
     packet = DEFAULT_PACKET + b"\x00" * spec.get("packet-size", DEFAULT_PACKET_SIZE)
     builder.make_device_send_data(clock=1, packet=packet)
     builder.run_simul()
@@ -138,14 +139,14 @@ def make_cmd_compare_all_parser(arg_subparser):
 #----------------------------------------
 
 def cmd_recheck_all(args):
-    #subprocess.run("./simtool run-all".split(), check=True)
-    #subprocess.run("./simtool compare-all".split(), check=True)
-    cmd_run_all(args)
-    cmd_compare_all(args)
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool compare-all".split(), check=True)
+    #cmd_run_all(args)
+    #cmd_compare_all(args)
 
 def make_cmd_recheck_all_parser(arg_subparser):
     run_parser = subparser.add_parser("recheck-all")
-    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--prefix", type=str, default="ref") # XXX: not used
     run_parser.set_defaults(cmd_func = cmd_recheck_all)
     return run_parser
 

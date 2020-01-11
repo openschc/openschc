@@ -67,6 +67,8 @@ class SimulLayer3:
         cls.__v6addr_base += 1
         return result
 
+#---------------------------------------------------------------------------
+
 class SimulNode: # object
     pass
 
@@ -111,6 +113,7 @@ class SimulSCHCNode(SimulNode):
 class SimulNullNode(SimulNode):
     pass
 
+#---------------------------------------------------------------------------
 
 class Simul:
     def __init__(self, simul_config = {}):

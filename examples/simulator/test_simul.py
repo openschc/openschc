@@ -50,10 +50,11 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # ---------------------------------------------------------------------------
 
 builder = net_sim_builder.SimulBuilder()
-builder.create_device(device_rules)
-builder.create_gateway(core_rules)
 #builder.set_config(net_sim_builder.DEFAULT_SIMUL_CONFIG, net_sim_builder.DEFAULT_LOSS_CONFIG)
 builder.create_simul()
+builder.create_device(device_rules)
+builder.create_core(core_rules)
+
 
 # ---------------------------------------------------------------------------
 # Simnulation
