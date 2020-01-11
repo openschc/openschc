@@ -117,13 +117,6 @@ class SimulNullNode(SimulNode):
 
 class Simul:
     def __init__(self, simul_config = {}):
-        self.ACK_SUCCESS = "ACK_SUCCESS" # XXX: this should not be here
-        self.ACK_FAILURE = "ACK_FAILURE"
-        self.RECEIVER_ABORT = "RECEIVER_ABORT"
-        self.SEND_ALL_1 = "SEND_ALL_1"
-        self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
-        self.ACK_TIMEOUT = "ACK_TIMEOUT"
-
         self.simul_config = simul_config
         self.node_table = {}
         self.link_set = set()
@@ -184,7 +177,7 @@ class Simul:
         return result
 
     def send_packet(self, packet, src_id, dst_id=None,
-                    callback=None, callback_args=tuple() ):
+                    callback=None, callback_args=tuple(), with_hack=False ):
         self._log("----------------------- SEND PACKET -----------------------")
         if not self.frame_loss.check(len(packet)):
             self._log("----------------------- OK -----------------------")
@@ -195,9 +188,13 @@ class Simul:
                 Statsct.add_packet_info(clock, packet, src_id, dst_id, True)
             # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
-            count = 0
-            for link in link_list:
-                count += self.send_packet_on_link(link, packet)
+            if not with_hack:
+                count = 0
+                for link in link_list:
+                    count += self.send_packet_on_link(link, packet)
+            else:
+                count = 1
+                self._send_packetX_hack() # [CA] should be removed
         else:
             self._log("----------------------- KO -----------------------")
             self._log("packet was lost {}->{}".format(src_id, dst_id))
@@ -220,18 +217,15 @@ class Simul:
         return count
 
     # XXX: this method should be removed, and object oriented style should be used:
-    def send_packetX(self, packet, src_id, dst_id=None, callback=None, callback_args=tuple()):
-        """send a message to another device in a client - server Simulation"""
-        self._log("----------------------- SEND PACKET -----------------------")
-        if not self.frame_loss.check(packet):
-            self._log("----------------------- OK -----------------------")
-            self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-            if enable_statsct:
-                Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
-                clock = self.scheduler.get_clock()
-                Statsct.add_packet_info(clock, packet, src_id, dst_id, True)
-            # if dst_id == None, it is a broadcast
-            # link_list = self.get_link_by_id(src_id, dst_id)
+    # [CA] didn't understood the logic here, so kept as is:
+    def _send_packetX_hack(self):
+            self.ACK_SUCCESS = "ACK_SUCCESS" # XXX: this should not be here
+            self.ACK_FAILURE = "ACK_FAILURE"
+            self.RECEIVER_ABORT = "RECEIVER_ABORT"
+            self.SEND_ALL_1 = "SEND_ALL_1"
+            self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
+            self.ACK_TIMEOUT = "ACK_TIMEOUT"
+        
             count = 1
             # for link in link_list:
             #     count += self.send_packet_on_link(link, packet)
@@ -255,26 +249,6 @@ class Simul:
                     # note_table_list1.protocol.fragment_session.session_list[0]["session"].state = 'START'
             except:
                 dprint("Not fragment state")
-        else:
-            self._log("----------------------- KO -----------------------")
-            self._log("packet was lost {}->{}".format(src_id, dst_id))
-            if enable_statsct:
-                Statsct.log("packet was lost {}->{} {}".format(src_id, dst_id, packet))
-                clock = self.scheduler.get_clock()
-                Statsct.add_packet_info(clock, packet, src_id, dst_id, False)
-            count = 0
-        #
-        if callback != None:
-            args = callback_args + (count,) # XXX need to check. - CA:
-            # [CA] the 'count' is now passed as 'status' in:
-            #  SimulLayer2._event_sent_callback(self, transmit_callback, status
-            # the idea is that is transmission fails, at least you can pass
-            # count == 0 (status == 0), and you can do something there.
-            # (in general case, some meta_information need to be sent)
-
-            #args = callback_args
-            callback(*args)
-        return count
 
     def send_packet_on_link(self, link, packet):
         node_to = self.node_table[link.to_id]
