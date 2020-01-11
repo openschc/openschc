@@ -8,6 +8,7 @@ Client
  python3 ClientServerSimul.py --r client
 """
 import sys
+sys.path.append("../../src") # XXX remove
 import argparse
 import ClientConnection
 import ServerConnection
@@ -82,7 +83,7 @@ ap.add_argument("--payload", action="store", dest="payload_name_file",
                 default="",
                 help="Specify a payload file name. e.g. payload/testfile_small.txt.")
 ap.add_argument("--rule", action="store", dest="rule_name_file",
-                default="{}/examples/configs/comp-rule-100.json".format(os.environ.get("OPENSCHCDIR",".."),
+                default="{}/examples/configs/comp-rule-100.json".format(os.environ.get("OPENSCHCDIR","../.."),
                 help="Specify a rule file name. e.g.  examples/comp-rule-100.json."))
 ap.add_argument("--time", action="store", dest="time_between_iteration", type=int,
                 default=10,

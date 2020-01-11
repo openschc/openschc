@@ -13,6 +13,18 @@ An short simple example is provided how to use it:
 
 ## Automated Simulation Tool
 
+### Introduction
+
+The program `simtool` provides a way to run, and compare the output of simulations, and the intended workflow is as
+follows:
+  1) With a stable version of openschc, run and record all scenarios with `./simtool run-all --prefix ref`
+  2) ... do modifications of openschc (like refactoring) ...
+  3) Check if the output is identical (or what are the differences) with `./simtool recheck-all` (which assumes 
+  default prefix `ref`)
+
+
+### Reference
+
 The program `simtool` provides a way to run, and compare the output of simulations
 
 * `./simtool list`:
