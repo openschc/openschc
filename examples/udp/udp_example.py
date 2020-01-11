@@ -14,7 +14,8 @@ frag_rule_noack = {
     "RuleID" : 12,
     "RuleIDLength" : 6,
     "Fragmentation" : {
-        "FRMode": "noAck"
+        "FRMode": "noAck",
+        "FRDirection": "DW"
     }
 }
 
@@ -33,15 +34,17 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # Get UDP address and role from command line
 
 parser = argparse.ArgumentParser()
-parser.add_argument("role", choices=["device", "gateway"])
+parser.add_argument("role", choices=["device", "core"])
 args = parser.parse_args()
 
 ip_address = "127.0.0.1"
+role = args.role
 
-if args.role == "device":
+if role == "device":
     udp_src = (ip_address, 33300)
     udp_dst = (ip_address, 33333)
 else:
+    assert role == "core"
     udp_src = (ip_address, 33333)
     udp_dst = (ip_address, 33300)
 
@@ -58,7 +61,7 @@ lower_layer = UdpLowerLayer(udp_src, udp_dst)
 system = UdpSystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
-    config, system, layer2=lower_layer, layer3=upper_layer)
+    config, system, layer2=lower_layer, layer3=upper_layer, role=role)
 schc_protocol.set_rulemanager(rule_manager)
 
 if args.role == "device": # XXX: fix addresses mismatches
