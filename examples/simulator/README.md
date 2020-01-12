@@ -50,3 +50,6 @@ The program `simtool` provides a way to run, and compare the output of simulatio
    Re-run each existing scenario, and theyn compare the output of each scenario in its default output 
    directory to the one prefixed by `<prefix>-` (or by default by `ref-`)
  
+ * Alternate commands for `recheck-all` are `rediff` or resp. `rekdiff`, which perform the same actions, 
+   except that the programs `diff -u` or resp. `kdiff3` are used to display the differences.
+ 

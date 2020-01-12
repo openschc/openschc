@@ -117,22 +117,84 @@ def make_cmd_run_all_parser(arg_subparser):
 #---------------------------------------------------------------------------
 
 def cmd_compare_all(args):
+    if args.compare_tool is None:
+        with_external_compare = True
+        check = False
+        cmp_prog = "cmp"
+
+    elif args.compare_tool is "diff":
+        with_external_compare = True
+        check = False
+        cmp_prog = "diff -u"
+
+    elif args.compare_tool is "kdiff3":
+        with_external_compare = False
+        check = "<unapplyabple>"
+        cmp_prog = None
+        diff_display_prog = "kdiff3"
+
+    else:
+        raise ValueError("bad compare_tool", args.compare_tool)
+
+    print(with_external_compare, cmp_prog)
+    #XXX
+    count_diff = 0
+
     prefix = args.prefix
     scenario_table = get_test_scenarios()
-    prog, check = "diff -u", False
     for scenario in sorted(scenario_table.keys()):
         spec = scenario_table[scenario]
         record_dir_name = get_record_dir_name_from_spec(scenario, spec)
         for log_file_name in os.listdir(record_dir_name):
             new_file_name = os.path.join(record_dir_name, log_file_name)
             ref_file_name = os.path.join(prefix+"-"+record_dir_name, log_file_name)
-            cmd = "{} {} {}".format(prog, new_file_name, ref_file_name)
-            print("> "+cmd)
-            subprocess.run(cmd.split(" "), check=check)
+
+            if with_external_compare:
+                cmd = "{} {} {}".format(cmp_prog, new_file_name, ref_file_name)
+                print("> "+cmd)
+                process = subprocess.run(cmd.split(" "), check=check)
+                if process.returncode != 0:
+                    count_diff += 1
+
+            else:
+                with open(new_file_name) as new_file:
+                    new_content = new_file.read()
+                with open(ref_file_name) as ref_file:
+                    ref_content = ref_file.read()
+
+                if new_content != ref_content:
+                    count_diff += 1
+                    print("{} differs from {}".format(
+                        new_file_name, ref_file_name))
+                    if diff_display_prog is not None:
+                        cmd = "{} {} {}".format(diff_display_prog, new_file_name, ref_file_name)
+                        print("> "+cmd)
+                        subprocess.run(cmd.split(" "), check=False)
+
+    if count_diff == 0:
+        print("> no difference(s) found.")
+    else:
+        print("> differences found in {} files".format(count_diff))
+
 
 def make_cmd_compare_all_parser(arg_subparser):
     run_parser = subparser.add_parser("compare-all")
     run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default=None)
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+def make_cmd_diff_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("diff-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default="diff")
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+def make_cmd_kdiff_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("kdiff-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default="kdiff3")
     run_parser.set_defaults(cmd_func = cmd_compare_all)
     return run_parser
 
@@ -150,6 +212,24 @@ def make_cmd_recheck_all_parser(arg_subparser):
     run_parser.set_defaults(cmd_func = cmd_recheck_all)
     return run_parser
 
+def cmd_rekdiff(args):
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool kdiff-all".split(), check=True)
+
+def make_cmd_rekdiff_parser(arg_subparser):
+    run_parser = subparser.add_parser("rekdiff")
+    run_parser.set_defaults(cmd_func = cmd_rekdiff)
+    return run_parser
+
+def cmd_rediff(args):
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool diff-all".split(), check=True)
+
+def make_cmd_rediff_parser(arg_subparser):
+    run_parser = subparser.add_parser("rediff")
+    run_parser.set_defaults(cmd_func = cmd_rediff)
+    return run_parser
+
 #---------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser()
@@ -160,6 +240,10 @@ cmd_run_parser = make_cmd_run_parser(subparser)
 cmd_run_all_parser = make_cmd_run_all_parser(subparser)
 cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
 cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)
+unused = make_cmd_diff_all_parser(subparser)
+unused = make_cmd_kdiff_all_parser(subparser)
+unused = make_cmd_rekdiff_parser(subparser)
+unused = make_cmd_rediff_parser(subparser)
 
 args = parser.parse_args()
 if args.cmd_func is not None:
