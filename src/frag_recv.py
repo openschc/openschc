@@ -121,6 +121,9 @@ class ReassembleBase:
         self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
         self.event_id_inactive_timer = None
 
+    def get_session_type(self):
+        return "reassembly"
+
 #---------------------------------------------------------------------------
 
 class ReassemblerNoAck(ReassembleBase):

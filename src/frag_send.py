@@ -104,6 +104,10 @@ class FragmentBase():
     def send_frag(self):
         raise NotImplementedError("it is implemented at the subclass.")
 
+    def get_session_type(self):
+        return "fragmentation"
+    
+
 class FragmentNoAck(FragmentBase):
 
 # 8.4.1.  No-ACK mode

@@ -59,34 +59,42 @@ class Session:
 
 # ---------------------------------------------------------------------------
 
-class FragSessionManager:
+class SessionManager:
     """
     Manage a table of sessions:
 
     Internals:
-       session_table_per_node[address]
-          -> session_table[(rule_id, rule_id_size, dtag)]
-              -> (session_type, session)
-        session_type is "reassembly" or "fragmentation"
+       session_table[(l2_address, rule_id, rule_id_size, dtag)]
+              -> session
+       session_type is "reassembly" or "fragmentation"
     """
     def __init__(self, protocol):
-        self.protocol = None
-        self.session_table_per_node = {}
+        self.protocol = protocol
+        self.session_table = {}
 
-    def find_session(self, node_l2_address, session_id):
-        session_table = self.session_table_per_node.get(node_l2_address, None)
-        if session_table is None:
-            return None, None
-        session_type, session = session_table.get(session_id, None)
-        return session_type, session
+    def find_session(self, session_id):
+        session = self.session_table.get(session_id, None)
+        return session
 
-    def add_session(self, node_l2_address, session_id, session, session_type):
-        if node_l2_address not in self.session_table_per_node:
-            self.session_table_per_node[node_l2_address] = {}
-
-        session_table = self.session_table_per_node[node_l2_address]
-        assert session_id not in session_table
-        session_table[session_id] = (session_type, session)
+    def _add_session(self, session_id, session):
+        assert session_id not in self.session_table
+        self.session_table[session_id] = session
+        
+    def create_reassembly_session(self, context, rule, session_id):
+        l2_address, rule_id, unused, dtag = session_id
+        mode = rule[T_FRAG][T_FRAG_MODE]
+        if mode == "noAck":
+            session = ReassemblerNoAck(
+                self.protocol, context, rule, dtag, l2_address)
+        elif mode == "ackAlways":
+            raise NotImplementedError("FRMode:", mode)
+        elif mode == "ackOnError":
+            session = ReassemblerAckOnError(
+                self.protocol, context, rule, dtag, l2_address)
+        else:
+            raise ValueError("FRMode:", mode)
+        self._add_session(session_id, session)
+        return session
 
     def get_state(self, **kw):
         return []
@@ -110,7 +118,7 @@ class SCHCProtocol:
         self.layer3._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
-        self.frag_session_manager = FragSessionManager(self)
+        self.session_manager = SessionManager(self)
         self.fragment_session = Session(self)
         self.reassemble_session = Session(self)
         if hasattr(config, "debug_level"):
@@ -219,18 +227,6 @@ class SCHCProtocol:
             raise ValueError("invalid FRMode: {}".format(mode))
         return session
 
-    def new_reassemble_session(self, context, rule, dtag, dev_L2addr):
-        mode = rule[T_FRAG][T_FRAG_MODE]
-        if mode == "noAck":
-            session = ReassemblerNoAck(self, context, rule, dtag, dev_L2addr)
-        elif mode == "ackAlways":
-            raise NotImplementedError("FRMode:", mode)
-        elif mode == "ackOnError":
-            session = ReassemblerAckOnError(self, context, rule, dtag,
-                                            dev_L2addr)
-        else:
-            raise ValueError("FRMode:", mode)
-        return session
 
     def schc_recv(self, sender_l2_address, raw_packet):
         #self._log("recv-from-L2 {} {}".format(sender_l2_addr, raw_packet))
@@ -249,25 +245,18 @@ class SCHCProtocol:
 
         rule_id = frag_rule[T_RULEID]
         rule_id_length = frag_rule[T_RULEIDLENGTH]
-        session_id = rule_id, rule_id_length, dtag
-        session_type, session = self.frag_session_manager.find_session(
-            sender_l2_address, session_id)
+        session_id = (sender_l2_address, rule_id, rule_id_length, dtag)
+        session = self.session_manager.find_session(session_id)
 
         if session is not None:
-            dprint("{} session found".format(session_type.capitalize()),
-                   session.__class__.__name__)
+            dprint("{} session found".format(
+                session.get_session_type().capitalize()),
+                session.__class__.__name__)
 
         else:
-            if session_type == "fragmentation":
-                dprint("context exists, but no {} session for this packet {}".
-                       format(sender_l2_address))
-                return
-
             context = None
-            session = self.new_reassemble_session(context, frag_rule, dtag,
-                                                  sender_l2_address)
-            self.frag_session_manager.add_session(
-                sender_l2_address, session_id, session, "reassembly")
+            session = self.session_manager.create_reassembly_session(
+                context, frag_rule, session_id)
             dprint("New reassembly session created", session.__class__.__name__)
 
         session.receive_frag(packet_bbuf, dtag)
