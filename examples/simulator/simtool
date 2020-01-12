@@ -150,7 +150,7 @@ def cmd_compare_all(args):
             ref_file_name = os.path.join(prefix+"-"+record_dir_name, log_file_name)
 
             if with_external_compare:
-                cmd = "{} {} {}".format(cmp_prog, new_file_name, ref_file_name)
+                cmd = "{} {} {}".format(cmp_prog, ref_file_name, new_file_name)
                 print("> "+cmd)
                 process = subprocess.run(cmd.split(" "), check=check)
                 if process.returncode != 0:
@@ -167,7 +167,7 @@ def cmd_compare_all(args):
                     print("{} differs from {}".format(
                         new_file_name, ref_file_name))
                     if diff_display_prog is not None:
-                        cmd = "{} {} {}".format(diff_display_prog, new_file_name, ref_file_name)
+                        cmd = "{} {} {}".format(diff_display_prog, ref_file_name, new_file_name)
                         print("> "+cmd)
                         subprocess.run(cmd.split(" "), check=False)
 

@@ -49,7 +49,6 @@ class Session:
                 return i["session"]
         return None
 
-
     def get_state(self, **kw):
         result = []
         for session in self.session_list:
@@ -58,11 +57,41 @@ class Session:
             result.append(session_state)
         return result
 
+# ---------------------------------------------------------------------------
 
-class debug_protocol:
-    def _log(*arg):
-        dprint(*arg)
+class FragSessionManager:
+    """
+    Manage a table of sessions:
 
+    Internals:
+       session_table_per_node[address]
+          -> session_table[(rule_id, rule_id_size, dtag)]
+              -> (session_type, session)
+        session_type is "reassembly" or "fragmentation"
+    """
+    def __init__(self, protocol):
+        self.protocol = None
+        self.session_table_per_node = {}
+
+    def find_session(self, node_l2_address, rule_id, rule_id_size, dtag):
+        session_table = self.session_table_per_node.get(node_l2_address, None)
+        if session_table is None:
+            return None, None
+        session_type, session = session_table.get((rule_id, rule_id_size, dtag), None)
+        return session_type, session
+
+    def add_session(self, node_l2_address, rule_id, rule_id_length, dtag, session, session_type):
+        if node_l2_address not in self.session_table_per_node:
+            self.session_table_per_node[node_l2_address] = {}
+
+        session_table = self.session_table_per_node[node_l2_address]
+        assert (rule_id, rule_id_length, dtag) not in session_table
+        session_table[(rule_id, rule_id_length, dtag)] = (session_type, session)
+
+    def get_state(self, **kw):
+        return []
+
+# ---------------------------------------------------------------------------
 
 class SCHCProtocol:
     """This class is the entry point for the openschc
@@ -81,6 +110,7 @@ class SCHCProtocol:
         self.layer3._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
+        self.frag_session_manager = FragSessionManager(self)
         self.fragment_session = Session(self)
         self.reassemble_session = Session(self)
         if hasattr(config, "debug_level"):
@@ -110,7 +140,7 @@ class SCHCProtocol:
             raise ValueError("direction must be UP or DOWN, but {}"
                              .format(direction))
 
-        P = Parser(debug_protocol)
+        P = Parser(self)
         parsed_packet = P.parse(raw_packet, t_dir)
         dpprint(parsed_packet)
 
@@ -202,66 +232,45 @@ class SCHCProtocol:
             raise ValueError("FRMode:", mode)
         return session
 
-    def schc_recv(self, dev_L2addr, raw_packet):
-        # self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
-        frag_rule = self.rule_manager.FindFragmentationRule(dev_L2addr)
+    def schc_recv(self, sender_l2_address, raw_packet):
+        #self._log("recv-from-L2 {} {}".format(sender_l2_addr, raw_packet))
+        frag_rule = self.rule_manager.FindFragmentationRule(sender_l2_address)
 
-        # dprint(dev_L2addr)
         packet_bbuf = BitBuffer(raw_packet)
-        # dprint("raw_packet", raw_packet)
-        # dprint("schc packet", packet_bbuf)
-        # dprint("frag_rule", frag_rule)
-
-        # !IMPORTANT: This condition has to be changed by a context condition like in the last version
 
         dtrace('>', binascii.hexlify(packet_bbuf.get_content()), ' ')
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
-        if dev_L2addr == b"\xaa\xbb\xcc\xee":
+        dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
+        if dtag_length > 0:
+            dtag = packet_bbuf.get_bits(dtag_length, position=frag_rule[T_RULEIDLENGTH])
+        else:
+            dtag = None # XXX: get_bits(0) should work?
 
-            if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
-                dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
-                                            position=frag_rule[T_RULEIDLENGTH])
-            else:
-                dtag = None
+        rule_id, rule_id_length = frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH]
+        session_type, session = self.frag_session_manager.find_session(
+            sender_l2_address, rule_id, rule_id_length, dtag)
 
-            # find existing session for fragment or reassembly.
-            session = self.reassemble_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
-            if session is not None:
+        if session is not None:
+            if session_type == "fragmentation":
+                dprint("Fragmentation session found", session.__class__.__name__)
+            elif session_type == "reassembly":
                 dprint("Reassembly session found", session.__class__.__name__)
-            else:
-                # no session is found.  create a new reassemble session.
-                context = None
-                session = self.new_reassemble_session(context, frag_rule, dtag,
-                                                      dev_L2addr)
-                self.reassemble_session.add(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH],
-                                            dtag, session)
-                dprint("New reassembly session created", session.__class__.__name__)
-            session.receive_frag(packet_bbuf, dtag)
-            return
-
-            self.process_decompress(packet_bbuf, dev_L2addr, direction=T_DIR_UP)
-
-        elif dev_L2addr == b"\xaa\xbb\xcc\xdd":
-            if frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] > 0:
-                dtag = packet_bbuf.get_bits(frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
-                                            position=frag_rule[T_RULEIDLENGTH])
-            else:
-                dtag = None
-            # find existing session for fragment or reassembly.
-            session = self.fragment_session.get(frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH], dtag)
-            dprint("rule.ruleID -> {},rule.ruleLength-> {}, dtag -> {}".format(frag_rule[T_RULEID],
-                                                                              frag_rule[T_RULEIDLENGTH], dtag))
-            if session is not None:
-                dprint("Fragmentation session found", session)
-                session.receive_frag(packet_bbuf, dtag)
-            else:
-                dprint("context exists, but no {} session for this packet {}".
-                      format(dev_L2addr))
-            return
 
         else:
-            raise RuntimeError("Not implemented properly", dev_L2addr)
+            if session_type == "fragmentation":
+                dprint("context exists, but no {} session for this packet {}".
+                       format(sender_l2_address))
+                return
+
+            context = None
+            session = self.new_reassemble_session(context, frag_rule, dtag,
+                                                  sender_l2_address)
+            self.frag_session_manager.add_session(
+                sender_l2_address, rule_id, rule_id_length, dtag, session, "fragmentation")
+            dprint("New reassembly session created", session.__class__.__name__)
+
+        session.receive_frag(packet_bbuf, dtag)
 
     # def schc_recv(self, dev_L2addr, raw_packet):
     #     self._log("recv-from-L2 {} {}".format(dev_L2addr, raw_packet))
