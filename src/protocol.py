@@ -73,20 +73,20 @@ class FragSessionManager:
         self.protocol = None
         self.session_table_per_node = {}
 
-    def find_session(self, node_l2_address, rule_id, rule_id_size, dtag):
+    def find_session(self, node_l2_address, session_id):
         session_table = self.session_table_per_node.get(node_l2_address, None)
         if session_table is None:
             return None, None
-        session_type, session = session_table.get((rule_id, rule_id_size, dtag), None)
+        session_type, session = session_table.get(session_id, None)
         return session_type, session
 
-    def add_session(self, node_l2_address, rule_id, rule_id_length, dtag, session, session_type):
+    def add_session(self, node_l2_address, session_id, session, session_type):
         if node_l2_address not in self.session_table_per_node:
             self.session_table_per_node[node_l2_address] = {}
 
         session_table = self.session_table_per_node[node_l2_address]
-        assert (rule_id, rule_id_length, dtag) not in session_table
-        session_table[(rule_id, rule_id_length, dtag)] = (session_type, session)
+        assert session_id not in session_table
+        session_table[session_id] = (session_type, session)
 
     def get_state(self, **kw):
         return []
@@ -247,15 +247,15 @@ class SCHCProtocol:
         else:
             dtag = None # XXX: get_bits(0) should work?
 
-        rule_id, rule_id_length = frag_rule[T_RULEID], frag_rule[T_RULEIDLENGTH]
+        rule_id = frag_rule[T_RULEID]
+        rule_id_length = frag_rule[T_RULEIDLENGTH]
+        session_id = rule_id, rule_id_length, dtag
         session_type, session = self.frag_session_manager.find_session(
-            sender_l2_address, rule_id, rule_id_length, dtag)
+            sender_l2_address, session_id)
 
         if session is not None:
-            if session_type == "fragmentation":
-                dprint("Fragmentation session found", session.__class__.__name__)
-            elif session_type == "reassembly":
-                dprint("Reassembly session found", session.__class__.__name__)
+            dprint("{} session found".format(session_type.capitalize()),
+                   session.__class__.__name__)
 
         else:
             if session_type == "fragmentation":
@@ -267,7 +267,7 @@ class SCHCProtocol:
             session = self.new_reassemble_session(context, frag_rule, dtag,
                                                   sender_l2_address)
             self.frag_session_manager.add_session(
-                sender_l2_address, rule_id, rule_id_length, dtag, session, "fragmentation")
+                sender_l2_address, session_id, session, "reassembly")
             dprint("New reassembly session created", session.__class__.__name__)
 
         session.receive_frag(packet_bbuf, dtag)
