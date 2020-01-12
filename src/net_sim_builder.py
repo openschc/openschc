@@ -88,7 +88,10 @@ class SimulBuilder:
 
     def make_device_send_data(self, clock, packet=None, packet_size=None):
         self.device_node.protocol.layer3.send_later(
-            clock, self.core_node.layer3.L3addr, packet)
+            clock, None, None, packet)
+        # XXX: remove:
+        #self.device_node.protocol.layer3.send_later(
+        #    clock, self.core_node.layer3.L3addr, packet)
 
     def set_config(self, simul_config, loss_config=None):
         simul_config = simul_config.copy()
@@ -123,6 +126,7 @@ class SimulBuilder:
 
     def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={},
                         role="undefined"):
+        extra_config["unique-peer"] = True # XXX: change for core server
         node = net_sim_core.SimulSCHCNode(sim, extra_config, role)
         node.protocol.set_rulemanager(rule_manager)
         if devaddr is None:

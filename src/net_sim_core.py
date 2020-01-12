@@ -38,14 +38,14 @@ class SimulLayer3:
     def __init__(self, sim):
         self.sim = sim
         self.protocol = None
-        self.L3addr = SimulLayer3.__get_unique_addr()
+        self.L3addr = SimulLayer3.__get_unique_addr() #XXX: remove
 
-    def send_later(self, rel_time, dst_L3addr, raw_packet):
+    def send_later(self, rel_time, dst_l2_address, dst_l3_address, raw_packet):
         self._log("send-later Devaddr={} Packet={}".format(
-                dst_L3addr, b2hex(raw_packet)))
+                dst_l2_address, dst_l3_address, b2hex(raw_packet)))
         self.sim.scheduler.add_event(
             rel_time, self.protocol.schc_send,
-            (dst_L3addr, raw_packet,))
+            (dst_l2_address, dst_l3_address, raw_packet,))
 
     # XXX need to confirm whether this should be here or not.
     def recv_packet(self, dev_L2addr, raw_packet):
@@ -75,13 +75,14 @@ class SimulNode: # object
 class SimulSCHCNode(SimulNode):
     def __init__(self, sim, extra_config={}, role="undefined"):
         self.sim = sim
-        self.config = sim.simul_config.get("node-config", {}).copy()
+        self.config = sim.simul_config.get("node-config", {}).copy() # XXX: remove?
         self.config.update(extra_config)
+        unique_peer = self.config["unique-peer"]
 
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
         self.protocol = protocol.SCHCProtocol(
-            self.config, self, self.layer2, self.layer3, role)
+            self.config, self, self.layer2, self.layer3, role, unique_peer)
         self.id = self.layer2.mac_id
         self.sim._add_node(self)
 
