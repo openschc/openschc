@@ -121,6 +121,25 @@ class SimulNullNode(SimulNode):
 
 #---------------------------------------------------------------------------
 
+PACKET_PER_SECOND = 1
+PROPAGATION_DELAY = 1
+
+class Channel:
+    def __init__(self, sim):
+        self.sim = sim
+        self.node_time_table = {}
+
+    def transmit_packet(self, src_id, packet, callback, callback_args):
+        clock = self.sim.scheduler.get_clock()
+        available_time = self.node_time_table.get(src_id, clock)
+        available_time += 1/PACKET_PER_SECOND
+        self.node_time_table[src_id] = available_time
+        delivery_rel_time = (available_time + PROPAGATION_DELAY) - clock
+        #callback(*callback_args)
+        self.sim.scheduler.add_event(delivery_rel_time, callback, callback_args)
+
+# ---------------------------------------------------------------------------
+
 class Simul:
     def __init__(self, simul_config = {}):
         self.simul_config = simul_config
@@ -130,6 +149,7 @@ class Simul:
         self.scheduler = Scheduler()
         self.log_file = None
         self.observer = None
+        self.channel = Channel(self)
         self.init_from_config()
 
     def init_from_config(self):
@@ -183,7 +203,16 @@ class Simul:
         return result
 
     def send_packet(self, packet, src_id, dst_id=None,
-                    callback=None, callback_args=tuple(), with_hack=False ):
+                    callback=None, callback_args=tuple(), with_hack=False):
+        if self.channel is None:
+            return self.deliver_packet(packet, src_id, dst_id, callback, callback_args, with_hack)
+        else:
+            return self.channel.transmit_packet(src_id, packet,
+                    self.deliver_packet,
+                    (packet, src_id, dst_id, callback, callback_args, with_hack))
+
+    def deliver_packet(self, packet, src_id, dst_id=None,
+                    callback=None, callback_args=tuple(), with_hack=False):
         self._log("----------------------- SEND PACKET -----------------------")
         lost = self.frame_loss.check(len(packet))
         if not lost:
@@ -215,7 +244,7 @@ class Simul:
             info = {"src":src_id, "dst":dst_id, "packet":packet, "clock": clock, "count":count, "lost":lost}
             self.observer.record_packet(info)
 
-        if callback != None:
+        if callback != None: #XXX: should called by channel after delay
             args = callback_args+(count,) # XXX need to check. - CA:
             # [CA] the 'count' is now passed as 'status' in:
             #  SimulLayer2._event_sent_callback(self, transmit_callback, status
@@ -331,6 +360,8 @@ class Simul:
                 raise ValueError("Not implemented yet: unbound methods", value)
         #elif not istance:
         #    raise ValueError("Not implemented yet:", type(value))
+        elif isinstance(value, tuple):
+            result = tuple(self._filter_value(x) for x in value)
         else:
             result = value
         return result
