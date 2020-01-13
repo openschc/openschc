@@ -243,7 +243,7 @@ class Simul:
             info = {"src":src_id, "dst":dst_id, "packet":packet, "clock": clock, "count":count, "lost":lost}
             self.observer.record_packet(info)
 
-        if callback != None:
+        if callback != None: #XXX: should called by channel after delay
             args = callback_args+(count,) # XXX need to check. - CA:
             # [CA] the 'count' is now passed as 'status' in:
             #  SimulLayer2._event_sent_callback(self, transmit_callback, status
@@ -359,6 +359,8 @@ class Simul:
                 raise ValueError("Not implemented yet: unbound methods", value)
         #elif not istance:
         #    raise ValueError("Not implemented yet:", type(value))
+        elif isinstance(value, tuple):
+            result = tuple(self._filter_value(x) for x in value)
         else:
             result = value
         return result

@@ -14,7 +14,7 @@ import net_sim_builder
 def get_test_scenarios():
     scenario_spec = {
         "rule-id-length": 4,
-        "packet-size": 100
+        "packet-size": 0
     }
     scenario_table = {
         "noack": scenario_spec
@@ -36,8 +36,9 @@ def make_cmd_list_parser(arg_subparser):
 
 #---------------------------------------------------------------------------
 
-DEFAULT_RULEID_LENGTH = 4
-DEFAULT_PACKET_SIZE = 10
+#DEFAULT_RULEID_LENGTH = 4
+#DEFAULT_PACKET_SIZE = 10
+DEFAULT_PACKET_SIZE = 0
 
 # XXX: what should be done with non-IPv6 +UDP packets?
 DEFAULT_PACKET = bytearray(b"""`\
@@ -52,14 +53,16 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
+
 def run_scenario(name, spec, prefix):
-    compr_rule = { "RuleID": 1,
-                   "RuleIDLength": spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+    compr_rule = { "RuleID": 12,
+                   "RuleIDLength": 4, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
                    "Compression": [] }
-    frag_rule = { "RuleID": 2,
-                  "RuleIDLength": spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+    frag_rule = { "RuleID": 12,
+                  "RuleIDLength": 6, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
                    "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
-    rules = [compr_rule, frag_rule]
+    nocompr_rule = {"RuleID" : 13, "RuleIDLength": 4, "NoCompression" : [] }
+    rules = [compr_rule, frag_rule, nocompr_rule]
 
     simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
     #loss_config = net_sim_builder.DEFAULT_LOSS_CONFIG
