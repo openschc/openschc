@@ -99,14 +99,18 @@ class SimulSCHCNode(SimulNode):
     def log(self, name, message):
         self.sim.log(name, "@{} {}".format(self.layer2.mac_id, message))
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result = {
-            "state": self.protocol.get_state(**kw)
+            "protocol": self.protocol.get_state_info(**kw)
         }
-        if kw.get("is_init") == True:
-            result["config"] = self.config.copy()
-            result["id"] = self.id
-            # XXX: L2 and L3 logs
+        return result
+
+    def get_init_info(self, **kw):
+        result = {
+            "protocol": self.protocol.get_init_info(**kw)
+        }
+        result["config"] = self.config.copy()
+        result["id"] = self.id
         return result
 
 
@@ -284,18 +288,23 @@ class Simul:
         if self.observer is not None:
             self.observer.stop_record()
 
-    def get_all_state(self, **kw):
+    def get_state_info(self, **kw):
         result = {
             "node_table": {
-                node_id: node.get_state(**kw)
+                node_id: node.get_state_info(**kw)
                 for node_id, node in self.node_table.items()
             }
         }
-        if kw.get("is_init") == True:
-            result["init"] = {
-                "links": [link_as_dict(link) for link in self.link_set]
-                # XXX: extra initialization info
+
+    def get_init_info(self, **kw):
+        result = {
+            "links": [link_as_dict(link) for link in self.link_set],
+            "simul_config": self.simul_config,
+            "node_table": {
+                node_id: node.get_init_info(**kw)
+                for node_id, node in self.node_table.items()
             }
+        }
         return result
 
 def link_as_dict(link):

@@ -17,7 +17,7 @@ def get_test_scenarios():
         "packet-size": 100
     }
     scenario_table = {
-        "base": scenario_spec
+        "noack": scenario_spec
     }
     return scenario_table
 
@@ -105,7 +105,7 @@ def cmd_run_all(args):
         if len(prefix) > 0:
             cmd += " --prefix "+prefix
         cmd += " " + scenario
-        print("> "+cmd)
+        print("> running: "+cmd)
         subprocess.run(cmd.split(" "), check=True)
 
 def make_cmd_run_all_parser(arg_subparser):
@@ -136,8 +136,6 @@ def cmd_compare_all(args):
     else:
         raise ValueError("bad compare_tool", args.compare_tool)
 
-    print(with_external_compare, cmp_prog)
-    #XXX
     count_diff = 0
 
     prefix = args.prefix
@@ -212,6 +210,16 @@ def make_cmd_recheck_all_parser(arg_subparser):
     run_parser.set_defaults(cmd_func = cmd_recheck_all)
     return run_parser
 
+#----------------------------------------
+
+def cmd_reref(args):
+    subprocess.run("./simtool run-all --prefix ref".split(), check=True)
+
+def make_cmd_reref_parser(arg_subparser):
+    run_parser = subparser.add_parser("reref")
+    run_parser.set_defaults(cmd_func = cmd_reref)
+    return run_parser
+
 def cmd_rekdiff(args):
     subprocess.run("./simtool run-all".split(), check=True)
     subprocess.run("./simtool kdiff-all".split(), check=True)
@@ -242,6 +250,7 @@ cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
 cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)
 unused = make_cmd_diff_all_parser(subparser)
 unused = make_cmd_kdiff_all_parser(subparser)
+unused = make_cmd_reref_parser(subparser)
 unused = make_cmd_rekdiff_parser(subparser)
 unused = make_cmd_rediff_parser(subparser)
 

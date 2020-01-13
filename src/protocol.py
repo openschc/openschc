@@ -358,12 +358,13 @@ class SCHCProtocol:
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result =  {
-            "reassemble": self.reassemble_session.get_state(**kw),
-            "fragment": self.fragment_session.get_state(**kw),
-            "state": "XXX - need to be added"
         }
-        if kw.get("is_init") == True:
-            result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
+        return result
+
+    def get_init_info(self, **kw):
+        result =  {
+        }
+        result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
         return result
