@@ -276,12 +276,14 @@ class SCHCProtocol:
     #    args = (dev_L2addr, raw_packet)
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
+        result =  {}
+        return result
+
+    def get_init_info(self, **kw):
         result =  {
-            "reassemble": None,
-            "fragment": None,
-            "state": "XXX - need to be added"
+            "role": self.role,
+            "unique-peer": self.unique_peer
         }
-        if kw.get("is_init") == True:
-            result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
+        result["rule-manager"] = self.rule_manager.get_init_info(**kw)
         return result
