@@ -66,4 +66,11 @@ class SimulScheduler:
             self.queue.sort()
             return self.queue[0][0]
 
+    # Internal API for Simulator get_state_info - don't use in other contexts
+
+    def get_queue_content(self):
+        result = self.queue.copy()
+        result.sort()
+        return result
+
 #---------------------------------------------------------------------------

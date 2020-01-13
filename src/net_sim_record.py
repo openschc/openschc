@@ -24,6 +24,7 @@ LOGGING_FILE_NAME = "logging.log"
 TRACE_FILE_NAME = "trace.log"
 PRINT_FILE_NAME = "print.log"
 INIT_FILE_NAME = "init.log"
+PACKET_FILE_NAME = "packet.log"
 
 class SimulResultManager:
 
@@ -63,6 +64,7 @@ class SimulRecordingObserver:
         self.log_file = open(self.manager.get_file_name(LOGGING_FILE_NAME), "w")
         self.trace_file = open(self.manager.get_file_name(TRACE_FILE_NAME), "w")
         self.print_file = open(self.manager.get_file_name(PRINT_FILE_NAME), "w")
+        self.packet_file = open(self.manager.get_file_name(PACKET_FILE_NAME), "w")
 
     def record_initial_state(self):
         init_file = open(self.manager.get_file_name(INIT_FILE_NAME), "w")
@@ -82,18 +84,8 @@ class SimulRecordingObserver:
             self.record_initial_state()
         elif event_name == "sched-pre-event":
             return # only record post-event to avoid redundancy
-        #is_init = False
-        #if event_name == "sched-pre-event":
-        #    if not self.has_initial_state:
-        #        event_name = "sim-start"
-        #        is_init = True
-        #        self.has_initial_state = True
-        #    else:
-        #        return # note: only post-event is used (except for init).
 
         clock, event_id, callback, args = event_info
-        if event_name == "sched-post-event":
-            pass # XXX: do something
         info = {
             "event": event_name,
             "clock": clock,
@@ -113,6 +105,14 @@ class SimulRecordingObserver:
             print(pprint.pformat(info), file=self.record_file)
         elif format == "json":
             print(json.dumps(info), file=self.record_file)
+        else: raise ValueError("unknown record.format", format)
+
+    def record_packet(self, info):
+        format = self.simul.simul_config.get("record.format")
+        if format == "pprint":
+            print(pprint.pformat(info), file=self.packet_file)
+        elif format == "json":
+            print(json.dumps(info), file=self.packet_file)
         else: raise ValueError("unknown record.format", format)
 
     def record_log(self, line):
@@ -137,6 +137,7 @@ class SimulRecordingObserver:
         self.record_file.close()
         self.log_file.close()
         self.trace_file.close()
+        self.packet_file.close()
         if not self.quiet:
             print("> recorded all state in '{}'".format(self.manager.get_file_name("")))
 

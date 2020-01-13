@@ -1066,3 +1066,10 @@ class RuleManager:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:
                     profile["tileSize"] = 64
+
+    def get_init_info(self):
+        result = {
+            "context": self._ctxt.copy(),
+            "database": self._db.copy()
+        }
+        return result

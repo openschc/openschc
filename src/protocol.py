@@ -74,6 +74,7 @@ class SCHCProtocol:
         assert role in ["device", "core"]
         self.config = config
         self.system = system
+        self.role = role
         self.scheduler = system.get_scheduler()
         self.layer2 = layer2
         self.layer3 = layer3
@@ -359,12 +360,12 @@ class SCHCProtocol:
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
 
     def get_state_info(self, **kw):
-        result =  {
-        }
+        result =  {}
         return result
 
     def get_init_info(self, **kw):
         result =  {
+            "role": self.role
         }
-        result["rule-manager"] = None #XXX:self.rule_manager.get_state(**kw)
+        result["rule-manager"] = self.rule_manager.get_init_info(**kw)
         return result

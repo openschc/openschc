@@ -17,9 +17,10 @@ try:
 except ImportError:
     import time
 
+import types
 import random
-import protocol
 
+import protocol
 from stats.statsct import Statsct
 
 #---------------------------------------------------------------------------
@@ -183,7 +184,8 @@ class Simul:
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple(), with_hack=False ):
         self._log("----------------------- SEND PACKET -----------------------")
-        if not self.frame_loss.check(len(packet)):
+        lost = self.frame_loss.check(len(packet))
+        if not lost:
             self._log("----------------------- OK -----------------------")
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
             if enable_statsct:
@@ -208,6 +210,10 @@ class Simul:
                 Statsct.add_packet_info(clock, packet, src_id, dst_id, False)
             count = 0
         #
+        if self.observer is not None:
+            info = {"src":src_id, "dst":dst_id, "packet":packet, "clock": clock, "count":count, "lost":lost}
+            self.observer.record_packet(info)
+
         if callback != None:
             args = callback_args+(count,) # XXX need to check. - CA:
             # [CA] the 'count' is now passed as 'status' in:
@@ -288,24 +294,62 @@ class Simul:
         if self.observer is not None:
             self.observer.stop_record()
 
+    # ---------- Introspection for recording
+
     def get_state_info(self, **kw):
+        queue = self.scheduler.get_queue_content()
         result = {
             "node_table": {
                 node_id: node.get_state_info(**kw)
                 for node_id, node in self.node_table.items()
-            }
+            },
+            "queue": [self._filter_event(event) for event in queue]
         }
+        return result
+
+    def _filter_event(self, event):
+        import inspect
+        (abs_time, event_id, callback, args) = event
+        result = {"clock":abs_time, "event-id": event_id}
+        result["callback"] = self._filter_value(callback)
+        result["args"] = tuple(self._filter_value(x) for x in args)
+        return result
+
+    def _filter_value(self, value):
+        result = {}
+        if isinstance(value, types.MethodType):
+            instance = value.__self__
+            if instance is not None:
+                class_name = instance.__class__.__name__
+                method_name = value.__func__.__name__
+                result["class"] = class_name
+                result["method"] = method_name
+                if class_name == SimulLayer2.__name__:
+                    result["node-id"] = instance.protocol.get_system().id
+            else:
+                raise ValueError("Not implemented yet: unbound methods", value)
+        #elif not istance:
+        #    raise ValueError("Not implemented yet:", type(value))
+        else:
+            result = value
+        return result
 
     def get_init_info(self, **kw):
+        # avoid difference in recording, just because of dir name:
+        simul_config = self.simul_config.copy()
+        simul_config["record.directory"] = "<here>"
+
         result = {
             "links": [link_as_dict(link) for link in self.link_set],
-            "simul_config": self.simul_config,
+            "simul_config": simul_config,
             "node_table": {
                 node_id: node.get_init_info(**kw)
                 for node_id, node in self.node_table.items()
             }
         }
         return result
+
+
 
 def link_as_dict(link):
     return {"to": link.to_id, "from": link.from_id, "delay": link.delay}
