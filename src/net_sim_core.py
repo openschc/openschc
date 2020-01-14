@@ -131,6 +131,7 @@ class Channel:
     def transmit_packet(self, src_id, packet, callback, callback_args):
         clock = self.sim.scheduler.get_clock()
         available_time = self.node_time_table.get(src_id, clock)
+        available_time = max(available_time, clock)
         available_time += 1/PACKET_PER_SECOND
         self.node_time_table[src_id] = available_time
         delivery_rel_time = (available_time + PROPAGATION_DELAY) - clock
