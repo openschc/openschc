@@ -144,20 +144,13 @@ class SCHCProtocol:
             t_dir = T_DIR_DW
 
         P = Parser(self)
-        parsed_packet = P.parse(raw_packet, t_dir)
+        parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         dpprint(parsed_packet)
-
-        try:
-            parsed_packet = P.parse(raw_packet, T_DIR_UP) # XXX: redundant!
-            dpprint("parsed_packet[0]", parsed_packet[0])
-        except:
-            dprint("no parsing, try fragmentation")
-            parsed_packet = None
-            schc_packet = None
+        schc_packet = None
 
         if parsed_packet is not None:
             # pass        # to be done
-            rule = self.rule_manager.FindRuleFromPacket(parsed_packet[0], direction=t_dir)
+            rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
             if rule is None:
                 schc_packet = None
                 # reject it.
@@ -169,7 +162,7 @@ class SCHCProtocol:
                     dprint(
                         "-------------------------------------- Compression Proccess -------------------------------------------")
                     dprint("selected rule is ", rule)
-                    schc_packet = self.compressor.compress(rule, parsed_packet[0], parsed_packet[1], t_dir)
+                    schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
                     dprint(schc_packet)
                     schc_packet.display("bin")
                 else:

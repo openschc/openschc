@@ -60,9 +60,13 @@ class Parser:
 
         if layer == "IPv6":
             version = unpack ("!B", pkt[:1])
-            assert version[0]>>4 == 6                 # only IPv6
+            #assert version[0]>>4 == 6                 # only IPv6
+            if version[0]>>4 == 6 != 6:
+                return None, None, "IP.version != 6"
 
-            assert len(pkt) >= 40  # IPv6 Header is 40 byte long
+            #assert len(pkt) >= 40  # IPv6 Header is 40 byte long
+            if len(pkt) < 40:
+                return None, None, "packet too short"
             firstBytes = unpack('!BBHHBBQQQQ', pkt[:40]) # IPv6 \ UDP \ CoAP header
             self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
 
@@ -86,7 +90,8 @@ class Parser:
                 self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[9], 64]
 
 
-            assert self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58
+            if not (self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58):
+                return None, None, "packet neither UDP nor ICMP"
 
             if self.header_fields[T_IPV6_NXT, 1][0] == 17: layer = "udp"
             if self.header_fields[T_IPV6_NXT, 1][0] == 58: layer = "icmp"
@@ -183,4 +188,4 @@ class Parser:
                 pos += 1
 
 
-        return self.header_fields, pkt[pos:]
+        return self.header_fields, pkt[pos:], None
