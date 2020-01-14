@@ -5,9 +5,27 @@ import argparse
 import subprocess
 import os
 import sys
+import json
 sys.path.append("../../src") # XXX: temporary hack
 
 import net_sim_builder
+
+#---------------------------------------------------------------------------
+
+DEFAULT_SIMTOOL_CONFIG_FILE = "config.json"
+
+DEFAULT_SIMTOOL_CONFIG = {}
+
+def get_simtool_config(config_file_name=None, args=None):
+    if config_file_name is None:
+        config_file_name = DEFAULT_SIMTOOL_CONFIG_FILE
+    if os.path.exists(config_file_name):
+        with open(config_file_name) as config_file:
+            config = json.load(config_file)
+    else:
+        config = DEFAULT_SIMTOOL_CONFIG.copy()
+    return config
+
 #---------------------------------------------------------------------------
 
 DEFAULT_PACKET_SIZE = None
@@ -51,6 +69,14 @@ def get_test_scenarios():
             spec["loss"] = (1,5)
             new_name = update_scenario_name(name, spec)
             scenario_table[new_name] = spec
+
+
+    config = get_simtool_config()
+    scenario_filter = config.get("scenario-filter", None)
+    if scenario_filter is not None:
+        for name in scenario_table.copy():
+            if name not in scenario_filter:
+                del scenario_table[name]
 
     return scenario_table
 
@@ -290,7 +316,7 @@ def make_cmd_rediff_parser(arg_subparser):
 #---------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser()
-subparser = parser.add_subparsers()
+subparser = parser.add_subparsers(dest="command", required=True)
 
 cmd_list_parser = make_cmd_list_parser(subparser)
 cmd_run_parser = make_cmd_run_parser(subparser)
@@ -304,9 +330,6 @@ unused = make_cmd_rekdiff_parser(subparser)
 unused = make_cmd_rediff_parser(subparser)
 
 args = parser.parse_args()
-if args.cmd_func is not None:
-    args.cmd_func(args)
-else:
-    raise RuntimeError("Cannot find function for command", dict(args))
+args.cmd_func(args)
 
 #--------------------------------------------------------------------------
