@@ -38,9 +38,9 @@ def update_scenario_name(initial_name, scenario_spec):
         name += "-ps{}".format(packet_size)
     if "loss-interval" in scenario_spec:
         name += "-li{}".format(scenario_spec["loss-interval"])
-    elif "loss-spec" in scenario_spec:
-        unused = scenario_spec["loss-spec"]
-        name += "-l{}".format("XXX") # need compact repr.
+    elif "loss-packet" in scenario_spec:
+        packet_index = scenario_spec["loss-packet"]
+        name += "-l{}".format(packet_index)
     elif "loss-rate" in scenario_spec:
         name += "-lr{}".format(scenario_spec["loss-rate"])
     if "seed" in scenario_spec:
@@ -81,6 +81,13 @@ def get_test_scenarios(with_filter=True):
             spec["loss-rate"] = 20
             new_name = update_scenario_name(name, spec)
             scenario_table[new_name] = spec
+
+            spec = scenario_spec.copy()
+            spec["packet-size"] = 100            
+            spec["loss-packet"] = 10
+            new_name = update_scenario_name(name, spec)
+            scenario_table[new_name] = spec
+            
 
     if with_filter:
         config = get_simtool_config()
@@ -153,6 +160,12 @@ def run_scenario(name, spec, prefix):
         simul_config["loss"] = {"mode":"cycle", "cycle":spec["loss-interval"]}
     elif "loss-rate" in spec:
         simul_config["loss"] = {"mode":"rate", "cycle": spec["loss-rate"]}
+    elif "loss-packet" in spec:
+        simul_config["loss"] = {
+            "mode":"list", "count_num": [spec["loss-packet"]], "cycle": 100000
+        }
+    else:
+        simul_config["loss"] = net_sim_builder.DEFAULT_LOSS_CONFIG
     #loss_config = net_sim_builder.DEFAULT_LOSS_CONFIG
     record_dir_name = get_record_dir_name_from_spec(name, spec)
     if len(prefix)>0:
@@ -216,7 +229,7 @@ def make_cmd_run_all_parser(arg_subparser):
 
 #---------------------------------------------------------------------------
 
-def cmd_compare_all(args):
+def do_compare_dir(record_dir_name, ref_dir_name, args):
     if args.compare_tool is None:
         with_external_compare = True
         check = False
@@ -238,38 +251,45 @@ def cmd_compare_all(args):
 
     count_diff = 0
 
+    for log_file_name in os.listdir(record_dir_name):
+        new_file_name = os.path.join(record_dir_name, log_file_name)
+        ref_file_name = os.path.join(ref_dir_name, log_file_name)
+
+        if with_external_compare:
+            cmd = "{} {} {}".format(cmp_prog, ref_file_name, new_file_name)
+            print("> "+cmd)
+            process = subprocess.run(cmd.split(" "), check=check)
+            if process.returncode != 0:
+                count_diff += 1
+
+        else:
+            with open(new_file_name) as new_file:
+                new_content = new_file.read()
+            with open(ref_file_name) as ref_file:
+                ref_content = ref_file.read()
+
+            if new_content != ref_content:
+                count_diff += 1
+                print("{} differs from {}".format(
+                    new_file_name, ref_file_name))
+                if diff_display_prog is not None:
+                    cmd = "{} {} {}".format(
+                        diff_display_prog, ref_file_name, new_file_name)
+                    print("> "+cmd)
+                    subprocess.run(cmd.split(" "), check=False)
+    return count_diff
+
+
+def cmd_compare_all(args):
+    count_diff = 0
+
     prefix = args.prefix
     scenario_table = get_test_scenarios()
     for scenario in sorted(scenario_table.keys()):
         spec = scenario_table[scenario]
         record_dir_name = get_record_dir_name_from_spec(scenario, spec)
         ref_dir_name = prefix+"-"+record_dir_name
-        for log_file_name in os.listdir(record_dir_name):
-            new_file_name = os.path.join(record_dir_name, log_file_name)
-            ref_file_name = os.path.join(ref_dir_name, log_file_name)
-
-            if with_external_compare:
-                cmd = "{} {} {}".format(cmp_prog, ref_file_name, new_file_name)
-                print("> "+cmd)
-                process = subprocess.run(cmd.split(" "), check=check)
-                if process.returncode != 0:
-                    count_diff += 1
-
-            else:
-                with open(new_file_name) as new_file:
-                    new_content = new_file.read()
-                with open(ref_file_name) as ref_file:
-                    ref_content = ref_file.read()
-
-                if new_content != ref_content:
-                    count_diff += 1
-                    print("{} differs from {}".format(
-                        new_file_name, ref_file_name))
-                    if diff_display_prog is not None:
-                        cmd = "{} {} {}".format(
-                            diff_display_prog, ref_file_name, new_file_name)
-                        print("> "+cmd)
-                        subprocess.run(cmd.split(" "), check=False)
+        count_diff += do_compare_dir(record_dir_name, ref_dir_name, args)
 
     if count_diff == 0:
         print("> no difference(s) found.")
@@ -297,6 +317,33 @@ def make_cmd_kdiff_all_parser(arg_subparser):
     run_parser.add_argument("--compare-tool", type=str, default="kdiff3")
     run_parser.set_defaults(cmd_func = cmd_compare_all)
     return run_parser
+
+def cmd_diff(args):
+    count_diff = 0
+    record_dir_name = args.first_dir
+    ref_dir_name = args.second_dir
+    count_diff += do_compare_dir(record_dir_name, ref_dir_name, args)
+
+    if count_diff == 0:
+        print("> no difference(s) found.")
+    else:
+        print("> differences found in {} files".format(count_diff))
+
+def make_cmd_diff_parser(arg_subparser):
+    diff_parser = subparser.add_parser("diff")
+    diff_parser.add_argument("first_dir")
+    diff_parser.add_argument("second_dir")    
+    diff_parser.add_argument("--compare-tool", type=str, default="diff")
+    diff_parser.set_defaults(cmd_func = cmd_diff)
+    return diff_parser
+
+def make_cmd_kdiff_parser(arg_subparser):
+    diff_parser = subparser.add_parser("kdiff")
+    diff_parser.add_argument("first_dir")
+    diff_parser.add_argument("second_dir")    
+    diff_parser.add_argument("--compare-tool", type=str, default="kdiff3")
+    diff_parser.set_defaults(cmd_func = cmd_diff)
+    return diff_parser
 
 #----------------------------------------
 
@@ -351,7 +398,9 @@ cmd_run_all_parser = make_cmd_run_all_parser(subparser)
 cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
 cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)
 unused = make_cmd_diff_all_parser(subparser)
+unused = make_cmd_diff_parser(subparser)
 unused = make_cmd_kdiff_all_parser(subparser)
+unused = make_cmd_kdiff_parser(subparser)
 unused = make_cmd_reref_parser(subparser)
 unused = make_cmd_rekdiff_parser(subparser)
 unused = make_cmd_rediff_parser(subparser)
