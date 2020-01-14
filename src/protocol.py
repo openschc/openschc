@@ -133,74 +133,85 @@ class SCHCProtocol:
     def get_system(self):
         return self.system
 
-    def schc_send(self, dst_l2_address, dst_l3_address, raw_packet):
-        self._log("recv-from-L3 -> {} {}".format(dst_l3_address, raw_packet))
+
+    def _apply_compression(self, dst_l3_address, raw_packet):
+        """Apply potential matching compression rule, and in any case return SCHC Packet as a BitBuffer"""
         context = self.rule_manager.find_context_bydstiid(dst_l3_address)
-        dprint("raw_packet in schc_send", raw_packet)
         if self.role == "device":
             t_dir = T_DIR_UP
         else:
             assert self.role == "core"
             t_dir = T_DIR_DW
 
+        # Parse packet as IP packet and apply compression rule
         P = Parser(self)
         parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
-        dpprint(parsed_packet)
-        schc_packet = None
+        self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
+        if parsed_packet is None:
+            return BitBuffer(raw_packet)
 
-        if parsed_packet is not None:
-            # pass        # to be done
-            rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
-            if rule is None:
-                schc_packet = None
-                # reject it.
-                # self._log("Rejected. Not for SCHC packet, L4addr={}".format(
-                #    dst_L3addr))
-                # return
-            else:
-                if rule["Compression"] != []:
-                    dprint(
-                        "-------------------------------------- Compression Proccess -------------------------------------------")
-                    dprint("selected rule is ", rule)
-                    schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
-                    dprint(schc_packet)
-                    schc_packet.display("bin")
-                else:
-                    schc_packet = None
+        # Apply compression rule
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        self._log("compression rule {}".format(rule))
+        if rule is None:
+            # XXX: not putting any SCHC compression header?
+            self._log("compression rule not found")
+            return BitBuffer(raw_packet)
 
-        if schc_packet == None:
-            packet_bbuf = BitBuffer(raw_packet) # XXX: not putting any SCHC compression header
-        else:
-            packet_bbuf = schc_packet
+        if rule["Compression"] == []:  # XXX: should be "NoCompression"
+            self._log("compression result no-compression")
+            return BitBuffer(raw_packet)
 
-        # check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
-            self._log("SCHC fragmentation is not needed. size={}".format(
-                packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), dst_l2_address)
-            self.scheduler.add_event(0, self.layer2.send_packet, args)
-            return
+        schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
+        dprint(schc_packet)
+        schc_packet.display("bin")
+        self._log("compression result {}".format(schc_packet))
 
-        # fragmentation is required.
-        lower_addr = self.layer2.get_address() #XXX: don't find rule based on my address???
-        frag_rule = self.rule_manager.FindFragmentationRule(lower_addr)
+        return schc_packet
+
+
+    def _make_frag_session(self, dst_l2_address):
+        """Search a fragmentation rule, create a session for it, return None if not found"""
+        # assume need for fragmentation was checked beforehands
+        l2_addr = self.layer2.get_address() #XXX: don't find rule based on my address???
+        frag_rule = self.rule_manager.FindFragmentationRule(l2_addr)
         if frag_rule is None:
-            self._log("Rejected the packet due to no fragmenation rule.")
-            return
-        # Do fragmenation
-        dprint(
-            "-------------------------------------- Fragmentation Proccess -------------------------------------------")
+            self._log("fragmentation rule not found")
+            return None
+
+        # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
         self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
 
-
         session = self.session_manager.create_fragmentation_session(
             dst_l2_address, context, rule)
-        # XXX: session can be None
-        session.set_packet(packet_bbuf)
-        session.start_sending()
+        if session is None:
+            self._log("fragmentation session could not be created") # XXX warning
+            return None
 
+        return session
+
+
+    def schc_send(self, dst_l2_address, dst_l3_address, raw_packet):
+        self._log("recv-from-l3 {} {} {}".format(dst_l2_address, dst_l3_address, raw_packet))
+
+        # Perform compression
+        packet_bbuf = self._apply_compression(dst_l3_address, raw_packet)
+
+        # Check if fragmentation is needed.
+        if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
+            self._log("fragmentation not needed size={}".format(
+                packet_bbuf.count_added_bits()))
+            args = (packet_bbuf.get_content(), dst_l2_address)
+            self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
+            return
+
+        # Start a fragmentation session from rule database
+        frag_session = self._make_frag_session(dst_l2_address)
+        if frag_session is not None:
+            frag_session.set_packet(packet_bbuf)
+            frag_session.start_sending()
 
 
     def schc_recv(self, sender_l2_address, raw_packet):
