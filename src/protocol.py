@@ -23,28 +23,37 @@ import binascii
 # ---------------------------------------------------------------------------
 
 class SessionManager:
-    """
-    Manage a table of sessions:
+    """Maintain the table of active fragmentation/reassembly sessions.
 
     Internals:
        session_table[(l2_address, rule_id, rule_id_size, dtag)]
               -> session
        session_type is "reassembly" or "fragmentation"
+
+    When 'unique_peer' is true, the l2_address for another peer is 'None'.
     """
     def __init__(self, protocol, unique_peer):
         self.protocol = protocol
         self.unique_peer = unique_peer
         self.session_table = {}
 
+    def _filter_session_id(self, session_id):
+        if self.unique_peer:
+            session_id = (None,) + session_id[1:]
+        return session_id
+
     def find_session(self, session_id):
+        session_id = self._filter_session_id(session_id)
         session = self.session_table.get(session_id, None)
         return session
 
     def _add_session(self, session_id, session):
+        session_id = self._filter_session_id(session_id)        
         assert session_id not in self.session_table
         self.session_table[session_id] = session
         
     def create_reassembly_session(self, context, rule, session_id):
+        session_id = self._filter_session_id(session_id)        
         l2_address, rule_id, unused, dtag = session_id
         if self.unique_peer:
             l2_address = None
@@ -73,21 +82,22 @@ class SessionManager:
 
         for dtag in range(0, dtag_limit):
             session_id = (l2_address, rule_id, rule_id_length, dtag)
+            session_id = self._filter_session_id(session_id)            
             if session_id not in self.session_table:
                 break
 
         if dtag == dtag_limit:
-            self.protocol.log("session", "cannot create session, no dtag available")
+            self.protocol.log("cannot create session, no dtag available")
             return None
 
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == "noAck":
-            session = FragmentNoAck(self.protocol, context, rule)
+            session = FragmentNoAck(self.protocol, context, rule, dtag)
         elif mode == "ackAlways":
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
         elif mode == "ackOnError":
-            session = FragmentAckOnError(self.protocol, context, rule)
+            session = FragmentAckOnError(self.protocol, context, rule, dtag)
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         self._add_session(session_id, session)        
@@ -135,7 +145,10 @@ class SCHCProtocol:
 
 
     def _apply_compression(self, dst_l3_address, raw_packet):
-        """Apply potential matching compression rule, and in any case return SCHC Packet as a BitBuffer"""
+        """Apply matching compression rule if one exists.
+        
+        In any case return a SCHC packet (compressed or not) as a BitBuffer
+        """
         context = self.rule_manager.find_context_bydstiid(dst_l3_address)
         if self.role == "device":
             t_dir = T_DIR_UP

@@ -28,12 +28,12 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, protocol, context, rule):
+    def __init__(self, protocol, context, rule, dtag):
         self.protocol = protocol
         self.context = context
         self.rule = rule
         self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
-        self.dtag = 0
+        self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
@@ -60,10 +60,11 @@ class FragmentBase():
         return dtag for the packet """
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.copy()
-        # update dtag for next
-        self.dtag += 1
-        if self.dtag > frag_msg.get_max_dtag(self.rule):
-            self.dtag = 0
+        # XXX:remove - dtag management is in protocol.py:
+        ## update dtag for next
+        #self.dtag += 1
+        #if self.dtag > frag_msg.get_max_dtag(self.rule):
+        #    self.dtag = 0
 
     def get_mic(self, mic_base, last_frag_base_size,
                 penultimate_size=0):
