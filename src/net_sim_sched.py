@@ -5,7 +5,8 @@
 #---------------------------------------------------------------------------
 
 from gen_base_import import *  # used for now for differing modules in py/upy
-from gen_utils import dprint
+from gen_utils import dprint, sanitize_value
+
 
 # XXX: this scheduler can be optimized by not sorting every time
 class SimulScheduler:
@@ -42,7 +43,7 @@ class SimulScheduler:
     # external API
 
     def add_event(self, rel_time, callback, args):
-        dprint("Add event {}".format([e[:-2]+(e[-2].__name__,)+e[-1:] for e in self.queue]))
+        dprint("Add event {}".format(sanitize_value(self.queue)))
         dprint("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
@@ -71,6 +72,6 @@ class SimulScheduler:
     def get_queue_content(self):
         result = self.queue.copy()
         result.sort()
-        return result
+        return sanitize_value(result)
 
 #---------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 import sys
 import pprint
+import types
 
 enable_debug_print = False
 
@@ -45,5 +46,31 @@ def dtrace(*args, **kw):
     global trace_print_function
     if trace_print_function is not None:
         trace_print_function(*args, **kw)
+
+#---------------------------------------------------------------------------
+
+def sanitize_value(value, helper_table={}):
+    """Sanitize value for printing"""
+    result = {}
+    if isinstance(value, types.MethodType):
+        instance = value.__self__
+        if instance is not None:
+            class_name = instance.__class__.__name__
+            method_name = value.__func__.__name__
+            result["class"] = class_name
+            result["method"] = method_name
+            if class_name in helper_table:
+                result = helper_table[class_name](instance, result.copy())
+        else:
+            raise ValueError("Not implemented yet: unbound methods", value)
+    elif isinstance(value, tuple):
+        result = tuple(sanitize_value(x, helper_table) for x in value)
+    elif isinstance(value, list):
+        result = [sanitize_value(x, helper_table) for x in value]
+    elif isinstance(value, dict):
+        result = { k:sanitize_value(v, helper_table) for k,v in value.items() }
+    else:
+        result = value
+    return result
 
 #---------------------------------------------------------------------------

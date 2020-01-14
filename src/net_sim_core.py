@@ -7,7 +7,7 @@
 from gen_base_import import *
 from net_sim_sched import SimulScheduler as Scheduler
 from net_sim_layer2 import SimulLayer2
-from net_sim_loss import ConditionalTrue
+from net_sim_loss import PacketLossModel
 import net_sim_record
 from gen_utils import dprint
 import gen_utils
@@ -122,7 +122,7 @@ class SimulNullNode(SimulNode):
 #---------------------------------------------------------------------------
 
 PACKET_PER_SECOND = 1
-PROPAGATION_DELAY = 1
+PROPAGATION_DELAY = 0 # XXX: if >0, the callback gets called too late
 
 class Channel:
     def __init__(self, sim):
@@ -157,7 +157,7 @@ class Simul:
         if self.simul_config.get("seed") is not None:
             random.seed(self.simul_config["seed"])
 
-        self.frame_loss = ConditionalTrue(
+        self.frame_loss = PacketLossModel(
                 **self.simul_config.get("loss", {"mode":"cycle"}))
 
         with_dprint = bool(self.simul_config.get("enable-print", True))
@@ -215,7 +215,7 @@ class Simul:
     def deliver_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple(), with_hack=False):
         self._log("----------------------- SEND PACKET -----------------------")
-        lost = self.frame_loss.check(len(packet))
+        lost = self.frame_loss.is_lost(len(packet))
         if not lost:
             self._log("----------------------- OK -----------------------")
             self._log("send-packet {}->{} {}".format(src_id, dst_id, packet))
@@ -346,25 +346,15 @@ class Simul:
         result["args"] = tuple(self._filter_value(x) for x in args)
         return result
 
+    def __sanitize_SimulLayer2(self, instance, info):
+        info["node-id"] = instance.protocol.get_system().id
+        return info
+
     def _filter_value(self, value):
-        result = {}
-        if isinstance(value, types.MethodType):
-            instance = value.__self__
-            if instance is not None:
-                class_name = instance.__class__.__name__
-                method_name = value.__func__.__name__
-                result["class"] = class_name
-                result["method"] = method_name
-                if class_name == SimulLayer2.__name__:
-                    result["node-id"] = instance.protocol.get_system().id
-            else:
-                raise ValueError("Not implemented yet: unbound methods", value)
-        #elif not istance:
-        #    raise ValueError("Not implemented yet:", type(value))
-        elif isinstance(value, tuple):
-            result = tuple(self._filter_value(x) for x in value)
-        else:
-            result = value
+        helpers = {
+            SimulLayer2.__name__ : self.__sanitize_SimulLayer2
+        }
+        result = gen_utils.sanitize_value(value, helpers)
         return result
 
     def get_init_info(self, **kw):
@@ -381,8 +371,6 @@ class Simul:
             }
         }
         return result
-
-
 
 def link_as_dict(link):
     return {"to": link.to_id, "from": link.from_id, "delay": link.delay}
