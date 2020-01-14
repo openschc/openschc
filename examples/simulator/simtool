@@ -125,18 +125,21 @@ def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
 def run_scenario(name, spec, prefix):
-    compr_rule = { "RuleID": 12,
-                   "RuleIDLength": 4, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
-                   "Compression": [] }
-    frag_rule = { "RuleID": 12,
-                  "RuleIDLength": 6, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
-                   "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
+    compr_rule = {
+        "RuleID": 12,
+        "RuleIDLength": 4, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+        "Compression": [] }
+    frag_rule = {
+        "RuleID": 12,
+        "RuleIDLength": 6, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
     if spec.get("mode") == "ack-on-error":
         frag_info = {
             "FRMode": "ackOnError",
             "FRDirection": "DW",
             "FRModeProfile": {
-                "dtagSize":2, "WSize":3, "FCNSize":3, "ackBehavior": "afterAll1",
+                "dtagSize":2, "WSize":3, "FCNSize":3,
+                "ackBehavior": "afterAll1",
                 "tileSize": 24, "MICAlgorithm": "crc32", "MICWordSize": 8,
                 "lastTileInAll1": False
             }
@@ -156,6 +159,9 @@ def run_scenario(name, spec, prefix):
         record_dir_name = prefix+"-"+record_dir_name
     simul_config["record.directory"] = record_dir_name
     simul_config["record.quiet"] = True
+    config = get_simtool_config()
+    if "log-format" in config:
+        simul_config["record.format"] = config["log-format"]
 
     builder = net_sim_builder.SimulBuilder()
     builder.set_config(simul_config, simul_config["loss"])
@@ -163,6 +169,7 @@ def run_scenario(name, spec, prefix):
     builder.create_device(rules.copy())
     builder.create_core(rules.copy())
 
+    
     packet_size = spec.get("packet-size", DEFAULT_PACKET_SIZE)
     if packet_size == 0 or packet_size == None:
         packet = DEFAULT_PACKET

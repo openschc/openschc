@@ -217,10 +217,9 @@ class ReassemblerNoAck(ReassembleBase):
         dprint("---", schc_frag.fcn)
 
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result = {
             "type": "no-ack",
-            "state": "XXX - need to be added"
         }
         return result
 
@@ -651,7 +650,7 @@ class ReassemblerAckOnError(ReassembleBase):
         return schc_ack
 
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result = {
             "type": "ack-on-error",
             "state": "XXX - need to be added"

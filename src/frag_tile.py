@@ -187,7 +187,7 @@ class TileList():
             bbuf += t["tile"]
         return bbuf
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result = self.all_tiles.copy()
         return result
 

@@ -26,6 +26,15 @@ PRINT_FILE_NAME = "print.log"
 INIT_FILE_NAME = "init.log"
 PACKET_FILE_NAME = "packet.log"
 
+
+def json_sanitize(value):
+    if isinstance(value, bytes):
+        return "<bytes>"+value.hex()
+    elif isinstance(value, bytearray):
+        return "<bytearray>"+value.hex()
+    else:
+        return "<skipped {}>".format(type(value))
+
 class SimulResultManager:
 
     def __init__(self, dir_name):
@@ -75,7 +84,7 @@ class SimulRecordingObserver:
         if format == "pprint":
             print(pprint.pformat(info), file=init_file)
         elif format == "json":
-            print(json.dumps(info), file=init_file)
+            print(json.dumps(info, default=json_sanitize), file=init_file)
         else: raise ValueError("unknown record.format", format)
         init_file.close()
 
@@ -104,7 +113,7 @@ class SimulRecordingObserver:
         if format == "pprint":
             print(pprint.pformat(info), file=self.record_file)
         elif format == "json":
-            print(json.dumps(info), file=self.record_file)
+            print(json.dumps(info, default=json_sanitize), file=self.record_file)
         else: raise ValueError("unknown record.format", format)
 
     def record_packet(self, info):
@@ -112,7 +121,7 @@ class SimulRecordingObserver:
         if format == "pprint":
             print(pprint.pformat(info), file=self.packet_file)
         elif format == "json":
-            print(json.dumps(info), file=self.packet_file)
+            print(json.dumps(info, default=json_sanitize), file=self.packet_file)
         else: raise ValueError("unknown record.format", format)
 
     def record_log(self, line):
