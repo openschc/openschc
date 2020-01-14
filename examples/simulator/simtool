@@ -5,20 +5,79 @@ import argparse
 import subprocess
 import os
 import sys
+import json
 sys.path.append("../../src") # XXX: temporary hack
 
 import net_sim_builder
+
 #---------------------------------------------------------------------------
 
+DEFAULT_SIMTOOL_CONFIG_FILE = "config.json"
+
+DEFAULT_SIMTOOL_CONFIG = {}
+
+def get_simtool_config(config_file_name=None, args=None):
+    if config_file_name is None:
+        config_file_name = DEFAULT_SIMTOOL_CONFIG_FILE
+    if os.path.exists(config_file_name):
+        with open(config_file_name) as config_file:
+            config = json.load(config_file)
+    else:
+        config = DEFAULT_SIMTOOL_CONFIG.copy()
+    return config
+
+#---------------------------------------------------------------------------
+
+DEFAULT_PACKET_SIZE = None
+DEFAULT_RULE_ID_LENGTH = 4
+
+def update_scenario_name(initial_name, scenario_spec):
+    name = initial_name
+    packet_size = scenario_spec.get("packet-size", None)
+    if packet_size not in [None, DEFAULT_PACKET_SIZE]:
+        name += "-p{}".format(packet_size)
+    if "loss" in scenario_spec:
+        name += "-l{}".format(scenario_spec["loss"])
+    if "seed" in scenario_spec:
+        name += "-s{}".format(scenario_spec["seed"])
+    return name
 
 def get_test_scenarios():
     scenario_spec = {
         "rule-id-length": 4,
-        "packet-size": 0
+        "packet-size": 0,
     }
+
+    scenario_spec_ack_on_error = scenario_spec.copy()
+    scenario_spec_ack_on_error["mode"] = "ack-on-error"
+
     scenario_table = {
-        "noack": scenario_spec
+        "noack": scenario_spec,
+        "ackerror": scenario_spec_ack_on_error
     }
+
+    for name, scenario_spec in scenario_table.copy().items():
+        if name == "ackerror":
+            spec = scenario_spec.copy()
+            spec["packet-size"] = 100
+            new_name = update_scenario_name(name, spec)
+            scenario_table[new_name] = spec
+
+    for name, scenario_spec in scenario_table.copy().items():
+        if name == "ackerror":
+            spec = scenario_spec.copy()
+            spec["loss"] = (1,5)
+            new_name = update_scenario_name(name, spec)
+            scenario_table[new_name] = spec
+
+
+    config = get_simtool_config()
+    scenario_filter = config.get("scenario-filter", None)
+    if scenario_filter is not None:
+        for name in scenario_table.copy():
+            if name not in scenario_filter:
+                del scenario_table[name]
+
     return scenario_table
 
 #---------------------------------------------------------------------------
@@ -38,7 +97,6 @@ def make_cmd_list_parser(arg_subparser):
 
 #DEFAULT_RULEID_LENGTH = 4
 #DEFAULT_PACKET_SIZE = 10
-DEFAULT_PACKET_SIZE = 0
 
 # XXX: what should be done with non-IPv6 +UDP packets?
 DEFAULT_PACKET = bytearray(b"""`\
@@ -53,7 +111,6 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
-
 def run_scenario(name, spec, prefix):
     compr_rule = { "RuleID": 12,
                    "RuleIDLength": 4, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
@@ -61,6 +118,17 @@ def run_scenario(name, spec, prefix):
     frag_rule = { "RuleID": 12,
                   "RuleIDLength": 6, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
                    "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
+    if spec.get("mode") == "ack-on-error":
+        frag_info = {
+            "FRMode": "ackOnError",
+            "FRDirection": "DW",
+            "FRModeProfile": {
+                "dtagSize":2, "WSize":3, "FCNSize":3, "ackBehavior": "afterAll1",
+                "tileSize": 24, "MICAlgorithm": "crc32", "MICWordSize": 8,
+                "lastTileInAll1": False
+            }
+        }
+        frag_rule["Fragmentation"] = frag_info
     nocompr_rule = {"RuleID" : 13, "RuleIDLength": 4, "NoCompression" : [] }
     rules = [compr_rule, frag_rule, nocompr_rule]
 
@@ -78,7 +146,11 @@ def run_scenario(name, spec, prefix):
     builder.create_device(rules.copy())
     builder.create_core(rules.copy())
 
-    packet = DEFAULT_PACKET + b"\x00" * spec.get("packet-size", DEFAULT_PACKET_SIZE)
+    packet_size = spec.get("packet-size", DEFAULT_PACKET_SIZE)
+    if packet_size == 0 or packet_size == None:
+        packet = DEFAULT_PACKET
+    else:
+        packet = packet_size * b"\x00"
     builder.make_device_send_data(clock=1, packet=packet)
     builder.run_simul()
 
@@ -244,7 +316,7 @@ def make_cmd_rediff_parser(arg_subparser):
 #---------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser()
-subparser = parser.add_subparsers()
+subparser = parser.add_subparsers(dest="command", required=True)
 
 cmd_list_parser = make_cmd_list_parser(subparser)
 cmd_run_parser = make_cmd_run_parser(subparser)
@@ -258,9 +330,6 @@ unused = make_cmd_rekdiff_parser(subparser)
 unused = make_cmd_rediff_parser(subparser)
 
 args = parser.parse_args()
-if args.cmd_func is not None:
-    args.cmd_func(args)
-else:
-    raise RuntimeError("Cannot find function for command", dict(args))
+args.cmd_func(args)
 
 #--------------------------------------------------------------------------
