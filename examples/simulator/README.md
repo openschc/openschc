@@ -65,8 +65,9 @@ you can use the command line with many options or:
 
 Scenario specification format:
 
-  * `packet-size`: size of the packet to send in bytes, `0` means a default predefined COAP packet is used
-  
+  * `packet-size`: size of the packet to send in bytes, `0` means a default predefined COAP packet
+    is used. Note that sizes for other parameters are usually in bits
+  * `mtu-size`: maximum size available in layer 2 packets, counted in bits
 
   * `compr-ruleid`
   * `compr-ruleid-size` 
@@ -117,4 +118,3 @@ The program `simtool` provides a way to run, and compare the output of simulatio
    except that the programs `diff -u` or resp. `kdiff3` are used to display the differences.
  
  * TODO: commands `diff`, `kdiff`, `show`, explain options for changing parameters
-

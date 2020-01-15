@@ -34,6 +34,7 @@ DEFAULT_RULE_ID_LENGTH = 4
 
 SCENARIO_CMD_ARGS = [
     ("packet-size",       int,   "ps"),
+    ("mtu-size",          int,   "mtu"),
 
     ("compr-ruleid",      int,   "crid"),
     ("compr-ruleid-size", int,   "cris"),
@@ -231,7 +232,10 @@ def get_simul_setup(name, spec):
 
     rules = [frag_rule, nocompr_rule]
 
-    simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
+    simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG.copy()
+    simul_config["radio"] = simul_config["radio"].copy()
+    simul_config["radio"]["l2_mtu"] = spec.get("mtu-size", 72)
+    #TODO: simul_config["radio"]["data_size"] = XXX
     if "loss-interval" in spec:
         simul_config["loss"] = {"mode":"cycle", "cycle":spec["loss-interval"]}
     elif "loss-rate" in spec:
