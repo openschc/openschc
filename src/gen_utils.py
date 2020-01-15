@@ -69,6 +69,8 @@ def sanitize_value(value, helper_table={}):
         result = [sanitize_value(x, helper_table) for x in value]
     elif isinstance(value, dict):
         result = { k:sanitize_value(v, helper_table) for k,v in value.items() }
+    elif isinstance(value, object) and value.__class__.__module__ == "frag_msg":
+        result = "<instance of {}>".format(value.__class__.__name__)
     else:
         result = value
     return result
