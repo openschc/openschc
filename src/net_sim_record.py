@@ -90,6 +90,7 @@ class SimulRecordingObserver:
 
     def sched_observer_func(self, event_name, event_info, **kw):
         if not self.has_initial_state:
+            self.has_initial_state = True
             self.record_initial_state()
         elif event_name == "sched-pre-event":
             return # only record post-event to avoid redundancy
