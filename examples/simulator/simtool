@@ -6,13 +6,14 @@ import subprocess
 import os
 import sys
 import json
+import pprint
 sys.path.append("../../src") # XXX: temporary hack
 
 import net_sim_builder
 
 #---------------------------------------------------------------------------
 
-DEFAULT_SIMTOOL_CONFIG_FILE = "config.json"
+DEFAULT_SIMTOOL_CONFIG_FILE = "simtool-config.json"
 
 DEFAULT_SIMTOOL_CONFIG = {}
 
@@ -31,27 +32,71 @@ def get_simtool_config(config_file_name=None, args=None):
 DEFAULT_PACKET_SIZE = None
 DEFAULT_RULE_ID_LENGTH = 4
 
-PREDEFINED_SCENARIO_TABLE = {
+SCENARIO_CMD_ARGS = [
+    ("packet-size",       int,   "ps"),
 
-    #"default": {
-    #    "mode": "no-ack",
-    #},
+    ("compr-ruleid",      int,   "crid"),
+    ("compr-ruleid-size", int,   "cris"),
+
+    ("frag-mode",         str,    None),
+    ("frag-ruleid",       int,    "rid"),
+    ("frag-ruleid-size",  int,    "ris"),
+    ("dtag-size",         int,    "ds"),
+    ("w-size",            int,    "ws"),
+    ("fcn-size",          int,    "fs"),
+    ("tile-size",         int,    "ts"),
+
+    ("loss-interval",     int,    "li"),
+    ("loss-packet",       int,    "lp"),
+    ("loss-rate",         int,    "lr"),
+    ("seed",              int,    "s")
+]
+
+#---------------------------------------------------------------------------
+
+BUILTIN_SCENARIO_TABLE = {
 
     "noack": {
-        "mode": "no-ack"
+        "frag-mode": "no-ack",
+
+        "compr-ruleid": 12,
+        "compr-ruleid-size": 4,
+
+        "frag-ruleid": 12,
+        "frag-ruleid-size": 6
     },
 
     "ackerror": {
-        "mode": "ack-on-error",
-        #"packet-size": 0
+        "frag-mode": "ack-on-error",
+
+        "compr-ruleid": 12,
+        "compr-ruleid-size": 4,
+
+        "frag-ruleid": 12,
+        "frag-ruleid-size": 6,
+        "dtag-size": 2,
+        "w-size": 3,
+        "fcn-size": 3,
+        "tile-size": 24,
+        "last-tile-in-all1": 1
     }
 }
 
-def update_scenario_name(initial_name, scenario_spec):
+def get_builtin_name(scenario_name):
+    if scenario_name.startswith(":") or scenario_name.startswith("@"):
+        return scenario_name[1:]
+    if "." not in scenario_name: # XXX: maybe remove
+        return scenario_name
+    return None
+
+#---------------------------------------------------------------------------
+
+def old_update_scenario_name(initial_name, scenario_spec): #XXX:remove
     name = initial_name
     packet_size = scenario_spec.get("packet-size", None)
     if packet_size not in [None, DEFAULT_PACKET_SIZE]:
         name += "-ps{}".format(packet_size)
+
     if "loss-interval" in scenario_spec:
         name += "-li{}".format(scenario_spec["loss-interval"])
     elif "loss-packet" in scenario_spec:
@@ -65,36 +110,58 @@ def update_scenario_name(initial_name, scenario_spec):
         name += "-s{}".format(scenario_spec["seed"])
     return name
 
-def get_test_scenarios(with_filter=True):
-    scenario_table = PREDEFINED_SCENARIO_TABLE.copy()
+def get_full_scenario_name(scenario_list, overide_spec):
+    if len(scenario_list) == 0:
+        name = "base"
+    else:
+        name = "-".join(scenario_list)
+    for var_name, var_type, var_short_name in SCENARIO_CMD_ARGS:
+        if var_name in overide_spec:
+            name += "-"+var_short_name+"{}".format(overide_spec[var_name])
+    return name
 
-    for name, scenario_spec in scenario_table.copy().items():
-        if name == "ackerror":
-            spec = scenario_spec.copy()
-            spec["packet-size"] = 100
-            new_name = update_scenario_name(name, spec)
-            scenario_table[new_name] = spec
+def _get_full_scenario(scenario_list, overide_spec, exit_on_error=False,
+                      builtin_scenario_table=BUILTIN_SCENARIO_TABLE):
+    full_scenario_spec = {}
+    full_scenario_name = get_full_scenario_name(scenario_list, overide_spec)
+    for scenario_name in scenario_list:
+        builtin_name = get_builtin_name(scenario_name)
+        if builtin_name is not None:
+            if builtin_name not in builtin_scenario_table:
+                if exit_on_error:
+                    print("Error: cannot find scenario `{}`"
+                          .format(scenario_name), file=sys.stderr)
+                    sys.exit(1)
+                else:
+                    raise ValueError("Unknown scenario name", scenario_name)
+            current_spec = builtin_scenario_table[builtin_name]
+        else:
+            if exit_on_error and not os.path.exists(scenario_name):
+                 print("Error: cannot find scenario file `{}`"
+                       .format(scenario_name), file=sys.stderr)
+                 sys.exit(1)
+            with open(scenario_name) as scenario_file:
+                current_spec = json.load(scenario_file)
+        full_scenario_spec.update(current_spec)
+    full_scenario_spec.update(overide_spec)
+    return full_scenario_name, full_scenario_spec
 
-    for name, scenario_spec in scenario_table.copy().items():
-        if name == "ackerror":
-            spec = scenario_spec.copy()
-            spec["packet-size"] = 100            
-            spec["loss-interval"] = 15
-            new_name = update_scenario_name(name, spec)
-            scenario_table[new_name] = spec
+#---------------------------------------------------------------------------
+# The set of built-in scenarios
 
-            spec = scenario_spec.copy()
-            spec["packet-size"] = 100            
-            spec["loss-rate"] = 20
-            new_name = update_scenario_name(name, spec)
-            scenario_table[new_name] = spec
+def get_all_builtin_scenarios(with_filter=True):
+    scenario_table = BUILTIN_SCENARIO_TABLE.copy()
+    #return scenario_table
+    #_get_full_scenario(scenario_list, overide_spec, exit_on_error=False)
 
-            spec = scenario_spec.copy()
-            spec["packet-size"] = 100            
-            spec["loss-packet"] = 10
-            new_name = update_scenario_name(name, spec)
-            scenario_table[new_name] = spec
-            
+    def _add_scenario(base_name, extra_spec):
+        full_name, full_spec = _get_full_scenario([base_name], extra_spec)
+        scenario_table[full_name] = full_spec
+
+    _add_scenario("ackerror", {"packet-size": 100})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-interval": 15})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-rate": 20})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-packet": 10})
 
     if with_filter:
         config = get_simtool_config()
@@ -106,10 +173,17 @@ def get_test_scenarios(with_filter=True):
 
     return scenario_table
 
+
+def get_full_scenario(scenario_list, overide_spec, exit_on_error=False):
+    scenario_table = get_all_builtin_scenarios(True)
+    return _get_full_scenario(
+        scenario_list, overide_spec, exit_on_error,
+        builtin_scenario_table=scenario_table)
+
 #---------------------------------------------------------------------------
 
 def cmd_list(args):
-    scenario_table = get_test_scenarios(not args.all)
+    scenario_table = get_all_builtin_scenarios(not args.all)
     print("List of name of scenarios:")
     for name in sorted(scenario_table.keys()):
         print("    "+name)
@@ -187,6 +261,7 @@ def run_scenario(name, spec, prefix):
     record_dir_name = get_record_dir_name_from_spec(name, spec)
     if len(prefix)>0:
         record_dir_name = prefix+"-"+record_dir_name
+    print(">   simulation '{}' in directory '{}'".format(name, record_dir_name))
     simul_config["record.directory"] = record_dir_name
     simul_config["record.quiet"] = True
     config = get_simtool_config()
@@ -207,28 +282,59 @@ def run_scenario(name, spec, prefix):
     builder.make_device_send_data(clock=1, packet=packet)
     builder.run_simul()
 
+def add_cmd_args_scenario(parser):
+    for var_name, var_type, var_short_cut in SCENARIO_CMD_ARGS:
+        parser.add_argument("--"+var_name, type=var_type)
+
+def get_scenario_spec_from_args(args):
+    args_table = vars(args)
+    spec = {}
+    for var_name, var_type, var_short_cut in SCENARIO_CMD_ARGS:
+        arg_name = var_name.replace("-", "_")
+        if arg_name in args_table and args_table[arg_name] is not None:
+            spec[var_name] = args_table[arg_name]
+    return spec
+
 def cmd_run(args):
-    scenario = args.scenario
+    scenario_list = args.scenario
     prefix = args.prefix
-    scenario_table = get_test_scenarios()
-    if scenario not in scenario_table:
-        print("Error: cannot find scenario '{}'".format(scenario),
-              file=sys.stderr)
-        sys.exit(1)
-    run_scenario(scenario, scenario_table[scenario], prefix)
+    overide_spec = get_scenario_spec_from_args(args)
+    full_scenario_name, full_scenario_spec = get_full_scenario(
+        scenario_list, overide_spec, exit_on_error=True)
+    run_scenario(full_scenario_name, full_scenario_spec, prefix)
 
 def make_cmd_run_parser(arg_subparser):
     run_parser = subparser.add_parser("run")
-    run_parser.add_argument("scenario")
+    run_parser.add_argument("scenario", nargs="*")
     run_parser.add_argument("--prefix", type=str, default="")
+    add_cmd_args_scenario(run_parser)
     run_parser.set_defaults(cmd_func = cmd_run)
+    return run_parser
+
+#--------------------------------------------------
+
+def cmd_show(args):
+    scenario_list = args.scenario
+    prefix = args.prefix
+    overide_spec = get_scenario_spec_from_args(args)
+    full_scenario_name, full_scenario_spec = get_full_scenario(
+        scenario_list, overide_spec, exit_on_error=True)
+    print("----- scenario: {}".format(full_scenario_name))
+    pprint.pprint(full_scenario_spec)
+
+def make_cmd_show_parser(arg_subparser):
+    run_parser = subparser.add_parser("show")
+    run_parser.add_argument("scenario", nargs="*")
+    run_parser.add_argument("--prefix", type=str, default="")
+    add_cmd_args_scenario(run_parser)
+    run_parser.set_defaults(cmd_func = cmd_show)
     return run_parser
 
 #---------------------------------------------------------------------------
 
 def cmd_run_all(args):
     prefix = args.prefix
-    scenario_table = get_test_scenarios()
+    scenario_table = get_all_builtin_scenarios()
     for scenario in sorted(scenario_table.keys()):
         cmd = "./simtool run"
         if len(prefix) > 0:
@@ -300,7 +406,7 @@ def cmd_compare_all(args):
     count_diff = 0
 
     prefix = args.prefix
-    scenario_table = get_test_scenarios()
+    scenario_table = get_all_builtin_scenarios()
     for scenario in sorted(scenario_table.keys()):
         spec = scenario_table[scenario]
         record_dir_name = get_record_dir_name_from_spec(scenario, spec)
@@ -311,7 +417,6 @@ def cmd_compare_all(args):
         print("> no difference(s) found.")
     else:
         print("> differences found in {} files".format(count_diff))
-
 
 def make_cmd_compare_all_parser(arg_subparser):
     run_parser = subparser.add_parser("compare-all")
@@ -348,7 +453,7 @@ def cmd_diff(args):
 def make_cmd_diff_parser(arg_subparser):
     diff_parser = subparser.add_parser("diff")
     diff_parser.add_argument("first_dir")
-    diff_parser.add_argument("second_dir")    
+    diff_parser.add_argument("second_dir")
     diff_parser.add_argument("--compare-tool", type=str, default="diff")
     diff_parser.set_defaults(cmd_func = cmd_diff)
     return diff_parser
@@ -356,7 +461,7 @@ def make_cmd_diff_parser(arg_subparser):
 def make_cmd_kdiff_parser(arg_subparser):
     diff_parser = subparser.add_parser("kdiff")
     diff_parser.add_argument("first_dir")
-    diff_parser.add_argument("second_dir")    
+    diff_parser.add_argument("second_dir")
     diff_parser.add_argument("--compare-tool", type=str, default="kdiff3")
     diff_parser.set_defaults(cmd_func = cmd_diff)
     return diff_parser
@@ -410,6 +515,7 @@ subparser = parser.add_subparsers(dest="command", required=True)
 
 cmd_list_parser = make_cmd_list_parser(subparser)
 cmd_run_parser = make_cmd_run_parser(subparser)
+unused = make_cmd_show_parser(subparser)
 cmd_run_all_parser = make_cmd_run_all_parser(subparser)
 cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
 cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)

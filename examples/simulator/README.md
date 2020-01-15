@@ -15,13 +15,31 @@ An short simple example is provided how to use it:
 
 ### Introduction
 
-The program `simtool` provides a way to run, and compare the output of simulations, and the intended workflow is as
-follows:
+The program `simtool` provides a way to run, and compare the output of simulations, 
+ 
+#### Workflow for trying out parameters
+ 
+The workflow or trying out simulation parameters is as follows:
+
+  1) First select a builtin simulation name from `./simtool list` 
+  2) Display the parameters of that simulation with `./simtool show <sim-name>` (e.g. `./simtool ackerror`)
+  3) Run the builtin simulation as `./simtool run <sim-name>` (e.g. `simtool run ackerror`)
+  4) **Try out** the same simulation but changing one (or several parameters) by using one or several
+   options  `--<parameter-name> <parameter-value>`, e.g.
+    `./simtool run ackerror --fcn-size 5` 
+  5) From the directory names displayed when you did './simtool run ...', do a comparison between
+    the output of the two runs with `./simtool diff <dir1> <dir2>` or `./simtool kdiff <dir1> <dir2>`,
+    e.g. `./simtool diff test-ackerror test-ackerror-fs5` or `./simtool kdiff test-ackerror test-ackerror-fs5`
+ 
+#### Workflow for looking for differences
+
+The workflow for refactoring or looking at the changes for one set of simulation is follows:
   1) With a stable version of openschc, run and record all scenarios with `./simtool run-all --prefix ref`
     (or use the equivalent shortcut `./simtool reref`)
   2) ... do modifications of openschc (like refactoring) ...
-  3) Check if the output is identical (or what are the differences) with `./simtool recheck-all` (which assumes 
-  default prefix `ref` for reference output)
+  3) Check if the output is identical with `./simtool recheck-all` (which assumes 
+  default prefix `ref` for reference output), or alternately display the differences with any
+  recorded file with: `./simtool rediff` or `./simtool rekdiff`
 
 ### Scenario specification
 
@@ -34,7 +52,7 @@ Scenario specification format:
   * `compr-ruleid-size` 
 
 
-  * `frag-mode`: `"ack-on-error"` or `"no-ack"`  XXX:update name in code
+  * `frag-mode`: `"ack-on-error"` or `"no-ack"`
   * `frag-ruleid`
   * `frag-ruleid-size`
   * `dtag-size`
