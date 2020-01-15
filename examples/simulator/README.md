@@ -21,25 +21,45 @@ The program `simtool` provides a way to run, and compare the output of simulatio
  
 The workflow or trying out simulation parameters is as follows:
 
-  1) First select a builtin simulation name from `./simtool list` 
-  2) Display the parameters of that simulation with `./simtool show <sim-name>` (e.g. `./simtool ackerror`)
-  3) Run the builtin simulation as `./simtool run <sim-name>` (e.g. `simtool run ackerror`)
+  1) First select a builtin simulation name from:
+     * `./simtool list` 
+  2) Display the parameters of that simulation with `./simtool show <sim-name>` (see below "Scenario Specification" 
+  for the parameters and their names)
+     * example:`./simtool show ackerror`
+  3) Run the builtin simulation as `./simtool run <sim-name>` 
+     * example: `simtool run ackerror`
   4) **Try out** the same simulation but changing one (or several parameters) by using one or several
-   options  `--<parameter-name> <parameter-value>`, e.g.
-    `./simtool run ackerror --fcn-size 5` 
-  5) From the directory names displayed when you did './simtool run ...', do a comparison between
+   options  `--<parameter-name> <parameter-value>`
+     * example: `./simtool run ackerror --frag-ruleid 2`
+     * or: `./simtool run ackerror --loss-packet 15` 
+  5) From the directory names displayed when you did `./simtool run ...`, do a comparison between
     the output of the two runs with `./simtool diff <dir1> <dir2>` or `./simtool kdiff <dir1> <dir2>`,
-    e.g. `./simtool diff test-ackerror test-ackerror-fs5` or `./simtool kdiff test-ackerror test-ackerror-fs5`
+     * example: `./simtool diff test-ackerror test-ackerror-rid2` 
+     * ... or `./simtool kdiff test-ackerror test-ackerror-rid2`
+     * ... or `./simtool kdiff test-ackerror test-ackerror-lp15`     
  
 #### Workflow for looking for differences
 
-The workflow for refactoring or looking at the changes for one set of simulation is follows:
+The workflow for refactoring or looking at the changes for the whole set of builtin simulations
+ is follows:
   1) With a stable version of openschc, run and record all scenarios with `./simtool run-all --prefix ref`
     (or use the equivalent shortcut `./simtool reref`)
   2) ... do modifications of openschc (like refactoring) ...
   3) Check if the output is identical with `./simtool recheck-all` (which assumes 
   default prefix `ref` for reference output), or alternately display the differences with any
   recorded file with: `./simtool rediff` or `./simtool rekdiff`
+
+### Workflow for an individual simulation
+
+If you want to set the parameters by yourself (described in next section "Scenario specification"), 
+you can use the command line with many options or:
+  1) You can create a json scenario specification file `<scenario-name>.json`, with content 
+    as follows (and example is in the file [sample-scen.json](sample-scen.json) ):
+     * `{ "option1": value1, "option2": value2, ... }` 
+  2) You can run the example with:
+     * `./simtool run <scenario-name>.json [<options>...]` 
+     * example: `./simtool run sample-scen.json`
+  3) The output should be in recorded files in `test-<scenario-name>`
 
 ### Scenario specification
 
@@ -61,10 +81,10 @@ Scenario specification format:
   * `tile-size`
 
   
-  * `loss-interval`
-  * `loss-packet`
-  * `loss-rate`
-  * `seed`
+  * `loss-interval <i>` : every `<i>` packet is lost (starting from `<i>-1`) 
+  * `loss-packet <i>`: packet with index `<i>` is lost
+  * `loss-rate <p>`: lost rate in percentage, e.g. `<p>` % 
+  * `seed`: random seed (for `loss-rate` case)
   
 ### Reference
 
@@ -96,5 +116,5 @@ The program `simtool` provides a way to run, and compare the output of simulatio
  * Alternate commands for `recheck-all` are `rediff` or resp. `rekdiff`, which perform the same actions, 
    except that the programs `diff -u` or resp. `kdiff3` are used to display the differences.
  
- 
- ## Configuration
+ * TODO: commands `diff`, `kdiff`, `show`, explain options for changing parameters
+

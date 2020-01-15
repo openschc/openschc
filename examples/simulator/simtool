@@ -78,9 +78,11 @@ BUILTIN_SCENARIO_TABLE = {
         "w-size": 3,
         "fcn-size": 3,
         "tile-size": 24,
-        "last-tile-in-all1": 1
+        "last-tile-in-all1": 0
     }
 }
+
+#---------------------------------------------------------------------------
 
 def get_builtin_name(scenario_name):
     if scenario_name.startswith(":") or scenario_name.startswith("@"):
@@ -89,32 +91,18 @@ def get_builtin_name(scenario_name):
         return scenario_name
     return None
 
-#---------------------------------------------------------------------------
-
-def old_update_scenario_name(initial_name, scenario_spec): #XXX:remove
-    name = initial_name
-    packet_size = scenario_spec.get("packet-size", None)
-    if packet_size not in [None, DEFAULT_PACKET_SIZE]:
-        name += "-ps{}".format(packet_size)
-
-    if "loss-interval" in scenario_spec:
-        name += "-li{}".format(scenario_spec["loss-interval"])
-    elif "loss-packet" in scenario_spec:
-        packet_index = scenario_spec["loss-packet"]
-        name += "-l{}".format(packet_index)
-    elif "loss-rate" in scenario_spec:
-        name += "-lr{}".format(scenario_spec["loss-rate"])
-        if "seed" in scenario_spec:
-            name += "-s{}".format(scenario.spec["seed"])
-    if "seed" in scenario_spec:
-        name += "-s{}".format(scenario_spec["seed"])
-    return name
+def get_actual_name(scenario_name):
+    result = get_builtin_name(scenario_name)
+    if result is None:
+        assert "." in scenario_name
+        result = ".".join(scenario_name.split(".")[:-1])
+    return result
 
 def get_full_scenario_name(scenario_list, overide_spec):
     if len(scenario_list) == 0:
         name = "base"
     else:
-        name = "-".join(scenario_list)
+        name = "-".join([get_actual_name(name) for name in scenario_list])
     for var_name, var_type, var_short_name in SCENARIO_CMD_ARGS:
         if var_name in overide_spec:
             name += "-"+var_short_name+"{}".format(overide_spec[var_name])
@@ -221,7 +209,7 @@ def get_simul_setup(name, spec):
         "RuleID": spec.get("frag-ruleid", 12),
         "RuleIDLength": spec.get("frag-ruleid-size", 6),
         "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
-    if spec.get("mode") == "ack-on-error":
+    if spec.get("frag-mode") == "ack-on-error":
         frag_info = {
             "FRMode": "ackOnError",
             "FRDirection": "DW",
