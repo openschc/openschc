@@ -42,8 +42,8 @@ class PacketLossModel:
         list mode:
             count_num: a list of indices of lost packets, modulo `cycle`
         cycle mode:
-            cycle: one packet is lost every `cycle` packet starting from 
-            the first one. If `cycle` is 0, no packet is lost.
+            cycle: one packet is lost every `cycle` packets, the
+            the last one in cycle. If `cycle` is 0, no packet is lost.
         rate mode:
             cycle: the rate in which true is returned. 
             i.e. % of losses Fragment Error Rate (e.g. 10 -> 10%)

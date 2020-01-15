@@ -31,6 +31,22 @@ def get_simtool_config(config_file_name=None, args=None):
 DEFAULT_PACKET_SIZE = None
 DEFAULT_RULE_ID_LENGTH = 4
 
+PREDEFINED_SCENARIO_TABLE = {
+
+    #"default": {
+    #    "mode": "no-ack",
+    #},
+
+    "noack": {
+        "mode": "no-ack"
+    },
+
+    "ackerror": {
+        "mode": "ack-on-error",
+        #"packet-size": 0
+    }
+}
+
 def update_scenario_name(initial_name, scenario_spec):
     name = initial_name
     packet_size = scenario_spec.get("packet-size", None)
@@ -43,23 +59,14 @@ def update_scenario_name(initial_name, scenario_spec):
         name += "-l{}".format(packet_index)
     elif "loss-rate" in scenario_spec:
         name += "-lr{}".format(scenario_spec["loss-rate"])
+        if "seed" in scenario_spec:
+            name += "-s{}".format(scenario.spec["seed"])
     if "seed" in scenario_spec:
         name += "-s{}".format(scenario_spec["seed"])
     return name
 
 def get_test_scenarios(with_filter=True):
-    scenario_spec = {
-        "rule-id-length": 4,
-        "packet-size": 0,
-    }
-
-    scenario_spec_ack_on_error = scenario_spec.copy()
-    scenario_spec_ack_on_error["mode"] = "ack-on-error"
-
-    scenario_table = {
-        "noack": scenario_spec,
-        "ackerror": scenario_spec_ack_on_error
-    }
+    scenario_table = PREDEFINED_SCENARIO_TABLE.copy()
 
     for name, scenario_spec in scenario_table.copy().items():
         if name == "ackerror":
@@ -131,28 +138,40 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
-def run_scenario(name, spec, prefix):
+def get_simul_setup(name, spec):
     compr_rule = {
-        "RuleID": 12,
-        "RuleIDLength": 4, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+        "RuleID": spec.get("compr-ruleid", 12),
+        "RuleIDLength": spec.get("compr-ruleid-size", 4),
         "Compression": [] }
     frag_rule = {
-        "RuleID": 12,
-        "RuleIDLength": 6, #spec.get("ruleid-length", DEFAULT_RULEID_LENGTH),
+        "RuleID": spec.get("frag-ruleid", 12),
+        "RuleIDLength": spec.get("frag-ruleid-size", 6),
         "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
     if spec.get("mode") == "ack-on-error":
         frag_info = {
             "FRMode": "ackOnError",
             "FRDirection": "DW",
             "FRModeProfile": {
-                "dtagSize":2, "WSize":3, "FCNSize":3,
+                "dtagSize": spec.get("dtag-size", 2),
+                "WSize": spec.get("w-size", 3),
+                "FCNSize": spec.get("fcn-size", 3),
                 "ackBehavior": "afterAll1",
-                "tileSize": 24, "MICAlgorithm": "crc32", "MICWordSize": 8,
-                "lastTileInAll1": False
+                "tileSize": spec.get("tile-size", 24),
+                "MICAlgorithm": "crc32",
+                "MICWordSize": 8,
+                "lastTileInAll1": spec.get("last-tile-in-all1", False)
             }
         }
         frag_rule["Fragmentation"] = frag_info
-    nocompr_rule = {"RuleID" : 13, "RuleIDLength": 4, "NoCompression" : [] }
+    else:
+        if spec.get("mode", "no-ack") != "no-ack":
+            raise ValueError("bad fragmentation mode", self.get("mode"))
+
+    nocompr_rule = {
+        "RuleID" : 13,
+        "RuleIDLength": 4,
+        "NoCompression" : []
+    }
     rules = [compr_rule, frag_rule, nocompr_rule]
 
     simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
@@ -164,6 +183,12 @@ def run_scenario(name, spec, prefix):
         simul_config["loss"] = {
             "mode":"list", "count_num": [spec["loss-packet"]], "cycle": 100000
         }
+    if "seed" in spec:
+        simul_config["seed"] = spec["seed"]
+    return simul_config, rules
+
+def run_scenario(name, spec, prefix):
+    simul_config, rules = get_simul_setup(name, spec)
     record_dir_name = get_record_dir_name_from_spec(name, spec)
     if len(prefix)>0:
         record_dir_name = prefix+"-"+record_dir_name
@@ -179,7 +204,6 @@ def run_scenario(name, spec, prefix):
     builder.create_device(rules.copy())
     builder.create_core(rules.copy())
 
-    
     packet_size = spec.get("packet-size", DEFAULT_PACKET_SIZE)
     if packet_size == 0 or packet_size == None:
         packet = DEFAULT_PACKET

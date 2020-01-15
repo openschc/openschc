@@ -18,20 +18,45 @@ An short simple example is provided how to use it:
 The program `simtool` provides a way to run, and compare the output of simulations, and the intended workflow is as
 follows:
   1) With a stable version of openschc, run and record all scenarios with `./simtool run-all --prefix ref`
+    (or use the equivalent shortcut `./simtool reref`)
   2) ... do modifications of openschc (like refactoring) ...
   3) Check if the output is identical (or what are the differences) with `./simtool recheck-all` (which assumes 
   default prefix `ref` for reference output)
 
+### Scenario specification
 
+Scenario specification format:
+
+  * `packet-size`: size of the packet to send in bytes, `0` means a default predefined COAP packet is used
+  
+
+  * `compr-ruleid`
+  * `compr-ruleid-size` 
+
+
+  * `frag-mode`: `"ack-on-error"` or `"no-ack"`  XXX:update name in code
+  * `frag-ruleid`
+  * `frag-ruleid-size`
+  * `dtag-size`
+  * `w-size`
+  * `fcn-size`
+  * `tile-size`
+
+  
+  * `loss-interval`
+  * `loss-packet`
+  * `loss-rate`
+  * `seed`
+  
 ### Reference
 
 The program `simtool` provides a way to run, and compare the output of simulations
 
 * `./simtool list`:
 
-  List the available scenario names
+  List the available predefined scenario names
   
-* `./simtool run <scenario name> [--prefix <prefix>]`
+* `./simtool run <scenario name> [<options>] [--prefix <prefix>]`
 
   Run a the scenario `<scenario name>` and output the result (logs) in the directory name corresponding 
  to the scenario (prefixed by `"<prefix>-"` if specified on the command line)
@@ -53,3 +78,5 @@ The program `simtool` provides a way to run, and compare the output of simulatio
  * Alternate commands for `recheck-all` are `rediff` or resp. `rekdiff`, which perform the same actions, 
    except that the programs `diff -u` or resp. `kdiff3` are used to display the differences.
  
+ 
+ ## Configuration
