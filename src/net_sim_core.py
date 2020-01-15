@@ -141,6 +141,8 @@ class Channel:
 
 # ---------------------------------------------------------------------------
 
+NO_LOSS_CONFIG = {"mode": "cycle"} # no cycle size, corresponds to no loss
+
 class Simul:
     def __init__(self, simul_config = {}):
         self.simul_config = simul_config
@@ -156,9 +158,8 @@ class Simul:
     def init_from_config(self):
         if self.simul_config.get("seed") is not None:
             random.seed(self.simul_config["seed"])
-
         self.frame_loss = PacketLossModel(
-                **self.simul_config.get("loss", {"mode":"cycle"}))
+                **self.simul_config.get("loss", NO_LOSS_CONFIG))
 
         with_dprint = bool(self.simul_config.get("enable-print", True))
         gen_utils.set_debug_output(with_dprint)
