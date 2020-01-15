@@ -139,10 +139,10 @@ def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
 def get_simul_setup(name, spec):
-    compr_rule = {
+    nocompr_rule = {
         "RuleID": spec.get("compr-ruleid", 12),
         "RuleIDLength": spec.get("compr-ruleid-size", 4),
-        "Compression": [] }
+        "NoCompression": [] }
     frag_rule = {
         "RuleID": spec.get("frag-ruleid", 12),
         "RuleIDLength": spec.get("frag-ruleid-size", 6),
@@ -167,12 +167,7 @@ def get_simul_setup(name, spec):
         if spec.get("mode", "no-ack") != "no-ack":
             raise ValueError("bad fragmentation mode", self.get("mode"))
 
-    nocompr_rule = {
-        "RuleID" : 13,
-        "RuleIDLength": 4,
-        "NoCompression" : []
-    }
-    rules = [compr_rule, frag_rule, nocompr_rule]
+    rules = [frag_rule, nocompr_rule]
 
     simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG
     if "loss-interval" in spec:

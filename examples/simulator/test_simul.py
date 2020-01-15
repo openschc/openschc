@@ -9,12 +9,6 @@ import net_sim_builder
 # --------------------------------------------------
 # Rule as in documentation
 
-compression_rule = {
-    "RuleID": 12,
-    "RuleIDLength": 4,
-    "Compression": []
-}
-
 frag_rule_noack = {
     "RuleID" : 12,
     "RuleIDLength" : 6,
@@ -25,15 +19,15 @@ frag_rule_noack = {
 }
 
 no_compression = {
-    "RuleID" : 13,
+    "RuleID" : 12,
     "RuleIDLength": 4,
     "NoCompression" : []
 }
 
 # ---------------------------------------------------------------------------
 
-core_rules = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
-device_rules = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
+core_rules = [frag_rule_noack.copy(), no_compression.copy()]
+device_rules = [frag_rule_noack.copy(), no_compression.copy()]
 
 # --------------------------------------------------
 # Message
@@ -54,7 +48,6 @@ builder = net_sim_builder.SimulBuilder()
 builder.create_simul()
 builder.create_device(device_rules)
 builder.create_core(core_rules)
-
 
 # ---------------------------------------------------------------------------
 # Simnulation

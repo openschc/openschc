@@ -167,8 +167,12 @@ class SCHCProtocol:
         rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         self._log("compression rule {}".format(rule))
         if rule is None:
-            # XXX: not putting any SCHC compression header?
-            self._log("compression rule not found")
+            rule = self.rule_manager.FindNoCompressionRule(dst_l3_address)
+            self._log("no-compression rule {}".format(rule))
+
+        if rule is None:
+            # XXX: not putting any SCHC compression header? - need fix
+            self._log("rule for compression/no-compression not found")
             return BitBuffer(raw_packet)
 
         if rule["Compression"] == []:  # XXX: should be "NoCompression"
