@@ -124,6 +124,9 @@ class ReassembleBase:
     def get_session_type(self):
         return "reassembly"
 
+    def get_state_info(self, **kw):
+        return "<reassembly session>"
+
 #---------------------------------------------------------------------------
 
 class ReassemblerNoAck(ReassembleBase):
@@ -219,7 +222,8 @@ class ReassemblerNoAck(ReassembleBase):
 
     def get_state_info(self, **kw):
         result = {
-            "type": "no-ack",
+            "type": "reassembly",
+            "mode": "no-ack"
         }
         return result
 
@@ -651,9 +655,33 @@ class ReassemblerAckOnError(ReassembleBase):
 
 
     def get_state_info(self, **kw):
+        r = self.rule["Fragmentation"]["FRModeProfile"]
+        rule_info = {
+            "ruleid": self.rule["RuleID"],
+            "ruleid-size": self.rule["RuleIDLength"],
+            "w-size": r["WSize"],
+            "dtag-size": r["dtagSize"],
+            "tile-size": r["tileSize"],
+            "window-size": r["windowSize"]
+        }
         result = {
-            "type": "ack-on-error",
-            "state": "XXX - need to be added"
+            "type": "reassembly",
+            "mode": "ack-on-error",
+            "rule": rule_info,
+
+            "state": self.state,
+
+            "dtag": self.dtag,
+            "sender": self.sender_L2addr,
+            "tile-list": self.tile_list,
+            "mic": self.mic_received,
+
+            #self.inactive_timer = 200 #last value 120
+            #self.event_id_inactive_timer = None
+            #self.schc_ack = None
+            #self.all1_received = False
+            #self.mic_missmatched = False
+            #self.fragment_received = False
         }
         return result
 #---------------------------------------------------------------------------

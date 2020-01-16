@@ -107,7 +107,9 @@ class FragmentBase():
 
     def get_session_type(self):
         return "fragmentation"
-    
+
+    def get_state_info(self, **kw):
+        return "<fragmentation session>"
 
 class FragmentNoAck(FragmentBase):
 

@@ -5,6 +5,8 @@
 
 """
 
+import sys
+
 BITS_PER_BYTE = 8
 
 class BitBuffer:
@@ -232,10 +234,6 @@ class BitBuffer:
         #assert nb_bits % BITS_PER_BYTE == 0
         return self._content[self._rpos // BITS_PER_BYTE:]
 
-    # Renamed because of bad ambiguity:
-    #def count_bits(self):
-    #    return self._wpos
-
     def count_remaining_bits(self):
         """return the number of the remaining bits from
         the position of self._rpos to _wpos. """
@@ -258,19 +256,19 @@ class BitBuffer:
             bit_list.append(self.get_bits(1, i))
         return bit_list
 
-    def display(self, format=None):
+    def display(self, format=None, file=sys.stdout):
         """ Display the content, if format is set to "bin" the 
         buffer is in binary, underline shows its size.
         """
         if format == None or format == "hex":
-            print ("{}/{}".format("".join(["%02x"%_ for _ in self._content]), self._wpos))
+            print ("{}/{}".format("".join(["%02x"%_ for _ in self._content]), self._wpos), file=file)
 
         if format == "bin":
             for x in self._content:
-                print ("{:08b}".format(x), end = "")
-            print ("/{}".format(self._wpos))
-            print ('='*self._rpos, end="")
-            print ("-"*(self._wpos-self._rpos))
+                print ("{:08b}".format(x), end = "", file=file)
+            print ("/{}".format(self._wpos), file=file)
+            print ('='*self._rpos, end="", file=file)
+            print ("-"*(self._wpos-self._rpos), file=file)
 
     def allones(self, position=None):
         """ check whether the bits from the position set all 1 or not.

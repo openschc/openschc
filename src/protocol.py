@@ -28,7 +28,6 @@ class SessionManager:
     Internals:
        session_table[(l2_address, rule_id, rule_id_size, dtag)]
               -> session
-       session_type is "reassembly" or "fragmentation"
 
     When 'unique_peer' is true, the l2_address for another peer is 'None'.
     """
@@ -103,8 +102,9 @@ class SessionManager:
         self._add_session(session_id, session)        
         return session
 
-    def get_state(self, **kw):
-        return []
+    def get_state_info(self, **kw):
+        return [(session_id, session.get_state_info(**kw))
+                for (session_id, session) in self.session_table.items() ]
 
 # ---------------------------------------------------------------------------
 
@@ -300,7 +300,9 @@ class SCHCProtocol:
     #    self.scheduler.add_event(0, self.layer3.recv_packet, args)
 
     def get_state_info(self, **kw):
-        result =  {}
+        result =  {
+            "sessions": self.session_manager.get_state_info(**kw)
+        }
         return result
 
     def get_init_info(self, **kw):

@@ -18,6 +18,7 @@ import pprint
 import io
 import os
 import gen_utils
+import gen_bitarray
 
 RECORD_FILE_NAME = "record.log"
 LOGGING_FILE_NAME = "logging.log"
@@ -32,6 +33,10 @@ def json_sanitize(value):
         return "<bytes>"+value.hex()
     elif isinstance(value, bytearray):
         return "<bytearray>"+value.hex()
+    elif isinstance(value, gen_bitarray.BitBuffer):
+        result = io.StringIO()
+        value.display(file=result)
+        return "<bitarray>"+result.getvalue()
     else:
         return "<skipped {}>".format(type(value))
 
