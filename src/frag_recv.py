@@ -63,7 +63,7 @@ class ReassembleBase:
 
         self.fragment_received = False
 
-
+        self._last_receive_info = None # for logs
 
     def get_mic(self, mic_target, extra_bits=0):
         """This gets the mic
@@ -241,7 +241,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
 
     def receive_frag(self, bbuf, dtag):
-
+        self._last_receive_info = []
         dprint('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
@@ -251,6 +251,7 @@ class ReassemblerAckOnError(ReassembleBase):
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
         if self.state == "ABORT":
+            self._last_receive_info = [("state-abort",)]
             self.send_receiver_abort()
             return
         #
@@ -259,10 +260,12 @@ class ReassemblerAckOnError(ReassembleBase):
             dprint("----------------------- Sender-Abort ---------------------------")
             # Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
+            self._last_receive_info = [("abort",)]
             return
 
         if schc_frag.ack_request == True:
             dprint("Received ACK-REQ")
+            self._last_receive_info = [("ack-req",)]            
             # if self.state != "DONE":
             #     #this can happen when the ALL-1 is not received, so the state is
             #     #not done and the sender is requesting an ACK.
@@ -285,6 +288,7 @@ class ReassemblerAckOnError(ReassembleBase):
             self.resend_ack(schc_frag)
             return
 
+        info = self._last_receive_info
         self.fragment_received = True
         # append the payload to the tile list.
         # padding truncation is done later. see below.
@@ -293,6 +297,8 @@ class ReassemblerAckOnError(ReassembleBase):
         nb_tiles, last_tile_size = (
             schc_frag.payload.count_added_bits() // tile_size,
             schc_frag.payload.count_added_bits() % tile_size)
+        info.append(("tile-info", {"nb-tiles":nb_tiles, "tile-size":tile_size,
+                      "last-tile-size": last_tile_size}))
         dprint("---------nb_tiles: ", nb_tiles, " -----last_tile_size ", last_tile_size)
         tiles = [schc_frag.payload.get_bits_as_buffer(tile_size) for _ in range(nb_tiles)]
         dprint("---------tiles: ", tiles)
@@ -318,12 +324,15 @@ class ReassemblerAckOnError(ReassembleBase):
                     if tile["t-num"] == fcn - idx:
                         dprint("tile is already in tile list")
                         tile_in_list = True
+                        info.append(("known-tile", idx, tile))
             if not tile_in_list:
-                self.tile_list.append({
+                new_tile = ({
                     "w-num": win,
                     "t-num": fcn - idx,
                     "nb_tiles": 1,
                     "raw_tiles": tile_in_tiles})
+                self.tile_list.append(new_tile)
+                info.append(("new-tile", idx, new_tile))
                 self.tile_list = sort_tile_list(self.tile_list, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
             if (fcn - idx) == 0:
                 win += 1
@@ -334,18 +343,22 @@ class ReassemblerAckOnError(ReassembleBase):
         if last_tile_size > 8:
             last_tile = schc_frag.payload.get_bits_as_buffer(last_tile_size)
             dprint('---------tile:', last_tile)
+            info.append(("last-tile", last_tile))
             tile_in_list = False
             for tile in self.tile_list:
                 if tile["w-num"] == win:
-                    if tile["t-num"] == 7:
+                    if tile["t-num"] == 7: # XXX: why 7?
                         dprint("tile is already in tile list")
                         tile_in_list = True
+                        info.append(("known-last-tile", None, tile))
             if not tile_in_list:
-                self.tile_list.append({
+                new_tile = ({
                     "w-num": win,
                     "t-num": 7,
                     "nb_tiles": 1,
                     "raw_tiles": last_tile})
+                self.tile_list.append(new_tile)
+                info.append(("new-last-tile", None, tile))
                 self.tile_list = sort_tile_list(self.tile_list, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
 
         # if schc_frag.payload.count_added_bits()%self.rule["tileSize"] != 0:
@@ -384,28 +397,34 @@ class ReassemblerAckOnError(ReassembleBase):
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if self.mic_received == mic_calced:
+                info.append("mic-ok")
                 self.finish(schc_packet, schc_frag)
                 return
             else:
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
+                info.append("mic-not-ok")
                 dprint("waiting for more fragments.")
         elif schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
+            # XXX: what if you receive two MICs?
             dprint("----------------------- ALL1 received -----------------------")
             self.all1_received = True
             Statsct.set_msg_type("SCHC_ALL_1")
             self.mic_received = schc_frag.mic
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             dprint("schc_frag.mic: {}, mic_calced: {}".format(schc_frag.mic, mic_calced))
+            info.append(("mic-received", schc_frag.mic, mic_calced))
             if schc_frag.mic == mic_calced:
                 dprint("SUCCESS: MIC matched. packet {} == result {}".format(
                     schc_frag.mic, mic_calced))
+                info.append("mic-ok")
                 self.mic_missmatched = False
                 self.finish(schc_packet, schc_frag)
                 return
             else:
                 self.mic_missmatched = True
                 self.state = 'ERROR_MIC'
+                info.append("mic-not-ok") # XXX: how do you leave ERROR state?
                 dprint("----------------------- ERROR -----------------------")
                 dprint("ERROR: MIC mismatched. packet {} != result {}".format(
                     schc_frag.mic, mic_calced))
@@ -415,6 +434,7 @@ class ReassemblerAckOnError(ReassembleBase):
 
                 assert bit_list is not None
                 schc_ack = self.create_ack_schc_ko(schc_frag)
+                info.append(("mic-ack", bit_list))
                 """
                 Changement à corriger
                 args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
@@ -423,6 +443,8 @@ class ReassemblerAckOnError(ReassembleBase):
                 self.protocol.scheduler.add_event(
                     0, self.protocol.layer2.send_packet, args)
                 # XXX need to keep the ack message for the ack request.
+
+        # XXX: maybe set timer in all cases (there are 'return's above)
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
             self.inactive_timer, self.event_inactive, tuple())
@@ -676,12 +698,15 @@ class ReassemblerAckOnError(ReassembleBase):
             "tile-list": self.tile_list,
             "mic": self.mic_received,
 
-            #self.inactive_timer = 200 #last value 120
-            #self.event_id_inactive_timer = None
-            #self.schc_ack = None
-            #self.all1_received = False
-            #self.mic_missmatched = False
-            #self.fragment_received = False
+            "inactive-timer": self.inactive_timer,
+            "event-id-inactive": self.event_id_inactive_timer,
+            "all1-received": self.all1_received,
+            "mic_missmatched": self.mic_missmatched,
+            "fragment-received": self.fragment_received,
+
+            "recv-log": self._last_receive_info,
         }
+        self._last_receive_info = None
         return result
+
 #---------------------------------------------------------------------------

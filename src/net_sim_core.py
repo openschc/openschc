@@ -322,6 +322,8 @@ class Simul:
         self.node_table[node.id] = node
 
     def run(self):
+        if self.observer is not None:
+            self.observer.record_initial_state()
         self.scheduler.run()
         if self.observer is not None:
             self.observer.stop_record()
