@@ -14,6 +14,7 @@ class SimulScheduler:
         self.queue = []
         self.clock = 0
         self.next_event_id = 0
+        self.current_event_id = None
         self.observer = None
 
     def set_observer(self, observer):
@@ -33,6 +34,7 @@ class SimulScheduler:
             self.queue.sort()
             event_info = self.queue.pop(0)
             self.clock, event_id, callback, args = event_info
+            self.current_event_id = event_id
             if self.observer is not None:
                 self.observer("sched-pre-event", event_info)
             callback(*args)
@@ -69,9 +71,13 @@ class SimulScheduler:
 
     # Internal API for Simulator get_state_info - don't use in other contexts
 
-    def get_queue_content(self):
+    def _get_queue_content(self, helper_table={}):
         result = self.queue.copy()
         result.sort()
-        return sanitize_value(result)
+        return sanitize_value(result, helper_table)
+
+    def _get_event_id(self):
+        return self.current_event_id
+    
 
 #---------------------------------------------------------------------------

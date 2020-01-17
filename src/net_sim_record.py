@@ -127,7 +127,8 @@ class SimulRecordingObserver:
         if format == "pprint":
             print(pprint.pformat(info), file=self.packet_file)
         elif format == "json":
-            print(json.dumps(info, default=json_sanitize), file=self.packet_file)
+            print(json.dumps(info, default=json_sanitize),
+                  file=self.packet_file)
         else: raise ValueError("unknown record.format", format)
 
     def record_log(self, line):
@@ -154,7 +155,8 @@ class SimulRecordingObserver:
         self.trace_file.close()
         self.packet_file.close()
         if not self.quiet:
-            print("> recorded all state in '{}'".format(self.manager.get_file_name("")))
+            print("> recorded all state in '{}'".format(
+                self.manager.get_file_name("")))
 
     def __del__(self):
         self.print_file.close() # XXX: this is done implicitly anyway

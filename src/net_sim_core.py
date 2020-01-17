@@ -12,6 +12,7 @@ import net_sim_record
 from gen_utils import dprint
 import gen_utils
 
+
 try:
     import utime as time
 except ImportError:
@@ -21,6 +22,8 @@ import types
 import random
 
 import protocol
+from frag_send import FragmentAckOnError
+from frag_recv import ReassemblerAckOnError
 from stats.statsct import Statsct
 
 #---------------------------------------------------------------------------
@@ -156,6 +159,7 @@ class Simul:
         self.init_from_config()
 
     def init_from_config(self):
+        self.scheduler.add_event(0, self._notify_start, ())
         if self.simul_config.get("seed") is not None:
             random.seed(self.simul_config["seed"])
         self.frame_loss = PacketLossModel(
@@ -174,10 +178,13 @@ class Simul:
             self.set_observer(obs)
             obs.start_record(record_dir_name, record_quiet) # XXX: should be at sim start.
 
+    def _notify_start(self):
+        pass # just used for recording (initial event)
+
     def set_log_file(self, filename):
         self.log_file = open(filename, "w")
 
-    def log(self, name, message): # XXX: put Soichi type of logging
+    def log(self, name, message):
         if not self.simul_config.get("log", False):
             return
         line = "{} [{}] ".format(self.scheduler.get_clock(), name) + message
@@ -207,11 +214,12 @@ class Simul:
     def send_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple(), with_hack=False):
         if self.channel is None:
-            return self.deliver_packet(packet, src_id, dst_id, callback, callback_args, with_hack)
+            return self.deliver_packet(
+                packet, src_id, dst_id, callback, callback_args, with_hack)
         else:
-            return self.channel.transmit_packet(src_id, packet,
-                    self.deliver_packet,
-                    (packet, src_id, dst_id, callback, callback_args, with_hack))
+            return self.channel.transmit_packet(
+                src_id, packet, self.deliver_packet,
+                (packet, src_id, dst_id, callback, callback_args, with_hack))
 
     def deliver_packet(self, packet, src_id, dst_id=None,
                     callback=None, callback_args=tuple(), with_hack=False):
@@ -243,7 +251,9 @@ class Simul:
             count = 0
         #
         if self.observer is not None:
-            info = {"src":src_id, "dst":dst_id, "packet":packet, "clock": clock, "count":count, "lost":lost}
+            info = {"src":src_id, "dst":dst_id, "packet":packet,
+                    "clock": clock, "count":count, "lost":lost,
+                    "event-id": self.scheduler._get_event_id() }
             self.observer.record_packet(info)
 
         if callback != None: #XXX: should called by channel after delay
@@ -267,7 +277,7 @@ class Simul:
             self.SEND_ALL_1 = "SEND_ALL_1"
             self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
             self.ACK_TIMEOUT = "ACK_TIMEOUT"
-        
+
             count = 1
             # for link in link_list:
             #     count += self.send_packet_on_link(link, packet)
@@ -331,7 +341,8 @@ class Simul:
     # ---------- Introspection for recording
 
     def get_state_info(self, **kw):
-        queue = self.scheduler.get_queue_content()
+        helpers = self._get_sanitize_helpers()
+        queue = self.scheduler._get_queue_content(helpers)
         result = {
             "node_table": {
                 node_id: node.get_state_info(**kw)
@@ -353,10 +364,25 @@ class Simul:
         info["node-id"] = instance.protocol.get_system().id
         return info
 
-    def _filter_value(self, value):
+    def __sanitize_frag(self, instance, info):
+        info["node-id"] = instance.protocol.get_system().id
+        return info
+
+    def __sanitize_protocol(self, instance, info):
+        info["node-id"] = instance.get_system().id
+        return info
+
+    def _get_sanitize_helpers(self):
         helpers = {
-            SimulLayer2.__name__ : self.__sanitize_SimulLayer2
+            SimulLayer2.__name__: self.__sanitize_SimulLayer2,
+            FragmentAckOnError.__name__: self.__sanitize_frag,
+            ReassemblerAckOnError.__name__: self.__sanitize_frag,
+            protocol.SCHCProtocol.__name__: self.__sanitize_protocol
         }
+        return helpers
+
+    def _filter_value(self, value):
+        helpers = self._get_sanitize_helpers()
         result = gen_utils.sanitize_value(value, helpers)
         return result
 
@@ -374,6 +400,8 @@ class Simul:
             }
         }
         return result
+
+#---------------------------------------------------------------------------
 
 def link_as_dict(link):
     return {"to": link.to_id, "from": link.from_id, "delay": link.delay}
