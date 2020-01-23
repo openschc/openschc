@@ -73,7 +73,7 @@ class SimulBuilder:
         rm1.Add(device=devaddr2, dev_info=rules)
         rm1.Print()
         self.core_rule_manager = rm1
-        self.core_node = self._make_schc_node(self.sim, rm1, devaddr2, role="core")
+        self.core_node = self._make_schc_node(self.sim, rm1, devaddr2, role="core-server")
         return self.core_node
 
     def create_device(self, rules):

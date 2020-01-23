@@ -115,7 +115,7 @@ class SCHCProtocol:
     """
 
     def __init__(self, config, system, layer2, layer3, role, unique_peer):
-        assert role in ["device", "core"]
+        assert role in ["device", "core-server"]
         self.config = config
         self.unique_peer = unique_peer
         self.role = role
@@ -153,7 +153,7 @@ class SCHCProtocol:
         if self.role == "device":
             t_dir = T_DIR_UP
         else:
-            assert self.role == "core"
+            assert self.role == "core-server"
             t_dir = T_DIR_DW
 
         # Parse packet as IP packet and apply compression rule

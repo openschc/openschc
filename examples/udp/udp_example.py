@@ -34,17 +34,19 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # Get UDP address and role from command line
 
 parser = argparse.ArgumentParser()
-parser.add_argument("role", choices=["device", "core"])
+parser.add_argument("role", choices=["device", "core", "core-server"])
 args = parser.parse_args()
 
 ip_address = "127.0.0.1"
 role = args.role
+if role == "core":
+    role = "core-server"
 
 if role == "device":
     udp_src = (ip_address, 33300)
     udp_dst = (ip_address, 33333)
 else:
-    assert role == "core"
+    assert role == "core-server"
     udp_src = (ip_address, 33333)
     udp_dst = (ip_address, 33300)
 

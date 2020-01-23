@@ -89,7 +89,7 @@ Statsct.get_results()
 sim = net_sim_core.Simul(simul_config)
 
 node0 = make_node(sim, rm0, devaddr1, role="device") # SCHC device
-node1 = make_node(sim, rm1, devaddr2, role="core")   # SCHC gw
+node1 = make_node(sim, rm1, devaddr2, role="core-server")   # SCHC gw
 sim.add_sym_link(node0, node1)
 node0.layer2.set_mtu(l2_mtu)
 node1.layer2.set_mtu(l2_mtu)

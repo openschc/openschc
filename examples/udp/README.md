@@ -7,7 +7,7 @@ By default, the example is a device sending a single (COAP) packet with a fragme
 the core (server).
 
 How to run:
-1) In one terminal, on command line, run: `python udp_example.py core` 
+1) In one terminal, on command line, run: `python udp_example.py core-server` 
   A node assuming the role of core (network infrastructure server) will start (waiting SCHC packet on one UDP Port)
   
 2) In another terminal, on command line, run: `python udp_example.py device`
