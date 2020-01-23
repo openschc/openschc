@@ -3168,6 +3168,9 @@
   3168	   between the arbitrary data and some content that was meant to remain
   3169	   secret, such as a security token, thereby allowing the attacker to
   3170	   get at the secret.
+
+
+
   3171
   3172	   By contrast, SCHC Compression takes place header field by header
   3173	   field, with the SCHC Packet being a mere concatenation of the

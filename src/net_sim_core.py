@@ -81,7 +81,7 @@ class SimulSCHCNode(SimulNode):
         self.sim = sim
         self.config = sim.simul_config.get("node-config", {}).copy() # XXX: remove?
         self.config.update(extra_config)
-        unique_peer = self.config["unique-peer"]
+        unique_peer = self.config.get("unique-peer", True) # XXX:remove default
 
         self.layer2 = SimulLayer2(sim)
         self.layer3 = SimulLayer3(sim)
