@@ -45,16 +45,18 @@ if role == "core":
 if role == "device":
     udp_src = (ip_address, 33300)
     udp_dst = (ip_address, 33333)
+    rule_address = (ip_address, 33300)
 else:
     assert role == "core-server"
     udp_src = (ip_address, 33333)
     udp_dst = (ip_address, 33300)
+    rule_address = (ip_address, 33300)
 
 # --------------------------------------------------
 # Actually run SCHC
 
 rule_manager = gen_rulemanager.RuleManager()
-rule_manager.Add(device=address_to_string(udp_src), dev_info=rule_set)
+rule_manager.Add(device=address_to_string(rule_address), dev_info=rule_set)
 rule_manager.Print()
 
 config = {}
@@ -63,7 +65,7 @@ lower_layer = UdpLowerLayer(udp_src, udp_dst)
 system = UdpSystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
-    config, system, layer2=lower_layer, layer3=upper_layer, role=role)
+    config, system, layer2=lower_layer, layer3=upper_layer, role=role, unique_peer=True)
 schc_protocol.set_rulemanager(rule_manager)
 
 if args.role == "device": # XXX: fix addresses mismatches
