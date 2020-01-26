@@ -48,7 +48,7 @@ SCENARIO_CMD_ARGS = [
     ("tile-size",         int,    "ts"),
 
     ("loss-interval",     int,    "li"),
-    ("loss-packet",       int,    "lp"),
+    ("loss-packet",       str,    "lp"),
     ("loss-rate",         int,    "lr"),
     ("seed",              int,    "s")
 ]
@@ -241,8 +241,12 @@ def get_simul_setup(name, spec):
     elif "loss-rate" in spec:
         simul_config["loss"] = {"mode":"rate", "cycle": spec["loss-rate"]}
     elif "loss-packet" in spec:
+        if isinstance(spec["loss-packet"], str):
+            lost_packet_list = [int(idx) for idx in spec["loss-packet"].split(",")]
+        else:
+            lost_packet_list = spec["loss-packet"]
         simul_config["loss"] = {
-            "mode":"list", "count_num": [spec["loss-packet"]], "cycle": 100000
+            "mode":"list", "count_num": lost_packet_list, "cycle": 100000
         }
     if "seed" in spec:
         simul_config["seed"] = spec["seed"]

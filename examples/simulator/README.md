@@ -82,8 +82,8 @@ Scenario specification format:
   * `tile-size`
 
   
-  * `loss-interval <i>` : every `<i>` packet is lost (starting from `<i>-1`) 
-  * `loss-packet <i>`: packet with index `<i>` is lost
+  * `loss-interval <i>` : every `<i>` packet is lost (starting from `0`) 
+  * `loss-packet <i>`: packet with index `<i>` is lost. Can be a list `<i1>,<i2>,...<ik>`
   * `loss-rate <p>`: lost rate in percentage, e.g. `<p>` % 
   * `seed`: random seed (for `loss-rate` case)
   

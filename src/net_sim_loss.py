@@ -159,8 +159,8 @@ class PacketLossModel:
         return False    
 
     def is_lost(self, packet_size):
-        self.count_in_cycle += 1
         is_true = self.check_func(packet_size)
+        self.count_in_cycle += 1
         if self.count_in_cycle == self.cycle:
             self.count_in_cycle = 0
         return is_true
