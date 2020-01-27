@@ -553,7 +553,7 @@ class FragmentAckOnError(FragmentBase):
         dprint("ack_requests_counter -> {}".format(self.ack_requests_counter))
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
-            schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag, win)
+            schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
             """ Changement à corriger
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             """
