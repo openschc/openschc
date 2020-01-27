@@ -80,7 +80,7 @@ Scenario specification format:
   * `w-size`
   * `fcn-size`
   * `tile-size`
-
+  * `window-size`
   
   * `loss-interval <i>` : every `<i>` packet is lost (starting from `0`) 
   * `loss-packet <i>`: packet with index `<i>` is lost. Can be a list `<i1>,<i2>,...<ik>`

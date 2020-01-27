@@ -43,9 +43,11 @@ SCENARIO_CMD_ARGS = [
     ("frag-ruleid",       int,    "rid"),
     ("frag-ruleid-size",  int,    "ris"),
     ("dtag-size",         int,    "ds"),
-    ("w-size",            int,    "ws"),
+    ("w-size",            int,    "wfs"), # W Field Size
     ("fcn-size",          int,    "fs"),
+
     ("tile-size",         int,    "ts"),
+    ("window-size",       int,    "wis"), # WIndow Size
 
     ("loss-interval",     int,    "li"),
     ("loss-packet",       str,    "lp"),
@@ -96,7 +98,7 @@ def get_actual_name(scenario_name):
     result = get_builtin_name(scenario_name)
     if result is None:
         assert "." in scenario_name
-        result = ".".join(scenario_name.split(".")[:-1])
+        result = ".".join(os.path.basename(scenario_name).split(".")[:-1])
     return result
 
 def get_full_scenario_name(scenario_list, overide_spec):
@@ -222,7 +224,8 @@ def get_simul_setup(name, spec):
                 "tileSize": spec.get("tile-size", 24),
                 "MICAlgorithm": "crc32",
                 "MICWordSize": 8,
-                "lastTileInAll1": spec.get("last-tile-in-all1", False)
+                "lastTileInAll1": spec.get("last-tile-in-all1", False),
+                "windowSize": spec.get("window-size", 7)
             }
         }
         frag_rule["Fragmentation"] = frag_info
