@@ -9,6 +9,8 @@ import json
 import pprint
 sys.path.append("../../src") # XXX: temporary hack
 
+import gen_bitarray
+from gen_bitarray import BITS_PER_BYTE
 import net_sim_builder
 
 #---------------------------------------------------------------------------
@@ -200,6 +202,8 @@ DEFAULT_PACKET = bytearray(b"""`\
 foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 \x82  &Ehello""")
 
+DEFAULT_TILE_SIZE = 24
+
 def get_record_dir_name_from_spec(name, spec):
     return "test-"+name
 
@@ -221,7 +225,7 @@ def get_simul_setup(name, spec):
                 "WSize": spec.get("w-size", 3),
                 "FCNSize": spec.get("fcn-size", 3),
                 "ackBehavior": "afterAll1",
-                "tileSize": spec.get("tile-size", 24),
+                "tileSize": spec.get("tile-size", DEFAULT_TILE_SIZE),
                 "MICAlgorithm": "crc32",
                 "MICWordSize": 8,
                 "lastTileInAll1": spec.get("last-tile-in-all1", False),
@@ -277,7 +281,20 @@ def run_scenario(name, spec, prefix):
     if packet_size == 0 or packet_size == None:
         packet = DEFAULT_PACKET
     else:
-        packet = packet_size * b"\x00"
+        tile_size = spec.get("tile-size", DEFAULT_TILE_SIZE)
+        nb_tile = (packet_size*BITS_PER_BYTE+tile_size-1)//tile_size
+        bb = gen_bitarray.BitBuffer()
+        for i in range(nb_tile):
+            available = tile_size
+            while available >= BITS_PER_BYTE:
+                bb.add_bits((i+1)%0x100, BITS_PER_BYTE)
+                available -= BITS_PER_BYTE
+            if available > 0:
+                bb.add_bits((1<<available)-1, available)
+        bb.ensure_padding()
+        packet = bb.get_content()
+        assert len(packet)>=packet_size
+        packet = packet[:packet_size]
     builder.make_device_send_data(clock=1, packet=packet)
     builder.run_simul()
 
