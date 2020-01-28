@@ -394,6 +394,7 @@ class ReassemblerAckOnError(ReassembleBase):
         # self.tile_list = sort_tile_list(self.tile_list, self.rule["FCNSize"])
         # self.tile_list = sort_tile_list(self.tile_list, self.rule["WSize"])
 
+        should_send_ack = False
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             if self.mic_received == mic_calced:
@@ -405,6 +406,8 @@ class ReassemblerAckOnError(ReassembleBase):
                 # during MAX_ACK_REQUESTS
                 info.append("mic-not-ok")
                 dprint("waiting for more fragments.")
+                # XXX: do that only when necessary (one per window):
+                #should_send_ack = True 
         elif schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
             # XXX: what if you receive two MICs?
             dprint("----------------------- ALL1 received -----------------------")
@@ -428,6 +431,9 @@ class ReassemblerAckOnError(ReassembleBase):
                 dprint("----------------------- ERROR -----------------------")
                 dprint("ERROR: MIC mismatched. packet {} != result {}".format(
                     schc_frag.mic, mic_calced))
+                should_send_ack = True
+
+        if should_send_ack:
                 bit_list = find_missing_tiles(self.tile_list,
                                               self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
                                               frag_msg.get_fcn_all_1(self.rule))
