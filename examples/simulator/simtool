@@ -152,7 +152,7 @@ def get_all_builtin_scenarios(with_filter=True):
     _add_scenario("ackerror", {"packet-size": 100})
     _add_scenario("ackerror", {"packet-size": 100, "loss-interval": 15})
     _add_scenario("ackerror", {"packet-size": 100, "loss-rate": 20})
-    _add_scenario("ackerror", {"packet-size": 100, "loss-packet": [10]})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-packet": "10"})
 
     if with_filter:
         config = get_simtool_config()
