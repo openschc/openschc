@@ -407,7 +407,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 info.append("mic-not-ok")
                 dprint("waiting for more fragments.")
                 # XXX: do that only when necessary (one per window):
-                #should_send_ack = True 
+                #should_send_ack = True
         elif schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
             # XXX: what if you receive two MICs?
             dprint("----------------------- ALL1 received -----------------------")
