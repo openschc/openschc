@@ -1,0 +1,30 @@
+# PYTHONPATH must be set to openschc/src
+
+import gen_rulemanager
+
+
+packet = "6" +                                      # IPv6 version
+         "00" +                                     # DiffServ
+         "12345" +                                  # Flow Label
+         "0039" +                                   # Payload Length
+         "11" +                                     # Next Header (UDP)
+         "33" +                                     # Hop Limit
+         "2001 0470 8957 1222 0000 0000 0000 0005"+ # Device address
+         "2001 41d0 0401 3100 0000 0000 0000 57d7"+ # Application address
+         "1634" +                                   # Device port
+         "1633" +                                   # Application port
+         "0039" +                                   # UDL length
+         "7a6e" +                                   # UDP checksum
+         "5102" +                                   # CoAP Header NON TLK=1
+         "00a0" +                                   # Message ID
+         "20" +                                     # Token
+         "b4 7465 6d70" +                           # Option Path /temp
+         "d1ea 02" +                                # Option Server No Response (4&5 allowed)
+         "ff" +                                     # end option
+         "981f19074b210503010500220622200600250301220401030300220304010122030a05"
+
+print (packet)
+
+
+    
+
