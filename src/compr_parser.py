@@ -152,11 +152,19 @@ class Parser:
                 pos += 1
 
                 deltaT = (deltaTL & 0xF0) >> 4
-                # /!\ add long value
+                if deltaT == 13:
+                    deltaT = int(pkt[pos]) + 13
+                    pos += 1
+                
+                # /!\ Larger value not implemented
+
                 option_number += int(deltaT)
 
                 L = int(deltaTL & 0x0F)
-                # /!\ add long values
+                if L == 13: 
+                    L = int(pkt[pos]) + 13
+                    pos += 1
+                # /!\ Larger value not implemented
 
                 # create a field_position counter if a field is repeated in the header
                 try:
