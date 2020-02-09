@@ -45,12 +45,16 @@ class Parser:
         self.protocol = protocol
         self.header_fields = {}
 
-    def parse(self, pkt, direction, layer="IPv6"):
+    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "COAP"], start="IPv6"):
         """
         Parsing a byte array:
         - pkt is the bytearray to be parsed
         - direction can be T_DIR_UP or T_DIR_DW
-        - layer is a optional argument: 3 means that parsing must start at ip Layer
+        - layer is a optional argument: 3 means which protocols can be parsed
+        - start where to start parsing
+
+        example to start at COAP layer start="COAP"
+        to stop before CoAP layers = ["IPv6, "UDP"]
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
@@ -58,7 +62,9 @@ class Parser:
         pos = 0
         self.header_fields = {}
 
-        if layer == "IPv6":
+        next_header = start
+
+        if  next_header == "IPv6" :
             version = unpack ("!B", pkt[:1])
             assert version[0]>>4 == 6                 # only IPv6
 
@@ -88,12 +94,12 @@ class Parser:
 
             assert self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58
 
-            if self.header_fields[T_IPV6_NXT, 1][0] == 17: layer = "udp"
-            if self.header_fields[T_IPV6_NXT, 1][0] == 58: layer = "icmp"
+            if self.header_fields[T_IPV6_NXT, 1][0] == 17: next_layer = "UDP"
+            if self.header_fields[T_IPV6_NXT, 1][0] == 58: next_layer = "ICMP"
 
             pos = 40 # IPv6 is fully parsed
 
-        if layer == "udp":
+        if "UDP" in layers and next_layer == "UDP":
             udpBytes = unpack('!HHHH', pkt[pos:pos+8])
             if direction == T_DIR_UP:
                 self.header_fields[T_UDP_DEV_PORT, 1]   = [udpBytes[0], 16]
@@ -106,9 +112,9 @@ class Parser:
 
             pos += 8
 
-            layer = "coap"
+            next_layer = "COAP"
 
-        if layer == "icmp":
+        if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
 
             self.header_fields[T_ICMPV6_TYPE, 1]        = [icmpBytes[0], 8]
@@ -123,7 +129,7 @@ class Parser:
                 pos += 4
 
 
-        if layer == "coap":
+        if "COAP" in layers and next_layer == "COAP":
             field_position = {}
             coapBytes = unpack('!BBH', pkt[pos:pos+4])
 
