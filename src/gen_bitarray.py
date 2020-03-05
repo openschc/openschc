@@ -4,6 +4,7 @@
     :synopsis: SCHC Bit Buffer Management
 
 """
+from contextlib import redirect_stdout
 
 BITS_PER_BYTE = 8
 
@@ -271,6 +272,14 @@ class BitBuffer:
             print ("/{}".format(self._wpos))
             print ('='*self._rpos, end="")
             print ("-"*(self._wpos-self._rpos))
+
+    def save_to_file(self, file_descriptor, format = None):
+        """ Save the content to file descriptor, if format is set to "bin" the
+        buffer is in binary, underline shows its size.
+        """
+        with redirect_stdout(file_descriptor):
+            self.display(format)
+
 
     def allones(self, position=None):
         """ check whether the bits from the position set all 1 or not.
