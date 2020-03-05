@@ -1,4 +1,4 @@
-# Interroperability test tools
+# Interoperability test tools
 
 
 ## Summary
@@ -9,11 +9,12 @@ This folder helps with interroperability testing:
 * `packet_rules` is the folder containing the parameters (packets and rules) to generate test vectors
 * `golden_samples` is the fodler containing the references test vectors
 
+Remember to setup PYTHONPATH per https://github.com/openschc/openschc/tree/master/examples
 
 ## Usage - `generate_golden_samples.py`
 Call `python generate_golden_samples.py`, no parameters. Results are generated in directory `golden_samples`.
 
-## Usage - `generate_golden_samples.py`
+## Usage - `compare_to_golden_samples.py`
 Call `python compare_to_golden_samples.py dut_folder_path`
 
 Example:
