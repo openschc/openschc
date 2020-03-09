@@ -51,7 +51,8 @@ for file_name in sorted(glob.glob(f"./{golden_samples_folder}/[0-9][0-9]-*.txt")
             f"{args.dut_folder}/{file_name_stem}.txt", "r"
         ) as f_dut:
             for golden_sample_line in f_golden_sample.readlines():
-                dut_line = f_dut.readline()
+                golden_sample_line = golden_sample_line.upper()
+                dut_line = f_dut.readline().upper()
                 if golden_sample_line != dut_line:
                     status = False
                     changes = generate_positionnal_changes_indicator(
