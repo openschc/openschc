@@ -68,7 +68,7 @@ class UdpLowerLayer:
         self.protocol = protocol
         self._actual_init()
 
-    def send_packet(self, packet, dst_str_address, transmit_callback):
+    def send_packet(self, packet, dst_str_address, transmit_callback=None):
         if dst_str_address is None or dst_str_address == "*":
             dst_address = self.udp_dst
         else:
