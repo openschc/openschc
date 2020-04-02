@@ -84,7 +84,11 @@ class SCHCProtocol:
         self.reassemble_session = Session(self)
         if hasattr(config, "debug_level"):
             set_debug_output(True)
+        self.packet_file = None
 
+    def set_packet_file(self, new_packet_file):
+        self.packet_file = new_packet_file
+        
     def _log(self, message):
         self.log("schc", message)
 
@@ -207,9 +211,13 @@ class SCHCProtocol:
 
         # dprint(dev_L2addr)
         packet_bbuf = BitBuffer(raw_packet)
-        # dprint("raw_packet", raw_packet)
+        #dprint("raw_packet", raw_packet)
         # dprint("schc packet", packet_bbuf)
         # dprint("frag_rule", frag_rule)
+        #print(self.config)
+        if self.packet_file is not None:
+            print("packet----->", raw_packet)
+            # XXX write packet in file 
 
         # !IMPORTANT: This condition has to be changed by a context condition like in the last version
 

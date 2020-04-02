@@ -94,6 +94,10 @@ sim.add_sym_link(node0, node1)
 node0.layer2.set_mtu(l2_mtu)
 node1.layer2.set_mtu(l2_mtu)
 
+
+f = open("golden-packet.txt", "w")
+node1.protocol.set_packet_file(f)
+
 # ---------------------------------------------------------------------------
 # Information about the devices
 
