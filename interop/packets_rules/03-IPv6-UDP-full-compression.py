@@ -74,7 +74,7 @@ class debug_protocol:
         print(*arg)
 
 P = Parser(debug_protocol)
-headers, data = P.parse(packet, direction="UP", layers=["IPv6", "UDP"])
+headers, data, parse_error = P.parse(packet, direction="UP", layers=["IPv6", "UDP"])
 
 pprint.pprint(headers)
 print (binascii.hexlify(data))
