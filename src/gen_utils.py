@@ -25,7 +25,8 @@ def dprint(*args, **kw):
     """Debug print"""
     global enable_debug_print
     if enable_debug_print:
-        print_function(*args, **kw)
+        print_function(">", *args, **kw)
+        sys.stdout.flush()
 
 def dpprint(*args, **kw):
     """Debug print"""
@@ -33,6 +34,7 @@ def dpprint(*args, **kw):
     if enable_debug_print:
         text = pprint.pformat(*args, **kw)
         print_function(text, end="")
+        sys.stdout.flush()
 
 trace_print_function = print
 
@@ -46,6 +48,7 @@ def dtrace(*args, **kw):
     global trace_print_function
     if trace_print_function is not None:
         trace_print_function(*args, **kw)
+        sys.stdout.flush()
 
 #---------------------------------------------------------------------------
 

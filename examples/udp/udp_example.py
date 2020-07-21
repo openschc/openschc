@@ -1,5 +1,7 @@
+import sys, getopt
+sys.path.append('/home/laurent/github/openschc-pr/src')
 
-
+    
 from net_udp_core import  *
 
 # --------------------------------------------------
@@ -15,7 +17,7 @@ frag_rule_noack = {
     "RuleIDLength" : 6,
     "Fragmentation" : {
         "FRMode": "noAck",
-        "FRDirection": "DW"
+        "FRDirection": "UP"
     }
 }
 
@@ -37,7 +39,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("role", choices=["device", "core", "core-server"])
 args = parser.parse_args()
 
-ip_address = "127.0.0.1"
+ip_address = ""
 role = args.role
 if role == "core":
     role = "core-server"
@@ -56,8 +58,9 @@ else:
 # Actually run SCHC
 
 rule_manager = gen_rulemanager.RuleManager()
-rule_manager.Add(device=address_to_string(rule_address), dev_info=rule_set)
+rule_manager.Add(dev_info=rule_set)
 rule_manager.Print()
+
 
 config = {}
 upper_layer = UdpUpperLayer()
@@ -71,6 +74,8 @@ schc_protocol.set_rulemanager(rule_manager)
 if args.role == "device": # XXX: fix addresses mismatches
     upper_layer.send_later(1, udp_src, coap_ip_packet)
 
+sys.stdout.flush()
 scheduler.run()
+
 
 # --------------------------------------------------

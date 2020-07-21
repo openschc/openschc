@@ -673,74 +673,85 @@ class RuleManager:
         Print a context
         """
         for dev in self._ctxt:
-            dprint ("*"*40)
-            dprint ("Device:", dev["DeviceID"])
+            print ("*"*40)
+            print ("Device:", dev["DeviceID"])
 
             for rule in dev["SoR"]:
-                dprint ("/" + "-"*25 + "\\")
+                print ("/" + "-"*25 + "\\")
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
-                dprint ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
+                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_COMP in rule:
-                    dprint ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
+                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
                     for e in rule[T_COMP]:
-                        dprint ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                        print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
                         if 'TV' in e:
                             if type(e[T_TV]) is list:
                                 self._smart_print(e[T_TV][0])
                             else:
                                 self._smart_print(e[T_TV])
                         if not T_TV in e or e[T_TV] == None:
-                            dprint ("-"*30, end="")
+                            print ("-"*30, end="")
 
                         txt = e[T_MO]
                         if T_MO_VAL in e:
                             txt = txt+ '(' + str(e[T_MO_VAL])+')'
 
-                        dprint ("|{:13}|{:16}|".format(txt, e[T_CDA]))
+                        print ("|{:13}|{:16}|".format(txt, e[T_CDA]))
 
                         if (T_TV in e) and (type (e[T_TV]) is list):
                             for i in range (1, len(e[T_TV])):
-                                dprint (":{:^15s}:{:^3}:{:^2}:{:^2}:".format(".", ".", ".","."), end='')
+                                print (":{:^15s}:{:^3}:{:^2}:{:^2}:".format(".", ".", ".","."), end='')
                                 self._smart_print(e[T_TV][i])
-                                dprint (":{:^13}:{:^16}:".format(".", "."))
+                                print (":{:^13}:{:^16}:".format(".", "."))
 
 
-                    dprint ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
+                    print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
-                    dprint ("!" + "="*25 + "+" + "="*61 +"\\")
-                    dprint ("!! Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:22} !!"
+                    print (rule)
+                    if rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP:
+                        dir_c = "^"
+                    else:
+                        dir_c = "v"
+
+                    print ("!" + "="*25 + "+" + "="*61 +"\\")
+                    print ("!{} Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:20}{:2} {}!"
                         .format(
+                            dir_c,
                             rule[T_FRAG][T_FRAG_MODE],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_W],
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                            ""
+                            "",
+                            rule[T_FRAG][T_FRAG_DIRECTION],
+                            dir_c
                         ))
 
                     if T_FRAG_TILE in rule[T_FRAG][T_FRAG_PROF]:
                         txt = "Tile size: "+ str(rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE])
                     else:
                         txt = "No Tile size specified"
-                    dprint ("!! {:<84}!!".format(txt))
+                    print ("!{} {:<84}{}!".format(dir_c, txt, dir_c))
 
 
-                    dprint ("!! RCS Algorithm: {:<69}!!".format(rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]))
+                    print ("!{} RCS Algorithm: {:<69}{}!".format(dir_c,rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC], dir_c))
 
                     if rule[T_FRAG][T_FRAG_MODE] != "noAck":
-                        dprint ("!!" + "-"*85 +"!!")
+                        print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
-                            dprint ("!! {:<84}!!".format(txt))
+                            print ("!{} {:<84}{}!".format(dir_c, txt, dir_c))
 
-                        dprint ("!! Max Retry : {:4}   Timeout {:5} seconds {:42} !!".format(
+                        print ("!{} Max Retry : {:4}   Timeout {:5} seconds {:42} {}!".format(
+                            dir_c,
                             rule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY],
-                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT], ""
+                            rule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT], "",
+                            dir_c
                         ))
 
-                    dprint ("\\" + "="*87 +"/")
+                    print ("\\" + "="*87 +"/")
                 elif T_NO_COMP in rule:
-                    dprint ("NO COMPRESSION RULE")
+                    print ("NO COMPRESSION RULE")
 
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True

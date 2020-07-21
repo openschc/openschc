@@ -233,7 +233,7 @@ class SCHCProtocol:
 
     def schc_recv(self, sender_l2_address, raw_packet):
         #self._log("recv-from-L2 {} {}".format(sender_l2_addr, raw_packet))
-        frag_rule = self.rule_manager.FindFragmentationRule(sender_l2_address)
+        frag_rule = self.rule_manager.FindFragmentationRule()
 
         packet_bbuf = BitBuffer(raw_packet)
 
