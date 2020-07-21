@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenSCHC Reception Module &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Testing information" href="../Testing/testing.html" />
@@ -35,22 +36,22 @@
   <div class="section" id="module-frag_recv">
 <span id="openschc-reception-module"></span><h1>OpenSCHC Reception Module<a class="headerlink" href="#module-frag_recv" title="Permalink to this headline">¶</a></h1>
 <p>OpenSCHC Reception Functionality</p>
-<dl class="class">
+<dl class="py class">
 <dt id="frag_recv.ReassembleBase">
-<em class="property">class </em><code class="sig-prename descclassname">frag_recv.</code><code class="sig-name descname">ReassembleBase</code><span class="sig-paren">(</span><em class="sig-param">protocol</em>, <em class="sig-param">context</em>, <em class="sig-param">rule</em>, <em class="sig-param">dtag</em>, <em class="sig-param">sender_L2addr</em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassembleBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">frag_recv.</code><code class="sig-name descname">ReassembleBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">protocol</span></em>, <em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">rule</span></em>, <em class="sig-param"><span class="n">dtag</span></em>, <em class="sig-param"><span class="n">sender_L2addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassembleBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is used as a common base for Reassembling packets</p>
-<dl class="method">
+<dl class="py method">
 <dt id="frag_recv.ReassembleBase.get_mic">
-<code class="sig-name descname">get_mic</code><span class="sig-paren">(</span><em class="sig-param">mic_target</em>, <em class="sig-param">extra_bits=0</em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassembleBase.get_mic" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_mic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mic_target</span></em>, <em class="sig-param"><span class="n">extra_bits</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassembleBase.get_mic" title="Permalink to this definition">¶</a></dt>
 <dd><p>This gets the mic</p>
 <p>This function gets the mic and display it in a 4 byte format</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="frag_recv.ReassemblerNoAck">
-<em class="property">class </em><code class="sig-prename descclassname">frag_recv.</code><code class="sig-name descname">ReassemblerNoAck</code><span class="sig-paren">(</span><em class="sig-param">protocol</em>, <em class="sig-param">context</em>, <em class="sig-param">rule</em>, <em class="sig-param">dtag</em>, <em class="sig-param">sender_L2addr</em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassemblerNoAck" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">frag_recv.</code><code class="sig-name descname">ReassemblerNoAck</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">protocol</span></em>, <em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">rule</span></em>, <em class="sig-param"><span class="n">dtag</span></em>, <em class="sig-param"><span class="n">sender_L2addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#frag_recv.ReassemblerNoAck" title="Permalink to this definition">¶</a></dt>
 <dd><p>ReassemblerNoAck class</p>
 <p>// Todo : Redaction</p>
 </dd></dl>
@@ -83,7 +84,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
+<script>$('#searchbox').show(0);</script><h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
@@ -95,6 +96,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
@@ -122,7 +128,7 @@
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

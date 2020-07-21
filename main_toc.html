@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenSCHC Project Complete Content &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation Guide" href="General/Installation_guide.html" />
@@ -39,7 +40,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="General/Installation_guide.html">Installation Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="General/Installation_guide.html#setting-up-the-environment-using-python3">Setting up the environment using Python3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="General/Installation_guide.html#setting-up-the-environment-using-micropython">Setting up the environment using micropython</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="General/User_guide.html">User Guide</a><ul>
@@ -65,6 +65,21 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="General/Micropython_Specificities.html">Micropython specificities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="General/Micropython_Specificities.html#todo">TODO:</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Internals/Architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Internals/Architecture.html#introduction">Introduction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Internals/Simulator.html">Simulator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Internals/Simulator.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Internals/Simulator.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Internals/Simulator.html#testing">Testing</a></li>
 </ul>
 </li>
 </ul>
@@ -133,9 +148,9 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
+<script>$('#searchbox').show(0);</script><h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="index.html">Back to Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Back to Home</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detailed Table of Content</a></li>
 </ul>
 <p class="caption"><span class="caption-text">General Information</span></p>
@@ -145,6 +160,11 @@
 <li class="toctree-l1"><a class="reference internal" href="General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Micropython_Specificities.html">Micropython specificities</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Internals/Architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Internals/Simulator.html">Simulator</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul>
@@ -172,7 +192,7 @@
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

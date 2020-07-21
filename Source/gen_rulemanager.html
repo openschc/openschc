@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenSCHC Rule Manager Module &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="OpenSCHC Bit Buffer Management Module" href="gen_bitarray.html" />
@@ -165,6 +166,8 @@ The order in which the Field Descriptions appear in the rule is significant (e.g
 <p>Fragmentation rules define how the compression and decompression must be performed.</p>
 <p>The keyword  <strong>Fragmentation</strong> is followed by a dictionnary containing the different parameters used.
 Inside the keyword <strong>FRMode</strong> indicates which Fragmentation mode is used (<strong>noAck</strong>, <strong>ackAlways</strong>, <strong>ackOnError</strong>).
+<strong>FRDirection</strong> give the direction of the fragmentation rule. <strong>UP</strong> means that data fragments are sent by the device,
+<strong>DW</strong> for the opposite direction. This entry is mandatory.
 Then the keyword <strong>FRModeProfiler</strong> gives the information needed to create the SCHC fragmentation header and mode profile:</p>
 <ul>
 <li><p><strong>dtagSize</strong> gives in bit the size of the dtag field. &lt;&lt;if not present or set to 0, this field is not present in the SCHC fragmentation header&gt;&gt;. This keyword can be used by all the fragmentation modes.</p></li>
@@ -191,6 +194,7 @@ Then the keyword <strong>FRModeProfiler</strong> gives the information needed to
     <span class="s2">&quot;RuleLength&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
     <span class="s2">&quot;Fragmentation&quot;</span> <span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;FRMode&quot;</span><span class="p">:</span> <span class="s2">&quot;ackOnError&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FRDirection&quot;</span><span class="p">:</span> <span class="s2">&quot;UP&quot;</span><span class="p">,</span>
         <span class="s2">&quot;FRModeProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;dtagSize&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
             <span class="s2">&quot;WSize&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
@@ -284,20 +288,20 @@ identifier, for instance a LoRaWAN devEUI.</p>
 <p>Given the first bits received from the LPWAN, returns either a fragmentation or a compression rule.</p>
 </div>
 </div>
-<dl class="class">
+<dl class="py class">
 <dt id="gen_rulemanager.DictToAttrDeep">
-<em class="property">class </em><code class="sig-prename descclassname">gen_rulemanager.</code><code class="sig-name descname">DictToAttrDeep</code><span class="sig-paren">(</span><em class="sig-param">**entries</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.DictToAttrDeep" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">gen_rulemanager.</code><code class="sig-name descname">DictToAttrDeep</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">entries</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.DictToAttrDeep" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
 <dt id="gen_rulemanager.DictToAttrDeep.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">k</em>, <em class="sig-param">d=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.DictToAttrDeep.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">d</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.DictToAttrDeep.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>this.get(k)</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="gen_rulemanager.RuleManager">
-<em class="property">class </em><code class="sig-prename descclassname">gen_rulemanager.</code><code class="sig-name descname">RuleManager</code><span class="sig-paren">(</span><em class="sig-param">file=None</em>, <em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gen_rulemanager.</code><code class="sig-name descname">RuleManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager" title="Permalink to this definition">¶</a></dt>
 <dd><p># Class RuleManager</p>
 <p>A RuleManager object is created this way:</p>
 <blockquote>
@@ -309,9 +313,9 @@ identifier, for instance a LoRaWAN devEUI.</p>
 <li><p>log:  display debugging events</p></li>
 </ul>
 </div></blockquote>
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.Add">
-<code class="sig-name descname">Add</code><span class="sig-paren">(</span><em class="sig-param">device=None</em>, <em class="sig-param">dev_info=None</em>, <em class="sig-param">file=None</em>, <em class="sig-param">compression=True</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.Add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dev_info</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">compression</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.Add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add is used to add a new rule or a set of rules to a context. Add checks the validity of the rule:</p>
 <ul class="simple">
 <li><p>ruleID/RuleIDLength do not overlap</p></li>
@@ -323,77 +327,87 @@ identifier, for instance a LoRaWAN devEUI.</p>
 </div></blockquote>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="gen_rulemanager.RuleManager.FindFragmentationRule">
+<code class="sig-name descname">FindFragmentationRule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">deviceID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">originalSize</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reliability</span><span class="o">=</span><span class="default_value">'NoAck'</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'UP'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindFragmentationRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a fragmentation rule regarding parameters:
+* original SCHC packet size
+* reliability NoAck, AckOnError, AckAlways
+* direction (UP or DOWN)
+NOTE: Not yet implemented, returns the first fragmentation rule.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.FindRuleFromPacket">
-<code class="sig-name descname">FindRuleFromPacket</code><span class="sig-paren">(</span><em class="sig-param">pkt</em>, <em class="sig-param">direction='BI'</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindRuleFromPacket" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindRuleFromPacket</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pkt</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'BI'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindRuleFromPacket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a parsed packet and returns the matching rule.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.FindRuleFromSCHCpacket">
-<code class="sig-name descname">FindRuleFromSCHCpacket</code><span class="sig-paren">(</span><em class="sig-param">schc</em>, <em class="sig-param">device=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindRuleFromSCHCpacket" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindRuleFromSCHCpacket</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">schc</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindRuleFromSCHCpacket" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the rule corresponding to the id stored at the
 beginning of the SCHC packet.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.Print">
 <code class="sig-name descname">Print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.Print" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a context</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.add_context">
-<code class="sig-name descname">add_context</code><span class="sig-paren">(</span><em class="sig-param">context</em>, <em class="sig-param">comp=None</em>, <em class="sig-param">fragSender=None</em>, <em class="sig-param">fragReceiver=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_context" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_context</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">comp</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fragSender</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fragReceiver</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_context" title="Permalink to this definition">¶</a></dt>
 <dd><p>add context into the db.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.add_rule">
-<code class="sig-name descname">add_rule</code><span class="sig-paren">(</span><em class="sig-param">context</em>, <em class="sig-param">key</em>, <em class="sig-param">rule</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_rule" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_rule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">rule</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_rule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check rule integrity and uniqueless and add it to the db</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.add_rules">
-<code class="sig-name descname">add_rules</code><span class="sig-paren">(</span><em class="sig-param">context</em>, <em class="sig-param">comp=None</em>, <em class="sig-param">fragSender=None</em>, <em class="sig-param">fragReceiver=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_rules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_rules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">comp</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fragSender</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fragReceiver</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.add_rules" title="Permalink to this definition">¶</a></dt>
 <dd><p>add rules into the context specified.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.check_rule_compression">
-<code class="sig-name descname">check_rule_compression</code><span class="sig-paren">(</span><em class="sig-param">rule</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.check_rule_compression" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_rule_compression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rule</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.check_rule_compression" title="Permalink to this definition">¶</a></dt>
 <dd><p>compression rule check</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.check_rule_fragmentation">
-<code class="sig-name descname">check_rule_fragmentation</code><span class="sig-paren">(</span><em class="sig-param">rule</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.check_rule_fragmentation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_rule_fragmentation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rule</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.check_rule_fragmentation" title="Permalink to this definition">¶</a></dt>
 <dd><p>fragmentation rule check</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.find_context_bydevL2addr">
-<code class="sig-name descname">find_context_bydevL2addr</code><span class="sig-paren">(</span><em class="sig-param">dev_L2addr</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydevL2addr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">find_context_bydevL2addr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dev_L2addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydevL2addr" title="Permalink to this definition">¶</a></dt>
 <dd><p>find a context with dev_L2addr.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.find_context_bydstiid">
-<code class="sig-name descname">find_context_bydstiid</code><span class="sig-paren">(</span><em class="sig-param">dst_iid</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydstiid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">find_context_bydstiid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dst_iid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydstiid" title="Permalink to this definition">¶</a></dt>
 <dd><p>find a context with dst_iid, which can be a wild card.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.find_context_exact">
-<code class="sig-name descname">find_context_exact</code><span class="sig-paren">(</span><em class="sig-param">dev_L2addr</em>, <em class="sig-param">dst_iid</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_exact" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">find_context_exact</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dev_L2addr</span></em>, <em class="sig-param"><span class="n">dst_iid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_exact" title="Permalink to this definition">¶</a></dt>
 <dd><p>find a context by both devL2Addr and dstIID.
 This is mainly for internal use.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.find_rule_bypacket">
-<code class="sig-name descname">find_rule_bypacket</code><span class="sig-paren">(</span><em class="sig-param">context</em>, <em class="sig-param">packet_bbuf</em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_rule_bypacket" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">find_rule_bypacket</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">packet_bbuf</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_rule_bypacket" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a compression rule or an fragmentation rule
 in the context matching with the field value of rule id in the packet.</p>
 </dd></dl>
@@ -428,7 +442,7 @@ in the context matching with the field value of rule id in the packet.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
+<script>$('#searchbox').show(0);</script><h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
@@ -440,6 +454,11 @@ in the context matching with the field value of rule id in the packet.</p>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul class="current">
@@ -467,7 +486,7 @@ in the context matching with the field value of rule id in the packet.</p>
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

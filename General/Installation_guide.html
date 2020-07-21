@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Installation Guide &#8212; OpenSCHC  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="User Guide" href="User_guide.html" />
@@ -42,34 +43,7 @@
 </div>
 <p>Step 2: Clone the <a class="reference external" href="https://github.com/openschc/openschc">OpenSCHC repository</a> .</p>
 <p>Step 3: For testing a simple example using SCHC under different scenarios, see <a class="reference external" href="https://github.com/openschc/openschc/blob/master/src/README.md">https://github.com/openschc/openschc/blob/master/src/README.rst</a>.</p>
-</div>
-<div class="section" id="setting-up-the-environment-using-micropython">
-<h2>Setting up the environment using micropython<a class="headerlink" href="#setting-up-the-environment-using-micropython" title="Permalink to this headline">¶</a></h2>
-<p>Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.</p>
-<p>Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.</p>
-<ul>
-<li><p>Micropython GitHub project: (<a class="reference external" href="https://github.com/micropython/micropython">https://github.com/micropython/micropython</a> .</p></li>
-<li><p>For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): <a class="reference external" href="https://github.com/micropython/micropython#the-unix-version">https://github.com/micropython/micropython#the-unix-version</a></p></li>
-<li><p>On OSX</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>either recompile from the GitHub project, see <a class="reference external" href="https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX">https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX</a> .</p></li>
-<li><p>or install with Brew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">micropython</span></code></p></li>
-<li><p>Note: on OS X, if you get an error message about missing libffi, try the fix described in <a class="reference external" href="https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749">https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749</a></p></li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-<p>Step 2: download the needed micropython modules.</p>
-<p>Modules to be installed in order to run SCHC are:</p>
-<ul class="simple">
-<li><p>argparse.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-argparse</span></code></p></li>
-<li><p>copy.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-copy</span></code></p></li>
-<li><p>types.py : <code class="docutils literal notranslate"><span class="pre">./micropython</span> <span class="pre">-m</span> <span class="pre">upip</span> <span class="pre">install</span> <span class="pre">micropython-types</span></code></p></li>
-</ul>
-<p>Libs are located under <code class="docutils literal notranslate"><span class="pre">~/.micropython/lib</span></code></p>
-<p>Step 3: Test the SCHC C/D and F/R</p>
-<p>To be added</p>
+<p>TODO: fix this</p>
 </div>
 </div>
 
@@ -99,9 +73,9 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script><h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
+<script>$('#searchbox').show(0);</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
 <p class="caption"><span class="caption-text">General Information</span></p>
@@ -111,6 +85,11 @@
 <li class="toctree-l1"><a class="reference internal" href="Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing_Guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Micropython_Specificities.html">Micropython specificities</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Source code in-depth</span></p>
 <ul>
@@ -138,7 +117,7 @@
       &copy;2019, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

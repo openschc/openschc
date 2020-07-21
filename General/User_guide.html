@@ -233,7 +233,7 @@ into the <strong>examples/configs</strong> folder, which will contain our rules 
 </div>
 <p>Then, it is possible to define the message that will be sent from client to server. The <strong>examples/tcp/payload</strong> folder
 contains some examples that can be used.</p>
-<p>Go in the <strong>examples/tcp</strong> directory.</p>
+<p>Go to the <strong>examples/tcp</strong> directory.</p>
 <p>Add the SCHC directory to your PYHTONPATH. On sh, this would be:</p>
 <blockquote>
 <div><p>$ export PYTHONPATH=&lt;YOUR_PATH_TO_SCHC&gt;</p>
@@ -243,26 +243,27 @@ contains some examples that can be used.</p>
 <div><p>$ setenv PYTHONPATH &lt;YOUR_PATH_TO_SCHC&gt;</p>
 </div></blockquote>
 <p>From the examples/tcp directory, we can execute the code as follows:</p>
-<p>Run Client on terminal 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
-</pre></div>
-</div>
-<p>Run Server on terminal 2</p>
+<p>Run Server on terminal 1</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span>
 </pre></div>
 </div>
+<p>Run Client on terminal 2</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>TODO: fix this</p>
 <p>If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
-transmission of the message and we will obtain the following result in server side:</p>
+transmission of the message and we will obtain the following result on the server side:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">804779011</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">194</span>
 <span class="n">SUCCESS</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">matched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span>
 </pre></div>
 </div>
-<p>where, in the first line we have the value of the RCS sent, the message received by the server which is the same as the
-one sent by the client, and the length of the message in bytes. In second line, whe have a confirmation of successful
+<p>where, on the first line we have the value of the RCS sent, the message received by the server which is the same as the
+one sent by the client, and the length of the message in bytes. On the second line, whe have a confirmation of successful
 matching between both RCS Values.</p>
-<p>On the other hand, to simulate the packet loss in transmission, we can use the <strong>–loss true</strong> argument in the client
+<p>Next, to simulate packet loss during transmission, we can use the <strong>–loss true</strong> argument in the client
 and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
-since the RCS sent by the client is not the same RCS calculated by the server:</p>
+since the RCS sent by the client is not the same as the RCS calculated by the server:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">907239817</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (1062</span><span class="se">\xb2\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">171</span>
 <span class="n">ERROR</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">mismatched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;6</span><span class="se">\x13</span><span class="s1">a</span><span class="se">\x89</span><span class="s1">&#39;</span>
 </pre></div>
