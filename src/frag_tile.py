@@ -33,7 +33,10 @@ class TileList():
         nb_full_size_tiles, last_tile_size = (
                 bbuf_bits_size // self.t_size,
                 bbuf_bits_size % self.t_size)
-        if last_tile_size >= l2word:
+        if last_tile_size == 0:
+            tiles = [ bbuf.get_bits_as_buffer(self.t_size)
+                    for _ in range(nb_full_size_tiles) ]
+        elif last_tile_size >= l2word:
             tiles = [ bbuf.get_bits_as_buffer(self.t_size)
                     for _ in range(nb_full_size_tiles) ]
             tiles.append(bbuf.get_bits_as_buffer(last_tile_size))
@@ -187,7 +190,7 @@ class TileList():
             bbuf += t["tile"]
         return bbuf
 
-    def get_state(self, **kw):
+    def get_state_info(self, **kw):
         result = self.all_tiles.copy()
         return result
 

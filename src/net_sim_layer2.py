@@ -31,8 +31,8 @@ class SimulLayer2:
         self.is_transmitting = False
         self.packet_queue = []
         self.mtu = 56
-        self.role = None
-        self.roleSend = None
+        self.role = None # XXX: should be removed
+        self.roleSend = None # XXX: should be removed
 
     def set_role(self, role, roleSend):
         self.role = role
@@ -62,7 +62,8 @@ class SimulLayer2:
         dprint("send packet from queue -> {}, {}, {}, {}".format(packet, src_dev_id, dst_dev_id, transmit_callback is None))
 
         if self.role == "client" or self.role == "server":
-            self.sim.send_packetX(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
+            self.sim.send_packet(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,),
+                                 with_hack=True)
         else:
             self.sim.send_packet(packet, src_dev_id, dst_dev_id, self._event_sent_callback, (transmit_callback,))
 

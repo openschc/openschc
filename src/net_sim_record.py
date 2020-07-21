@@ -18,14 +18,29 @@ import pprint
 import io
 import os
 import gen_utils
+import gen_bitarray
 
 RECORD_FILE_NAME = "record.log"
 LOGGING_FILE_NAME = "logging.log"
 TRACE_FILE_NAME = "trace.log"
 PRINT_FILE_NAME = "print.log"
+INIT_FILE_NAME = "init.log"
+PACKET_FILE_NAME = "packet.log"
+
+
+def json_sanitize(value):
+    if isinstance(value, bytes):
+        return "<bytes>"+value.hex()
+    elif isinstance(value, bytearray):
+        return "<bytearray>"+value.hex()
+    elif isinstance(value, gen_bitarray.BitBuffer):
+        result = io.StringIO()
+        value.display(file=result)
+        return "<bitarray>"+result.getvalue()
+    else:
+        return "<skipped {}>".format(type(value))
 
 class SimulResultManager:
-
     def __init__(self, dir_name):
         self.dir_name = dir_name
         self._ensure_dir()
@@ -33,6 +48,9 @@ class SimulResultManager:
     def get_file_name(self, suffix):
         assert self.dir_name is not None
         return os.path.join(self.dir_name, suffix)
+
+    def open(self, file_name, *args, **kwargs):
+        return open(self.get_file_name(file_name), *args, **kwargs)
 
     def _ensure_dir(self):
         if not os.path.exists(self.dir_name):
@@ -51,30 +69,37 @@ class SimulRecordingObserver:
         self.manager = SimulResultManager(dir_name)
         self.quiet = quiet
         self.dir_name = dir_name
-        self.has_initial_state = False
         self.previous_dtrace = gen_utils.set_trace_function(self.trace_function)
         unused = gen_utils.set_print_function(self.print_function)
         self.log_line_list = []
         self.trace_line_list = [] # print could also be recorded for tests?
         self.print_line_list = []
 
-        self.record_file = open(self.manager.get_file_name(RECORD_FILE_NAME), "w")
-        self.log_file = open(self.manager.get_file_name(LOGGING_FILE_NAME), "w")
-        self.trace_file = open(self.manager.get_file_name(TRACE_FILE_NAME), "w")
-        self.print_file = open(self.manager.get_file_name(PRINT_FILE_NAME), "w")
+        self.record_file = self.manager.open(RECORD_FILE_NAME, "w")
+        self.log_file = self.manager.open(LOGGING_FILE_NAME, "w")
+        self.trace_file = self.manager.open(TRACE_FILE_NAME, "w")
+        self.print_file = self.manager.open(PRINT_FILE_NAME, "w")
+        self.packet_file = self.manager.open(PACKET_FILE_NAME, "w")
+
+    def record_initial_state(self, **kw):
+        init_file = open(self.manager.get_file_name(INIT_FILE_NAME), "w")
+        info = { }
+        info["init"] = self.simul.get_init_info(**kw)
+        info["state"] = self.simul.get_state_info(**kw)
+        format =  self.simul.simul_config.get("record.format")
+        if format == "pprint":
+            print(pprint.pformat(info), file=init_file)
+        elif format == "json":
+            print(json.dumps(info, default=json_sanitize), file=init_file)
+        else: raise ValueError("unknown record.format", format)
+        init_file.close()
+        self.has_initial_state = True
 
     def sched_observer_func(self, event_name, event_info, **kw):
-        is_init = False
         if event_name == "sched-pre-event":
-            if not self.has_initial_state:
-                event_name = "sim-start"
-                is_init = True
-                self.has_initial_state = True
-            else:
-                return # note: only post-event is used (except for init).
+            return # only record post-event to avoid redundancy
+
         clock, event_id, callback, args = event_info
-        if event_name == "sched-post-event":
-            pass # XXX: do something
         info = {
             "event": event_name,
             "clock": clock,
@@ -88,12 +113,22 @@ class SimulRecordingObserver:
         self.log_line_list = []
         self.trace_line_list = []
         self.print_line_list = []
-        info["state"] = self.simul.get_all_state(is_init=is_init, **kw)
+        info["state"] = self.simul.get_state_info(**kw)
         format =  self.simul.simul_config.get("record.format")
         if format == "pprint":
             print(pprint.pformat(info), file=self.record_file)
         elif format == "json":
-            print(json.dumps(info), file=self.record_file)
+            print(json.dumps(info, default=json_sanitize),
+                  file=self.record_file)
+        else: raise ValueError("unknown record.format", format)
+
+    def record_packet(self, info):
+        format = self.simul.simul_config.get("record.format")
+        if format == "pprint":
+            print(pprint.pformat(info), file=self.packet_file)
+        elif format == "json":
+            print(json.dumps(info, default=json_sanitize),
+                  file=self.packet_file)
         else: raise ValueError("unknown record.format", format)
 
     def record_log(self, line):
@@ -118,8 +153,10 @@ class SimulRecordingObserver:
         self.record_file.close()
         self.log_file.close()
         self.trace_file.close()
+        self.packet_file.close()
         if not self.quiet:
-            print("> recorded all state in '{}'".format(self.manager.get_file_name("")))
+            print("> recorded all state in '{}'".format(
+                self.manager.get_file_name("")))
 
     def __del__(self):
         self.print_file.close() # XXX: this is done implicitly anyway

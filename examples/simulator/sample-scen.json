@@ -1,0 +1,14 @@
+{
+    "frag-mode": "ack-on-error",
+    
+    "compr-ruleid": 12,
+    "compr-ruleid-size": 4,
+    
+    "frag-ruleid": 12,
+    "frag-ruleid-size": 6,
+    "dtag-size": 2,
+    "w-size": 3,
+    "fcn-size": 3,
+    "tile-size": 24,
+    "last-tile-in-all1": 0
+}

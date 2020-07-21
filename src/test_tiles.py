@@ -40,6 +40,7 @@ def test_make_tiles():
             "RuleIDLength": 6,
             "Fragmentation": {
                     "FRMode": "ackOnError",
+                    "FRDirection": "DW",
                     "FRModeProfile": {
                             "dtagSize": 2,
                             "ackBehavior": "afterAll1",

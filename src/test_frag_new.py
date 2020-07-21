@@ -53,14 +53,14 @@ if loss_config is not None:
 
 # ---------------------------------------------------------------------------
 
-def make_node(sim, rule_manager, devaddr=None, extra_config={}):
-    node = net_sim_core.SimulSCHCNode(sim, extra_config)
+def make_node(sim, rule_manager, devaddr=None, extra_config={}, role=None):
+    extra_config["unique-peer"] = True  # XXX: change for core server
+    node = net_sim_core.SimulSCHCNode(sim, extra_config, role)
     node.protocol.set_rulemanager(rule_manager)
     if devaddr is None:
         devaddr = node.id
     node.layer2.set_devaddr(devaddr)
     return node
-
 
 # ---------------------------------------------------------------------------
 # Statistic module
@@ -88,8 +88,8 @@ rm1.Print()
 Statsct.get_results()
 sim = net_sim_core.Simul(simul_config)
 
-node0 = make_node(sim, rm0, devaddr1)  # SCHC device
-node1 = make_node(sim, rm1, devaddr2)  # SCHC gw
+node0 = make_node(sim, rm0, devaddr1, role="device") # SCHC device
+node1 = make_node(sim, rm1, devaddr2, role="core-server")   # SCHC gw
 sim.add_sym_link(node0, node1)
 node0.layer2.set_mtu(l2_mtu)
 node1.layer2.set_mtu(l2_mtu)
@@ -126,7 +126,8 @@ foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 # ---------------------------------------------------------------------------
 # Simnulation
 
-node0.protocol.layer3.send_later(1, node1.layer3.L3addr, coap)
+#node0.protocol.layer3.send_later(1, node1.layer3.L3addr, coap)
+node0.protocol.layer3.send_later(1, None, None, coap)
 sim.run()
 
 dprint('-------------------------------- Simulation ended -----------------------|')

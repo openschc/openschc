@@ -1,0 +1,549 @@
+#!/usr/bin/env python
+#---------------------------------------------------------------------------
+
+import argparse
+import subprocess
+import os
+import sys
+import json
+import pprint
+sys.path.append("../../src") # XXX: temporary hack
+
+import gen_bitarray
+from gen_bitarray import BITS_PER_BYTE
+import net_sim_builder
+
+#---------------------------------------------------------------------------
+
+DEFAULT_SIMTOOL_CONFIG_FILE = "simtool-config.json"
+
+DEFAULT_SIMTOOL_CONFIG = {}
+
+def get_simtool_config(config_file_name=None, args=None):
+    if config_file_name is None:
+        config_file_name = DEFAULT_SIMTOOL_CONFIG_FILE
+    if os.path.exists(config_file_name):
+        with open(config_file_name) as config_file:
+            config = json.load(config_file)
+    else:
+        config = DEFAULT_SIMTOOL_CONFIG.copy()
+    return config
+
+#---------------------------------------------------------------------------
+
+DEFAULT_PACKET_SIZE = None
+DEFAULT_RULE_ID_LENGTH = 4
+
+SCENARIO_CMD_ARGS = [
+    ("packet-size",       int,   "ps"),
+    ("mtu-size",          int,   "mtu"),
+
+    ("compr-ruleid",      int,   "crid"),
+    ("compr-ruleid-size", int,   "cris"),
+
+    ("frag-mode",         str,    None),
+    ("frag-ruleid",       int,    "rid"),
+    ("frag-ruleid-size",  int,    "ris"),
+    ("dtag-size",         int,    "ds"),
+    ("w-size",            int,    "wfs"), # W Field Size
+    ("fcn-size",          int,    "fs"),
+
+    ("tile-size",         int,    "ts"),
+    ("window-size",       int,    "wis"), # WIndow Size
+
+    ("loss-interval",     int,    "li"),
+    ("loss-packet",       str,    "lp"),
+    ("loss-rate",         int,    "lr"),
+    ("seed",              int,    "s")
+]
+
+#---------------------------------------------------------------------------
+
+BUILTIN_SCENARIO_TABLE = {
+
+    "noack": {
+        "frag-mode": "no-ack",
+
+        "compr-ruleid": 12,
+        "compr-ruleid-size": 4,
+
+        "frag-ruleid": 12,
+        "frag-ruleid-size": 6
+    },
+
+    "ackerror": {
+        "frag-mode": "ack-on-error",
+
+        "compr-ruleid": 12,
+        "compr-ruleid-size": 4,
+
+        "frag-ruleid": 12,
+        "frag-ruleid-size": 6,
+        "dtag-size": 2,
+        "w-size": 3,
+        "fcn-size": 3,
+        "tile-size": 24,
+        "last-tile-in-all1": 0
+    }
+}
+
+#---------------------------------------------------------------------------
+
+def get_builtin_name(scenario_name):
+    if scenario_name.startswith(":") or scenario_name.startswith("@"):
+        return scenario_name[1:]
+    if "." not in scenario_name: # XXX: maybe remove
+        return scenario_name
+    return None
+
+def get_actual_name(scenario_name):
+    result = get_builtin_name(scenario_name)
+    if result is None:
+        assert "." in scenario_name
+        result = ".".join(os.path.basename(scenario_name).split(".")[:-1])
+    return result
+
+def get_full_scenario_name(scenario_list, overide_spec):
+    if len(scenario_list) == 0:
+        name = "base"
+    else:
+        name = "-".join([get_actual_name(name) for name in scenario_list])
+    for var_name, var_type, var_short_name in SCENARIO_CMD_ARGS:
+        if var_name in overide_spec:
+            name += "-"+var_short_name+"{}".format(overide_spec[var_name])
+    return name
+
+def _get_full_scenario(scenario_list, overide_spec, exit_on_error=False,
+                      builtin_scenario_table=BUILTIN_SCENARIO_TABLE):
+    full_scenario_spec = {}
+    full_scenario_name = get_full_scenario_name(scenario_list, overide_spec)
+    for scenario_name in scenario_list:
+        builtin_name = get_builtin_name(scenario_name)
+        if builtin_name is not None:
+            if builtin_name not in builtin_scenario_table:
+                if exit_on_error:
+                    print("Error: cannot find scenario `{}`"
+                          .format(scenario_name), file=sys.stderr)
+                    sys.exit(1)
+                else:
+                    raise ValueError("Unknown scenario name", scenario_name)
+            current_spec = builtin_scenario_table[builtin_name]
+        else:
+            if exit_on_error and not os.path.exists(scenario_name):
+                 print("Error: cannot find scenario file `{}`"
+                       .format(scenario_name), file=sys.stderr)
+                 sys.exit(1)
+            with open(scenario_name) as scenario_file:
+                current_spec = json.load(scenario_file)
+        full_scenario_spec.update(current_spec)
+    full_scenario_spec.update(overide_spec)
+    return full_scenario_name, full_scenario_spec
+
+#---------------------------------------------------------------------------
+# The set of built-in scenarios
+
+def get_all_builtin_scenarios(with_filter=True):
+    scenario_table = BUILTIN_SCENARIO_TABLE.copy()
+    #return scenario_table
+    #_get_full_scenario(scenario_list, overide_spec, exit_on_error=False)
+
+    def _add_scenario(base_name, extra_spec):
+        full_name, full_spec = _get_full_scenario([base_name], extra_spec)
+        scenario_table[full_name] = full_spec
+
+    _add_scenario("ackerror", {"packet-size": 100})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-interval": 15})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-rate": 20})
+    _add_scenario("ackerror", {"packet-size": 100, "loss-packet": "10"})
+
+    if with_filter:
+        config = get_simtool_config()
+        scenario_filter = config.get("scenario-filter", None)
+        if scenario_filter is not None:
+            for name in scenario_table.copy():
+                if name not in scenario_filter:
+                    del scenario_table[name]
+
+    return scenario_table
+
+
+def get_full_scenario(scenario_list, overide_spec, exit_on_error=False):
+    scenario_table = get_all_builtin_scenarios(True)
+    return _get_full_scenario(
+        scenario_list, overide_spec, exit_on_error,
+        builtin_scenario_table=scenario_table)
+
+#---------------------------------------------------------------------------
+
+def cmd_list(args):
+    scenario_table = get_all_builtin_scenarios(not args.all)
+    print("List of name of scenarios:")
+    for name in sorted(scenario_table.keys()):
+        print("    "+name)
+
+def make_cmd_list_parser(arg_subparser):
+    list_parser = subparser.add_parser("list")
+    list_parser.set_defaults(cmd_func = cmd_list)
+    list_parser.add_argument("--all", default=False, action="store_true")
+    return list_parser
+
+#---------------------------------------------------------------------------
+
+#DEFAULT_RULEID_LENGTH = 4
+#DEFAULT_PACKET_SIZE = 10
+
+# XXX: what should be done with non-IPv6 +UDP packets?
+DEFAULT_PACKET = bytearray(b"""`\
+\x12\x34\x56\x00\x1e\x11\x1e\xfe\x80\x00\
+\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
+\x00\x00\x01\xfe\x80\x00\x00\x00\x00\x00\
+\x00\x00\x00\x00\x00\x00\x00\x00\x02\x16\
+2\x163\x00\x1e\x00\x00A\x02\x00\x01\n\xb3\
+foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
+\x82  &Ehello""")
+
+DEFAULT_TILE_SIZE = 24
+
+def get_record_dir_name_from_spec(name, spec):
+    return "test-"+name
+
+def get_simul_setup(name, spec):
+    nocompr_rule = {
+        "RuleID": spec.get("compr-ruleid", 12),
+        "RuleIDLength": spec.get("compr-ruleid-size", 4),
+        "NoCompression": [] }
+    frag_rule = {
+        "RuleID": spec.get("frag-ruleid", 12),
+        "RuleIDLength": spec.get("frag-ruleid-size", 6),
+        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
+    if spec.get("frag-mode") == "ack-on-error":
+        frag_info = {
+            "FRMode": "ackOnError",
+            "FRDirection": "DW",
+            "FRModeProfile": {
+                "dtagSize": spec.get("dtag-size", 2),
+                "WSize": spec.get("w-size", 3),
+                "FCNSize": spec.get("fcn-size", 3),
+                "ackBehavior": "afterAll1",
+                "tileSize": spec.get("tile-size", DEFAULT_TILE_SIZE),
+                "MICAlgorithm": "crc32",
+                "MICWordSize": 8,
+                "lastTileInAll1": spec.get("last-tile-in-all1", False),
+                "windowSize": spec.get("window-size", 7)
+            }
+        }
+        frag_rule["Fragmentation"] = frag_info
+    else:
+        if spec.get("mode", "no-ack") != "no-ack":
+            raise ValueError("bad fragmentation mode", self.get("mode"))
+
+    rules = [frag_rule, nocompr_rule]
+
+    simul_config = net_sim_builder.DEFAULT_SIMUL_CONFIG.copy()
+    simul_config["radio"] = simul_config["radio"].copy()
+    simul_config["radio"]["l2_mtu"] = spec.get("mtu-size", 72)
+    #TODO: simul_config["radio"]["data_size"] = XXX
+    if "loss-interval" in spec:
+        simul_config["loss"] = {"mode":"cycle", "cycle":spec["loss-interval"]}
+    elif "loss-rate" in spec:
+        simul_config["loss"] = {"mode":"rate", "cycle": spec["loss-rate"]}
+    elif "loss-packet" in spec:
+        if isinstance(spec["loss-packet"], str):
+            lost_packet_list = [int(idx) for idx in spec["loss-packet"].split(",")]
+        else:
+            lost_packet_list = spec["loss-packet"]
+        simul_config["loss"] = {
+            "mode":"list", "count_num": lost_packet_list, "cycle": 100000
+        }
+    if "seed" in spec:
+        simul_config["seed"] = spec["seed"]
+    return simul_config, rules
+
+def run_scenario(name, spec, prefix):
+    simul_config, rules = get_simul_setup(name, spec)
+    record_dir_name = get_record_dir_name_from_spec(name, spec)
+    if len(prefix)>0:
+        record_dir_name = prefix+"-"+record_dir_name
+    print(">   simulation '{}' in directory '{}'".format(name, record_dir_name))
+    simul_config["record.directory"] = record_dir_name
+    simul_config["record.quiet"] = True
+    config = get_simtool_config()
+    if "log-format" in config:
+        simul_config["record.format"] = config["log-format"]
+
+    builder = net_sim_builder.SimulBuilder()
+    builder.set_config(simul_config)
+    builder.create_simul()
+    builder.create_device(rules.copy())
+    builder.create_core(rules.copy())
+
+    packet_size = spec.get("packet-size", DEFAULT_PACKET_SIZE)
+    if packet_size == 0 or packet_size == None:
+        packet = DEFAULT_PACKET
+    else:
+        tile_size = spec.get("tile-size", DEFAULT_TILE_SIZE)
+        nb_tile = (packet_size*BITS_PER_BYTE+tile_size-1)//tile_size
+        bb = gen_bitarray.BitBuffer()
+        for i in range(nb_tile):
+            available = tile_size
+            while available >= BITS_PER_BYTE:
+                bb.add_bits((i+1)%0x100, BITS_PER_BYTE)
+                available -= BITS_PER_BYTE
+            if available > 0:
+                bb.add_bits((1<<available)-1, available)
+        bb.ensure_padding()
+        packet = bb.get_content()
+        assert len(packet)>=packet_size
+        packet = packet[:packet_size]
+    builder.make_device_send_data(clock=1, packet=packet)
+    builder.run_simul()
+
+def add_cmd_args_scenario(parser):
+    for var_name, var_type, var_short_cut in SCENARIO_CMD_ARGS:
+        parser.add_argument("--"+var_name, type=var_type)
+
+def get_scenario_spec_from_args(args):
+    args_table = vars(args)
+    spec = {}
+    for var_name, var_type, var_short_cut in SCENARIO_CMD_ARGS:
+        arg_name = var_name.replace("-", "_")
+        if arg_name in args_table and args_table[arg_name] is not None:
+            spec[var_name] = args_table[arg_name]
+    return spec
+
+def cmd_run(args):
+    scenario_list = args.scenario
+    prefix = args.prefix
+    overide_spec = get_scenario_spec_from_args(args)
+    full_scenario_name, full_scenario_spec = get_full_scenario(
+        scenario_list, overide_spec, exit_on_error=True)
+    run_scenario(full_scenario_name, full_scenario_spec, prefix)
+
+def make_cmd_run_parser(arg_subparser):
+    run_parser = subparser.add_parser("run")
+    run_parser.add_argument("scenario", nargs="*")
+    run_parser.add_argument("--prefix", type=str, default="")
+    add_cmd_args_scenario(run_parser)
+    run_parser.set_defaults(cmd_func = cmd_run)
+    return run_parser
+
+#--------------------------------------------------
+
+def cmd_show(args):
+    scenario_list = args.scenario
+    prefix = args.prefix
+    overide_spec = get_scenario_spec_from_args(args)
+    full_scenario_name, full_scenario_spec = get_full_scenario(
+        scenario_list, overide_spec, exit_on_error=True)
+    print("----- scenario: {}".format(full_scenario_name))
+    pprint.pprint(full_scenario_spec)
+
+def make_cmd_show_parser(arg_subparser):
+    run_parser = subparser.add_parser("show")
+    run_parser.add_argument("scenario", nargs="*")
+    run_parser.add_argument("--prefix", type=str, default="")
+    add_cmd_args_scenario(run_parser)
+    run_parser.set_defaults(cmd_func = cmd_show)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+def cmd_run_all(args):
+    prefix = args.prefix
+    scenario_table = get_all_builtin_scenarios()
+    for scenario in sorted(scenario_table.keys()):
+        cmd = "./simtool run"
+        if len(prefix) > 0:
+            cmd += " --prefix "+prefix
+        cmd += " " + scenario
+        print("> running: "+cmd)
+        subprocess.run(cmd.split(" "), check=True)
+
+def make_cmd_run_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("run-all")
+    run_parser.add_argument("--prefix", type=str, default="")
+    run_parser.set_defaults(cmd_func = cmd_run_all)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+def do_compare_dir(record_dir_name, ref_dir_name, args):
+    if args.compare_tool is None:
+        with_external_compare = True
+        check = False
+        cmp_prog = "cmp"
+
+    elif args.compare_tool is "diff":
+        with_external_compare = True
+        check = False
+        cmp_prog = "diff -u"
+
+    elif args.compare_tool is "kdiff3":
+        with_external_compare = False
+        check = "<unapplyabple>"
+        cmp_prog = None
+        diff_display_prog = "kdiff3"
+
+    else:
+        raise ValueError("bad compare_tool", args.compare_tool)
+
+    count_diff = 0
+
+    for log_file_name in os.listdir(record_dir_name):
+        new_file_name = os.path.join(record_dir_name, log_file_name)
+        ref_file_name = os.path.join(ref_dir_name, log_file_name)
+
+        if with_external_compare:
+            cmd = "{} {} {}".format(cmp_prog, ref_file_name, new_file_name)
+            print("> "+cmd)
+            process = subprocess.run(cmd.split(" "), check=check)
+            if process.returncode != 0:
+                count_diff += 1
+
+        else:
+            with open(new_file_name) as new_file:
+                new_content = new_file.read()
+            with open(ref_file_name) as ref_file:
+                ref_content = ref_file.read()
+
+            if new_content != ref_content:
+                count_diff += 1
+                print("{} differs from {}".format(
+                    new_file_name, ref_file_name))
+                if diff_display_prog is not None:
+                    cmd = "{} {} {}".format(
+                        diff_display_prog, ref_file_name, new_file_name)
+                    print("> "+cmd)
+                    subprocess.run(cmd.split(" "), check=False)
+    return count_diff
+
+
+def cmd_compare_all(args):
+    count_diff = 0
+
+    prefix = args.prefix
+    scenario_table = get_all_builtin_scenarios()
+    for scenario in sorted(scenario_table.keys()):
+        spec = scenario_table[scenario]
+        record_dir_name = get_record_dir_name_from_spec(scenario, spec)
+        ref_dir_name = prefix+"-"+record_dir_name
+        count_diff += do_compare_dir(record_dir_name, ref_dir_name, args)
+
+    if count_diff == 0:
+        print("> no difference(s) found.")
+    else:
+        print("> differences found in {} files".format(count_diff))
+
+def make_cmd_compare_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("compare-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default=None)
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+def make_cmd_diff_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("diff-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default="diff")
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+def make_cmd_kdiff_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("kdiff-all")
+    run_parser.add_argument("--prefix", type=str, default="ref")
+    run_parser.add_argument("--compare-tool", type=str, default="kdiff3")
+    run_parser.set_defaults(cmd_func = cmd_compare_all)
+    return run_parser
+
+def cmd_diff(args):
+    count_diff = 0
+    record_dir_name = args.first_dir
+    ref_dir_name = args.second_dir
+    count_diff += do_compare_dir(record_dir_name, ref_dir_name, args)
+
+    if count_diff == 0:
+        print("> no difference(s) found.")
+    else:
+        print("> differences found in {} files".format(count_diff))
+
+def make_cmd_diff_parser(arg_subparser):
+    diff_parser = subparser.add_parser("diff")
+    diff_parser.add_argument("first_dir")
+    diff_parser.add_argument("second_dir")
+    diff_parser.add_argument("--compare-tool", type=str, default="diff")
+    diff_parser.set_defaults(cmd_func = cmd_diff)
+    return diff_parser
+
+def make_cmd_kdiff_parser(arg_subparser):
+    diff_parser = subparser.add_parser("kdiff")
+    diff_parser.add_argument("first_dir")
+    diff_parser.add_argument("second_dir")
+    diff_parser.add_argument("--compare-tool", type=str, default="kdiff3")
+    diff_parser.set_defaults(cmd_func = cmd_diff)
+    return diff_parser
+
+#----------------------------------------
+
+def cmd_recheck_all(args):
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool compare-all".split(), check=True)
+    #cmd_run_all(args)
+    #cmd_compare_all(args)
+
+def make_cmd_recheck_all_parser(arg_subparser):
+    run_parser = subparser.add_parser("recheck-all")
+    run_parser.add_argument("--prefix", type=str, default="ref") # XXX: not used
+    run_parser.set_defaults(cmd_func = cmd_recheck_all)
+    return run_parser
+
+#----------------------------------------
+
+def cmd_reref(args):
+    subprocess.run("./simtool run-all --prefix ref".split(), check=True)
+
+def make_cmd_reref_parser(arg_subparser):
+    run_parser = subparser.add_parser("reref")
+    run_parser.set_defaults(cmd_func = cmd_reref)
+    return run_parser
+
+def cmd_rekdiff(args):
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool kdiff-all".split(), check=True)
+
+def make_cmd_rekdiff_parser(arg_subparser):
+    run_parser = subparser.add_parser("rekdiff")
+    run_parser.set_defaults(cmd_func = cmd_rekdiff)
+    return run_parser
+
+def cmd_rediff(args):
+    subprocess.run("./simtool run-all".split(), check=True)
+    subprocess.run("./simtool diff-all".split(), check=True)
+
+def make_cmd_rediff_parser(arg_subparser):
+    run_parser = subparser.add_parser("rediff")
+    run_parser.set_defaults(cmd_func = cmd_rediff)
+    return run_parser
+
+#---------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+subparser = parser.add_subparsers(dest="command", required=True)
+
+cmd_list_parser = make_cmd_list_parser(subparser)
+cmd_run_parser = make_cmd_run_parser(subparser)
+unused = make_cmd_show_parser(subparser)
+cmd_run_all_parser = make_cmd_run_all_parser(subparser)
+cmd_compare_all_parser = make_cmd_compare_all_parser(subparser)
+cmd_recheck_all_parser = make_cmd_recheck_all_parser(subparser)
+unused = make_cmd_diff_all_parser(subparser)
+unused = make_cmd_diff_parser(subparser)
+unused = make_cmd_kdiff_all_parser(subparser)
+unused = make_cmd_kdiff_parser(subparser)
+unused = make_cmd_reref_parser(subparser)
+unused = make_cmd_rekdiff_parser(subparser)
+unused = make_cmd_rediff_parser(subparser)
+
+args = parser.parse_args()
+args.cmd_func(args)
+
+#--------------------------------------------------------------------------

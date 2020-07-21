@@ -28,12 +28,12 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, protocol, context, rule):
+    def __init__(self, protocol, context, rule, dtag):
         self.protocol = protocol
         self.context = context
         self.rule = rule
         self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
-        self.dtag = 0
+        self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
         self.event_id_ack_wait_timer = None
@@ -60,10 +60,11 @@ class FragmentBase():
         return dtag for the packet """
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.copy()
-        # update dtag for next
-        self.dtag += 1
-        if self.dtag > frag_msg.get_max_dtag(self.rule):
-            self.dtag = 0
+        # XXX:remove - dtag management is in protocol.py:
+        ## update dtag for next
+        #self.dtag += 1
+        #if self.dtag > frag_msg.get_max_dtag(self.rule):
+        #    self.dtag = 0
 
     def get_mic(self, mic_base, last_frag_base_size,
                 penultimate_size=0):
@@ -103,6 +104,12 @@ class FragmentBase():
 
     def send_frag(self):
         raise NotImplementedError("it is implemented at the subclass.")
+
+    def get_session_type(self):
+        return "fragmentation"
+
+    def get_state_info(self, **kw):
+        return "<fragmentation session>"
 
 class FragmentNoAck(FragmentBase):
 
@@ -321,7 +328,7 @@ class FragmentAckOnError(FragmentBase):
         scheduler = self.protocol.system.get_scheduler()
         dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(scheduler.get_clock()))  # utime.time()
         dprint("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
-        dprint("all tiles unsend -> {}".format(self.all_tiles))
+        dprint("all tiles unsend -> {}".format(self.all_tiles.get_all_tiles()))
         for tile in self.all_tiles.get_all_tiles():
             dprint("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
         dprint("")
@@ -546,7 +553,7 @@ class FragmentAckOnError(FragmentBase):
         dprint("ack_requests_counter -> {}".format(self.ack_requests_counter))
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
-            schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag, win)
+            schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
             """ Changement à corriger
             args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
             """

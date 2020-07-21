@@ -92,10 +92,7 @@ class AbstractLowerLayer:
         abstract
 
     def get_mtu_size(self):
-        """Return the MTU (Maximum Transmission Unit) of this layer.
-
-        XXX: check if there is an assumption that the MTU is fixed
-        (where not true, e.g. LoRaWAN, the lower MTU can be used).
+        """Return the current MTU (Maximum Transmission Unit) of this layer.
         """
         abstract
 

@@ -2,8 +2,8 @@
 .. module:: simul
    :platform: Python
 
-A set of helper function to create a simulation more easily.
-XXX: this is moved from test_simul.py, with the intent of cleaning later
+A set of builder/helper functions to create a simulation more easily.
+XXX: one iteration if cleaning is still needed.
 """
 
 from gen_base_import import *  # used for now for differing modules in py/upy
@@ -59,20 +59,22 @@ DEFAULT_MAC_ADDRESS_TABLE = {
 
 # ---------------------------------------------------------------------------
 
-class SimulHelper:
+class SimulBuilder:
     def __init__(self):
         self.simul = None
         self.simul_config = None
         self.device_rule_manager = None
-        self.gateway_rule_manager = None
+        self.core_rule_manager = None
 
-    def create_gateway(self, rules):
+    def create_core(self, rules):
         dprint("---------Rules gw -----------")
         rm1 = RuleManager()
         devaddr2 = DEFAULT_MAC_ADDRESS_TABLE["gateway"]
         rm1.Add(device=devaddr2, dev_info=rules)
         rm1.Print()
-        self.gateway_rule_manager = rm1
+        self.core_rule_manager = rm1
+        self.core_node = self._make_schc_node(self.sim, rm1, devaddr2, role="core-server")
+        return self.core_node
 
     def create_device(self, rules):
         dprint("---------Rules Device -----------")
@@ -81,49 +83,51 @@ class SimulHelper:
         rm0.Add(device=devaddr1, dev_info=rules)
         rm0.Print()
         self.device_rule_manager = rm0
+        self.device_node = self._make_schc_node(self.sim, rm0, devaddr1, role="device")
+        return self.device_node
 
     def make_device_send_data(self, clock, packet=None, packet_size=None):
-        self.node0.protocol.layer3.send_later(
-            clock, self.node1.layer3.L3addr, packet)
+        self.device_node.protocol.layer3.send_later(
+            clock, None, None, packet)
+        # XXX: remove:
+        #self.device_node.protocol.layer3.send_later(
+        #    clock, self.core_node.layer3.L3addr, packet)
 
     def set_config(self, simul_config, loss_config=None):
         simul_config = simul_config.copy()
         if loss_config is not None:
             simul_config["loss"] = loss_config
         self.simul_config = simul_config
-        # --------------------------------
-        # Configuration of the simulation
-        self.init_stat()
-        Statsct.get_results()
-        sim = net_sim_core.Simul(simul_config)
-        self.sim = sim
 
+    def _prepare_run(self):
         devaddr1 = DEFAULT_MAC_ADDRESS_TABLE["device"]
         devaddr2 = DEFAULT_MAC_ADDRESS_TABLE["gateway"]
-        l2_mtu = simul_config["radio"]["l2_mtu"]
+        l2_mtu = self.simul_config["radio"]["l2_mtu"]
 
-        rm0 = self.device_rule_manager
-        rm1 = self.gateway_rule_manager
-        node0 = self._make_schc_node(sim, rm0, devaddr1)  # SCHC device
-        node1 = self._make_schc_node(sim, rm1, devaddr2)  # SCHC gw
-        sim.add_sym_link(node0, node1)
-        node0.layer2.set_mtu(l2_mtu)
-        node1.layer2.set_mtu(l2_mtu)
-        self.node0 = node0
-        self.node1 = node1
+        self.sim.add_sym_link(self.core_node, self.device_node)
+        self.core_node.layer2.set_mtu(l2_mtu)
+        self.device_node.layer2.set_mtu(l2_mtu)
 
-        self.update_stat(node1, rm0, rm1, node0)
+        self.update_stat(self.core_node, self.device_rule_manager,
+                         self.core_rule_manager, self.device_node)
 
     def create_simul(self):
         if self.simul_config is None:
             self.set_config(DEFAULT_SIMUL_CONFIG.copy())
+        self.init_stat()
+        Statsct.get_results()
+        sim = net_sim_core.Simul(self.simul_config)
+        self.sim = sim
 
     def run_simul(self):
+        self._prepare_run()
         self.sim.run()
         self.show_stat()
 
-    def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={}):
-        node = net_sim_core.SimulSCHCNode(sim, extra_config)
+    def _make_schc_node(self, sim, rule_manager, devaddr=None, extra_config={},
+                        role="undefined"):
+        extra_config["unique-peer"] = True # XXX: change for core server
+        node = net_sim_core.SimulSCHCNode(sim, extra_config, role)
         node.protocol.set_rulemanager(rule_manager)
         if devaddr is None:
             devaddr = node.id

@@ -14,7 +14,7 @@ import math
 
 #---------------------------------------------------------------------------
 
-def cond_random(rate):
+def cond_random(rate): # XXX: simplify
     if sys.implementation.name == "micropython":
         #dprint("micropython")
         random_num = urandom.getrandbits(8)/256
@@ -29,22 +29,24 @@ def cond_random(rate):
         return random_num * 1000 < rate * 10
 
 
+# XXX: if mode is "rate", another name than "cycle" should be used for rate
 
-class ConditionalTrue:
+class PacketLossModel:
     """ It returns True in a condition of 3 modes.
     """
 
     def __init__(self, mode="cycle", cycle=0, count_num=None, G = None, background_frag_size = None):
         """
-        mode: "list", "cycle", or "rate"
+        mode: "list", "cycle", "rate" or "collision"
 
         list mode:
-            count_num: a list of numbers of counter that return true.
-            cycle: option.
+            count_num: a list of indices of lost packets, modulo `cycle`
         cycle mode:
-            cycle: the cycle in which true is returned.
+            cycle: one packet is lost every `cycle` packets, the
+            the last one in cycle. If `cycle` is 0, no packet is lost.
         rate mode:
-            cycle: the rate in which true is returned. i.e. % of losses Fragment Error Rate (e.g. 10 -> 10%)
+            cycle: the rate in which true is returned. 
+            i.e. % of losses Fragment Error Rate (e.g. 10 -> 10%)
         collision mode:
             G: percentage of occupation of the channel between 0 and 1
             background devices using the channel
@@ -88,13 +90,13 @@ class ConditionalTrue:
             if Statsct.get_background_traffic() is not None:
                 self.background_traffic = Statsct.get_background_traffic()
             else:
-                self.generate_background_traffic(G,background_frag_size)
+                self.generate_background_traffic(G, background_frag_size)
             if Statsct.get_current_time is not None:
                 self.current_time = Statsct.get_current_time()
             if Statsct.get_position is not None:
                 self.position = Statsct.get_position()
         else:
-            self.generate_background_traffic(G,background_frag_size)
+            self.generate_background_traffic(G, background_frag_size)
         dprint("background_frag_size: {}".format(background_frag_size))
         #y = 0
         #calculate the background traffic, one packet each 5000ms of 500ms ToA
@@ -106,9 +108,9 @@ class ConditionalTrue:
         self.current_time = 10000 * urandom.getrandbits(8)/256
         input('')
  
-    def generate_background_traffic(self,G, background_frag_size):
+    def generate_background_traffic(self, G, background_frag_size):
         self.background_traffic
-        T = get_toa(background_frag_size,Statsct.SF)
+        T = get_toa(background_frag_size, Statsct.SF)
         g = G / T['t_packet']
         dprint("g: {}, G:{}, T:{}".format(g,G,T['t_packet']))
         for i in range (1000):
@@ -155,12 +157,10 @@ class ConditionalTrue:
         self.current_time += frag_ToA['t_packet'] + Statsct.dc_time_off(frag_ToA['t_packet'],Statsct.dc)
         input('')
         return False    
-    
 
-
-    def check(self,packet_size):
-        self.count_in_cycle += 1
+    def is_lost(self, packet_size):
         is_true = self.check_func(packet_size)
+        self.count_in_cycle += 1
         if self.count_in_cycle == self.cycle:
             self.count_in_cycle = 0
         return is_true
@@ -180,11 +180,12 @@ class ConditionalTrue:
         return self.cond_collision(packet_size)
 
 if __name__ == "__main__":
+    packet_size = 10
     def test(config):
-        dprint(config["cond"])
-        cond = ConditionalTrue(**config["cond"])
+        print(config["cond"])
+        loss_model = PacketLossModel(**config["cond"])
         for i in range(1, 21):
-            dprint(i, cond.check())
+            print(i, loss_model.is_lost(packet_size))
 
     test({ "cond": { "mode": "rate", "cycle": 5 } })
     test({ "cond": { "mode": "cycle", "cycle": 3 } })

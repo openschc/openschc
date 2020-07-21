@@ -177,10 +177,16 @@ class frag_receiver_tx(frag_base):
 
 class frag_sender_tx_abort(frag_tx):
     """ make a message for the SCHC fragment sender. """
-    def __init__(self, rule, dtag=None, win=None):
+    def __init__(self, rule, dtag=None):
         self.init_param()
         self.rule = rule
         self.rule_id = rule[T_RULEID]
+        # Must set w to proper value:
+        # 1815 If the W field is present,
+        # 1817 o the fragment sender MUST set it to all ones.  Other values are
+        # 1818   RESERVED.
+        w_size = self.rule["Fragmentation"]["FRModeProfile"]["WSize"]
+        win = (1<<w_size)-1
         self.make_frag(dtag, win=win, abort=True)
 
 class frag_sender_tx(frag_tx):
