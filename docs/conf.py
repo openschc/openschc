@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'OpenSCHC'
-copyright = '2019, OpenSCHC'
+copyright = '2020, OpenSCHC'
 author = 'OpenSCHC'
 
 # The version info for the project you're documenting, acts as replacement for
