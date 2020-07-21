@@ -2,7 +2,7 @@
 
 .. include:: Coding_guidelines.rst
 
-Other advices
-=============
+.. Other advices
+.. =============
 
-Please be aware of the :doc:`Micropython restrictions and specificities <Micropython_Specificities>` compared to Python3 should you decide to run your code on constrained devices
+.. Please be aware of the :doc:`Micropython restrictions and specificities <Micropython_Specificities>` compared to Python3 should you decide to run your code on constrained devices

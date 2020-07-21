@@ -17,7 +17,7 @@ Install a development environment
 
 See :doc:`../General/Installation_guide`.
 
-Test you code using pytest
-==========================
+Test your code using pytest
+===========================
 
 See :doc:`../Testing/testing`.

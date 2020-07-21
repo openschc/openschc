@@ -4,7 +4,7 @@ User Guide
 Introduction
 ============
 
-This document explains how to run the openSCHC fragmentation and compression code.
+This document explains how to run the OpenSCHC fragmentation and compression code.
 
 This entails the following steps:
 

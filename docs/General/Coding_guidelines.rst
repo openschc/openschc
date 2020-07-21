@@ -6,7 +6,9 @@ Following the guidelines below when contributing to the project would be appreci
 Language
 --------
 
-OpenSCHC's code is in Python, targetting:
+OpenSCHC's code is Python3.
+
+.. OpenSCHC's code is in Python, targetting:
   * micropython (`https://micropython.org <https://micropython.org>`_)
   * the micropython variant for Pycom devices `(`https://pycom.io/ <https://pycom.io>`_)
   * Python 3 (on server/desktop) 

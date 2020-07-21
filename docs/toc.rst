@@ -12,7 +12,7 @@
    General/User_guide
    General/Documenting_Guidelines
    General/Contributing_Guidelines
-   General/Micropython_Specificities
+..   General/Micropython_Specificities
 
 .. toctree::
    :maxdepth: 1

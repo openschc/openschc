@@ -33,7 +33,7 @@ The **Rule Manager** stores a set of Rules and provides methods to install or re
 Rules are composed of two elements:
 
 * A **RuleID** which identifies the Rule by its number, and
-* A **content** which contains an array of fields. For details, refer to the `SCHC context data model <https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1>`_
+* A **content** which contains an array of fields. For details, refer to the `SCHC context data model <https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1>`_.
 
 The **App 1 ... App n** are the applications that invoke the **SCHC Orchestrator** to run the necessary SCHC operations, which are briefly defined below:
 
