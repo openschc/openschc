@@ -12,11 +12,11 @@ What is OpenSCHC ?
 OpenSCHC
 --------
 
-OpenSCHC is a OpenSource Implementation of `SCHC (Static Context Header Compression) <https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/>`_ currently being standardized by the `LPWAN Working Group <https://tools.ietf.org/wg/lpwan/>`_ at the IETF. Oversimplifying, this is essentially IP protocl headers compression and fragmentation so that they can be transported by low datarate, long range IoT networks.
+OpenSCHC is a OpenSource Implementation of SCHC (Static Context Header Compression) standardized at the IETF by the `LPWAN Working Group <https://tools.ietf.org/wg/lpwan/>`_ as `RFC8724 <https://www.rfc-editor.org/info/rfc8724>`_. Oversimplifying, this is essentially IP protocol headers compression and fragmentation so that they can be transported by low datarate, long range IoT networks.
 
 The long term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.
 
-OpenSCHC is developed to be compatible with micropython, on the device side.
+.. OpenSCHC is developed to be compatible with micropython, on the device side.
 
 OpenSCHC is licensed under the `MIT License <https://github.com/openschc/openschc/blob/master/LICENSE>`_ .
 
@@ -33,7 +33,7 @@ The **Rule Manager** stores a set of Rules and provides methods to install or re
 Rules are composed of two elements:
 
 * A **RuleID** which identifies the Rule by its number, and
-* A **content** which contains an array of fields. For details, refer to the `SCHC protocol <https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1>`_
+* A **content** which contains an array of fields. For details, refer to the `SCHC context data model <https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1>`_
 
 The **App 1 ... App n** are the applications that invoke the **SCHC Orchestrator** to run the necessary SCHC operations, which are briefly defined below:
 
@@ -43,10 +43,10 @@ The **App 1 ... App n** are the applications that invoke the **SCHC Orchestrator
 **Fragmentation** is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
 **Reassembly** is used on the receiver side to reconstruct the packet out of the set of fragments.
 
-Fragmentation modes and the associated parameters are described in the `SCHC protocol <https://datatracker.ietf.org/doc/draft-ietf-lpwan-ipv6-static-context-hc/?include_text=1>`_ .
+Fragmentation modes and the associated parameters are described in the `SCHC protocol <https://www.rfc-editor.org/info/rfc8724>`_ .
 
 **Network Connector** interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
-or to a link simulator.
+or to a link layer simulator.
 
 Using OpenSCHC
 ==============
@@ -58,10 +58,11 @@ Contributing
 
 Want to help ? See our :doc:`General/Contributing_Guidelines` for more details on the future work on the OpenSCHC project.
 
-Our current activity
-====================
+.. Our current activity
+.. ====================
 
-Direct link to the Etherpad for on-line information exchange at the IETF Hackathons : `https://etherpad.tools.ietf.org/p/openschc <https://etherpad.tools.ietf.org/p/openschc>`_
+.. Direct link to the Etherpad for on-line information exchange at the IETF Hackathons : `https://etherpad.tools.ietf.org/p/openschc <https://etherpad.tools.ietf.org/p/openschc>`_
+.. https://pad.inria.fr/p/np_xwIl7Q6DQuTGVewM_openschc
 
 Indices and tables
 ==================

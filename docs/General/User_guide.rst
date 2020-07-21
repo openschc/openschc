@@ -30,7 +30,8 @@ in the core network. On the device side, the rules that are installed are likely
 used by the applications running on that particular device. Conversely, on the core network side, the
 rule manager has to maintain a copy of the rules of each associated device.
 
-In openSCHC, rules are defined through a JSON structure. The common part is the
+The rule semantics is defined in the the `SCHC context data model <https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1>`_.
+However, in openSCHC, rules are written as JSON structures. The common part is the
 following: ::
 
     {
@@ -38,16 +39,16 @@ following: ::
     "RuleIDLength" : 4
     }
 
-The **RuleID** is a positive integer aligned to the right. So 12 can be writen in
-binary 1100. The **ruleIDLength** gives the number of bits used. So the previous
-rule is different from this one: ::
+The **RuleID** is a positive integer, right-aligned on the number of bits specified by **ruleIDLength**.
+In this first exemple, the RuleID is binary 1100.
+This rule is different from that one: ::
 
     {
     "RuleID" : 12,
     "RuleIDLength" : 6
     }
 
-which gives this value 001100.
+which yields the binary value 001100.
 
 Rule IDs compose a binary tree and can also be noted with the / representation
 (as IP prefixes) 12/4 or 12/6.
@@ -57,7 +58,7 @@ by the JSON keyword **Fragmentation** or **Compression**. A rule can contain onl
 these keywords.
 
 For compression, the keyword is followed by an array, containing the field descriptions.
-The smallest compression rule is the one where this array is empty. ::
+A trivial compression rule is one where this array is empty. ::
 
     {
     "RuleID" : 12,
@@ -66,20 +67,21 @@ The smallest compression rule is the one where this array is empty. ::
     }
 
 For fragmentation, the keyword is followed by the definition of the fragmentation
-parameters, which for example describe the fragmentation mode and the size of the
-different fragment SCHC header fields. ::
+parameters, which for example describe the fragmentation mode, the direction of the flow the
+rule applies to and optionnally the size of the different fragment SCHC header fields. ::
 
     {
     "RuleID" : 12,
     "RuleIDLength" : 4,
     "Fragmentation" : {
-      "FRMode": "noAck",
+      "FRMode" : "noAck",
+      "FRDirection" : "UP"
       }
     }
 
 See below for the description of the compression and fragmentation parameters.
 
-The following program adds these 2 basic rules into the rule manager and displays them. ::
+The following Python code adds these 2 basic rules into the OpenSCHC rule manager and displays them. ::
 
     from gen_rulemanager import *
 
@@ -95,7 +97,8 @@ The following program adds these 2 basic rules into the rule manager and display
       "RuleID" : 12,
       "RuleIDLength" : 6,
       "Fragmentation" :  {
-        "FRMode": "noAck",
+        "FRMode" : "noAck",
+        "FRDirection" : "UP"
       }
     }
 
@@ -108,9 +111,9 @@ The first line imports the rule manager module.
 
 **RM** will be the rule manager instance. If necessary, several rule managers can be instantiated.
 
-The two rules are created as a python dictionary and added to the instance of rule manager.
+The two rules are created as Python dictionaries and added to the instance of the rule manager.
 
-Finally, rules are displayed as cards on the console output. ::
+Finally, the rules are displayed as cards on the console output. ::
 
     ****************************************
     Device: None
@@ -120,27 +123,28 @@ Finally, rules are displayed as cards on the console output. ::
     \---------------+---+--+--+------------------------------+-------------+----------------/
     /-------------------------\
     |Rule 12/6        001100  |
+    {'RuleID': 12, 'RuleIDLength': 6, 'Fragmentation': {'FRDirection': 'UP', 'FRMode': 'noAck', 'FRModeProfile': {'FCNSize': 3, 'dtagSize': 2, 'MICALgorithm': 'crc32', 'WSize': 0, 'L2WordSize': 8, 'windowSize': 7}}}
     !=========================+=============================================================\
-    !! Fragmentation mode : noAck    header dtag 0 Window  0 FCN  1                        !!
-    !! No Tile size specified                                                              !!
-    !! MIC Algorithm: crc32                                                                !!
+    !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+    !^ No Tile size specified                                                              ^!
+    !^ RCS Algorithm: crc32                                                                ^!
     \=======================================================================================/
 
-Compression rules contain the field descriptions (here absent) and the Fragmentation rule contain the
+Compression rules contain the field descriptions (here absent) and Fragmentation rules contain the
 fragmentation parameters. As we will notice in the rest of this chapter, the rule manager may add some default
 parameters.
 
 We can notice that, since no device is specified, the rules are associated to the device **None**.
 
-In the add method, we used the **dev_info** named argument to indicate that the rule is contained in
-a python structure. The named argument  **file** could have been used instead. In that case, a filename
-containing the JSON structure is used.
+In the Add() method, we used the **dev_info** named argument to indicate that the rule is contained in
+a Python structure. The named argument  **file** could have been used instead, with the name of the file
+containing the JSON structure.
 
 Set of Rules
 ------------
 
-A  device will contain a set of rules related to compression and fragmentation. In openSCHC,
-a set of rules is an JSON array. The following program has the same behavior as the previous one.::
+A device should contain a set of rules related to compression and fragmentation. In OpenSCHC,
+the SoR (set of rules) is a JSON array. The following program has the same behavior as the previous one.::
 
   from gen_rulemanager import *
 
@@ -156,7 +160,8 @@ a set of rules is an JSON array. The following program has the same behavior as 
    "RuleID" : 12,
    "RuleIDLength" : 6,
    "Fragmentation" : {
-     "FRMode": "noAck"
+     "FRMode": "noAck",
+     "FRDirection" : "UP"
    }
   }
 
@@ -173,28 +178,28 @@ applies to. Conversely,
 when the SCHC instance is on the core network side, the set of rules must be associated with
 a device ID.
 
-Rules associated with a Device ID can be directly stored into the rule manager through the **Add** method
+Rules associated with a Device ID can be directly stored into the rule manager through the **Add()** method
 as follows: ::
 
     RM.Add(device="1234567890", dev_info=[rule1100, rule001100])
 
-The JSON structure is the following: ::
+Alternately, the JSON structure would be the following: ::
 
     {
         "DeviceID": 1234567890,
         "SoR" : [ ..... ]
     }
 
-where the **DeviceID** keyword represents the device ID in a specific technology, for
-instance LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
+where the **DeviceID** keyword represents the device ID in a specific LPWAN technology, for
+instance the LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
 the DeviceID literal must be expressed in decimal, not hexadecimal.
 
 Fragmenter/Reassembler
 ======================
 
-Using the client-server simulation is possible to observe some important details about noAck mode and
+Using the client-server simulation, it is possible to observe some important details about noAck mode and
 fragmenter/reassembler. First of all, it is necessary to create a file with any name (e.g. rule1.json)
-into **rules** folder, which will contain our rule as follows: ::
+into the **examples/configs** folder, which will contain our rules as follows: ::
 
     [{
        "RuleID" : 12,
@@ -204,46 +209,49 @@ into **rules** folder, which will contain our rule as follows: ::
       "RuleID" : 12,
       "RuleIDLength" : 6,
       "Fragmentation" :  {
-        "FRMode": "noAck"
+        "FRMode": "noAck",
+        "FRDirection" : "UP"
       }
     }]
 
-Then, it is possible to define the message which will be sent from client to server. **Payload** folder
+Then, it is possible to define the message that will be sent from client to server. The **examples/tcp/payload** folder
 contains some examples that can be used.  
 
-Go in the **examples/tcp_client_server** directory.
+Go to the **examples/tcp** directory.
 
-Add the SCHC directory on PYHTONPATH. On sh:
+Add the SCHC directory to your PYHTONPATH. On sh, this would be:
 
     $ export PYTHONPATH=<YOUR_PATH_TO_SCHC>
 
-on csh:
+On csh:
 
     $ setenv PYTHONPATH <YOUR_PATH_TO_SCHC>
 
-In the example/tcp_client_server directory, we can execute the code as follows:
+From the examples/tcp directory, we can execute the code as follows:
 
-Run Client on terminal 1 ::
-
-    python3 ClientServerSimul.py --role client --compression false --rule ../configs/rule1.json --time 20 --payload payload/testfile_small.txt
-
-Run Server on terminal 2 ::
+Run Server on terminal 1 ::
 
     python3 ClientServerSimul.py --role server --compression false --rule ../configs/rule1.json
 
+Run Client on terminal 2 ::
+
+    python3 ClientServerSimul.py --role client --compression false --rule ../configs/rule1.json --time 20 --payload payload/testfile_small.txt
+
+TODO: fix this
+
 If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
-transmission of the message and we will obtain the following result in server side: ::
+transmission of the message and we will obtain the following result on the server side: ::
 
     Recv MIC 804779011, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started\x00'), lenght = 194
     SUCCESS: MIC matched. packet bytearray(b'/\xf7\xf4\x03') == result b'/\xf7\xf4\x03'
 
-where, in the first line we have the value of the RCS sent, the message received by the server which is the same as the
-one sent by the client, and the length of the message in bytes. In second line, whe have a confirmation of successful
+where, on the first line we have the value of the RCS sent, the message received by the server which is the same as the
+one sent by the client, and the length of the message in bytes. On the second line, whe have a confirmation of successful
 matching between both RCS Values.
 
-On the other hand, to simulate the packet loss in transmission, we can use the **--loss true** argument in the client
+Next, to simulate packet loss during transmission, we can use the **--loss true** argument in the client
 and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
-since the RCS sent by the client is not the same RCS calculated by the server: ::
+since the RCS sent by the client is not the same as the RCS calculated by the server: ::
 
     Recv MIC 907239817, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (1062\xb2\x00'), lenght = 171
     ERROR: MIC mismatched. packet bytearray(b'/\xf7\xf4\x03') != result b'6\x13a\x89'

@@ -8,12 +8,12 @@ Syntax
 
 Sphinx's default syntax is called ReStructuredText.
 Sphinx's documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
-The original RST document is avaible `here <http://docutils.sourceforge.net/rst.html>`_.
+The original RST documentation is available `here <http://docutils.sourceforge.net/rst.html>`_.
 
 Building the documentation
 ==========================
 
-The documentation is built using `Sphinx <https://sphinx-doc.org>`_.
+The documentation is built using `Sphinx <https://www.sphinx-doc.org>`_.
 
 The first thing to do when trying to build the documentation is to setup the environment.
 
