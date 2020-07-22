@@ -79,6 +79,12 @@ rule applies to and optionnally the size of the different fragment SCHC header f
       }
     }
 
+SCHC differentiates the traffic generated from the device (upstream traffic) and 
+traffic sent to the device (downstream traffic). Fragmentation rules are unidirectional.
+It is mandatory to specify in a fragmentation rule the direction which can be "UP" or "DW".
+Note that for compression rules, the direction will have to be specified for each field, so the 
+rule by itself is bidirectional. 
+
 See below for the description of the compression and fragmentation parameters.
 
 The following Python code adds these 2 basic rules into the OpenSCHC rule manager and displays them. ::
