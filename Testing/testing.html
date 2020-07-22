@@ -42,34 +42,34 @@
 <p>They contain asserts, so that an unexpected result generates an error message.
 Conversely, no error message on the console output means that all results are as expected.</p>
 <p>If you want to do the test with micropython, you can just type:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">make</span> <span class="pre">all-tests</span>
-<span class="pre">`</span></code></p>
-<p>If you want to use your python, set it into the PY variable like below:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">PY=python3</span> <span class="pre">make</span> <span class="pre">all-tests</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
+</pre></div>
+</div>
+<p>If you want to use your own python, set it into the PY variable like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PY</span><span class="o">=</span><span class="n">python3</span> <span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
+</pre></div>
+</div>
 <p>If the path is a relative path, make the path relative to the tests directory, e.g.:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">PY=../../../micropython/ports/unix/micropython</span> <span class="pre">make</span> <span class="pre">all-tests</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PY</span><span class="o">=../../../</span><span class="n">micropython</span><span class="o">/</span><span class="n">ports</span><span class="o">/</span><span class="n">unix</span><span class="o">/</span><span class="n">micropython</span> <span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="pytest-the-modern-way">
 <h2>Pytest (the modern way)<a class="headerlink" href="#pytest-the-modern-way" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="https://docs.pytest.org/en/latest/">Pytest</a> is required.</p>
-<p>Install it using <cite>pip</cite>:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pytest</span>
-<span class="pre">`</span></code></p>
+<p>Install pytest with <cite>pip</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pytest</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="run">
 <h3>Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h3>
 <p>In the src directory, type:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">make</span> <span class="pre">pytest</span>
-<span class="pre">`</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">pytest</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="guidelines">
@@ -136,7 +136,7 @@ so that they keep working both when executed with pytest and when run directly a
 </ul>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
 
 

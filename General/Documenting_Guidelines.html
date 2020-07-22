@@ -38,16 +38,22 @@
 <p>Following the guidelines below when documenting the project would be appreciated.</p>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<p>Sphinx’s default syntax is called ReStructuredText.
-Sphinx’s documentation provides a <a class="reference external" href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html">syntax guide</a>.
-The original RST documentation is available <a class="reference external" href="http://docutils.sourceforge.net/rst.html">here</a>.</p>
+<p>Sphinx’s default syntax is called ReStructuredText.</p>
+<p>Sphinx’s documentation provides a <a class="reference external" href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html">syntax guide</a>.</p>
+<p>The original RST documentation is available <a class="reference external" href="http://docutils.sourceforge.net/rst.html">here</a>.</p>
 </div>
 <div class="section" id="building-the-documentation">
 <h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>The documentation is built using <a class="reference external" href="https://www.sphinx-doc.org">Sphinx</a>.</p>
-<p>The first thing to do when trying to build the documentation is to setup the environment.</p>
-<p>We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build, and another one synchronised with the gh-pages branch on which the documentation will be built.</p>
-<p>An example of how to do it</p>
+<p>After installing Sphinx (depending on your OS), you have to add the sphinx-doc bin directory to your PATH environment variable.</p>
+<p>Type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sphinx</span><span class="o">-</span><span class="n">build</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+<p>for a check.</p>
+<p>Then you need to setup the git environment.</p>
+<p>We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build the documentation for, and another one synchronised with the gh-pages branch in which the documentation will be stored.</p>
+<p>An example of how to do this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/openschc/openschc.git
 $ cd openschc
 $ git checkout my_branch
@@ -165,12 +171,12 @@ $ git push
 </ul>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
 
 
