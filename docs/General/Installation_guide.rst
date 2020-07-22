@@ -10,9 +10,7 @@ Step 1 : Make sure you have a Python3 version installed. Check your python versi
 
 Step 2: Clone the `OpenSCHC repository <https://github.com/openschc/openschc>`_ .
 
-Step 3: For testing a simple example using SCHC under different scenarios, see `https://github.com/openschc/openschc/blob/master/src/README.rst <https://github.com/openschc/openschc/blob/master/src/README.md>`_.
-
-TODO: fix this
+Step 3: For experimenting with SCHC on simple examples, see the :doc:`../General/User_guide`. For performing extensive tests of the SCHC functionnalities, see :doc:`../Testing/testing`.
 
 .. Setting up the environment using micropython
 .. ++++++++++++++++++++++++++++++++++++++++++++
