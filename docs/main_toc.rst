@@ -22,7 +22,7 @@ OpenSCHC Project Complete Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: Source code in-depth
+   :caption: Source code, detailed
 
    Source/File_Classification
    Source/gen_rulemanager

@@ -12,7 +12,7 @@ The different components are
 
 * COMPRESSION/DECOMPRESSION prefix
 
-  * compr_core.py       ``# core compression/decompression fct``
+  * compr_core.py       ``# core compression/decompression functions``
   * compr_bitmap.py     ``# ?``
   * compr_parser.py     ``# ?``
 
@@ -31,6 +31,7 @@ The different components are
   * net_sim_core.py     ``# ?``
   * net_sim_layer2.py   ``# simulates an L2``
   * net_sim_loss.py     ``# simulates packet loss on L2``
+  * net_sim_record.py   ``# ?``
   * net_sim_sched.py    ``# schedules transmission in simulated network ?``
 
 * APPLICATION
@@ -39,20 +40,19 @@ The different components are
 
 * ORCHESTRATION
 
-  * protocol.py         ``# start rule manager, cC/D and F/R``
+  * protocol.py         ``# start rule manager, C/D and F/R``
 
 * RUNNERS
 
   * test_compress.py    ``# run a SCHC compression example``
   * test_frag_new.py    ``# run a SCHC fragmentation example``
 
-* TEST (under the tests directory)
+* TEST (under the **tests** directory)
 
   * test_bitarray.py    ``# tests the BitBuffer functionalities``
   * test_bitarray2.py   ``# more tests of the BitBuffer functionalities``
   * test_bitmap.py      ``# tests the generation of a BitMap out of the list of tiles received``
   * test_newschc.py
-  * test_oschc.py
   * test_ruleman.py
   * test_simsched.py
 

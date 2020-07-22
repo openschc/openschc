@@ -1,5 +1,5 @@
-OpenSCHC Rule Manager Module
-****************************
+Rule Manager
+************
 
 .. automodule:: gen_rulemanager
 

@@ -1,5 +1,5 @@
-OpenSCHC Reception Module
-*************************
+Fragment Reassembly
+*******************
 
 .. automodule:: frag_recv
 
