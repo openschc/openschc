@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator &#8212; OpenSCHC  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="File Classification" href="../Source/File_Classification.html" />
+    <link rel="prev" title="Architecture" href="Architecture.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="simulator">
+<h1>Simulator<a class="headerlink" href="#simulator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>OpenSCHC includes a way to run simple simulations:
+to use it, one sets up, one creates nodes,</p>
+<p>An example of simulation is in <cite>examples/simulator</cite>.</p>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>The configuration is in a dictionary with the following fields</p>
+<ul class="simple">
+<li><p>There have been 4 different versions of logging :</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>“log” (boolean): the initial logging system (with clock). Not used much lately.</p></li>
+<li><p>“enable-print” (boolean): the print statements that have been added to do debugging.</p></li>
+<li><p>“enable-trace” (boolean): the trace displays only the packet exchanged between nodes.</p></li>
+<li><p>the record system to record the state of nodes at each event.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>When used, the record system uses the following entries in the dictionary:</dt><dd><ul class="simple">
+<li><p>“record.enable” (boolean): should loging</p></li>
+<li><p>“record.directory” (string): the name of the directory where all state/logs will be stored</p></li>
+<li><p>“record.format” (string): the format with which the information is stored (“pprint” or “json”)</p></li>
+<li><p>“record.quiet” (string): disable all output from screen (including trace)</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>An example of simulation in <cite>examples/simulator</cite> can be run through the script <cite>run_simul.sh</cite>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
+      <li>Previous: <a href="Architecture.html" title="previous chapter">Architecture</a></li>
+      <li>Next: <a href="../Source/File_Classification.html" title="next chapter">File Classification</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
+</ul>
+<p class="caption"><span class="caption-text">General Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../General/Installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internals</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Architecture.html">Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulator</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Testing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">Testing information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Testing/random-fragment-testing.html">Fragm. Random Test</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Actus/IETF-Hackathon-LPWAN.html">IETF Hackathon info</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, OpenSCHC.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/Internals/Simulator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
