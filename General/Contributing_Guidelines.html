@@ -15,7 +15,7 @@
     <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Micropython specificities" href="Micropython_Specificities.html" />
+    <link rel="next" title="Architecture" href="../Internals/Architecture.html" />
     <link rel="prev" title="Documenting Guidelines" href="Documenting_Guidelines.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -47,8 +47,8 @@
 <h2>Install a development environment<a class="headerlink" href="#install-a-development-environment" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference internal" href="Installation_guide.html"><span class="doc">Installation Guide</span></a>.</p>
 </div>
-<div class="section" id="test-you-code-using-pytest">
-<h2>Test you code using pytest<a class="headerlink" href="#test-you-code-using-pytest" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="test-your-code-using-pytest">
+<h2>Test your code using pytest<a class="headerlink" href="#test-your-code-using-pytest" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference internal" href="../Testing/testing.html"><span class="doc">Testing information</span></a>.</p>
 </div>
 <div class="section" id="coding-guidelines">
@@ -56,23 +56,12 @@
 <p>Following the guidelines below when contributing to the project would be appreciated</p>
 <div class="section" id="language">
 <h3>Language<a class="headerlink" href="#language" title="Permalink to this headline">¶</a></h3>
-<dl class="simple">
-<dt>OpenSCHC’s code is in Python, targetting:</dt><dd><ul class="simple">
-<li><p>micropython (<a class="reference external" href="https://micropython.org">https://micropython.org</a>)</p></li>
-<li><p>the micropython variant for Pycom devices <a class="reference external" href="https://pycom.io">(`https://pycom.io/</a>)</p></li>
-<li><p>Python 3 (on server/desktop)</p></li>
-</ul>
-</dd>
-</dl>
+<p>OpenSCHC’s code is Python3.</p>
 </div>
 <div class="section" id="coding-style">
 <h3>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h3>
 <p>You should loosely follow the <a class="reference external" href="http://google.github.io/styleguide/pyguide.html">google python style guide</a>.  However, the style should not be firstly coerced. All contributions will be appreciated.</p>
 </div>
-</div>
-<div class="section" id="other-advices">
-<h2>Other advices<a class="headerlink" href="#other-advices" title="Permalink to this headline">¶</a></h2>
-<p>Please be aware of the <a class="reference internal" href="Micropython_Specificities.html"><span class="doc">Micropython restrictions and specificities</span></a> compared to Python3 should you decide to run your code on constrained devices</p>
 </div>
 </div>
 
@@ -88,7 +77,7 @@
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
       <li>Previous: <a href="Documenting_Guidelines.html" title="previous chapter">Documenting Guidelines</a></li>
-      <li>Next: <a href="Micropython_Specificities.html" title="next chapter">Micropython specificities</a></li>
+      <li>Next: <a href="../Internals/Architecture.html" title="next chapter">Architecture</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -113,19 +102,18 @@
 <li class="toctree-l1"><a class="reference internal" href="User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guidelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Micropython_Specificities.html">Micropython specificities</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code in-depth</span></p>
+<p class="caption"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Classification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">OpenSCHC Rule Manager Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">OpenSCHC Reception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
@@ -143,7 +131,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, OpenSCHC.
+      &copy;2020, OpenSCHC.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>

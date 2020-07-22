@@ -15,7 +15,7 @@
     <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="OpenSCHC Rule Manager Module" href="gen_rulemanager.html" />
+    <link rel="next" title="Rule Manager" href="gen_rulemanager.html" />
     <link rel="prev" title="Simulator" href="../Internals/Simulator.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -47,7 +47,7 @@
 </li>
 <li><p>COMPRESSION/DECOMPRESSION prefix</p>
 <ul>
-<li><p>compr_core.py       <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">core</span> <span class="pre">compression/decompression</span> <span class="pre">fct</span></code></p></li>
+<li><p>compr_core.py       <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">core</span> <span class="pre">compression/decompression</span> <span class="pre">functions</span></code></p></li>
 <li><p>compr_bitmap.py     <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">?</span></code></p></li>
 <li><p>compr_parser.py     <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">?</span></code></p></li>
 </ul>
@@ -68,6 +68,7 @@
 <li><p>net_sim_core.py     <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">?</span></code></p></li>
 <li><p>net_sim_layer2.py   <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">simulates</span> <span class="pre">an</span> <span class="pre">L2</span></code></p></li>
 <li><p>net_sim_loss.py     <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">simulates</span> <span class="pre">packet</span> <span class="pre">loss</span> <span class="pre">on</span> <span class="pre">L2</span></code></p></li>
+<li><p>net_sim_record.py   <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">?</span></code></p></li>
 <li><p>net_sim_sched.py    <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">schedules</span> <span class="pre">transmission</span> <span class="pre">in</span> <span class="pre">simulated</span> <span class="pre">network</span> <span class="pre">?</span></code></p></li>
 </ul>
 </li>
@@ -78,7 +79,7 @@
 </li>
 <li><p>ORCHESTRATION</p>
 <ul>
-<li><p>protocol.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">start</span> <span class="pre">rule</span> <span class="pre">manager,</span> <span class="pre">cC/D</span> <span class="pre">and</span> <span class="pre">F/R</span></code></p></li>
+<li><p>protocol.py         <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">start</span> <span class="pre">rule</span> <span class="pre">manager,</span> <span class="pre">C/D</span> <span class="pre">and</span> <span class="pre">F/R</span></code></p></li>
 </ul>
 </li>
 <li><p>RUNNERS</p>
@@ -87,13 +88,12 @@
 <li><p>test_frag_new.py    <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">run</span> <span class="pre">a</span> <span class="pre">SCHC</span> <span class="pre">fragmentation</span> <span class="pre">example</span></code></p></li>
 </ul>
 </li>
-<li><p>TEST (under the tests directory)</p>
+<li><p>TEST (under the <strong>tests</strong> directory)</p>
 <ul>
 <li><p>test_bitarray.py    <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">tests</span> <span class="pre">the</span> <span class="pre">BitBuffer</span> <span class="pre">functionalities</span></code></p></li>
 <li><p>test_bitarray2.py   <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">more</span> <span class="pre">tests</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">BitBuffer</span> <span class="pre">functionalities</span></code></p></li>
 <li><p>test_bitmap.py      <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">tests</span> <span class="pre">the</span> <span class="pre">generation</span> <span class="pre">of</span> <span class="pre">a</span> <span class="pre">BitMap</span> <span class="pre">out</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">tiles</span> <span class="pre">received</span></code></p></li>
 <li><p>test_newschc.py</p></li>
-<li><p>test_oschc.py</p></li>
 <li><p>test_ruleman.py</p></li>
 <li><p>test_simsched.py</p></li>
 </ul>
@@ -114,7 +114,7 @@
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
       <li>Previous: <a href="../Internals/Simulator.html" title="previous chapter">Simulator</a></li>
-      <li>Next: <a href="gen_rulemanager.html" title="next chapter">OpenSCHC Rule Manager Module</a></li>
+      <li>Next: <a href="gen_rulemanager.html" title="next chapter">Rule Manager</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -139,19 +139,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../General/Micropython_Specificities.html">Micropython specificities</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code in-depth</span></p>
+<p class="caption"><span class="caption-text">Source code, detailed</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">File Classification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gen_rulemanager.html">OpenSCHC Rule Manager Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gen_bitarray.html">OpenSCHC Bit Buffer Management Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="frag_recv.html">OpenSCHC Reception Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gen_rulemanager.html">Rule Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gen_bitarray.html">Bit Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frag_recv.html">Fragment Reassembly</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul>
@@ -169,7 +168,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, OpenSCHC.
+      &copy;2020, OpenSCHC.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
