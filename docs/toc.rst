@@ -42,4 +42,4 @@
    :maxdepth: 1
    :caption: Other info
 
-   Actus/IETF-Hackathon-LPWAN
+   News/IETF-Hackathon-LPWAN

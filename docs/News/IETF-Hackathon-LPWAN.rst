@@ -1,11 +1,8 @@
-IETF Hackathon info
-*******************
+IETF Hackathons info
+********************
 
-`IETF106 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/106hackathon>`_
+`IETF108 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/108hackathon>`_
 
-`IETF105 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/105hackathon>`_
-
-`IETF104 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/104hackathon>`_
 
 Quick links
 ===========
@@ -14,13 +11,15 @@ Quick links
 Resource
 ===================== ======================================================================
 openschc code         https://github.com/openschc/openschc
-SCHC draft -22        https://tools.ietf.org/html/draft-ietf-lpwan-ipv6-static-context-hc-22
-Etherpad (live notes) https://etherpad.tools.ietf.org/p/openschc
+SCHC (RFC8724)        https://www.rfc-editor.org/info/rfc8724
+Etherpad (live notes) https://etherpad.tools.ietf.org/p/openschc                
 ===================== ======================================================================
 
 Write-ups of OpenSCHC work at previous hackathons
 =================================================
 
+
+`IETF106 Hackathon (Singapore) <https://github.com/IETF-Hackathon/ietf106-project-presentations/blob/master/%40LPWAN-hackathon-presentation-00.pdf>`_
 
 `IETF105 Hackathon (Montreal) <https://github.com/IETF-Hackathon/ietf105-project-presentations/blob/master/IETF105-hackathon-LPWAN.pdf>`_
 

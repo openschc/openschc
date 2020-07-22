@@ -1,15 +1,15 @@
 Contributing Guidelines
 ***********************
 
-Report bugs or give new ideas
-=============================
+Report bugs or privde suggestions
+=================================
 
-Don't hesitate to open new `issues <https://github.com/openschc/openschc/issues>`_ with your reports or remarks.
+Don't hesitate to open new `issues <https://github.com/openschc/openschc/issues>`_ with your bug reports or comments.
 
 Open a Pull Request
 ===================
 
-If you have a fix for one of the `issues <https://github.com/openschc/openschc/issues>`_, please submit a Pull Request from your fork.
+If you have a fix for one of the current `issues <https://github.com/openschc/openschc/issues>`_, please submit a Pull Request from your fork.
 
 
 Install a development environment
