@@ -7,7 +7,9 @@ Syntax
 ======
 
 Sphinx's default syntax is called ReStructuredText.
+
 Sphinx's documentation provides a `syntax guide <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
+
 The original RST documentation is available `here <http://docutils.sourceforge.net/rst.html>`_.
 
 Building the documentation
@@ -15,11 +17,19 @@ Building the documentation
 
 The documentation is built using `Sphinx <https://www.sphinx-doc.org>`_.
 
-The first thing to do when trying to build the documentation is to setup the environment.
+After installing Sphinx (depending on your OS), you have to add the sphinx-doc bin directory to your PATH environment variable.
 
-We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build, and another one synchronised with the gh-pages branch on which the documentation will be built.
+Type::
 
-An example of how to do it ::
+  sphinx-build --version
+
+for a check.
+
+Then you need to setup the git environment.
+
+We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build the documentation for, and another one synchronised with the gh-pages branch in which the documentation will be stored.
+
+An example of how to do this::
 
   $ git clone https://github.com/openschc/openschc.git
   $ cd openschc

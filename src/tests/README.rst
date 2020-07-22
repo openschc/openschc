@@ -11,23 +11,18 @@ Move into the **tests** directory and run the test_xxx.py files directly.
 They contain asserts, so that an unexpected result generates an error message.
 Conversely, no error message on the console output means that all results are as expected.
 
-If you want to do the test with micropython, you can just type:
+If you want to do the test with micropython, you can just type::
 
-```
-make all-tests
-```
+  make all-tests
 
-If you want to use your python, set it into the PY variable like below:
+If you want to use your own python, set it into the PY variable like this::
 
-```
-PY=python3 make all-tests
-```
+  PY=python3 make all-tests
 
-If the path is a relative path, make the path relative to the tests directory, e.g.:
+If the path is a relative path, make the path relative to the tests directory, e.g.::
 
-```
-PY=../../../micropython/ports/unix/micropython make all-tests
-```
+  PY=../../../micropython/ports/unix/micropython make all-tests
+
 
 
 Pytest (the modern way)
@@ -38,20 +33,17 @@ Installation
 
 `Pytest <https://docs.pytest.org/en/latest/>`_ is required.
 
-Install it using `pip`:
+Install pytest with `pip`::
 
-```
-pip install pytest
-```
+  pip install pytest
 
 Run
 ***
 
-In the src directory, type:
+In the src directory, type::
 
-```
-make pytest
-```
+  make pytest
+
 
 Guidelines
 ----------
