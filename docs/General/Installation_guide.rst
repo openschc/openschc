@@ -10,6 +10,17 @@ Step 1 : Make sure you have a Python3 version installed. Check your python versi
 
 Step 2: Clone the `OpenSCHC repository <https://github.com/openschc/openschc>`_ .
 
+Add the SCHC source code directory (typically something/openschc/src) to your PYTHONPATH.
+
+On sh, this would be:
+
+    $ export PYTHONPATH=<YOUR_PATH_TO_SCHC_SRC>
+
+On csh:
+
+    $ setenv PYTHONPATH <YOUR_PATH_TO_SCHC_SRC>
+
+
 Step 3: For experimenting with SCHC on simple examples, see the :doc:`../General/User_guide`. For performing extensive tests of the SCHC functionnalities, see :doc:`../Testing/testing`.
 
 .. Setting up the environment using micropython

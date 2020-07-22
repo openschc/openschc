@@ -36,7 +36,7 @@
 
    Testing/testing
    Testing/random-fragment-testing
-
+   Testing/Interop_testing
 
 .. toctree::
    :maxdepth: 1

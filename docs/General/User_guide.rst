@@ -225,15 +225,9 @@ contains some examples that can be used.
 
 Go to the **examples/tcp** directory.
 
-Add the SCHC directory to your PYHTONPATH. On sh, this would be:
+Double-check you have setup your PYTHONPATH per the :doc:`../General/Installation_guide`.
 
-    $ export PYTHONPATH=<YOUR_PATH_TO_SCHC>
-
-On csh:
-
-    $ setenv PYTHONPATH <YOUR_PATH_TO_SCHC>
-
-From the examples/tcp directory, we can execute the code as follows:
+From the examples/tcp directory, run the code as follows:
 
 Run Server on terminal 1 ::
 
