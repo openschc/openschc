@@ -2,7 +2,15 @@
 class LNS:
     "LNS class, contains all parameters required to communicate with a given LNS"
 
-    def __init__(self, device_id, mqtt_url, mqtt_port, mqtt_username, mqtt_password, mqtt_secured=True):
+    def __init__(
+        self,
+        device_id,
+        mqtt_url,
+        mqtt_port,
+        mqtt_username,
+        mqtt_password,
+        mqtt_secured=True,
+    ):
         self._mqtt_url = mqtt_url
         self._mqtt_port = mqtt_port
         self._mqtt_username = mqtt_username
@@ -57,7 +65,7 @@ class LNS:
     @mqtt_secured.setter
     def mqtt_secured(self, secured):
         self._mqtt_secured = secured
-    
+
     @property
     def mqtt_topic_uplink(self):
         raise NotImplementedError

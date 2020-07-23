@@ -124,13 +124,16 @@ class MqttLowerLayer:
         scheduler = self.protocol.get_system().get_scheduler()
         self.queue = queue.Queue(maxsize=0)
         self.mqtt_client = mqtt.Client()
-        self.mqtt_client.username_pw_set(
-            self.lns.mqtt_username, self.lns.mqtt_password
-        )
+        self.mqtt_client.username_pw_set(self.lns.mqtt_username, self.lns.mqtt_password)
         if self.lns.mqtt_secured == True:
             self.mqtt_client.tls_set()
         self.mqtt_client.user_data_set(
-            {"queue": self.queue, "device_id": self.device_id, "port": self.port, "lns": self.lns}
+            {
+                "queue": self.queue,
+                "device_id": self.device_id,
+                "port": self.port,
+                "lns": self.lns,
+            }
         )
         self.mqtt_client.on_connect = self.on_mqtt_connect
         self.mqtt_client.on_disconnect = self.on_mqtt_disconnect
