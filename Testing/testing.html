@@ -15,7 +15,7 @@
     <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Fragm. Random Test" href="random-fragment-testing.html" />
+    <link rel="next" title="Interoperability test tools" href="Interop_testing.html" />
     <link rel="prev" title="Fragment Reassembly" href="../Source/frag_recv.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -37,22 +37,19 @@
 <h1>OpenSCHC tests<a class="headerlink" href="#openschc-tests" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="testing-the-traditionnal-way">
 <h2>Testing, the traditionnal way<a class="headerlink" href="#testing-the-traditionnal-way" title="Permalink to this headline">¶</a></h2>
-<p>It works with both micropython and Python3.</p>
-<p>Move into the <strong>tests</strong> directory and run the test_xxx.py files directly.</p>
+<p>Move into the <em>tests</em> directory and run the test_xxx.py files directly.</p>
 <p>They contain asserts, so that an unexpected result generates an error message.
 Conversely, no error message on the console output means that all results are as expected.</p>
-<p>If you want to do the test with micropython, you can just type:</p>
+<p>This works with both Python3 and micropython.</p>
+<p>You can also run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
 </pre></div>
 </div>
-<p>If you want to use your own python, set it into the PY variable like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PY</span><span class="o">=</span><span class="n">python3</span> <span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
-</pre></div>
-</div>
-<p>If the path is a relative path, make the path relative to the tests directory, e.g.:</p>
+<p>To use another version of python, such as micropython, set it into the PY variable like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PY</span><span class="o">=../../../</span><span class="n">micropython</span><span class="o">/</span><span class="n">ports</span><span class="o">/</span><span class="n">unix</span><span class="o">/</span><span class="n">micropython</span> <span class="n">make</span> <span class="nb">all</span><span class="o">-</span><span class="n">tests</span>
 </pre></div>
 </div>
+<p>If the path is a relative path, make the path relative to the <em>tests</em> directory.</p>
 </div>
 <div class="section" id="pytest-the-modern-way">
 <h2>Pytest (the modern way)<a class="headerlink" href="#pytest-the-modern-way" title="Permalink to this headline">¶</a></h2>
@@ -91,7 +88,7 @@ so that they keep working both when executed with pytest and when run directly a
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
       <li>Previous: <a href="../Source/frag_recv.html" title="previous chapter">Fragment Reassembly</a></li>
-      <li>Next: <a href="random-fragment-testing.html" title="next chapter">Fragm. Random Test</a></li>
+      <li>Next: <a href="Interop_testing.html" title="next chapter">Interoperability test tools</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -132,7 +129,7 @@ so that they keep working both when executed with pytest and when run directly a
 <p class="caption"><span class="caption-text">Testing</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">OpenSCHC tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="random-fragment-testing.html">Fragm. Random Test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interop_testing.html">Interoperability test tools</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Other info</span></p>
 <ul>
