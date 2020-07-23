@@ -129,7 +129,6 @@ Finally, the rules are displayed as cards on the console output. ::
     \---------------+---+--+--+------------------------------+-------------+----------------/
     /-------------------------\
     |Rule 12/6        001100  |
-    {'RuleID': 12, 'RuleIDLength': 6, 'Fragmentation': {'FRDirection': 'UP', 'FRMode': 'noAck', 'FRModeProfile': {'FCNSize': 3, 'dtagSize': 2, 'MICALgorithm': 'crc32', 'WSize': 0, 'L2WordSize': 8, 'windowSize': 7}}}
     !=========================+=============================================================\
     !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
     !^ No Tile size specified                                                              ^!
