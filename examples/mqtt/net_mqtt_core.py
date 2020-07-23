@@ -9,7 +9,6 @@ import socket
 import os
 
 import base64
-import json
 import paho.mqtt.client as mqtt
 import queue
 
@@ -154,17 +153,7 @@ class MqttLowerLayer:
 
     @staticmethod
     def on_mqtt_uplink(client, context, msg):
-        try:
-            payload = json.loads(msg.payload.decode("utf-8"))
-            # print(msg.topic, pformat(payload))
-            if payload["port"] != context["port"]:
-                return
-            payload = base64.b64decode(payload["payload_raw"])
-            print("UPLINK - Payload:", payload.hex())
-            print(f"UPLINK - Payload length: {len(payload)}")
-            context["queue"].put(payload)
-        except Exception as e:
-            print(str(e))
+        context["lns"].get_payload(context["queue"], msg.payload, context["port"])
 
     def event_packet_received(self, packet):
         """Called by the SelectScheduler when an MQTT packet is received"""

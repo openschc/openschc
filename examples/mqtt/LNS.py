@@ -61,3 +61,7 @@ class LNS:
     @property
     def mqtt_topic_uplink(self):
         raise NotImplementedError
+
+    @staticmethod
+    def get_payload(msg_queue, payload, f_port):
+        raise NotImplementedError

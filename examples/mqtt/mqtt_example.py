@@ -87,8 +87,8 @@ lns = LNS_TTN_V2(
     args.device_id,
     "eu.thethings.network",
     8883,
-    "APP ID",
-    "APP TOKEN",
+    "libschc",
+    "ttn-account-v2.AJsxYxLN5aXbQjd_JtX-GNtKPwfx-t_KZEjDt83JII4",
     True,
 )
 
