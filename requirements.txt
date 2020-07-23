@@ -1,1 +1,3 @@
 kamene==0.32
+paho-mqtt==1.5.0
+scapy==2.4.3
