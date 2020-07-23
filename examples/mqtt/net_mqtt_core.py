@@ -137,7 +137,6 @@ class MqttLowerLayer:
         self.mqtt_client.on_disconnect = self.on_mqtt_disconnect
         self.mqtt_client.on_message = self.on_mqtt_uplink
         print("Connect to MQTT")
-        print(self.lns.mqtt_topic_uplink)
         self.mqtt_client.connect(self.lns.mqtt_url, self.lns.mqtt_port, 60)
         self.mqtt_client.loop_start()
         scheduler.configure(self.event_packet_received, self.queue)
@@ -147,7 +146,7 @@ class MqttLowerLayer:
         print("Connected with result code " + str(rc))
         if rc == 0:
             print("Subscribed to", context["device_id"])
-            client.subscribe(context.lns.mqtt_topic_uplink)
+            client.subscribe(context["lns"]["mqtt_topic_uplink"])
 
     def on_mqtt_disconnect(self):
         self.mqtt_client.disconnect()
