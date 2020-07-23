@@ -1,6 +1,7 @@
 ifeq ($(PY),)
 	#PY := ../../../micropython/ports/unix/micropython
-	PY := micropython
+	PY := python3
+	# micropython
 endif
 
 all-tests:
