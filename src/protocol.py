@@ -68,6 +68,7 @@ class SessionManager:
         else:
             raise ValueError("FRMode:", mode)
         self._add_session(session_id, session)
+        setattr(session, "_session_id", session_id)
         return session
 
     def create_fragmentation_session(self, l2_address, context, rule):
@@ -100,6 +101,7 @@ class SessionManager:
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         self._add_session(session_id, session)        
+        setattr(session, "_session_id", session_id)
         return session
 
     def get_state_info(self, **kw):
@@ -187,11 +189,10 @@ class SCHCProtocol:
         return schc_packet
 
 
-    def _make_frag_session(self, dst_l2_address):
+    def _make_frag_session(self, dst_l2_address, direction):
         """Search a fragmentation rule, create a session for it, return None if not found"""
-        # assume need for fragmentation was checked beforehands
-        l2_addr = self.layer2.get_address() #XXX: don't find rule based on my address???
-        frag_rule = self.rule_manager.FindFragmentationRule(l2_addr)
+        frag_rule = self.rule_manager.FindFragmentationRule(
+                deviceID=dst_l2_address, direction=direction)
         if frag_rule is None:
             self._log("fragmentation rule not found")
             return None
@@ -211,6 +212,14 @@ class SCHCProtocol:
 
 
     def schc_send(self, dst_l2_address, dst_l3_address, raw_packet):
+        """Starting to send SCHC packet after called by L3.
+        
+        If dst_l2_address is None, this function is for sending
+        from device to core.
+
+        XXX the order of the args should be:
+            schc_send(self, dst_l3_address, raw_packet, dst_l2_address=None)
+        """
         self._log("recv-from-l3 {} {} {}".format(dst_l2_address, dst_l3_address, raw_packet))
 
         # Perform compression
@@ -225,11 +234,14 @@ class SCHCProtocol:
             return
 
         # Start a fragmentation session from rule database
-        frag_session = self._make_frag_session(dst_l2_address)
+        if dst_l2_address == None:
+            direction = T_DIR_UP
+        else:
+            direction = T_DIR_DW
+        frag_session = self._make_frag_session(dst_l2_address, direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
-
 
     def schc_recv(self, sender_l2_address, raw_packet):
         #self._log("recv-from-L2 {} {}".format(sender_l2_addr, raw_packet))

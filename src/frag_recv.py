@@ -93,11 +93,7 @@ class ReassembleBase:
 
         # sending sender abort.
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        """
-        Changement à corriger
-        args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
-        """
-        args = (schc_frag.packet.get_content(), '*')
+        args = (schc_frag.packet.get_content(), self._session_id[0])
         dprint("Sent Receiver-Abort.", schc_frag.__dict__)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
@@ -271,7 +267,7 @@ class ReassemblerAckOnError(ReassembleBase):
             #     #not done and the sender is requesting an ACK.
             #     # sending Receiver abort.
             #     schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-            #     args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
+            #     args = (schc_frag.packet.get_content(), self._session_id[0])
             #     dprint("Sent Receiver-Abort.", schc_frag.__dict__)
             #     dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
@@ -441,11 +437,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 assert bit_list is not None
                 schc_ack = self.create_ack_schc_ko(schc_frag)
                 info.append(("mic-ack", bit_list))
-                """
-                Changement à corriger
-                args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
-                """
-                args = (schc_ack.packet.get_content(), '*')
+                args = (schc_ack.packet.get_content(), self._session_id[0])
                 self.protocol.scheduler.add_event(
                     0, self.protocol.layer2.send_packet, args)
                 # XXX need to keep the ack message for the ack request.
@@ -524,11 +516,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     dprint("----------------------- SCHC ACK KO SEND  -----------------------")
 
                     dprint("ACK failure sent:", schc_ack.__dict__)
-        """
-        Changement à corriger
-        args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
-        """
-        args = (schc_ack.packet.get_content(), "*")
+        args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
     def finish(self, schc_packet, schc_frag):
@@ -548,11 +536,7 @@ class ReassemblerAckOnError(ReassembleBase):
         if enable_statsct:
             Statsct.set_msg_type("SCHC_ACK_OK")
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
-        """
-        Changement à corriger
-        args = (schc_ack.packet.get_content(), self.context["devL2Addr"])
-        """
-        args = (schc_ack.packet.get_content(), '*')
+        args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
         #the ack is build everytime
@@ -609,11 +593,7 @@ class ReassemblerAckOnError(ReassembleBase):
         # sending Receiver abort.
         self.state = "ABORT"
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        """
-        Changement à  corriger
-        args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
-        """
-        args = (schc_frag.packet.get_content(), '*')
+        args = (schc_frag.packet.get_content(), self._session_id[0])
         dprint("Sent Receiver-Abort.", schc_frag.__dict__)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 

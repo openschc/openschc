@@ -221,12 +221,7 @@ class FragmentNoAck(FragmentBase):
             payload=tile)
 
         # send a SCHC fragment
-        """
-        Corriger le chagement
-        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
-        transmit_callback)
-        """
-        args = (schc_frag.packet.get_content(), '*',
+        args = (schc_frag.packet.get_content(), self._session_id[0],
                 transmit_callback)
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
@@ -367,7 +362,7 @@ class FragmentAckOnError(FragmentBase):
             #     #case when with the bitmap is not possible to identify the missing tile,
             #     #resend ALL-1 messages
             #     # send a SCHC fragment
-            #     args = (self.schc_all_1.packet.get_content(), self.context["devL2Addr"],
+            #     args = (self.schc_all_1.packet.get_content(), self._session_id[0],
             #     self.event_sent_frag)
             #     dprint("frag sent:", self.schc_all_1.__dict__)
             #     if enable_statsct:
@@ -525,11 +520,7 @@ class FragmentAckOnError(FragmentBase):
             dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # send a SCHC fragment
-        """ Changement à corriger
-            args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
-                self.event_sent_frag)
-        """
-        args = (schc_frag.packet.get_content(), '*', self.event_sent_frag)
+        args = (schc_frag.packet.get_content(), self._session_id[0], self.event_sent_frag)
         dprint("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
 
@@ -554,10 +545,7 @@ class FragmentAckOnError(FragmentBase):
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
-            """ Changement à corriger
-            args = (schc_frag.packet.get_content(), self.context["devL2Addr"])
-            """
-            args = (schc_frag.packet.get_content(), "*")
+            args = (schc_frag.packet.get_content(), self._session_id[0])
             dprint("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
@@ -574,11 +562,7 @@ class FragmentAckOnError(FragmentBase):
         if enable_statsct:
                 Statsct.set_msg_type("SCHC_ACK_REQ")
         # # retransmit MIC.
-        """Changement à corriger
-        args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
-                self.event_sent_frag)
-        """
-        args = (schc_frag.packet.get_content(), '*',
+        args = (schc_frag.packet.get_content(), self._session_id[0],
                 self.event_sent_frag)
 
         dprint("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
@@ -593,7 +577,7 @@ class FragmentAckOnError(FragmentBase):
             if enable_statsct:
                     Statsct.set_msg_type("SCHC_ACK_REQ")
             # # retransmit MIC.
-            args = (schc_frag.packet.get_content(), self.context["devL2Addr"],
+            args = (schc_frag.packet.get_content(), self._session_id[0],
                     self.event_sent_frag)
             dprint("SCHC ACK REQ frag:", schc_frag.__dict__)
             # if enable_statsct:
