@@ -846,15 +846,17 @@ class RuleManager:
                                     arg):
                                         matches += 1
                                 else:
-                                        break # field does not match, rule does not match
+                                    dprint("field does not match", r[T_MO], pkt)
+                                    break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
                                     dprint("Suboptimal rule")
                                 else:
+                                    dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
                             dprint ("->", matches)
-                    dprint("-"*10, matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                    dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
