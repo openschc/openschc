@@ -3,6 +3,8 @@ SCHC Gateway Sample
 
 SCHC GW implementation.
 
+Device simulator is needed for further test.
+
 ## Requirement
 
 - Python 3.7
