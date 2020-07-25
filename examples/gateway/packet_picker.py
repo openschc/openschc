@@ -25,12 +25,13 @@ def cb_post(ts, pkt, cb_arg, raw_packet=False):
     verify = cb_arg.get("verify")
     headers = cb_arg.get("headers")
     if raw_packet is False:
-        l3_header_offset = 4
+        # skip the pcap header.
+        packet = b2hex(pkt[4:])
     else:
-        l3_header_offset = 0
+        packet = b2hex(pkt)
     if "content-type" not in headers:
-        headers["content-type"] = "application/x-rawip"
-    requests.post(url, headers=headers, data=pkt[l3_header_offset:],
+        headers["content-type"] = "application/x-rawip-hex"
+    requests.post(url, headers=headers, data=packet,
                   verify=verify)
 
 
