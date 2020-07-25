@@ -5,14 +5,18 @@ import pcap
 import requests
 import argparse
 
-from gen_base_import import b2hex
-from gen_utils import dprint, dpprint
-
 requests.packages.urllib3.disable_warnings()
 
 
+def dprint(*args, **kw):
+    """Debug print"""
+    if opt.debug:
+        print(*args, **kw)
+        sys.stdout.flush()
+
+
 def cb_debug(ts, pkt, cb_arg):
-    dprint(ts, b2hex(pkt))
+    dprint(ts, pkt.hex())
     sys.stdout.flush()
 
 
@@ -26,9 +30,9 @@ def cb_post(ts, pkt, cb_arg, raw_packet=False):
     headers = cb_arg.get("headers")
     if raw_packet is False:
         # skip the pcap header.
-        packet = b2hex(pkt[4:])
+        packet = pkt[4:].hex()
     else:
-        packet = b2hex(pkt)
+        packet = pkt.hex()
     if "content-type" not in headers:
         headers["content-type"] = "application/x-rawip-hex"
     requests.post(url, headers=headers, data=packet,
@@ -43,7 +47,9 @@ class PcapWrapper():
         else:
             self._pc = pcap.pcap(input_device, timeout_ms=0)
         # set filter.
-        self._pc.setfilter(filter_rules)
+        if filter_rules is not None:
+            self._pc.setfilter(filter_rules)
+        #
         dprint("dloff:", self._pc.dloff)
         dprint("fd:", self._pc.fd)
         dprint("filter:", self._pc.filter)
@@ -73,6 +79,8 @@ if __name__ == "__main__":
                     help="specify the filters.")
     ap.add_argument("--untrust", action="store_false", dest="trust_server",
                     help="disable to check the server certificate.")
+    ap.add_argument("-d", action="store_true", dest="debug",
+                    help="enable debug mode.")
     opt = ap.parse_args()
     #
     cb_arg = {
