@@ -105,6 +105,11 @@ class AbstractLowerLayer:
 class AbstractScheduler:
     """Allows to schedule events in the future, and cancel them."""
 
+    def get_clock(self):
+        """Return the clock in the scheduler.  Any type of value should be
+        acceptable as it is logging purpose."""
+        abstract
+
     def add_event(self, time_in_sec, event_function, event_args):
         """Add an event (function) that will be called in the future.
 
