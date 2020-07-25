@@ -872,19 +872,31 @@ class RuleManager:
         return None        
 
     def FindFragmentationRule(self, deviceID=None, originalSize=None, reliability=T_FRAG_NO_ACK, direction=T_DIR_UP):
-        """
+        """Lookup a fragmentation rule.
+
         Find a fragmentation rule regarding parameters:
         * original SCHC packet size
         * reliability NoAck, AckOnError, AckAlways
         * direction (UP or DOWN)
         NOTE: Not yet implemented, returns the first fragmentation rule.  
-        """
-        for d in self._ctxt:
-            if d["DeviceID"] == deviceID:
-                for r in d["SoR"]:
-                    if T_FRAG in r:
-                        return r
 
+        XXX please check whether the following rule is okey.
+        - return a rule if the direction and the deviceID is matched.
+        - if deviceID is None and direction is not None.
+          return a first rule if the direction in the rule matches.
+        """
+        if deviceID is None and direction is not None:
+            for d in self._ctxt:
+                for r in d["SoR"]:
+                    if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
+                        # return the 1st one.
+                        return r
+        else:
+            for d in self._ctxt:
+                if d["DeviceID"] == deviceID:
+                    for r in d["SoR"]:
+                        if T_FRAG in r:
+                            return r
         return None
 
     def _checkRuleValue(self, rule_id, rule_id_length):
@@ -926,16 +938,6 @@ class RuleManager:
                 if r[T_RULEID] == rule_id:
                     return k, r
         return None, None
-
-    def find_context_bydevL2addr(self, dev_L2addr):
-        """ find a context with dev_L2addr. """
-        # XXX needs to implement wildcard search or something like that.
-        for c in self._db:
-            if c["devL2Addr"] == dev_L2addr:
-                return c
-            if c["devL2Addr"] == "*":
-                return c
-        return None
 
     def find_context_bydstiid(self, dst_iid):
         """ find a context with dst_iid, which can be a wild card. """
