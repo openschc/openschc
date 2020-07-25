@@ -130,7 +130,7 @@ class Parser:
             if icmpBytes[0] == 128 or icmpBytes[0] == 129: #icmp echo request or reply
                 echoHeader = unpack('!HH', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_IDENT, 1]       = [echoHeader[0], 16]
-                self.header_fields[T_ICMPV6_SEQNB, 1]        = [echoHeader[1], 16]
+                self.header_fields[T_ICMPV6_SEQNO, 1]        = [echoHeader[1], 16]
                 pos += 4
 
 
