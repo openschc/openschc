@@ -9,5 +9,8 @@
     "downlink_url": "https://[::1]:51225/ul",
     "ssl_verify": false,
     "my_cert": "testgw2-cert.pem",
-    "rule_file": "comp-rule-100.json"
+    "rule_file": "comp-rule-100.json",
+    "address_map": {
+        "2001:420:c0dc:1002::79": "B2345678"
+    }
 }

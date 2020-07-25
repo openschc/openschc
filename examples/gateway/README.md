@@ -5,11 +5,11 @@ SCHC GW implementation.
 
 ## Requirement
 
-- Python 3.6
+- Python 3.7
 - requests
 - aiohttp
 - [pypcap][https://github.com/pynetwork/pypcap#installation-from-sources]
-- you may need to install libpcap.
+- You may need to install libpcap.
 
 ## export OPENSCHCDIR
 
@@ -28,7 +28,7 @@ You need 3 terminals.
 ```
 ./schcgw.py -c testgw1-config.json
 ./schcgw.py -c testgw2-config.json
-./packet_picker.py --untrust -f test/icmpv6.dmp 'https://[::1]:51225/dl'
+./packet_picker.py --untrust -f icmpv6.dmp 'https://[::1]:51225/dl'
 ```
 
 ## 
@@ -46,4 +46,18 @@ containing the certificate and private key in PEM format for "testgw2".
         -out testgw2-cert.pem \
         -keyout testgw2-cert.pem \
         -subj "/CN=testgw2"
+
+---
+
+Trouble Shooting
+================
+
+## BPF device, Permission denied.
+
+```
+OSError: Activateing packet capture failed. Error returned by packet capture library was b'(cannot open BPF device) /dev/bpf0: Permission denied'
+```
+
+It needs to add both read and write permission to the device,
+which is /dev/bpf0 for example.
 

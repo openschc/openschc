@@ -4,10 +4,18 @@
     "bind_addr": "::1",
     "bind_port": 51225,
     "ifname": "lo0",
-    "eth_dst": "00:1f:67:c1:91:c4",
-    "eth_src": "ac:bc:32:ba:1c:9f",
     "downlink_url": "https://[::1]:51226/ul",
     "ssl_verify": false,
     "my_cert": "testgw1-cert.pem",
-    "rule_file": "comp-rule-100.json"
+    "rule_file": "comp-rule-100.json",
+    "route": {
+        "2001:420:c0dc:1002::79": { "ifname": "en0", "dst": "00:1f:67:c1:91:c5" },
+        "2404:6800:4004:818::2004": { "ifname": "en0", "dst": "00:1f:67:c1:91:c6" },
+        "2404:6800:4004:818::1004": { "ifname": "lo0", "dst": "" },
+        "2404:6800:4004:818::2004": { "ifname": "lpwan", "dst": "A2345678" }
+    },
+    "interface": {
+        "lo0": { "addr": "" },
+        "en0": { "addr": "38:f9:d3:51:f8:72" }
+    }
 }
