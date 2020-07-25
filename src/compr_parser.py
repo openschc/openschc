@@ -84,6 +84,13 @@ class Parser:
             self.header_fields[T_IPV6_NXT, 1]      = [firstBytes[4], 8,  'fixed']
             self.header_fields[T_IPV6_HOP_LMT, 1]  = [firstBytes[5], 8,  'fixed']
 
+            # XXX
+            # Here, the type of the prefix are in integer.
+            # It should be kept in bytes.
+            # Because to compare with the one in the packet,
+            # the length of prefix is required and the value must be aligned
+            # to left.
+            #
             if direction == T_DIR_UP:
                 self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
                 self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]

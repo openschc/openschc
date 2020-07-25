@@ -759,6 +759,7 @@ class RuleManager:
     def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
         if type(TV) != type(FV):
             if type(TV) == bytes and type (FV) == int:
+                # XXX see Parser.parse in compr_parser.py
                 FV = FV.to_bytes(len(TV), byteorder="big") # same length both
             else:
                 return False
