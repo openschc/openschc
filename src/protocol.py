@@ -50,7 +50,11 @@ class SessionManager:
         session_id = self._filter_session_id(session_id)        
         assert session_id not in self.session_table
         self.session_table[session_id] = session
-        
+
+    def delete_session(self, session_id):
+        self.session_table.pop(session_id)
+        dprint("SessionManager: deleted", session_id)
+
     def create_reassembly_session(self, context, rule, session_id):
         session_id = self._filter_session_id(session_id)        
         l2_address, rule_id, unused, dtag = session_id
@@ -130,7 +134,7 @@ class SCHCProtocol:
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
-        if hasattr(config, "debug_level"):
+        if config.get("debug_level", 0):
             set_debug_output(True)
 
     def _log(self, message):
