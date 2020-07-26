@@ -208,6 +208,7 @@ class ReassemblerNoAck(ReassembleBase):
                 #dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
                 self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
             self.state = 'DONE_NO_ACK'
+            self.protocol.session_manager.delete_session(self._session_id)
             #dprint(self.state)
             return
         # set inactive timer.
