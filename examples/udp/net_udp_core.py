@@ -51,7 +51,7 @@ class UdpUpperLayer:
 
     def _send_now(self, udp_dst, packet):
         dst_address = address_to_string(udp_dst)
-        self.protocol.schc_send(dst_address, dst_address, packet)
+        self.protocol.schc_send(None, dst_address, packet)
 
 # --------------------------------------------------        
 
