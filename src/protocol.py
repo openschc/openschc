@@ -134,7 +134,8 @@ class SCHCProtocol:
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
-        if config.get("debug_level", 0):
+        if ((isinstance(config, object) and hasattr(config, "debug_level")) or
+            (isinstance(config, dict) and config.get("debug_level", 0))):
             set_debug_output(True)
 
     def _log(self, message):
