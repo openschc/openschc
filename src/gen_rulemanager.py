@@ -434,8 +434,7 @@ class RuleManager:
         for d in self._ctxt:
             if device == d["DeviceID"]:
                 break
-
-        if d == None:
+        else:
             d = {"DeviceID": device, "SoR": []}
             self._ctxt.append(d)
 
