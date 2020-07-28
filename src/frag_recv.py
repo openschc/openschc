@@ -355,7 +355,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     "nb_tiles": 1,
                     "raw_tiles": last_tile})
                 self.tile_list.append(new_tile)
-                info.append(("new-last-tile", None, tile))
+                info.append(("new-last-tile", None, new_tile))
                 self.tile_list = sort_tile_list(self.tile_list, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
 
         # if schc_frag.payload.count_added_bits()%self.rule["tileSize"] != 0:
