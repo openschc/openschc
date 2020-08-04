@@ -95,9 +95,9 @@ class FragmentBase():
             mic_base.add_bits(0, frag_msg.roundup(extra_bits,
                                                 self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_MIC]))
         #
-        mic = get_mic(mic_base.get_content())
-        dprint("Send MIC {}, base = {}, lenght = {}".format(mic, mic_base.get_content(), len(mic_base.get_content())))
-        return mic.to_bytes(4, "big")
+        mic = get_mic(mic_base.get_content()).to_bytes(4, "big")
+        dprint("Send MIC {}, base = {}, lenght = {}".format(mic.hex(), mic_base.get_content(), len(mic_base.get_content())))
+        return mic
 
     def start_sending(self):
         self.send_frag()
