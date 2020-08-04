@@ -84,23 +84,20 @@ class Parser:
             self.header_fields[T_IPV6_NXT, 1]      = [firstBytes[4], 8,  'fixed']
             self.header_fields[T_IPV6_HOP_LMT, 1]  = [firstBytes[5], 8,  'fixed']
 
-            # XXX
-            # Here, the type of the prefix are in integer.
-            # It should be kept in bytes.
-            # Because to compare with the one in the packet,
-            # the length of prefix is required and the value must be aligned
-            # to left.
-            #
+            # The prefix, DEV_PREFIX and APP_PREFIX, should be in bytes
+            # to keep its length and to be aligned to the left.
+            # This is because it will be used to compare with the one
+            # in the src/dst address of IPv6 packet.
             if direction == T_DIR_UP:
                 self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
                 self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
                 self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
                 self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
             elif direction == T_DIR_DW:
-                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[6], 64]
-                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[7], 64]
-                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[8], 64]
-                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[9], 64]
+                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
+                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
+                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
+                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
 
 
             if not (self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58):

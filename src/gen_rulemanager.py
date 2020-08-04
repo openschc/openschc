@@ -757,11 +757,7 @@ class RuleManager:
 
     def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
         if type(TV) != type(FV):
-            if type(TV) == bytes and type (FV) == int:
-                # XXX see Parser.parse in compr_parser.py
-                FV = FV.to_bytes(len(TV), byteorder="big") # same length both
-            else:
-                return False
+            return False
 
         if TV != FV: return False
         return True
@@ -833,7 +829,6 @@ class RuleManager:
                     for r in rule["Compression"]:
                         dprint(r)
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
-                            dprint (r)
                             if (r[T_FID], r[T_FP]) in pkt:
                                 if T_MO_VAL in r:
                                     arg = r[T_MO_VAL]
@@ -846,7 +841,10 @@ class RuleManager:
                                     arg):
                                         matches += 1
                                 else:
-                                    dprint("field does not match", r[T_MO], pkt)
+                                    dprint("field does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                            r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
+                                            r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
+                                            arg), "packet=", pkt)
                                     break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept

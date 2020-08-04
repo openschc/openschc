@@ -214,11 +214,6 @@ class Compressor:
             if type(field[0]) == type(tv) and field[0] == tv:
                 output.add_bits(pos, size)
                 return
-            elif type(tv) == bytes and type(field[0]) == int:
-                # XXX see Parser.parse in compr_parser.py
-                if field[0].to_bytes(len(tv), byteorder="big") == tv:
-                    output.add_bits(pos, size)
-                    return
             else:
                 pos += 1
 
