@@ -73,9 +73,9 @@ class ReassembleBase:
         """
 
         assert isinstance(mic_target, bytearray)
-        mic = get_mic(mic_target)
-        dprint("Recv MIC {}, base = {}, lenght = {}".format(mic, mic_target, len(mic_target)))
-        return mic.to_bytes(4, "big")
+        mic = get_mic(mic_target).to_bytes(4, "big")
+        dprint("Recv MIC {}, base = {}, lenght = {}".format(mic.hex(), mic_target, len(mic_target)))
+        return mic
 
     def event_inactive(self):
         """ event_inactive
