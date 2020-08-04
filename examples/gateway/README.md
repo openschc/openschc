@@ -48,8 +48,13 @@ openssl req -new -x509 -newkey rsa:2048 -days 7300 -nodes \
 
 You need 3 terminals.  Run below command in each terminal of two.
 
+At Terminal 1:
 ```
 ./schcgw.py -c testgw1-config.json -d
+```
+
+At Terminal 2:
+```
 ./schcgw.py -c test/testgw2-config.json -d
 ```
 
@@ -57,12 +62,14 @@ In the remained terminal, you can choose:
 
 - for No-ack
 
+At Terminal 3:
 ```
 ./packet_picker.py --untrust 'https://[::1]:51225/dl' -f icmpv6-to-a234.dmp
 ```
 
 - for ACK-on-Error
 
+At Terminal 3:
 ```
 ./packet_picker.py --untrust 'https://[::1]:51225/dl' -f icmpv6-to-b234.dmp
 ```
