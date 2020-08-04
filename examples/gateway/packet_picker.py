@@ -95,5 +95,5 @@ if __name__ == "__main__":
         packet = open(opt.data_file, "rb").read()
         cb_post(None, packet, cb_arg, raw_packet=True)
     else:
-        opt.print_help()
+        ap.print_help()
         exit(1)
