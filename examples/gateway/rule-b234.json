@@ -1,0 +1,40 @@
+[
+  {
+    "RuleID": 1,
+    "RuleIDLength": 3,
+    "Fragmentation" : {
+        "FRDirection": "DW",
+        "FRMode": "ackOnError",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "WSize": 7,
+            "FCNSize": 3,
+            "ackBehavior": "afterAll1",
+            "tileSize": 17,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8,
+            "lastTileInAll1": false
+        }
+    }
+  },
+  {
+    "RuleID": 2,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRDirection": "UP",
+        "FRMode": "ackOnError",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "WSize": 7,
+            "FCNSize": 3,
+            "ackBehavior": "afterAll1",
+            "tileSize": 16,
+            "MICAlgorithm": "crc32",
+            "MICWordSize": 8,
+            "L2WordSize": 8,
+            "lastTileInAll1": false
+        }
+    }
+  }
+]
