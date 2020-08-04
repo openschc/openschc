@@ -248,12 +248,12 @@ class SCHCProtocol:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
 
-    def schc_recv(self, sender_l2_address, raw_packet):
+    def schc_recv(self, dst_l2_addr, raw_packet):
         """Receiving a SCHC packet from a lower layer."""
         packet_bbuf = BitBuffer(raw_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
         frag_rule = self.rule_manager.FindFragmentationRule(
-                deviceID=sender_l2_address, packet=packet_bbuf)
+                deviceID=dst_l2_addr, packet=packet_bbuf)
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
@@ -265,7 +265,7 @@ class SCHCProtocol:
 
         rule_id = frag_rule[T_RULEID]
         rule_id_length = frag_rule[T_RULEIDLENGTH]
-        session_id = (sender_l2_address, rule_id, rule_id_length, dtag)
+        session_id = (dst_l2_addr, rule_id, rule_id_length, dtag)
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
