@@ -46,14 +46,25 @@ openssl req -new -x509 -newkey rsa:2048 -days 7300 -nodes \
 
 ## Example with two gateways.
 
-- ACK-on-Error with 
-
-You need 3 terminals.  Run below command in each terminal.
+You need 3 terminals.  Run below command in each terminal of two.
 
 ```
 ./schcgw.py -c testgw1-config.json -d
 ./schcgw.py -c test/testgw2-config.json -d
+```
+
+In the remained terminal, you can choose:
+
+- for No-ack
+
+```
 ./packet_picker.py --untrust 'https://[::1]:51225/dl' -f icmpv6-to-a234.dmp
+```
+
+- for ACK-on-Error
+
+```
+./packet_picker.py --untrust 'https://[::1]:51225/dl' -f icmpv6-to-b234.dmp
 ```
 
 ## capture packets for downlink
