@@ -80,9 +80,6 @@ class UdpLowerLayer:
     def get_mtu_size(self):
         return 72 # XXX
 
-    def get_address(self):
-        return address_to_string(self.udp_src)
-
     # ----- end AbstractLowerLayer interface
 
     def _actual_init(self):

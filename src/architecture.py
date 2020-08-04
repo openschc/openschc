@@ -96,13 +96,6 @@ class AbstractLowerLayer:
         """
         abstract
 
-    def get_address(self):
-        """Return the MAC address associated with this layer
-
-        XXX need to check whether this function is required.
-        """
-        abstract
-
 #---------------------------------------------------------------------------
 
 class AbstractScheduler:

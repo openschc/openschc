@@ -104,9 +104,6 @@ class AioLowerLayer():
         # XXX how to know the MTU of the LPWA link beyond the NS.
         return 56
 
-    def get_address(self):
-        return b"<L2 addr>"
-
     async def _post_data(self, url, data, verify):
         #headers = {"content-type": "application/json"}
         async with aiohttp.ClientSession() as session:
