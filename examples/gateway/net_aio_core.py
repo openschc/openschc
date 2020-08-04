@@ -39,19 +39,23 @@ class AiohttpUpperLayer:
 
     def recv_packet(self, dst_l2_addr, raw_packet):
         """Processing a packet from the SCHC layer to northbound."""
-        self.system.log("L3: recv packet from devaddr={} packet={}".format(
-                dst_l2_addr, raw_packet.get_content().hex()))
+        self.system.log("L3", "recv packet from devaddr={} packet={}".format(
+                dst_l2_addr, raw_packet.hex()))
         route_info = self.lookup_route(raw_packet[24:40])
-        l2_info = lookup_interface(route_info["ifname"])
+        if route_info is None:
+            self.system.log("L3", "no route for {}".format(
+                    raw_packet[24:40].hex()))
+            return
+        l2_info = self.lookup_interface(route_info["ifname"])
         asyncio.ensure_future(self.async_pcap_send(l2_info["pcap"],
                 route_info["dst_raw"] + l2_info["addr_raw"] + l2_info["type"] + 
-                raw_packet.get_content()))
+                raw_packet))
 
     async def send_packet(self, packet):
         dst_l3_addr = packet[24:40]
         route_info = self.lookup_route(dst_l3_addr)
         if route_info is None:
-            self.system.log(f"L3: route for {dst_l3_addr} wasn't found.")
+            self.system.log(f"L3", "route for {dst_l3_addr} wasn't found.")
             return False
         # XXX need to check for asyncio
         self.protocol.schc_send(route_info["dst"], dst_l3_addr, packet)
@@ -65,6 +69,7 @@ class AiohttpLowerLayer():
     def __init__(self, system, config=None):
         self.system = system
         self.config = config
+        self.last_clock = 0
 
     def _set_protocol(self, protocol):
         self.protocol = protocol
@@ -87,9 +92,17 @@ class AiohttpLowerLayer():
                 None, self._post_data, self.config["downlink_url"], body,
                 self.config["ssl_verify"])
         """
-        #self._post_data(self.config.downlink_url, body, self.config.ssl_verify)
-        task_a = asyncio.ensure_future(self._post_data(
-                self.config["downlink_url"], body, self.config["ssl_verify"]))
+        current_clock = self.system.scheduler.get_clock()
+        diff = current_clock - self.last_clock
+        if diff > self.config["tx_interval"]:
+            delay = self.config["tx_interval"]
+        else:
+            delay = self.config["tx_interval"] - diff
+        self.last_clock = current_clock
+        self.system.scheduler.add_event(delay,
+                                        self._post_data,
+                                        (self.config["downlink_url"],
+                                        body, self.config["ssl_verify"]))
         status = 0
         #
         if callback is not None:
@@ -101,7 +114,10 @@ class AiohttpLowerLayer():
         # XXX how to know the MTU of the LPWA link beyond the NS.
         return 56
 
-    async def _post_data(self, url, data, verify):
+    def _post_data(self, *args):
+        t = asyncio.ensure_future(self._do_post_data(*args))
+
+    async def _do_post_data(self, url, data, verify):
         #headers = {"content-type": "application/json"}
         async with aiohttp.ClientSession() as session:
             await session.post(url, json=data, ssl=verify)

@@ -26,6 +26,7 @@ config_default = {
     "my_cert": None,
     "rule_config": None,
     "route": {},
+    "tx_interval": 2,
     "interface": {},
     }
 
@@ -179,6 +180,9 @@ ap.add_argument("--my-cert", action="store", dest="my_cert",
                 help="specify the certificate of mine.")
 ap.add_argument("--untrust", action="store_false", dest="ssl_verify",
                 default=None,
+                help="disable to check the server certificate.")
+ap.add_argument("--tx-interval", action="store", dest="tx_interval",
+                type=int, default=2,
                 help="disable to check the server certificate.")
 ap.add_argument("--prog-name", action="store", dest="prog_name",
                 default="GW",
