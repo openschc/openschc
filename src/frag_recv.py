@@ -192,6 +192,7 @@ class ReassemblerNoAck(ReassembleBase):
                 dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
                         schc_frag.mic, mic_calced))
                 self.state = 'ERROR_MIC_NO_ACK'
+                self.protocol.session_manager.delete_session(self._session_id)
                 return
             else:
                 dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
