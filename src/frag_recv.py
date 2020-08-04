@@ -239,7 +239,7 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def receive_frag(self, bbuf, dtag):
         self._last_receive_info = []
-        dprint('state: {}, recieved fragment -> {}, rule-> {}'.format(self.state,
+        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
