@@ -870,7 +870,9 @@ class RuleManager:
 
         return None        
 
-    def FindFragmentationRule(self, deviceID=None, originalSize=None, reliability=T_FRAG_NO_ACK, direction=T_DIR_UP):
+    def FindFragmentationRule(self, deviceID=None, originalSize=None,
+                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
+                              packet=None):
         """Lookup a fragmentation rule.
 
         Find a fragmentation rule regarding parameters:
@@ -879,17 +881,29 @@ class RuleManager:
         * direction (UP or DOWN)
         NOTE: Not yet implemented, returns the first fragmentation rule.  
 
-        XXX please check whether the following rule is okey.
-        - return a rule if the direction and the deviceID is matched.
-        - if deviceID is None and direction is not None.
-          return a first rule if the direction in the rule matches.
+        XXX please check whether the following strategy is okey.
+        - if direction is specified, and deviceID is None, it is assumed that
+          the request is for a device. Return the 1st rule matched with the
+          direction regardless of the deviceID.  A deviceID for a device is
+          not configured typically.
+        - if raw_packet is not None, it compares the rule_id with the packet.
+        - if the direction and the deviceID is matched.
         """
-        if deviceID is None and direction is not None:
+        if direction is not None and deviceID is None:
             for d in self._ctxt:
                 for r in d["SoR"]:
                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
                         # return the 1st one.
                         return r
+        elif packet is not None:
+            print("packet dev-id", deviceID)
+            for d in self._ctxt:
+                for r in d["SoR"]:
+                    print("rule dev-id", d["DeviceID"])
+                    if T_FRAG in r:
+                        rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
+                        if r[T_RULEID] == rule_id:
+                            return r
         else:
             for d in self._ctxt:
                 if d["DeviceID"] == deviceID:
