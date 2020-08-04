@@ -7,6 +7,8 @@
 from contextlib import redirect_stdout
 
 import sys
+# micropython doesn't have fromhex()
+from binascii import unhexlify
 
 BITS_PER_BYTE = 8
 
@@ -14,7 +16,11 @@ class BitBuffer:
 
     def __init__(self, content=b""):
         """ BitBuffer manage a buffer bit per bit.
-        The content should be either a list or a bytearray.
+        The content should be either a list, a string, or a bytearray.
+        If the content is a string, it must consist of below format:
+            e.g.
+            "b'\x01\x02\x03\x04'/32"
+            "b'\xd2\x01\x00'/17"
         If the content is a list, each item (0 or others) is dealt as a bit.
         Or, the content should be any objects which can be passed to bytes
         or bytearray.
@@ -56,6 +62,16 @@ class BitBuffer:
             self._rpos = 0
             for i in range(len(content)):
                 self.set_bit(content[i])
+        elif isinstance(content, str):
+            c,b = content.split("/")
+            c = c.encode("unicode_escape").decode("utf-8")[2:-1]
+            if content.find("\\") > 0:
+                # it looks a raw literal.
+                self._content = bytearray(unhexlify(c.replace("\\\\x","")))
+            else:
+                self._content = bytearray(unhexlify(c.replace("\\x","")))
+            self._wpos = int(b)
+            self._rpos = 0
         else:
             self._content = bytearray(content)
             self._wpos = len(content)*8  # write position

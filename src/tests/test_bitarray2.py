@@ -173,6 +173,23 @@ def test_bitarray2():
     print(a)
     assert str(a) == r"b'\x50\x30\x40'/20"
 
+    print("""
+    ## BitBuffer() instantiation
+          """)
+    # passing a raw string
+    a = BitBuffer(r"b'\x01\x02\x03\x04'/32")
+    print(a)
+    assert str(a) == r"b'\x01\x02\x03\x04'/32"
+    a = BitBuffer(r"b'\xd2\x01\x00'/17")
+    print(a)
+    assert str(a) == r"b'\xd2\x01\x00'/17"
+    # passing a string
+    a = BitBuffer("b'\x01\x02\x03\x04'/32")
+    print(a)
+    assert str(a) == r"b'\x01\x02\x03\x04'/32"
+    a = BitBuffer("b'\xd2\x01\x00'/17")
+    print(a)
+    assert str(a) == r"b'\xd2\x01\x00'/17"
 
 # for micropython and other tester.
 if __name__ == "__main__":
