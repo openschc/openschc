@@ -2,36 +2,33 @@ import asyncio
 import aiohttp
 
 from gen_base_import import *  # used for now for differing modules in py/upy
-from compr_parser import Parser
-from gen_utils import dprint, sanitize_value
+from gen_utils import dprint
 
 # --------------------------------------------------
 
-def lookup_route(dst_ipaddr, config):
-    """
-    tricky. the IP address in the config is hex string.
-    the IP address in bytes has been added by config_update().
-    """
-    for l3a_raw,info in config.route.items():
-        if l3a_raw == dst_ipaddr:
-            return info
-    else:
-        return None
-
-def lookup_interface(ifname, config):
-    for config_ifname,info in config.interface.items():
-        if ifname == config_ifname:
-            return info
-    else:
-        return None
-
-# --------------------------------------------------
-
-class AioUpperLayer:
+class AiohttpUpperLayer:
 
     def __init__(self, system, config=None):
         self.system = system
         self.config = config
+
+    def lookup_route(self, dst_ipaddr):
+        """
+        tricky. the IP address in the config is hex string.
+        the IP address in bytes has been added by config_update().
+        """
+        for l3a_raw,info in self.config["route"].items():
+            if l3a_raw == dst_ipaddr:
+                return info
+        else:
+            return None
+
+    def lookup_interface(self, ifname):
+        for config_ifname,info in self.config["interface"].items():
+            if ifname == config_ifname:
+                return info
+        else:
+            return None
 
     def _set_protocol(self, protocol):
         self.protocol = protocol
@@ -44,15 +41,15 @@ class AioUpperLayer:
         """Processing a packet from the SCHC layer to northbound."""
         self.system.log("L3: recv packet from devaddr={} packet={}".format(
                 dst_l2_addr, raw_packet.get_content().hex()))
-        route_info = lookup_route(raw_packet[24:40])
-        l2_info = lookup_l2info(route_info["ifname"])
+        route_info = self.lookup_route(raw_packet[24:40])
+        l2_info = lookup_interface(route_info["ifname"])
         asyncio.ensure_future(self.async_pcap_send(l2_info["pcap"],
                 route_info["dst_raw"] + l2_info["addr_raw"] + l2_info["type"] + 
                 raw_packet.get_content()))
 
     async def send_packet(self, packet):
         dst_l3_addr = packet[24:40]
-        route_info = lookup_route(dst_l3_addr, self.config)
+        route_info = self.lookup_route(dst_l3_addr)
         if route_info is None:
             self.system.log(f"L3: route for {dst_l3_addr} wasn't found.")
             return False
@@ -63,7 +60,7 @@ class AioUpperLayer:
 
 # --------------------------------------------------        
 
-class AioLowerLayer():
+class AiohttpLowerLayer():
 
     def __init__(self, system, config=None):
         self.system = system
@@ -87,12 +84,12 @@ class AioLowerLayer():
                             "devL2Addr": dst_l2_addr})
         """
         self.system.scheduler.loop.run_in_executor(
-                None, self._post_data, self.config.downlink_url, body,
-                self.config.ssl_verify)
+                None, self._post_data, self.config["downlink_url"], body,
+                self.config["ssl_verify"])
         """
         #self._post_data(self.config.downlink_url, body, self.config.ssl_verify)
         task_a = asyncio.ensure_future(self._post_data(
-                self.config.downlink_url, body, self.config.ssl_verify))
+                self.config["downlink_url"], body, self.config["ssl_verify"]))
         status = 0
         #
         if callback is not None:
@@ -113,7 +110,7 @@ class AioLowerLayer():
 
 #class Scheduler(SimulScheduler):
 # net_aio_sched.py
-class AioScheduler():
+class AiohttpScheduler():
 
     def __init__(self, loop):
         self.loop = loop
@@ -135,16 +132,16 @@ class AioScheduler():
 
 # --------------------------------------------------        
 
-class AioSystem:
+class AiohttpSystem:
     """
     self.get_scheduler(): provide the handler of the scheduler.
     self.log(): show the messages.  It is called by all modules.
     """
     def __init__(self, logger=None, config=None):
         loop = asyncio.get_event_loop()
-        if config.debug_level > 1:
+        if config["debug_level"] > 1:
             loop.set_debug(True)
-        self.scheduler = AioScheduler(loop)
+        self.scheduler = AiohttpScheduler(loop)
         self.config = config
         if logger is None:
             self.logger = logging.getLogger(PROG_NAME)

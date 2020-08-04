@@ -154,6 +154,12 @@ def update_config():
             if getattr(config, k, None) is None:
                 setattr(config, k, v)
 
+def get_schc_conf(config):
+    """Return a dict of which values are taken from the config instance."""
+    dict_config = {}
+    for n in config.__dir__():
+        dict_config[n] = getattr(config, n)
+    return dict_config
 
 #  main
 ap = argparse.ArgumentParser(
@@ -194,10 +200,11 @@ for x in config.rule_config:
 if config.debug_level:
     rule_manager.Print()
 #
-system = AioSystem(logger=logger, config=config)
-layer2 = AioLowerLayer(system, config=config)
-layer3 = AioUpperLayer(system, config=config)
-protocol = protocol.SCHCProtocol(config, system, layer2, layer3,
+schc_conf = get_schc_conf(config)
+system = AiohttpSystem(logger=logger, config=schc_conf)
+layer2 = AiohttpLowerLayer(system, config=schc_conf)
+layer3 = AiohttpUpperLayer(system, config=schc_conf)
+protocol = protocol.SCHCProtocol(schc_conf, system, layer2, layer3,
                                  role="core-server", unique_peer=False)
 protocol.set_rulemanager(rule_manager)
 #
