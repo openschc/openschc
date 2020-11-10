@@ -151,6 +151,7 @@ content-type: text/json
   "hexSCHCData": "6578616d706c65",
   "devL2Addr": "A2345678"
 }
+```
 
 ---
 
