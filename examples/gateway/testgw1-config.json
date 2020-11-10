@@ -1,5 +1,5 @@
 {
-    "debug_level": 0,
+    "enable_debug": true,
     "enable_sim_lpwa": true,
     "bind_addr": "::1",
     "bind_port": 51225,
