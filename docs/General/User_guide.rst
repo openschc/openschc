@@ -266,7 +266,9 @@ contains an example that can be used.
 Sending/ receiving over UDP
 ===========================
  
-.. include:: ../../examples/udp/UDP_example_usage.rst
+.. include:: ../../examples/udp/README.rst
+  :start-after: begin-sphynx-doc-do-no-remove
+  :end-before: end-sphynx-doc-do-no-remove
   
 ..
   Client-server Simulation
