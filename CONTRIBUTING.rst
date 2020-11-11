@@ -1,8 +1,8 @@
 Contributing Guidelines
 ***********************
 
-Report bugs or privde suggestions
-=================================
+Report bugs or provide suggestions
+==================================
 
 Don't hesitate to open new `issues <https://github.com/openschc/openschc/issues>`_ with your bug reports or comments.
 
