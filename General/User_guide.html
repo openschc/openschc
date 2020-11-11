@@ -4,10 +4,10 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Guide &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -235,105 +235,80 @@ into the <strong>examples/configs</strong> folder, which will contain our rules 
 <span class="p">}]</span>
 </pre></div>
 </div>
-<p>Then, it is possible to define the message that will be sent from client to server. The <strong>examples/tcp/payload</strong> folder
-contains some examples that can be used.</p>
-<p>Go to the <strong>examples/tcp</strong> directory.</p>
-<p>Double-check you have setup your PYTHONPATH per the <a class="reference internal" href="Installation_guide.html"><span class="doc">Installation Guide</span></a>.</p>
-<p>From the examples/tcp directory, run the code as follows:</p>
-<p>Run Server on terminal 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span>
+<p>Then, it is possible to define the message that will be sent from client to server. The <strong>examples/udp/udp_example.py</strong> file
+contains an example that can be used.</p>
+</div>
+<div class="section" id="sending-receiving-over-udp">
+<h2>Sending/ receiving over UDP<a class="headerlink" href="#sending-receiving-over-udp" title="Permalink to this headline">¶</a></h2>
+<p>This is an example of an openSCHC sender transmitting over UDP to an openSCHC receiver, on the same host computer.
+By default, the example is that of a device sending a single COAP packet processed with one fragmentation rule, but not compressed, to
+the core (server).</p>
+<p>In order to run the example, move to the examples/udp directory, then</p>
+<ol class="arabic">
+<li><p>In one terminal, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">udp_example</span><span class="o">.</span><span class="n">py</span> <span class="n">core</span><span class="o">-</span><span class="n">server</span>
 </pre></div>
 </div>
-<p>Run Client on terminal 2</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span> <span class="o">--</span><span class="n">compression</span> <span class="n">false</span> <span class="o">--</span><span class="n">rule</span> <span class="o">../</span><span class="n">configs</span><span class="o">/</span><span class="n">rule1</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">time</span> <span class="mi">20</span> <span class="o">--</span><span class="n">payload</span> <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span>
+</li>
+</ol>
+<blockquote>
+<div><p>This will start a node playing the role of the SCHC core (network infrastructure server).
+It displays the Rules stored in its context,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>****************************************
+Device: None
+/-------------------------\
+|Rule 12/4          1100  |
+|---------------+---+--+--+------------------------------+-------------+----------------\
+\---------------+---+--+--+------------------------------+-------------+----------------/
+/-------------------------\
+|Rule 12/6        001100  |
+{&#39;RuleID&#39;: 12, &#39;RuleIDLength&#39;: 6, &#39;Fragmentation&#39;: {&#39;FRDirection&#39;: &#39;UP&#39;, &#39;FRMode&#39;: &#39;noAck&#39;, &#39;FRModeProfile&#39;: {&#39;FCNSize&#39;: 3, &#39;dtagSize&#39;: 2, &#39;MICALgorithm&#39;: &#39;crc32&#39;, &#39;WSize&#39;: 0, &#39;L2WordSize&#39;: 8, &#39;windowSize&#39;: 7}}}
+!=========================+=============================================================\
+!^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+!^ No Tile size specified                                                              ^!
+!^ RCS Algorithm: crc32                                                                ^!
+\=======================================================================================/
 </pre></div>
 </div>
-<p>TODO: fix this</p>
-<p>If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
-transmission of the message and we will obtain the following result on the server side:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">804779011</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">194</span>
-<span class="n">SUCCESS</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">matched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span>
+<p>then awaits a SCHC Message on UDP port 33300 on the loopback interface.</p>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p>In another terminal, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">udp_example</span><span class="o">.</span><span class="n">py</span> <span class="n">device</span>
 </pre></div>
 </div>
-<p>where, on the first line we have the value of the RCS sent, the message received by the server which is the same as the
-one sent by the client, and the length of the message in bytes. On the second line, whe have a confirmation of successful
-matching between both RCS Values.</p>
-<p>Next, to simulate packet loss during transmission, we can use the <strong>–loss true</strong> argument in the client
-and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
-since the RCS sent by the client is not the same as the RCS calculated by the server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Recv</span> <span class="n">MIC</span> <span class="mi">907239817</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...</span><span class="se">\n</span><span class="s1">2018-11-20 11:00:42 - daemon.py (1062</span><span class="se">\xb2\x00</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">lenght</span> <span class="o">=</span> <span class="mi">171</span>
-<span class="n">ERROR</span><span class="p">:</span> <span class="n">MIC</span> <span class="n">mismatched</span><span class="o">.</span> <span class="n">packet</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/</span><span class="se">\xf7\xf4\x03</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">result</span> <span class="sa">b</span><span class="s1">&#39;6</span><span class="se">\x13</span><span class="s1">a</span><span class="se">\x89</span><span class="s1">&#39;</span>
+</li>
+</ol>
+<blockquote>
+<div><p>This will start a node playing the device role.
+It will display the Rules that are stored in its context,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> ****************************************
+ Device: None
+/-------------------------\
+|Rule 12/4          1100  |
+|---------------+---+--+--+------------------------------+-------------+----------------\
+\---------------+---+--+--+------------------------------+-------------+----------------/
+/-------------------------\
+|Rule 12/6        001100  |
+{&#39;RuleID&#39;: 12, &#39;RuleIDLength&#39;: 6, &#39;Fragmentation&#39;: {&#39;FRDirection&#39;: &#39;UP&#39;, &#39;FRMode&#39;: &#39;noAck&#39;, &#39;FRModeProfile&#39;: {&#39;FCNSize&#39;: 3, &#39;dtagSize&#39;: 2, &#39;MICALgorithm&#39;: &#39;crc32&#39;, &#39;WSize&#39;: 0, &#39;L2WordSize&#39;: 8, &#39;windowSize&#39;: 7}}}
+!=========================+=============================================================\
+!^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+!^ No Tile size specified                                                              ^!
+!^ RCS Algorithm: crc32                                                                ^!
+\=======================================================================================/
 </pre></div>
 </div>
-<p>Unlike the successful result, we can notice that the message was not completely received by the server. Besides, the RCS
-sent by the client is not equal to the RCS calculated by the server.</p>
-</div>
-<div class="section" id="client-server-simulation">
-<h2>Client-server Simulation<a class="headerlink" href="#client-server-simulation" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id1">
-<h3>Introduction<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>Client-server Simulation implements the Socket library to perform the communication between a client and a server,
-using the localhost address 127.0.0.1, port 1234, TCP protocol and threads on the server to allow communication
-<strong>from several clients to a server</strong>.</p>
-<p>At the end of a successful communication, the simulation records the time in seconds at that instant in the text file
-<strong>client_server_simulation.txt</strong>, and restarts sending the same message from the client to the server.</p>
-</div>
-<div class="section" id="how-to-run-this-simulation">
-<h3>How to run this simulation<a class="headerlink" href="#how-to-run-this-simulation" title="Permalink to this headline">¶</a></h3>
-<p>Run Client on terminal 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">client</span>
-</pre></div>
-</div>
-<p>Run Server on terminal 2</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">role</span> <span class="n">server</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="option-list">
-<h3>Option List<a class="headerlink" href="#option-list" title="Permalink to this headline">¶</a></h3>
-<p>We can find some option to modify our client-server simulation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ClientServerSimul</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">role</span> <span class="n">ROLE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">payload</span> <span class="n">PAYLOAD_NAME_FILE</span><span class="p">]</span>
-                            <span class="p">[</span><span class="o">--</span><span class="n">rule</span> <span class="n">RULE_NAME_FILE</span><span class="p">]</span>
-                            <span class="p">[</span><span class="o">--</span><span class="n">time</span> <span class="n">TIME_BETWEEN_ITERATION</span><span class="p">]</span>
-                            <span class="p">[</span><span class="o">--</span><span class="n">loss</span> <span class="p">[</span><span class="n">PACKET_LOSS_SIMULATION</span><span class="p">]]</span>
-                            <span class="p">[</span><span class="o">--</span><span class="n">compression</span> <span class="p">[</span><span class="n">MODE_WITH_COMPRESSION</span><span class="p">]]</span>
-
-<span class="n">a</span> <span class="n">SCHC</span> <span class="n">simulator</span><span class="o">.</span>
-
-<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
-  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
-  <span class="o">--</span><span class="n">role</span> <span class="n">ROLE</span>           <span class="n">specify</span> <span class="n">a</span> <span class="n">role</span><span class="p">:</span> <span class="n">client</span> <span class="ow">or</span> <span class="n">server</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">client</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">payload</span> <span class="n">PAYLOAD_NAME_FILE</span>
-                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">payload</span> <span class="n">file</span> <span class="n">name</span><span class="o">.</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span>
-                        <span class="n">payload</span><span class="o">/</span><span class="n">testfile_small</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="p">)</span>
-  <span class="o">--</span><span class="n">rule</span> <span class="n">RULE_NAME_FILE</span>
-                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">rule</span> <span class="n">file</span> <span class="n">name</span><span class="o">.</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">examples</span><span class="o">/</span><span class="n">comp</span><span class="o">-</span>
-                        <span class="n">rule</span><span class="o">-</span><span class="mf">100.</span><span class="n">json</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">examples</span><span class="o">/</span><span class="n">comp</span><span class="o">-</span><span class="n">rule</span><span class="o">-</span><span class="mf">100.</span><span class="n">json</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">time</span> <span class="n">TIME_BETWEEN_ITERATION</span>
-                        <span class="n">Specify</span> <span class="n">a</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">seconds</span> <span class="n">between</span> <span class="n">each</span> <span class="n">sending</span> <span class="n">message</span>
-                        <span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">10</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">loss</span> <span class="p">[</span><span class="n">PACKET_LOSS_SIMULATION</span><span class="p">]</span>
-                        <span class="n">Simulation</span> <span class="n">using</span> <span class="n">packet</span> <span class="n">loss</span><span class="p">:</span> <span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
-                        <span class="kc">False</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">compression</span> <span class="p">[</span><span class="n">MODE_WITH_COMPRESSION</span><span class="p">]</span>
-                        <span class="n">Simulation</span> <span class="n">using</span> <span class="n">compression</span><span class="p">:</span> <span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
-                        <span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Some options are defined to be used by both client and server devices, while there are other options that are only
-useful for the client:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Options</span> <span class="k">for</span> <span class="n">Client</span> <span class="ow">and</span> <span class="n">Server</span><span class="p">:</span>
-<span class="o">--</span><span class="n">role</span>
-<span class="o">--</span><span class="n">rule</span>
-<span class="o">--</span><span class="n">compression</span>
-<span class="o">--</span><span class="n">loss</span>
-
-<span class="n">Options</span> <span class="n">only</span> <span class="k">for</span> <span class="n">Client</span><span class="p">:</span>
-<span class="o">--</span><span class="n">time</span>
-<span class="o">--</span><span class="n">payload</span>
-</pre></div>
-</div>
-</div>
+<p>then send one SCHC-processed COAP packet.
+Since their is no compression Rule (except the mandatory “no-compression” Rule),
+the packet is simply prepended with the 12/4 RuleID and passed to the fragmentation sublayer.
+It is then fragmented into 13 SCHC Fragments, which are sent over UDP.
+Hit Ctrl+C to exit.</p>
+</div></blockquote>
+<p>In the first terminal,
+you can observe the SCHC Fragments being received by the SCHC core (server),
+being reassembled into one SCHC Packet with sucessful RCS (previously known as MIC) check.
+It is then passed up to the decompression sublayer,
+which has nothing to do except strip off the 12/4 RuleID.</p>
 </div>
 </div>
 
@@ -382,7 +357,7 @@ useful for the client:</p>
 </ul>
 <p class="caption"><span class="caption-text">Source code, detailed</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
@@ -406,7 +381,7 @@ useful for the client:</p>
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

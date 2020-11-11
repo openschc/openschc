@@ -4,10 +4,10 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rule Manager &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Bit Buffer" href="gen_bitarray.html" />
-    <link rel="prev" title="File Classification" href="File_Classification.html" />
+    <link rel="prev" title="File Taxonomy" href="File_Classification.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -329,12 +329,24 @@ identifier, for instance a LoRaWAN devEUI.</p>
 
 <dl class="py method">
 <dt id="gen_rulemanager.RuleManager.FindFragmentationRule">
-<code class="sig-name descname">FindFragmentationRule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">deviceID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">originalSize</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reliability</span><span class="o">=</span><span class="default_value">'NoAck'</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'UP'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindFragmentationRule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find a fragmentation rule regarding parameters:
+<code class="sig-name descname">FindFragmentationRule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">deviceID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">originalSize</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reliability</span><span class="o">=</span><span class="default_value">'NoAck'</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'UP'</span></em>, <em class="sig-param"><span class="n">packet</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.FindFragmentationRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup a fragmentation rule.</p>
+<p>Find a fragmentation rule regarding parameters:
 * original SCHC packet size
 * reliability NoAck, AckOnError, AckAlways
 * direction (UP or DOWN)
 NOTE: Not yet implemented, returns the first fragmentation rule.</p>
+<p>XXX please check whether the following strategy is okey.
+- if direction is specified, and deviceID is None, it is assumed that</p>
+<blockquote>
+<div><p>the request is for a device. Return the 1st rule matched with the
+direction regardless of the deviceID.  A deviceID for a device is
+not configured typically.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>if raw_packet is not None, it compares the rule_id with the packet.</p></li>
+<li><p>if the direction and the deviceID is matched.</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -387,12 +399,6 @@ beginning of the SCHC packet.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="gen_rulemanager.RuleManager.find_context_bydevL2addr">
-<code class="sig-name descname">find_context_bydevL2addr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dev_L2addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydevL2addr" title="Permalink to this definition">¶</a></dt>
-<dd><p>find a context with dev_L2addr.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="gen_rulemanager.RuleManager.find_context_bydstiid">
 <code class="sig-name descname">find_context_bydstiid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dst_iid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gen_rulemanager.RuleManager.find_context_bydstiid" title="Permalink to this definition">¶</a></dt>
 <dd><p>find a context with dst_iid, which can be a wild card.</p>
@@ -427,7 +433,7 @@ in the context matching with the field value of rule id in the packet.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../main_toc.html">OpenSCHC Project Complete Content</a><ul>
-      <li>Previous: <a href="File_Classification.html" title="previous chapter">File Classification</a></li>
+      <li>Previous: <a href="File_Classification.html" title="previous chapter">File Taxonomy</a></li>
       <li>Next: <a href="gen_bitarray.html" title="next chapter">Bit Buffer</a></li>
   </ul></li>
   </ul></li>
@@ -461,7 +467,7 @@ in the context matching with the field value of rule id in the packet.</p>
 </ul>
 <p class="caption"><span class="caption-text">Source code, detailed</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frag_recv.html">Fragment Reassembly</a></li>
@@ -485,7 +491,7 @@ in the context matching with the field value of rule id in the packet.</p>
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
