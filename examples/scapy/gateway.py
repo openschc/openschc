@@ -32,24 +32,25 @@ def processPkt(pkt):
     
     # look for a tunneled SCHC pkt
 
-    e_type = pkt.getlayer(Ether).type
-    if e_type == 0x0800:
-        ip_proto = pkt.getlayer(IP).proto
-        if ip_proto == 17:
-            udp_dport = pkt.getlayer(UDP).dport
-            if udp_dport == 8888: # tunnel SCHC msg to be decompressed
-               print ("tunneled SCHC msg")
-               
-               schc_pkt, addr = tunnel.recvfrom(2000)
-               print (binascii.hexlify(schc_pkt), addr)
-
-               rule = rm.FindRuleFromSCHCpacket(schc_pkt)
-               print (rule)
+    if pkt.getlayer(Ether) != None: HE tunnel do not have Ethernet
+        e_type = pkt.getlayer(Ether).type
+        if e_type == 0x0800:
+            ip_proto = pkt.getlayer(IP).proto
+            if ip_proto == 17:
+                udp_dport = pkt.getlayer(UDP).dport
+                if udp_dport == 8888: # tunnel SCHC msg to be decompressed
+                    print ("tunneled SCHC msg")
+                    
+                    schc_pkt, addr = tunnel.recvfrom(2000)
+                    print (binascii.hexlify(schc_pkt), addr)
+                    
+                    rule = rm.FindRuleFromSCHCpacket(schc_pkt)
+                    print (rule)
 
                
 
         
-    elif pkt.getlayer(Ether).version == 0x86dd : # regular trafic to be compression
+    elif pkt.getlayer(IPv6) != None : # regular IPv6trafic to be compression
 
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
