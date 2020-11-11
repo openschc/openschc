@@ -155,7 +155,7 @@ class AiohttpSystem:
     """
     def __init__(self, logger=None, config=None):
         loop = asyncio.get_event_loop()
-        if config["debug_level"] > 1:
+        if config["enable_debug"] > 1:
             loop.set_debug(True)
         self.scheduler = AiohttpScheduler(loop)
         self.config = config

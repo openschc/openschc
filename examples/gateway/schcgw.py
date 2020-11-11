@@ -17,7 +17,7 @@ from gen_utils import dprint, dpprint, set_debug_output
 #----
 
 config_default = {
-    "debug_level": 0,
+    "enable_debug": 0,
     "enable_sim_device": False,
     "bind_addr": "::",
     "bind_port": 51225,
@@ -37,7 +37,7 @@ def set_logger(config):
     logging.basicConfig(format=LOG_FMT, datefmt=LOG_DATE_FMT)
     logger = logging.getLogger(config.prog_name)
 
-    if config.debug_level:
+    if config.enable_debug:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
@@ -187,21 +187,21 @@ ap.add_argument("--tx-interval", action="store", dest="tx_interval",
 ap.add_argument("--prog-name", action="store", dest="prog_name",
                 default="GW",
                 help="specify the name of this program.")
-ap.add_argument("-d", action="store_true", dest="debug_level", default=None,
-                help="specify debug level.")
+ap.add_argument("-d", action="store_true", dest="enable_debug", default=None,
+                help="enable debug mode.")
 config = ap.parse_args()
 update_config()
 
 # set the logger object.
 logger = set_logger(config)
-if not config.debug_level:
+if not config.enable_debug:
     set_debug_output(True)
 
 # create the schc protocol object.
 rule_manager = RuleManager()
 for x in config.rule_config:
     rule_manager.Add(device=x.get("devL2Addr"), file=x["rule_file"])
-if config.debug_level:
+if config.enable_debug:
     rule_manager.Print()
 #
 schc_conf = get_schc_conf(config)
@@ -215,12 +215,13 @@ protocol.set_rulemanager(rule_manager)
 ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 ctx.load_cert_chain(config.my_cert)
 app = web.Application(logger=logger)
-if config.enable_sim_device:
-    app.router.add_route("POST", "/ul", app_downlink)
-    app.router.add_route("POST", "/dl", app_uplink)
-else:
+if not config.enable_sim_device:
     app.router.add_route("POST", "/ul", app_uplink)
     app.router.add_route("POST", "/dl", app_downlink)
+else:
+    # this is debug use only.
+    app.router.add_route("POST", "/ul", app_downlink)
+    app.router.add_route("POST", "/dl", app_uplink)
 #
 logger.info("Starting {} listening on https://{}:{}/".format(
         config.prog_name,
