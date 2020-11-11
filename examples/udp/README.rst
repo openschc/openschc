@@ -4,7 +4,7 @@ Sending/ receiving over UDP
 Usage
 -----
 
-.. include:: UDP_implementation_usage.rst
+.. include:: UDP_example_usage.rst
 
 ..
   This is an example of openSCHC sending over UDP to an openSCHC receiver, on the same machine.
