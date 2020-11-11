@@ -219,110 +219,121 @@ into the **examples/configs** folder, which will contain our rules as follows: :
       }
     }]
 
-Then, it is possible to define the message that will be sent from client to server. The **examples/tcp/payload** folder
-contains some examples that can be used.  
-
-Go to the **examples/tcp** directory.
-
-Double-check you have setup your PYTHONPATH per the :doc:`../General/Installation_guide`.
-
-From the examples/tcp directory, run the code as follows:
-
-Run Server on terminal 1 ::
-
-    python3 ClientServerSimul.py --role server --compression false --rule ../configs/rule1.json
-
-Run Client on terminal 2 ::
-
-    python3 ClientServerSimul.py --role client --compression false --rule ../configs/rule1.json --time 20 --payload payload/testfile_small.txt
-
-TODO: fix this
-
-If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
-transmission of the message and we will obtain the following result on the server side: ::
-
-    Recv MIC 804779011, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started\x00'), lenght = 194
-    SUCCESS: MIC matched. packet bytearray(b'/\xf7\xf4\x03') == result b'/\xf7\xf4\x03'
-
-where, on the first line we have the value of the RCS sent, the message received by the server which is the same as the
-one sent by the client, and the length of the message in bytes. On the second line, whe have a confirmation of successful
-matching between both RCS Values.
-
-Next, to simulate packet loss during transmission, we can use the **--loss true** argument in the client
-and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
-since the RCS sent by the client is not the same as the RCS calculated by the server: ::
-
-    Recv MIC 907239817, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (1062\xb2\x00'), lenght = 171
-    ERROR: MIC mismatched. packet bytearray(b'/\xf7\xf4\x03') != result b'6\x13a\x89'
-
-Unlike the successful result, we can notice that the message was not completely received by the server. Besides, the RCS
-sent by the client is not equal to the RCS calculated by the server.
-
-Client-server Simulation
-========================
-
-Introduction
-------------
-
-Client-server Simulation implements the Socket library to perform the communication between a client and a server,
-using the localhost address 127.0.0.1, port 1234, TCP protocol and threads on the server to allow communication
-**from several clients to a server**.
-
-At the end of a successful communication, the simulation records the time in seconds at that instant in the text file
-**client_server_simulation.txt**, and restarts sending the same message from the client to the server.
-
-How to run this simulation
---------------------------
-
-Run Client on terminal 1 ::
-
-    python3 ClientServerSimul.py --role client
-
-Run Server on terminal 2 ::
-
-    python3 ClientServerSimul.py --role server
+Then, it is possible to define the message that will be sent from client to server. The **examples/udp/udp_example.py** file
+contains an example that can be used.  
 
 
-Option List
------------
-We can find some option to modify our client-server simulation: ::
+..
+  Then, it is possible to define the message that will be sent from client to server. The **examples/tcp/payload** folder
+  contains some examples that can be used.  
+  
+  Go to the **examples/tcp** directory.
+  
+  Double-check you have setup your PYTHONPATH per the :doc:`../General/Installation_guide`.
+  
+  From the examples/tcp directory, run the code as follows:
+  
+  Run Server on terminal 1 ::
+  
+      python3 ClientServerSimul.py --role server --compression false --rule ../configs/rule1.json
+  
+  Run Client on terminal 2 ::
+  
+      python3 ClientServerSimul.py --role client --compression false --rule ../configs/rule1.json --time 20 --payload payload/testfile_small.txt
+  
+  TODO: fix this
+  
+  If the sending was successful, the sent RCS will be equal to the RCS calculated by the server at the end of the
+  transmission of the message and we will obtain the following result on the server side: ::
+  
+      Recv MIC 804779011, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (107) - INFO : Daemon started\x00'), lenght = 194
+      SUCCESS: MIC matched. packet bytearray(b'/\xf7\xf4\x03') == result b'/\xf7\xf4\x03'
+  
+  where, on the first line we have the value of the RCS sent, the message received by the server which is the same as the
+  one sent by the client, and the length of the message in bytes. On the second line, whe have a confirmation of successful
+  matching between both RCS Values.
+  
+  Next, to simulate packet loss during transmission, we can use the **--loss true** argument in the client
+  and server terminal. With this parameter we can observe the result obtained when the transmission is not successful
+  since the RCS sent by the client is not the same as the RCS calculated by the server: ::
+  
+      Recv MIC 907239817, base = bytearray(b'2018-11-20 11:00:16 - daemon.py (162) - INFO : Stopping daemon...\n2018-11-20 11:00:42 - daemon.py (125) - INFO : Starting daemon...\n2018-11-20 11:00:42 - daemon.py (1062\xb2\x00'), lenght = 171
+      ERROR: MIC mismatched. packet bytearray(b'/\xf7\xf4\x03') != result b'6\x13a\x89'
+  
+  Unlike the successful result, we can notice that the message was not completely received by the server. Besides, the RCS
+  sent by the client is not equal to the RCS calculated by the server.
 
-    usage: ClientServerSimul.py [-h] [--role ROLE] [--payload PAYLOAD_NAME_FILE]
-                                [--rule RULE_NAME_FILE]
-                                [--time TIME_BETWEEN_ITERATION]
-                                [--loss [PACKET_LOSS_SIMULATION]]
-                                [--compression [MODE_WITH_COMPRESSION]]
-
-    a SCHC simulator.
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --role ROLE           specify a role: client or server. (default: client)
-      --payload PAYLOAD_NAME_FILE
-                            Specify a payload file name. e.g.
-                            payload/testfile_small.txt. (default: )
-      --rule RULE_NAME_FILE
-                            Specify a rule file name. e.g. examples/comp-
-                            rule-100.json. (default: examples/comp-rule-100.json)
-      --time TIME_BETWEEN_ITERATION
-                            Specify a time in seconds between each sending message
-                            . (default: 10)
-      --loss [PACKET_LOSS_SIMULATION]
-                            Simulation using packet loss: True or False. (default:
-                            False)
-      --compression [MODE_WITH_COMPRESSION]
-                            Simulation using compression: True or False. (default:
-                            True)
-
-Some options are defined to be used by both client and server devices, while there are other options that are only
-useful for the client: ::
-
-    Options for Client and Server:
-    --role
-    --rule
-    --compression
-    --loss
-
-    Options only for Client:
-    --time
-    --payload
+Sending/ receiving over UDP
+===========================
+ 
+.. include:: ../../examples/udp/UDP_example_usage.rst
+  
+..
+  Client-server Simulation
+  ========================
+  
+  Introduction
+  ------------
+  
+  Client-server Simulation implements the Socket library to perform the communication between a client and a server,
+  using the localhost address 127.0.0.1, port 1234, TCP protocol and threads on the server to allow communication
+  **from several clients to a server**.
+  
+  At the end of a successful communication, the simulation records the time in seconds at that instant in the text file
+  **client_server_simulation.txt**, and restarts sending the same message from the client to the server.
+  
+  How to run this simulation
+  --------------------------
+  
+  Run Client on terminal 1 ::
+  
+      python3 ClientServerSimul.py --role client
+  
+  Run Server on terminal 2 ::
+  
+      python3 ClientServerSimul.py --role server
+  
+  
+  Option List
+  -----------
+  We can find some option to modify our client-server simulation: ::
+  
+      usage: ClientServerSimul.py [-h] [--role ROLE] [--payload PAYLOAD_NAME_FILE]
+                                  [--rule RULE_NAME_FILE]
+                                  [--time TIME_BETWEEN_ITERATION]
+                                  [--loss [PACKET_LOSS_SIMULATION]]
+                                  [--compression [MODE_WITH_COMPRESSION]]
+  
+      a SCHC simulator.
+  
+      optional arguments:
+        -h, --help            show this help message and exit
+        --role ROLE           specify a role: client or server. (default: client)
+        --payload PAYLOAD_NAME_FILE
+                              Specify a payload file name. e.g.
+                              payload/testfile_small.txt. (default: )
+        --rule RULE_NAME_FILE
+                              Specify a rule file name. e.g. examples/comp-
+                              rule-100.json. (default: examples/comp-rule-100.json)
+        --time TIME_BETWEEN_ITERATION
+                              Specify a time in seconds between each sending message
+                              . (default: 10)
+        --loss [PACKET_LOSS_SIMULATION]
+                              Simulation using packet loss: True or False. (default:
+                              False)
+        --compression [MODE_WITH_COMPRESSION]
+                              Simulation using compression: True or False. (default:
+                              True)
+  
+  Some options are defined to be used by both client and server devices, while there are other options that are only
+  useful for the client: ::
+  
+      Options for Client and Server:
+      --role
+      --rule
+      --compression
+      --loss
+  
+      Options only for Client:
+      --time
+      --payload
