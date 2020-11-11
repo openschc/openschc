@@ -50,7 +50,7 @@ def processPkt(pkt):
                
 
         
-    elif pkt.getlayer(IPv6) != None : # regular IPv6trafic to be compression
+    elif pkt.getlayer(IPv6).version == 6 : # regular IPv6trafic to be compression
 
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
