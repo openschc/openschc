@@ -17,7 +17,7 @@ from gen_utils import dprint, dpprint, set_debug_output
 #----
 
 config_default = {
-    "enable_debug": 0,
+    "debug_level": 0,
     "enable_sim_device": False,
     "bind_addr": "::",
     "bind_port": 51225,
@@ -37,7 +37,7 @@ def set_logger(config):
     logging.basicConfig(format=LOG_FMT, datefmt=LOG_DATE_FMT)
     logger = logging.getLogger(config.prog_name)
 
-    if config.enable_debug:
+    if config.debug_level > 0:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
@@ -182,26 +182,26 @@ ap.add_argument("--untrust", action="store_false", dest="ssl_verify",
                 default=None,
                 help="disable to check the server certificate.")
 ap.add_argument("--tx-interval", action="store", dest="tx_interval",
-                type=int, default=2,
+                type=int,
                 help="disable to check the server certificate.")
 ap.add_argument("--prog-name", action="store", dest="prog_name",
                 default="GW",
                 help="specify the name of this program.")
-ap.add_argument("-d", action="store_true", dest="enable_debug", default=None,
-                help="enable debug mode.")
+ap.add_argument("-d", action="store_true", dest="debug_level", default=None,
+                help="specify debug level.")
 config = ap.parse_args()
 update_config()
 
 # set the logger object.
 logger = set_logger(config)
-if not config.enable_debug:
+if config.debug_level > 0:
     set_debug_output(True)
 
 # create the schc protocol object.
 rule_manager = RuleManager()
 for x in config.rule_config:
     rule_manager.Add(device=x.get("devL2Addr"), file=x["rule_file"])
-if config.enable_debug:
+if config.debug_level > 1:
     rule_manager.Print()
 #
 schc_conf = get_schc_conf(config)
