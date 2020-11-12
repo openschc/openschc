@@ -191,11 +191,13 @@ class Compressor:
         if type(field[0]) is int:
             dprint("+++", bin(field[0]), field[1])
             output.add_bits(field[0], field[1])
-        elif type(field[0]) == str:
+        elif type(field[0]) is str:
             assert (field[1] % 8 == 0) # string is a number of bytes
             for i in range(field[1]//8):
                 dprint(i, field[0][i])
                 output.add_bytes(field[0][i].encode("utf-8"))
+        elif type(field[0]) is bytes:
+            output.add_bits(int.from_bytes(field[0], "big"), field[1])
         else:
             raise ValueError("CA value-sent unknown type")
 
