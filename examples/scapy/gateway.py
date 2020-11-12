@@ -46,7 +46,7 @@ def processPkt(pkt):
 
                     schc_bb = BitBuffer(schc_pkt)
                     
-                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
+                    rule, device = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
                     print (rule)
 
                     if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
