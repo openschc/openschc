@@ -100,6 +100,8 @@ T_META = "META"
 T_UP_RULES = "UP_RULES"
 T_DW_RULES = "DW_RULES"
 
+T_ACTION = "Action"
+
 T_COMP = "Compression"
 T_NO_COMP = "NoCompression"
 T_FRAG = "Fragmentation"

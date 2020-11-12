@@ -581,9 +581,9 @@ class RuleManager:
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
-        # if T_ACTION in nrule:
-        #     print ("Warning: using experimental Action")
-        #     arule[T_ACTION] = nrule[T_ACTION]
+        if T_ACTION in nrule:
+             print ("Warning: using experimental Action")
+             arule[T_ACTION] = nrule[T_ACTION]
 
 
         arule[T_COMP] = []
@@ -653,11 +653,11 @@ class RuleManager:
     def _smart_print(self, v):
         if type(v) is str:
             v = '"'+v+'"'
-            dprint ('{:<30}'.format(v), end="")
+            print ('{:<30}'.format(v), end="")
         elif type(v) is int:
-            dprint ('{:>30}'.format(v), end="")
+            print ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            dprint ('{:>30}'.format(b2hex(v), end=""))
+            print ('{:>30}'.format(v.hex()), end="")
 
     def printBin(self, v, l):
         txt = ""
