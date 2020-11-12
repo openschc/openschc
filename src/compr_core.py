@@ -9,6 +9,7 @@ import pprint
 
 T_RULEID = "RuleID"
 T_RULEIDLENGTH = "RuleIDLength"
+T_DEVICEID = "DeviceID"
 
 T_FID = "FID"
 T_FL = "FL"
