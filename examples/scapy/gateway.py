@@ -42,14 +42,15 @@ def processPkt(pkt):
                     print ("tunneled SCHC msg")
                     
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    print (binascii.hexlify(schc_pkt), addr)
+                    #print (binascii.hexlify(schc_pkt), addr)
 
                     schc_bb = BitBuffer(schc_pkt)
                     
-                    rule, device = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
-                    print (rule)
+                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
+                    #print (rule)
 
                     if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
+                        print ("answer ping request")
                         tunnel.sendto(schc_pkt, addr) 
 
                
@@ -103,7 +104,7 @@ elif ip_addr == "51.91.121.182": # tests.openschc.net
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 0x5C4C))
     
-    sniff(prn=processPkt, iface="he-ipv6")
+    sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
 else:
     print ("Unknown host {}, please look at the code to configure it")
