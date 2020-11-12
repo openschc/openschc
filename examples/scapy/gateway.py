@@ -43,14 +43,19 @@ def processPkt(pkt):
                     
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     print (binascii.hexlify(schc_pkt), addr)
+
+                    schc_bb = BitBuffer(schc_pkt)
                     
-                    rule = rm.FindRuleFromSCHCpacket(schc_pkt)
+                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
                     print (rule)
+
+                    if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
+                        tunnel.sendto(schc_pkt, addr) 
 
                
 
         
-    elif pkt.getlayer(IPv6).version == 6 : # regular IPv6trafic to be compression
+    elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
 
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
@@ -80,6 +85,8 @@ if ip_addr == "192.168.1.104":
     print("device role")
     send_dir = T_DIR_UP
     recv_dir = T_DIR_DW
+
+    device_id = "udp:dl.touta.in:8888"
 
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
