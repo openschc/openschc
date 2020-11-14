@@ -52,12 +52,8 @@ def processPkt(pkt):
                     rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
                     #print (rule)
 
-                    if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
-                        print ("answer ping request")
-                        tunnel.sendto(schc_pkt, addr) 
-
-               
-
+                    phd = decomp.decompress(schc_bb, rule, recv_dir)
+                    print (phd)
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
 
@@ -85,36 +81,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
 
-if ip_addr == "192.168.1.104":
-    print("device role")
-    send_dir = T_DIR_UP
-    recv_dir = T_DIR_DW
 
-    socket_port = 8888
+print ("core role")
+send_dir = T_DIR_DW
+recv_dir = T_DIR_UP
 
-    device_id = "udp:dl.touta.in:8888"
+socket_port = 0x5C4C
 
-    tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    tunnel.bind(("0.0.0.0", 8888))
+tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tunnel.bind(("0.0.0.0", 0x5C4C))
 
-    sniff (filter="ip6 or port 23628 and not arp",
-           prn=processPkt,
-           iface="enp0s3")
-    
-elif ip_addr == "51.91.121.182": # tests.openschc.net
-    print ("core role")
-    send_dir = T_DIR_DW
-    recv_dir = T_DIR_UP
+sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
-    socket_port = 0x5C4C
-
-    tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    tunnel.bind(("0.0.0.0", 0x5C4C))
-    
-    sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
-    #sniff(prn=processPkt, iface="he-ipv6")
-
-else:
-    print ("Unknown host {}, please look at the code to configure it")
 
  

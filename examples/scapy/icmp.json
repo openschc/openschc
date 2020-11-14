@@ -1,5 +1,5 @@
  {
-    "DeviceID" : "udp:dl.touta.in:8888",
+    "DeviceID" : "udp:83.199.26.128:8888",
     "SoR" : [
 	{
 	    "RuleID": 6,

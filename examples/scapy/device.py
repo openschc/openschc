@@ -44,9 +44,6 @@ def processPkt(pkt):
                     pkt.show()
                     
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    device_id = "udp:"+addr[0]+":"+str(addr[1])
-                    print (binascii.hexlify(schc_pkt), addr, device_id)
-
                     schc_bb = BitBuffer(schc_pkt)
                     
                     rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
