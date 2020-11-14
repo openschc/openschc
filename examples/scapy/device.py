@@ -89,7 +89,7 @@ if ip_addr == "192.168.1.104":
 
     socket_port = 8888
 
-    device_id = "udp:dl.touta.in:8888"
+    device_id = "udp:83.199.26.128:8888"
 
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
@@ -97,21 +97,6 @@ if ip_addr == "192.168.1.104":
     sniff (filter="ip6 or port 23628 and not arp",
            prn=processPkt,
            iface="enp0s3")
-    
-elif ip_addr == "51.91.121.182": # tests.openschc.net
-    print ("core role")
-    send_dir = T_DIR_DW
-    recv_dir = T_DIR_UP
 
-    socket_port = 0x5C4C
-
-    tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    tunnel.bind(("0.0.0.0", 0x5C4C))
-    
-    sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
-    #sniff(prn=processPkt, iface="he-ipv6")
-
-else:
-    print ("Unknown host {}, please look at the code to configure it")
 
  
