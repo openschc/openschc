@@ -218,7 +218,7 @@ def processPkt(pkt):
         print (pkt_fields)
 
         if pkt_fields != None:
-            rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW)
+            rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW, failed_field=True)
             if rule != None:
                 schc_pkt = comp.compress(rule, pkt_fields, data, T_DIR_DW)
                 if device.find("udp") == 0:

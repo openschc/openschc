@@ -818,7 +818,7 @@ class RuleManager:
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
         """ Takes a parsed packet and returns the matching rule.
         """
         for dev in self._ctxt:
@@ -840,10 +840,13 @@ class RuleManager:
                                     arg):
                                         matches += 1
                                 else:
-                                    dprint("field does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                    if failed_field:
+                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
+                                            r[T_FID],
                                             r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
                                             r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                            arg), "packet=", pkt)
+                                            arg))
                                     break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
