@@ -13,6 +13,14 @@ import binascii
 
 import socket
 
+import time, datetime
+import struct
+
+from random import randint
+
+import cbor2 as cbor
+
+# ------
 
 class debug_protocol:
     def _log(*arg):
@@ -26,12 +34,45 @@ rm.Print()
 comp = Compressor(debug_protocol)
 decomp = Decompressor(debug_protocol)
 
+# -------
+tunnel = None
+
+event_queue = []
+
+mid = 0
+token = 0X200
+
+
+def send_coap_request():
+    global mid, token
+    global tunnel
+    
+    print ("send CoAP", mid, token, flush=True)
+
+    coap_msg = struct.pack("!BHH", 2, mid, token)
+    coap_msg += cbor.dumps(randint(10, 1000))
+
+    print (binascii.hexlify(coap_msg))
+
+    tunnel.sendto(coap_msg, ("tests.openschc.net", 0x5C4C))
+    
+    mid += 1
+    token += 2
+    event_queue.append([int(time.time())+10, send_coap_request])
+    
+
 def processPkt(pkt):
     global parser
     global rm
     
     # look for a tunneled SCHC pkt
+    epoch = int(time.time())
 
+    if len(event_queue) > 0 and epoch > event_queue[0][0]:
+        e = event_queue.pop(0)
+        print (e)
+        e[1]()
+        
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x0800:
@@ -93,6 +134,8 @@ if ip_addr == "192.168.1.104":
 
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
+
+    event_queue.append([int(time.time())+10, send_coap_request])
 
     sniff (filter="ip6 or port 23628 and not arp",
            prn=processPkt,
