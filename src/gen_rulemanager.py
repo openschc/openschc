@@ -316,7 +316,6 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
-    T_COAP_OPT_END         : {"FL": 1,     "TYPE": int, "TV" : 0xFF, "ALGO": "DIRECT"}
 }
 
 class DictToAttrDeep:
@@ -598,7 +597,7 @@ class RuleManager:
                 ))
 
             entry = {}
-            FID = r[T_FID].upper()
+            FID = r[T_FID]
             entry[T_FID] = FID
             entry[T_FL] = self._return_default(r, T_FL, FIELD__DEFAULT_PROPERTY[FID][T_FL])
             entry[T_FP] = self._return_default(r, T_FP, 1)

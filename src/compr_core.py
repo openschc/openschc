@@ -53,6 +53,8 @@ T_COAP_TKL = "COAP.TKL"
 T_COAP_CODE = "COAP.CODE"
 T_COAP_MID = "COAP.MID"
 T_COAP_TOKEN = "COAP.TOKEN"
+
+# WARNING: CoAP option string must be writen exactly as in standards and IANA
 T_COAP_OPT_IF_MATCH =  "COAP.If-Match"
 T_COAP_OPT_URI_HOST = "COAP.Uri-Host"
 T_COAP_OPT_ETAG = "COAP.ETag"
@@ -60,10 +62,10 @@ T_COAP_OPT_IF_NONE_MATCH =  "COAP.If-None-Match"
 T_COAP_OPT_OBS =  "COAP.Observe"
 T_COAP_OPT_URI_PORT =  "COAP.Uri-Port"
 T_COAP_OPT_LOC_PATH = "COAP.Location-Path"
-T_COAP_OPT_URI_PATH =  "COAP.URI-PATH"
-T_COAP_OPT_CONT_FORMAT =  "COAP.CONTENT-FORMAT"
+T_COAP_OPT_URI_PATH =  "COAP.Uri-Path"
+T_COAP_OPT_CONT_FORMAT =  "COAP.Content-Format"
 T_COAP_OPT_MAX_AGE =  "COAP.Max-Age"
-T_COAP_OPT_URI_QUERY =  "COAP.URI-QUERY"
+T_COAP_OPT_URI_QUERY =  "COAP.Uri-Query"
 T_COAP_OPT_ACCEPT =  "COAP.Accept"
 T_COAP_OPT_LOC_QUERY =  "COAP.Location-Query"
 T_COAP_OPT_BLOCK2 =  "COAP.Block2"
@@ -73,7 +75,7 @@ T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
 T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
-T_COAP_OPT_END = "COAP.END"
+
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
@@ -394,7 +396,21 @@ class Decompressor:
 
 
     def rx_cda_not_sent(self, rule, in_bbuf):
-        return [rule[T_TV], rule[T_FL]]
+        if rule[T_FL] == "var":
+            if type(rule[T_TV]) == str:
+                size = len(rule[T_TV]) * 8
+            elif type(rule[T_TV]) == int: # return the minimal size, used in CoAP
+                size = 0
+                v = rule[T_TV]
+                while v != 0:
+                    size += 8
+                    v >>=8
+            else:
+                size="var" # should never happend
+        else:
+            size = rule[T_FL]
+        
+        return [rule[T_TV], size]
 
     def rx_cda_val_sent(self, rule, in_bbuf):
         # XXX not implemented that the variable length size.
