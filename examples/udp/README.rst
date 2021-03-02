@@ -27,7 +27,6 @@ In order to run the example, move to the examples/udp directory, then
     \---------------+---+--+--+------------------------------+-------------+----------------/
     /-------------------------\
     |Rule 12/6        001100  |
-    {'RuleID': 12, 'RuleIDLength': 6, 'Fragmentation': {'FRDirection': 'UP', 'FRMode': 'noAck', 'FRModeProfile': {'FCNSize': 3, 'dtagSize': 2, 'MICALgorithm': 'crc32', 'WSize': 0, 'L2WordSize': 8, 'windowSize': 7}}}
     !=========================+=============================================================\
     !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
     !^ No Tile size specified                                                              ^!
@@ -51,7 +50,6 @@ In order to run the example, move to the examples/udp directory, then
    \---------------+---+--+--+------------------------------+-------------+----------------/
    /-------------------------\
    |Rule 12/6        001100  |
-   {'RuleID': 12, 'RuleIDLength': 6, 'Fragmentation': {'FRDirection': 'UP', 'FRMode': 'noAck', 'FRModeProfile': {'FCNSize': 3, 'dtagSize': 2, 'MICALgorithm': 'crc32', 'WSize': 0, 'L2WordSize': 8, 'windowSize': 7}}}
    !=========================+=============================================================\
    !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
    !^ No Tile size specified                                                              ^!
@@ -59,7 +57,7 @@ In order to run the example, move to the examples/udp directory, then
    \=======================================================================================/
   
   then send one SCHC-processed COAP packet.
-  Since their is no compression Rule (except the mandatory "no-compression" Rule),
+  Since there is no compression Rule (except the mandatory "no-compression" Rule),
   the packet is simply prepended with the 12/4 RuleID and passed to the fragmentation sublayer.
   It is then fragmented into 13 SCHC Fragments, which are sent over UDP.
   Hit Ctrl+C to exit.

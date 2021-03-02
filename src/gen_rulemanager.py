@@ -707,7 +707,7 @@ class RuleManager:
 
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
-                    print (rule)
+                    # print (rule)
                     if rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP:
                         dir_c = "^"
                     else:
