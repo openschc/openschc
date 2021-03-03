@@ -262,7 +262,6 @@ Device: None
 \---------------+---+--+--+------------------------------+-------------+----------------/
 /-------------------------\
 |Rule 12/6        001100  |
-{&#39;RuleID&#39;: 12, &#39;RuleIDLength&#39;: 6, &#39;Fragmentation&#39;: {&#39;FRDirection&#39;: &#39;UP&#39;, &#39;FRMode&#39;: &#39;noAck&#39;, &#39;FRModeProfile&#39;: {&#39;FCNSize&#39;: 3, &#39;dtagSize&#39;: 2, &#39;MICALgorithm&#39;: &#39;crc32&#39;, &#39;WSize&#39;: 0, &#39;L2WordSize&#39;: 8, &#39;windowSize&#39;: 7}}}
 !=========================+=============================================================\
 !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
 !^ No Tile size specified                                                              ^!
@@ -290,7 +289,6 @@ It will display the Rules that are stored in its context,</p>
 \---------------+---+--+--+------------------------------+-------------+----------------/
 /-------------------------\
 |Rule 12/6        001100  |
-{&#39;RuleID&#39;: 12, &#39;RuleIDLength&#39;: 6, &#39;Fragmentation&#39;: {&#39;FRDirection&#39;: &#39;UP&#39;, &#39;FRMode&#39;: &#39;noAck&#39;, &#39;FRModeProfile&#39;: {&#39;FCNSize&#39;: 3, &#39;dtagSize&#39;: 2, &#39;MICALgorithm&#39;: &#39;crc32&#39;, &#39;WSize&#39;: 0, &#39;L2WordSize&#39;: 8, &#39;windowSize&#39;: 7}}}
 !=========================+=============================================================\
 !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
 !^ No Tile size specified                                                              ^!
@@ -299,7 +297,7 @@ It will display the Rules that are stored in its context,</p>
 </pre></div>
 </div>
 <p>then send one SCHC-processed COAP packet.
-Since their is no compression Rule (except the mandatory “no-compression” Rule),
+Since there is no compression Rule (except the mandatory “no-compression” Rule),
 the packet is simply prepended with the 12/4 RuleID and passed to the fragmentation sublayer.
 It is then fragmented into 13 SCHC Fragments, which are sent over UDP.
 Hit Ctrl+C to exit.</p>
