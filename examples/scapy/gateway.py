@@ -16,6 +16,8 @@ import binascii
 import socket
 import ipaddress
 
+import time, datetime
+
 coap_options = {'If-Match':1,
             'Uri-Host':3,
             'ETag':4,
@@ -179,6 +181,28 @@ def send_scapy(fields, pkt_bb, rule=None):
 #    full_header.hexdump()
 
     send(full_header, iface="he-ipv6")
+
+event_queue = []
+
+class frag_context:
+
+    def __init__(self, pkt=None, rule=None):
+        self.wakeup = None
+        self.pkt = pkt
+        self.rule = rule
+
+
+
+def send_frag (pkt, size):
+    global event_queue
+
+    ctxt = frag_context(pkt=pkt)
+    ctxt.wakeup = int(time.time())+10
+
+    event_queue.append(ctxt)
+    print (event_queue)
+
+
     
 def processPkt(pkt):
     global parser
@@ -226,7 +250,7 @@ def processPkt(pkt):
                     print (destination)
                     schc_pkt.display()
                     if len(schc_pkt._content) > 20:
-                        print ("fragmentation")
+                        send_frag(schc_pkt, 20)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
                 else:
