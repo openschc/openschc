@@ -192,13 +192,16 @@ class frag_context:
         self.rule = rule
         self.fct = send_frag
 
+    def fragmentor(self):
+        print ("fragmentor")
+
 
 def send_frag (pkt=None, size=None):
     global event_queue
 
-    if pkt != None:
-        ctxt = frag_context(pkt=pkt)
+    ctxt = frag_context(pkt=pkt)
 
+    ctxt.fct = self.fragmentor
     ctxt.wakeup = time.time()+10
 
     event_queue.append(ctxt)
