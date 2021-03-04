@@ -197,7 +197,7 @@ def send_frag (pkt, size):
     global event_queue
 
     ctxt = frag_context(pkt=pkt)
-    ctxt.wakeup = int(time.time())+10
+    ctxt.wakeup = time.time()+10
 
     event_queue.append(ctxt)
     print (event_queue)
