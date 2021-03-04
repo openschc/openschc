@@ -213,7 +213,11 @@ def processPkt(pkt):
     print ("@")
 
     for qe in event_queue:
-        print (qe.wakeup)
+        print (time.time(), qe.wakeup, end="")
+        if qe.wakeup > time.time():
+            print ("*")
+        else:
+            print()
 
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
