@@ -198,7 +198,7 @@ def send_frag (pkt=None, size=None):
 
     if pkt != None:
         ctxt = frag_context(pkt=pkt)
-        
+
     ctxt.wakeup = time.time()+10
 
     event_queue.append(ctxt)
@@ -212,7 +212,7 @@ def processPkt(pkt):
     global event_queue
     
 
-    if len(event_queue) > 0 and epoch > event_queue[0].wakeup:
+    if len(event_queue) > 0 and time.time() > event_queue[0].wakeup:
         e = event_queue.pop(0)
         print (e)
         e.fct()
