@@ -193,7 +193,13 @@ class frag_context:
         self.fct = send_frag
 
     def fragmentor(self):
-        print ("fragmentor")
+        global event_queue
+
+        print ("fragmentor", binascii.hexlify(self.pkt._content))
+        self.wakeup = time.time()+20
+        event_queue.append(self)
+
+
 
 
 def send_frag (pkt=None, size=None):
