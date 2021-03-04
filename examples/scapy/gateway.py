@@ -225,7 +225,10 @@ def processPkt(pkt):
                     destination = (device.split(":")[1], int(device.split(":")[2]))
                     print (destination)
                     schc_pkt.display()
-                    tunnel.sendto(schc_pkt._content, destination)
+                    if len(schc_pkt._content) > 20:
+                        print ("fragmentation")
+                    else: 
+                        tunnel.sendto(schc_pkt._content, destination)
                 else:
                     print ("unknown connector" + device)
     else:
