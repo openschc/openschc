@@ -190,13 +190,15 @@ class frag_context:
         self.wakeup = None
         self.pkt = pkt
         self.rule = rule
+        self.fct = send_frag
 
 
-
-def send_frag (pkt, size):
+def send_frag (pkt=None, size=None):
     global event_queue
 
-    ctxt = frag_context(pkt=pkt)
+    if pkt != None:
+        ctxt = frag_context(pkt=pkt)
+        
     ctxt.wakeup = time.time()+10
 
     event_queue.append(ctxt)
@@ -209,15 +211,13 @@ def processPkt(pkt):
     global rm
     global event_queue
     
-    # look for a tunneled SCHC pkt
-    print ("@")
 
-    for qe in event_queue:
-        print (time.time(), qe.wakeup, end="")
-        if qe.wakeup > time.time():
-            print ("*")
-        else:
-            print()
+    if len(event_queue) > 0 and epoch > event_queue[0].wakeup:
+        e = event_queue.pop(0)
+        print (e)
+        e.fct()
+
+    # look for a tunneled SCHC pkt
 
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
