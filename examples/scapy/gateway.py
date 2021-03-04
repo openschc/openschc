@@ -209,6 +209,9 @@ def processPkt(pkt):
     global rm
     
     # look for a tunneled SCHC pkt
+    print ("@")
+    if event_queue != None:
+        print (">", event_queue)
 
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
