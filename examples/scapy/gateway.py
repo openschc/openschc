@@ -201,7 +201,7 @@ def send_frag (pkt=None, size=None):
 
     ctxt = frag_context(pkt=pkt)
 
-    ctxt.fct = self.fragmentor
+    ctxt.fct = ctxt.fragmentor
     ctxt.wakeup = time.time()+10
 
     event_queue.append(ctxt)
