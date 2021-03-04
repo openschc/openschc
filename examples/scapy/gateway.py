@@ -207,11 +207,13 @@ def send_frag (pkt, size):
 def processPkt(pkt):
     global parser
     global rm
+    global event_queue
     
     # look for a tunneled SCHC pkt
     print ("@")
-    if event_queue != None:
-        print (">", event_queue)
+
+    for qe in event_queue:
+        print (qe.wakeup)
 
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
