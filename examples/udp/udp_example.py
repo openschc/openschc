@@ -1,8 +1,13 @@
-import sys, getopt
-sys.path.append('/home/laurent/github/openschc-pr/src')
+import sys, getopt, signal
 
     
 from net_udp_core import  *
+
+# handle signal to stop the program
+def signal_handler(self, sig):
+    # handles the Ctrl-C signal
+    print ("End of program requested")
+    sys.exit(0)
 
 # --------------------------------------------------
 
@@ -21,6 +26,14 @@ frag_rule_noack = {
     }
 }
 
+#no_compression = {
+#    "RuleID" : 20,
+#    "RuleIDLength": 8,
+#    "NoCompression": None
+#}
+
+
+#rule_set = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
 rule_set = [compression_rule.copy(), frag_rule_noack.copy()]
 
 coap_ip_packet = bytearray(b"""`\
@@ -75,6 +88,10 @@ if args.role == "device": # XXX: fix addresses mismatches
     upper_layer.send_later(1, udp_src, coap_ip_packet)
 
 sys.stdout.flush()
+
+# Handles the Ctrl-C signal
+signal.signal(signal.SIGINT, signal_handler)
+
 scheduler.run()
 
 
