@@ -208,7 +208,7 @@ def send_frag (pkt=None, mtu=None):
     global event_queue
     global RM
 
-    rule = rm.FindFragmentationRule(dir=T_DIR_DW)
+    rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
     print ("rule = ", rule)
     frag_ctxt = protocol.FragmentNoAck(rule=rule)
