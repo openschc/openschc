@@ -204,14 +204,14 @@ class frag_context:
 
 
 
-def send_frag (pkt=None, mtu=None):
+def send_frag (pkt=None, mtu_in_bytes=None):
     global event_queue
     global RM
 
     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
     print ("rule = ", rule)
-    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu=mtu)
+    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu=mtu_in_bytes)
     frag_ctxt.set_packet(pkt)
 
     ctxt = frag_context(pkt=pkt)
@@ -277,7 +277,7 @@ def processPkt(pkt):
                     print (destination)
                     schc_pkt.display()
                     if len(schc_pkt._content) > 12:
-                        send_frag(schc_pkt, mtu=12)
+                        send_frag(schc_pkt, mtu_in_bytes=12)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
                 else:
