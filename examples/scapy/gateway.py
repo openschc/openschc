@@ -201,7 +201,7 @@ class frag_context:
         print ("fragmentor")
         frag = self.ctxt.get_frag()
         print (frag.packet)
-        self.sock.sendto(frag.packet, self.dest)
+        self.sock.sendto(frag.packet.get_content(), self.dest)
 
         self.wakeup = time.time()+20
         event_queue.append(self)
