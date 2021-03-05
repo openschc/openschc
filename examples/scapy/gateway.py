@@ -207,7 +207,7 @@ class frag_context:
 def send_frag (pkt=None, mtu=None):
     global event_queue
 
-    frag_ctxt = protocol.FragmentNoAck()
+    #frag_ctxt = protocol.FragmentNoAck()
     frag_ctxt.set_packet(pkt)
 
     ctxt = frag_context(pkt=pkt)
