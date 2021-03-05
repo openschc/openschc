@@ -215,7 +215,7 @@ def send_frag (pkt=None, mtu_in_bytes=None):
     frag_ctxt.set_packet(pkt)
 
     frag = frag_ctxt.get_frag()
-    print (frag)
+    print (frag.packet)
 
     ctxt = frag_context(pkt=pkt)
 
