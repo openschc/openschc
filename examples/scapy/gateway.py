@@ -211,7 +211,7 @@ def send_frag (pkt=None, mtu_in_bytes=None):
     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
     print ("rule = ", rule)
-    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes)
+    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
     frag_ctxt.set_packet(pkt)
 
     frag = frag_ctxt.get_frag()
