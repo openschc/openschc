@@ -188,9 +188,9 @@ event_queue = []
 
 class frag_context:
 
-    def __init__(self, pkt=None, rule=None):
+    def __init__(self, ctxt, rule=None):
         self.wakeup = None
-        self.pkt = pkt
+        self.ctxt = ctxt
         self.rule = rule
         self.fct = send_frag
 
@@ -198,6 +198,8 @@ class frag_context:
         global event_queue
 
         print ("fragmentor", binascii.hexlify(self.pkt._content))
+        frag = self.ctxt.get_frag()
+        print (frag.packet)
         self.wakeup = time.time()+20
         event_queue.append(self)
 
@@ -214,10 +216,9 @@ def send_frag (pkt=None, mtu_in_bytes=None):
     frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
     frag_ctxt.set_packet(pkt)
 
-    frag = frag_ctxt.get_frag()
-    print (frag.packet)
 
-    ctxt = frag_context(pkt=pkt)
+
+    ctxt = frag_context(ctxt=frag_ctxt)
 
     ctxt.fct = ctxt.fragmentor
     ctxt.wakeup = time.time()+10
