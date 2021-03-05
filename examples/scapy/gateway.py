@@ -203,14 +203,14 @@ class frag_context:
         frag = self.ctxt.get_frag()
         print (frag.packet)
         self.sock.sendto(frag.packet, self.dest)
-        
+
         self.wakeup = time.time()+20
         event_queue.append(self)
 
 
 
 
-def send_frag (pkt=None, mtu_in_bytes=None, sock=s, dest=d):
+def send_frag (pkt=None, sock, dest, mtu_in_bytes=None):
     global event_queue
     global RM
 
