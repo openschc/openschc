@@ -28,11 +28,11 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, rule, mtu, protocol=None, context=None, dtag=None):
+    def __init__(self, rule, mtu_in_bytes, protocol=None, context=None, dtag=None):
         self.protocol = protocol
         self.context = context
         self.rule = rule
-        self.mtu = mtu
+        self.mtu = mtu_in_bytes*8  
         self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
@@ -222,9 +222,11 @@ class FragmentNoAck(FragmentBase):
             mic=self.mic_sent,
             payload=tile)
 
+
         # send a SCHC fragment
-        args = (schc_frag.packet.get_content(), self._session_id[0],
-                transmit_callback)
+        #args = (schc_frag.packet.get_content(), self._session_id[0],
+        #        transmit_callback)
+        
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
             w_dtag = '-'
@@ -255,6 +257,8 @@ class FragmentNoAck(FragmentBase):
 
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
+        return schc_frag
+
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         dprint("event_sent_frag")
