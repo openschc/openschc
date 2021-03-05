@@ -10,7 +10,7 @@ import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
 
-import frag_send
+from frag_send import *
 
 import pprint
 import binascii
