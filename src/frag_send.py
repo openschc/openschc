@@ -28,10 +28,11 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, rule, protocol=None, context=None, dtag=None):
+    def __init__(self, rule, mtu, protocol=None, context=None, dtag=None):
         self.protocol = protocol
         self.context = context
         self.rule = rule
+        self.mtu = mtu
         self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
