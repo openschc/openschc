@@ -206,8 +206,12 @@ class frag_context:
 
 def send_frag (pkt=None, mtu=None):
     global event_queue
+    global RM
 
-    frag_ctxt = protocol.FragmentNoAck()
+    rule = rm.FindFragmentationRule(dir=T_DIR_DW)
+
+    print ("rule = ", rule)
+    frag_ctxt = protocol.FragmentNoAck(rule=rule)
     frag_ctxt.set_packet(pkt)
 
     ctxt = frag_context(pkt=pkt)
