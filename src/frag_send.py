@@ -28,7 +28,7 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, protocol, context, rule, dtag):
+    def __init__(self, protocol=None, context=None, rule, dtag=None):
         self.protocol = protocol
         self.context = context
         self.rule = rule
@@ -146,7 +146,7 @@ class FragmentNoAck(FragmentBase):
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.protocol.layer2.get_mtu_size(), min_size))
 
 
-    def send_frag(self):
+    def get_frag(self):
         # XXX
         # because No-ACK mode supports variable MTU,
         # sender can't know the fact that it can't send all fragments

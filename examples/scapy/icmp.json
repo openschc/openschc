@@ -72,8 +72,14 @@
 		{"FID": "ICMPV6.CODE",  "TV": 4,  "MO": "equal","CDA": "not-sent"},
 		{"FID": "ICMPV6.CKSUM", "TV": 0, "MO": "ignore","CDA": "compute-checksum"}
 	    ]
-	}
-
+	},{
+		"RuleID" : 12,
+		"RuleIDLength" : 8,
+		"Fragmentation" : {
+			"FRMode": "noAck",
+			"FRDirection": "DW"
+		}
+	} 
     ]
   }
 
