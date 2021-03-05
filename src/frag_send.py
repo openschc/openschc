@@ -143,7 +143,7 @@ class FragmentNoAck(FragmentBase):
         dprint(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
                         frag_msg.get_mic_size(self.rule) + self.l2word)
-        if self.protocol.layer2.get_mtu_size() < min_size:
+        if self.mtu < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.protocol.layer2.get_mtu_size(), min_size))
 
 
