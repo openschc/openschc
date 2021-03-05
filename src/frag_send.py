@@ -28,7 +28,7 @@ from compr_core import *
 max_ack_requests = 8
 
 class FragmentBase():
-    def __init__(self, protocol=None, context=None, dtag=None, rule):
+    def __init__(self, rule, protocol=None, context=None, dtag=None):
         self.protocol = protocol
         self.context = context
         self.rule = rule
