@@ -191,8 +191,7 @@ class frag_context:
     def __init__(self, ctxt, sock, dest):
         self.wakeup = None
         self.ctxt = ctxt
-        self.rule = rule
-        self.fct = send_frag
+        self.fct = None
         self.sock = sock
         self.dest = dest
 
@@ -217,12 +216,12 @@ def send_frag (pkt, sock, dest, mtu_in_bytes=None):
     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
     print ("rule = ", rule)
-    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0, sock=sock, dest=dest)
+    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
     frag_ctxt.set_packet(pkt)
 
 
 
-    ctxt = frag_context(ctxt=frag_ctxt)
+    ctxt = frag_context(ctxt=frag_ctxt, sock=sock, dest=dest)
 
     ctxt.fct = ctxt.fragmentor
     ctxt.wakeup = time.time()+10
