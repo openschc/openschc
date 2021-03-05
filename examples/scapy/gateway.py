@@ -204,7 +204,7 @@ class frag_context:
 
 
 
-def send_frag (pkt=None, size=None):
+def send_frag (pkt=None, mtu=None):
     global event_queue
 
     frag_ctxt = FragmentNoAck()
