@@ -197,7 +197,7 @@ class frag_context:
     def fragmentor(self):
         global event_queue
 
-        print ("fragmentor", binascii.hexlify(self.pkt._content))
+        print ("fragmentor")
         frag = self.ctxt.get_frag()
         print (frag.packet)
         self.wakeup = time.time()+20
