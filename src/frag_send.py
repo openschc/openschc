@@ -214,6 +214,7 @@ class FragmentNoAck(FragmentBase):
                 if enable_statsct:
                     Statsct.set_msg_type("SCHC_FRAG")
                     Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
+
         schc_frag = frag_msg.frag_sender_tx(
             self.rule, dtag=self.dtag,
             win=None,
@@ -254,8 +255,8 @@ class FragmentNoAck(FragmentBase):
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
 
-        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-                                          args)
+        #self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+        #                                  args)
         return schc_frag
 
 
