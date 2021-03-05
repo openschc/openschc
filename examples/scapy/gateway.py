@@ -207,8 +207,8 @@ class frag_context:
 def send_frag (pkt=None, mtu=None):
     global event_queue
 
-    #frag_ctxt = protocol.FragmentNoAck()
-    #frag_ctxt.set_packet(pkt)
+    frag_ctxt = protocol.FragmentNoAck()
+    frag_ctxt.set_packet(pkt)
 
     ctxt = frag_context(pkt=pkt)
 
@@ -272,7 +272,7 @@ def processPkt(pkt):
                     destination = (device.split(":")[1], int(device.split(":")[2]))
                     print (destination)
                     schc_pkt.display()
-                    if len(schc_pkt._content) > 20:
+                    if len(schc_pkt._content) > 12:
                         send_frag(schc_pkt, mtu=12)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
