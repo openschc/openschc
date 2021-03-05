@@ -10,6 +10,8 @@ import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
 
+import frag_send
+
 import pprint
 import binascii
 
@@ -205,6 +207,9 @@ class frag_context:
 def send_frag (pkt=None, size=None):
     global event_queue
 
+    frag_ctxt = FragmentNoAck()
+    frag_ctxt.set_packet(pkt)
+
     ctxt = frag_context(pkt=pkt)
 
     ctxt.fct = ctxt.fragmentor
@@ -268,7 +273,7 @@ def processPkt(pkt):
                     print (destination)
                     schc_pkt.display()
                     if len(schc_pkt._content) > 20:
-                        send_frag(schc_pkt, 20)
+                        send_frag(schc_pkt, mtu=12)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
                 else:
