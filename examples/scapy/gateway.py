@@ -210,7 +210,7 @@ class frag_context:
 
 
 
-def send_frag (pkt=None, sock, dest, mtu_in_bytes=None):
+def send_frag (pkt, sock, dest, mtu_in_bytes=None):
     global event_queue
     global RM
 
