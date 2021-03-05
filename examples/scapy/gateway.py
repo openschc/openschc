@@ -188,11 +188,13 @@ event_queue = []
 
 class frag_context:
 
-    def __init__(self, ctxt, rule=None):
+    def __init__(self, ctxt, sock, dest):
         self.wakeup = None
         self.ctxt = ctxt
         self.rule = rule
         self.fct = send_frag
+        self.sock = sock
+        self.dest = dest
 
     def fragmentor(self):
         global event_queue
@@ -200,20 +202,22 @@ class frag_context:
         print ("fragmentor")
         frag = self.ctxt.get_frag()
         print (frag.packet)
+        self.sock.sendto(frag.packet, self.dest)
+        
         self.wakeup = time.time()+20
         event_queue.append(self)
 
 
 
 
-def send_frag (pkt=None, mtu_in_bytes=None):
+def send_frag (pkt=None, mtu_in_bytes=None, sock=s, dest=d):
     global event_queue
     global RM
 
     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
     print ("rule = ", rule)
-    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
+    frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0, sock=s, dest=d)
     frag_ctxt.set_packet(pkt)
 
 
@@ -281,7 +285,7 @@ def processPkt(pkt):
                     print (destination)
                     schc_pkt.display()
                     if len(schc_pkt._content) > 12:
-                        send_frag(schc_pkt, mtu_in_bytes=12)
+                        send_frag(schc_pkt, mtu_in_bytes=12, sock=tunnel, dest=destination)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
                 else:
