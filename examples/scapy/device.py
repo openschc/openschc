@@ -159,7 +159,7 @@ if ip_addr == "192.168.1.104":
 
     socket_port = 8888
 
-    device_id = "udp:83.199.26.128:8888"
+    device_id = "udp:83.199.61.5:8888"
 
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
