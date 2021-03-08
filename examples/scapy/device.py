@@ -16,6 +16,8 @@ import socket
 import time, datetime
 import struct
 
+import frag_recv
+
 from random import randint
 
 import cbor2 as cbor
