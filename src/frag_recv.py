@@ -30,7 +30,7 @@ class ReassembleBase:
 
     """
 
-    def __init__(self, protocol, context, rule, dtag, sender_L2addr):
+    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None):
         """
 
         Args :
