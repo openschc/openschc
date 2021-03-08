@@ -43,6 +43,23 @@ mid = 0
 token = 0X200
 
 
+
+frag_ctxt = [] 
+
+def get_frag_ctxt (rule, dev=None):
+    for fc in frag_ctxt:
+        if fc[T_RULEID] == rule[T_RULEID] and fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]:
+            return fc
+    print ("get_fragCtxt not found")
+    fc = None
+    if rule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
+        fc[T_RULEID]  == rule[T_RULEID]
+        fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]
+        fc["CONTEXT"] = ReassemblerNoAck
+
+    return fc 
+
+
 def send_coap_request():
     global mid, token
     global tunnel
@@ -64,6 +81,7 @@ def send_coap_request():
 def processPkt(pkt):
     global parser
     global rm
+    global frag_ctxt
     
     # look for a tunneled SCHC pkt
     epoch = int(time.time())
@@ -88,7 +106,12 @@ def processPkt(pkt):
                     schc_bb = BitBuffer(schc_pkt)
                     
                     rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
-                    print (rule)
+
+                    if T_FRAG in rule:
+                        print ("Fragmentation rule")
+                        fc = get_frag_ctxt (rule=rule)
+
+
 
                     if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
                         print ("answer ping request")
