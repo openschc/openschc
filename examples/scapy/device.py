@@ -51,7 +51,7 @@ def get_frag_ctxt (rule, dev=None):
     for fc in frag_ctxt:
         if fc[T_RULEID] == rule[T_RULEID] and fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]:
             return fc
-    print ("get_fragCtxt not found")
+    print ("get_fragCtxt not found", rule)
     fc = None
     if rule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
         fc[T_RULEID]  == rule[T_RULEID]
