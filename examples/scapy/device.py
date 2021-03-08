@@ -56,6 +56,7 @@ def get_frag_ctxt (rule, dev=None):
     print ("get_fragCtxt not found", T_FRAG_NO_ACK, rule, rule[T_FRAG][T_FRAG_MODE])
     fc = None
     if rule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
+        fc = {}
         fc[T_RULEID]  = rule[T_RULEID]
         fc[T_RULEIDLENGTH] = rule[T_RULEIDLENGTH]
         fc["CONTEXT"] = ReassemblerNoAck()
