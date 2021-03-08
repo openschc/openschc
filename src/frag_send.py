@@ -262,13 +262,13 @@ class FragmentNoAck(FragmentBase):
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         dprint("event_sent_frag")
-        self.send_frag()
-        #input("")
+        delay = self.protocol.config.get("tx_interval", 0)
+        self.protocol.scheduler.add_event(delay, self.send_frag, {})
 
     def receive_frag(self, schc_frag, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         dprint("sender frag received:", schc_frag.__dict__)
-        if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] is 0 or
+        if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] == 0 or
              schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
             dprint("Receiver Abort rid={} dtag={}".format(
@@ -316,7 +316,7 @@ class FragmentAckOnError(FragmentBase):
         self.num_of_windows = 0
         for pos in self.bit_list:
             dprint("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
-            if len(self.bit_list[pos]) is not 0:
+            if len(self.bit_list[pos]) != 0:
                 self.num_of_windows += 1
         dprint("number of windows = {}".format(self.num_of_windows))
         #input("")

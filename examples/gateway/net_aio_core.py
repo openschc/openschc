@@ -136,11 +136,15 @@ class AiohttpScheduler():
         return self.loop.time()
 
     def add_event(self, time_in_sec, event_function, event_args):
-        dprint(f"Add event {time_in_sec} {event_args}")
-        dprint(f"callback set -> {event_function.__name__}")
+        dprint(f"Add event: "
+               f"call in {time_in_sec} sec: "
+               f"{event_function.__name__} {event_args}")
         assert time_in_sec >= 0
-        evnet_id = self.loop.call_later(time_in_sec, event_function,
-                                        *event_args)
+        if event_args is None:
+            evnet_id = self.loop.call_later(time_in_sec, event_function)
+        else:
+            evnet_id = self.loop.call_later(time_in_sec, event_function,
+                                            *event_args)
         return evnet_id
 
     def cancel_event(self, event_handle):
