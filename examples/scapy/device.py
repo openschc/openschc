@@ -57,6 +57,7 @@ def get_frag_ctxt (rule, dev=None):
         fc[T_RULEID]  == rule[T_RULEID]
         fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]
         fc["CONTEXT"] = ReassemblerNoAck
+        frag_ctxt.append(fc)
 
     return fc 
 
