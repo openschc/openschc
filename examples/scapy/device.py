@@ -47,15 +47,20 @@ token = 0X200
 frag_ctxt = [] 
 
 def get_frag_ctxt (rule, dev=None):
+    global frag_ctxt
+
+    print (frag_ctxt)
     for fc in frag_ctxt:
         if fc[T_RULEID] == rule[T_RULEID] and fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]:
             return fc
-    print ("get_fragCtxt not found")
+    print ("get_fragCtxt not found", T_FRAG_NO_ACK, rule, rule[T_FRAG][T_FRAG_MODE])
     fc = None
     if rule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
         fc[T_RULEID]  == rule[T_RULEID]
         fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]
         fc["CONTEXT"] = ReassemblerNoAck
+        frag_ctxt.append(fc)
+        print (frag_ctxt)
 
     return fc 
 
@@ -110,6 +115,7 @@ def processPkt(pkt):
                     if T_FRAG in rule:
                         print ("Fragmentation rule")
                         fc = get_frag_ctxt (rule=rule)
+                        print (fc)
 
 
 

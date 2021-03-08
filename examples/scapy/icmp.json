@@ -76,7 +76,7 @@
 		"RuleID" : 12,
 		"RuleIDLength" : 8,
 		"Fragmentation" : {
-			"FRMode": "noAck",
+			"FRMode": "NoAck",
 			"FRDirection": "DW"
 		}
 	} 

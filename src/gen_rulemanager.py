@@ -531,7 +531,7 @@ class RuleManager:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
 
-            if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
+            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
 
@@ -539,12 +539,12 @@ class RuleManager:
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
                 _default_value (arule, nrule, T_FRAG_MIC, "crc32")
 
-                if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
+                if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG, 2)
                     _default_value (arule, nrule, T_FRAG_W, 0)
                     _default_value (arule, nrule, T_FRAG_FCN, 3)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
+                elif nrule[T_FRAG][T_FRAG_MODE] == "aT_FRAG_ACK_ALWAYS":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
@@ -734,7 +734,7 @@ class RuleManager:
 
                     print ("!{} RCS Algorithm: {:<69}{}!".format(dir_c,rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC], dir_c))
 
-                    if rule[T_FRAG][T_FRAG_MODE] != "noAck":
+                    if rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
                         print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
@@ -1056,7 +1056,7 @@ class RuleManager:
 
             mode = fragRule["FRMode"]
 
-            if not mode in ("noAck", "ackAlways", "ackOnError"):
+            if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"):
                 raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
 
             if not "FRModeProfile" in fragRule:
@@ -1068,17 +1068,17 @@ class RuleManager:
                 profile["dtagSize"] = 0
 
             if not "WSize" in profile:
-                if  mode == "noAck":
+                if  mode == T_FRAG_NO_ACK:
                     profile["WSize"] = 0
-                elif  mode == "ackAlways":
+                elif  mode == T_FRAG_ACK_ALWAYS:
                     profile["WSize"] = 1
                 elif mode == "ackOnError":
                     profile["WSize"] = 5
 
             if not "FCNSize" in profile:
-                if mode == "noAck":
+                if mode == T_FRAG_NO_ACK:
                     profile["FCNSize"] = 1
-                elif mode == "ackAlways":
+                elif mode == T_FRAG_ACK_ALWAYS:
                     profile["FCNSize"] = 3
                 elif mode == "ackOnError":
                     profile["FCNSize"] = 3
