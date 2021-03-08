@@ -47,6 +47,7 @@ token = 0X200
 frag_ctxt = [] 
 
 def get_frag_ctxt (rule, dev=None):
+    print (frag_ctxt)
     for fc in frag_ctxt:
         if fc[T_RULEID] == rule[T_RULEID] and fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]:
             return fc
