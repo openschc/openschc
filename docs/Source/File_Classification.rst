@@ -1,5 +1,5 @@
-File Classification
-*******************
+File Taxonomy
+*************
 
 The different components are
 

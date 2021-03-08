@@ -1,5 +1,4 @@
 {
-    "debug_level": true,
     "enable_sim_device": true,
     "bind_addr": "::1",
     "bind_port": 51226,

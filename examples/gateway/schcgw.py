@@ -37,7 +37,7 @@ def set_logger(config):
     logging.basicConfig(format=LOG_FMT, datefmt=LOG_DATE_FMT)
     logger = logging.getLogger(config.prog_name)
 
-    if config.debug_level:
+    if config.debug_level > 0:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
@@ -182,7 +182,7 @@ ap.add_argument("--untrust", action="store_false", dest="ssl_verify",
                 default=None,
                 help="disable to check the server certificate.")
 ap.add_argument("--tx-interval", action="store", dest="tx_interval",
-                type=int, default=2,
+                type=int,
                 help="disable to check the server certificate.")
 ap.add_argument("--prog-name", action="store", dest="prog_name",
                 default="GW",
@@ -194,14 +194,14 @@ update_config()
 
 # set the logger object.
 logger = set_logger(config)
-if not config.debug_level:
+if config.debug_level > 0:
     set_debug_output(True)
 
 # create the schc protocol object.
 rule_manager = RuleManager()
 for x in config.rule_config:
     rule_manager.Add(device=x.get("devL2Addr"), file=x["rule_file"])
-if config.debug_level:
+if config.debug_level > 1:
     rule_manager.Print()
 #
 schc_conf = get_schc_conf(config)
@@ -215,12 +215,13 @@ protocol.set_rulemanager(rule_manager)
 ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 ctx.load_cert_chain(config.my_cert)
 app = web.Application(logger=logger)
-if config.enable_sim_device:
-    app.router.add_route("POST", "/ul", app_downlink)
-    app.router.add_route("POST", "/dl", app_uplink)
-else:
+if not config.enable_sim_device:
     app.router.add_route("POST", "/ul", app_uplink)
     app.router.add_route("POST", "/dl", app_downlink)
+else:
+    # this is debug use only.
+    app.router.add_route("POST", "/ul", app_downlink)
+    app.router.add_route("POST", "/dl", app_uplink)
 #
 logger.info("Starting {} listening on https://{}:{}/".format(
         config.prog_name,

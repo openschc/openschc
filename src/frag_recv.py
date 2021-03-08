@@ -190,7 +190,7 @@ class ReassemblerNoAck(ReassembleBase):
             mic_calced = self.get_mic(schc_packet.get_content())
             if schc_frag.mic != mic_calced:
                 dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
-                        schc_frag.mic, mic_calced))
+                        b2hex(schc_frag.mic), b2hex(mic_calced)))
                 self.state = 'ERROR_MIC_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 return
@@ -428,7 +428,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 info.append("mic-not-ok") # XXX: how do you leave ERROR state?
                 dprint("----------------------- ERROR -----------------------")
                 dprint("ERROR: MIC mismatched. packet {} != result {}".format(
-                    schc_frag.mic, mic_calced))
+                    b2hex(schc_frag.mic), b2hex(mic_calced)))
                 should_send_ack = True
 
         if should_send_ack:
