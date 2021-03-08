@@ -110,6 +110,7 @@ def processPkt(pkt):
                     if T_FRAG in rule:
                         print ("Fragmentation rule")
                         fc = get_frag_ctxt (rule=rule)
+                        print (fc)
 
 
 
