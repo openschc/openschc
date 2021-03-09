@@ -200,9 +200,10 @@ class ReassemblerNoAck(ReassembleBase):
             else:
                 dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
                     schc_frag.mic, mic_calced))
+                    return schc_packet.get_content()
             # decompression
             # dprint("----------------------- Decompression -----------------------")
-            if not self.protocol.config.get("debug-fragment"):
+            #if not self.protocol.config.get("debug-fragment"):
                 # XXX
                 # XXX in hack105, we have separate databases for C/D and F/R.
                 # XXX need to merge them into one.  Then, here searching database will
@@ -210,9 +211,9 @@ class ReassemblerNoAck(ReassembleBase):
                 # XXX
                 #rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
                 #dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
+                #self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
             self.state = 'DONE_NO_ACK'
-            self.protocol.session_manager.delete_session(self._session_id)
+            #self.protocol.session_manager.delete_session(self._session_id)
             #dprint(self.state)
             return
         # set inactive timer.
