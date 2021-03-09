@@ -108,7 +108,7 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")
 
-                    pkt.show()
+                    #pkt.show()
                     
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     schc_bb = BitBuffer(schc_pkt)
@@ -168,7 +168,7 @@ if ip_addr == "192.168.1.104":
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
 
-    #event_queue.append([int(time.time())+10, send_coap_request])
+    #event_queue.append([int(time.time())+10, send_coap_request]) s
 
     sniff (filter="ip6 or port 23628 and not arp",
            prn=processPkt,
