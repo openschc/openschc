@@ -203,7 +203,7 @@ class frag_context:
         print (frag.packet)
         self.sock.sendto(frag.packet.get_content(), self.dest)
 
-        self.wakeup = time.time()+20
+        self.wakeup = time.time()+2
         event_queue.append(self)
 
 
