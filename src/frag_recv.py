@@ -213,8 +213,8 @@ class ReassemblerNoAck(ReassembleBase):
             #dprint(self.state)
             return
         # set inactive timer.
-        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-                self.inactive_timer, self.event_inactive, tuple())
+        #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+        #        self.inactive_timer, self.event_inactive, tuple())
         dprint("---", schc_frag.fcn)
 
 
