@@ -174,7 +174,7 @@ class ReassemblerNoAck(ReassembleBase):
         if schc_frag.abort == True:
             dprint("----------------------- Sender-Abort ---------------------------")
             # XXX needs to release all resources.
-            return
+            return False
         self.tile_list.append(schc_frag.payload)
         print (self.tile_list)
         #
@@ -196,11 +196,11 @@ class ReassemblerNoAck(ReassembleBase):
                         b2hex(schc_frag.mic), b2hex(mic_calced)))
                 self.state = 'ERROR_MIC_NO_ACK'
                 #self.protocol.session_manager.delete_session(self._session_id)
-                return
+                return False
             else:
                 dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
                     schc_frag.mic, mic_calced))
-                    return schc_packet.get_content()
+                return schc_packet.get_content()
             # decompression
             # dprint("----------------------- Decompression -----------------------")
             #if not self.protocol.config.get("debug-fragment"):
