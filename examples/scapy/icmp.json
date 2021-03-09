@@ -74,7 +74,7 @@
 	    ]
 	},{
 		"RuleID" : 12,
-		"RuleIDLength" : 8,
+		"RuleIDLength" : 11,
 		"Fragmentation" : {
 			"FRMode": "NoAck",
 			"FRDirection": "DW"
