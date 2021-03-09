@@ -119,6 +119,7 @@ def processPkt(pkt):
                         print ("Fragmentation rule")
                         fc = get_frag_ctxt (rule=rule)
                         print (fc)
+                        fc.receive_frag(bbuf=schc_bb, dtag=0)
 
 
 
