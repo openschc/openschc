@@ -176,6 +176,7 @@ class ReassemblerNoAck(ReassembleBase):
             # XXX needs to release all resources.
             return
         self.tile_list.append(schc_frag.payload)
+        print (self.tile_list)
         #
         if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
             dprint("----------------------- Final Reassembly -----------------------")
