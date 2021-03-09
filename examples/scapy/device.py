@@ -65,7 +65,7 @@ def get_frag_ctxt (rule, dev=None):
         frag_ctxt.append(fc)
         print (frag_ctxt)
 
-    return fc 
+    return fc
 
 
 def send_coap_request():
@@ -119,7 +119,7 @@ def processPkt(pkt):
                         print ("Fragmentation rule")
                         fc = get_frag_ctxt (rule=rule)
                         print (fc)
-                        fc.receive_frag(bbuf=schc_bb, dtag=0)
+                        fc["CONTEXT"].receive_frag(bbuf=schc_bb, dtag=0)
 
 
 
