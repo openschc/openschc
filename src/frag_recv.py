@@ -135,6 +135,8 @@ class ReassemblerNoAck(ReassembleBase):
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
+        print (binascii.hexlify(bbuf._content)
+
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         dprint("receiver frag received:", schc_frag.__dict__)
 
