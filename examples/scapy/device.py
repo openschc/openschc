@@ -119,6 +119,7 @@ def processPkt(pkt):
                         print ("Fragmentation rule")
                         fc = get_frag_ctxt (rule=rule)
                         print (fc)
+                        hexdump(schc_bb._content)
                         res = fc["CONTEXT"].receive_frag(bbuf=schc_bb, dtag=0)
 
                         if res == False: # we have a fragment we cannot go further
