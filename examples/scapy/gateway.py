@@ -271,7 +271,7 @@ def processPkt(pkt):
                         print ("unknown rule")
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        print ("RECEIVED ", bytes(pkt))
+        hexdump(bytes(pkt))
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
 
