@@ -122,10 +122,17 @@ def processPkt(pkt):
                         hexdump(schc_bb._content)
                         res = fc["CONTEXT"].receive_frag(bbuf=schc_bb, dtag=0)
 
-                        if res == False: # we have a fragment we cannot go further
-                            return
+                        if res == None: # we have a fragment we cannot go further
+                            print ("frag continue")
+                        elif res = False:
+                            print ("fragmentation error MIC incorrect")
+                        else:
+                            print ("Alleluia")
+                        
 
                         print (res)
+                    
+                    return
 
 
 
