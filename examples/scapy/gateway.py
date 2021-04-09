@@ -271,7 +271,6 @@ def processPkt(pkt):
                         print ("unknown rule")
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        hexdump(bytes(pkt))
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
 
@@ -284,6 +283,7 @@ def processPkt(pkt):
                     print (destination)
                     schc_pkt.display()
                     if len(schc_pkt._content) > 12:
+                        hexdump(schc_pkt._content)
                         send_frag(schc_pkt, mtu_in_bytes=12, sock=tunnel, dest=destination)
                     else: 
                         tunnel.sendto(schc_pkt._content, destination)
