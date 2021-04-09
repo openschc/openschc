@@ -220,6 +220,7 @@ class ReassemblerNoAck(ReassembleBase):
         #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
         #        self.inactive_timer, self.event_inactive, tuple())
         dprint("---", schc_frag.fcn)
+        return None
 
 
     def get_state_info(self, **kw):
