@@ -164,6 +164,7 @@ if ip_addr == "192.168.1.11":
 
     SCHC_machine = SCHCProtocol()
     SCHC_machine.set_rulemanager(rm)
+    SCHC_machine.set_position(T_POSITION_DEVICE)
 
     #event_queue.append([int(time.time())+10, send_coap_request]) s
 
