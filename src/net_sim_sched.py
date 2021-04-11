@@ -30,6 +30,7 @@ class SimulScheduler:
         self.clock += delay
 
     def run(self):
+        print ("Run")
         while len(self.queue) > 0:
             self.queue.sort()
             event_info = self.queue.pop(0)
