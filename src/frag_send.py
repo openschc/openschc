@@ -147,8 +147,7 @@ class FragmentNoAck(FragmentBase):
         if self.protocol.connectivity_manager.get_mtu("toto")*8 < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.mtu, min_size))
 
-
-    def get_frag(self):
+    def send_frag(self):
         # XXX
         # because No-ACK mode supports variable MTU,
         # sender can't know the fact that it can't send all fragments
