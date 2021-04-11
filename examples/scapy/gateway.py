@@ -238,7 +238,7 @@ scheduler = SimulScheduler()
 def send_tunnel(pkt, dest):
     print ("send tunnel")
     print (dest, pkt)
-    print (pkt.make_frag())
+    print (pkt.display())
 
 def processPkt(pkt):
     global parser
