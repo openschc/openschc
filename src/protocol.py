@@ -139,10 +139,10 @@ class SCHCProtocol:
             set_debug_output(True)
 
     def _log(self, message):
-        self.log("schc", message)
+        print("schc", message)
 
     def log(self, name, message):
-        self.system.log(name, message)
+        print(name, message)
 
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
