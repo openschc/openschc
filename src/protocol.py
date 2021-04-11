@@ -173,14 +173,14 @@ class SCHCProtocol:
             t_dir = T_DIR_UP
         else:
             raise ValueError ("Unknown postion")
-            
+
         parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
         if parsed_packet is None:
             return BitBuffer(raw_packet)
 
         # Apply compression rule
-        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        rule, device_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         self._log("compression rule {}".format(rule))
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(dst_l3_address)
