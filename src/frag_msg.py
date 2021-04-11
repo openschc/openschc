@@ -89,6 +89,19 @@ class frag_base():
         if dtag > get_max_dtag(self.rule):
             raise ValueError("dtag is bigger than the field size.")
 
+    def display(self):
+        print ("rule id", self.rule_id)
+        print ("dtag", self.dtag)
+        print ("win", self.win)
+        print ("fcn", self.fcn)
+        print ("mic", self.mic)
+        print ("bitmap", self.bitmap)
+        print ("cbit", self.cbit)
+        print ("payload", self.payload)
+        print ("packet", self.packet)
+        print ("abort", self.abort)
+        print ("ack_request", self.ack_request)
+
 class frag_tx(frag_base):
 
     '''
