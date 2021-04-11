@@ -237,6 +237,7 @@ scheduler = SimulScheduler()
     
 def send_tunnel(pkt, dest):
     print ("send tunnel")
+    print (dest, binascii.hexlify(pkt))
 
 def processPkt(pkt):
     global parser
