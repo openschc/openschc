@@ -266,7 +266,7 @@ class SCHCProtocol:
         print ("after compression")
 
         # Check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu():
+        if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
                 packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), dst_l2_address)
