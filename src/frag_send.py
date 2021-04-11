@@ -140,7 +140,7 @@ class FragmentNoAck(FragmentBase):
         # because draft-18 requires that in No-ACK mode, each fragment must
         # contain exactly one tile and the tile size must be at least the size
         # of an L2 Word.
-        dprint(self.rule)
+        print(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
                         frag_msg.get_mic_size(self.rule) + self.l2word)
         print (self.mtu*8, min_size)
