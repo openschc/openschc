@@ -32,9 +32,9 @@ class SimulScheduler:
 
     def run(self):
         seq = ["|", "/", "-", "\\", "-"]
-        print ("{:s}\b".format(seq[item%len(seq)]))
-        item +=1
-        
+        print ("{:s}\b".format(seq[self.item%len(seq)]))
+        self.item +=1
+
         while len(self.queue) > 0:
             self.queue.sort()
             event_info = self.queue.pop(0)
