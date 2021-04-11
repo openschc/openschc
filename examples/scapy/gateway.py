@@ -9,6 +9,8 @@ import scapy.contrib.coap as scapy_coap
 import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
+from protocol import SCHCProtocol
+
 
 import protocol
 
@@ -308,6 +310,9 @@ socket_port = 0x5C4C
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", 0x5C4C))
+
+SCHC_machine = SCHCProtocol()
+SCHC_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
