@@ -132,6 +132,13 @@ class ReassemblerNoAck(ReassembleBase):
 
     """
     def receive_frag(self, bbuf, dtag):
+        """
+        return 
+        - None if fragmentation is not finished
+        - False if the MIC is wrong
+        - bytearray if fragmentaiton succeed 
+        
+        """
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 

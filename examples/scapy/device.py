@@ -7,6 +7,7 @@ import binascii
 import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
+from protocol import SCHCProtocol
 
 import pprint
 import binascii
@@ -90,6 +91,8 @@ def processPkt(pkt):
     global parser
     global rm
     global frag_ctxt
+    global SCHC_machine
+    global device_id
     
     # look for a tunneled SCHC pkt
     epoch = int(time.time())
@@ -109,43 +112,19 @@ def processPkt(pkt):
                     print ("tunneled SCHC msg")
 
                     #pkt.show()
-                    
+
+            
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    schc_bb = BitBuffer(schc_pkt)
-                    
-                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
+                    r = SCHC_machine.schc_recv(device_id, schc_pkt)
 
-                    if T_FRAG in rule:
-                        print ("Fragmentation rule")
-                        fc = get_frag_ctxt (rule=rule)
-                        print (fc)
-                        hexdump(schc_bb._content)
-                        res = fc["CONTEXT"].receive_frag(bbuf=schc_bb, dtag=0)
-
-                        if res == None: # we have a fragment we cannot go further
-                            print ("frag continue")
-                        elif res == False:
-                            print ("fragmentation error MIC incorrect")
-                        else:
-                            print ("Alleluia")
-                        
-
-                        print (res)
+                    print (r)
                     
                     return
 
 
 
-
-
-                    if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH] == 3:  # answer ping request
-                        print ("answer ping request")
-                        tunnel.sendto(schc_pkt, addr) 
-
-               
-
         
-    elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
+    elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
 
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         print (pkt_fields)
@@ -171,7 +150,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
 
-if ip_addr == "192.168.1.104":
+if ip_addr == "192.168.1.11":
     print("device role")
     send_dir = T_DIR_UP
     recv_dir = T_DIR_DW
@@ -183,11 +162,14 @@ if ip_addr == "192.168.1.104":
     tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tunnel.bind(("0.0.0.0", 8888))
 
+    SCHC_machine = SCHCProtocol()
+    SCHC_machine.set_rulemanager(rm)
+
     #event_queue.append([int(time.time())+10, send_coap_request]) s
 
     sniff (filter="ip6 or port 23628 and not arp",
            prn=processPkt,
-           iface="enp0s3")
+           iface="en0")
 
 
  
