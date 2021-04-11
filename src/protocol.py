@@ -20,6 +20,21 @@ from compr_core import Compressor, Decompressor
 from gen_utils import dtrace
 import binascii
 
+class ConnectivityManager:
+    """
+    This class is aware of the connectivity condition for a device:
+    - current MTU
+    - error rate
+    - duty cycle
+    """
+
+    def __init__(self):
+        pass
+
+    def get_mtu (self, device):
+        return 12
+
+
 # ---------------------------------------------------------------------------
 
 class SessionManager:
@@ -94,14 +109,20 @@ class SessionManager:
             self.protocol.log("cannot create session, no dtag available")
             return None
 
+
+        print ("PRTOCOL=", self.protocol)
+
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(self.protocol, context, rule, dtag)
+
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
+
         elif mode == T_FRAG_ACK_ON_ERROR:
             session = FragmentAckOnError(self.protocol, context, rule, dtag)
+
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         self._add_session(session_id, session)        
@@ -135,6 +156,9 @@ class SCHCProtocol:
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
+
+        self.connectivity_manager = ConnectivityManager()
+
         if ((isinstance(config, object) and hasattr(config, "debug_level")) or
             (isinstance(config, dict) and config.get("debug_level", 0))):
             set_debug_output(True)
@@ -242,7 +266,7 @@ class SCHCProtocol:
         print ("after compression")
 
         # Check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < 12:
+        if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu():
             self._log("fragmentation not needed size={}".format(
                 packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), dst_l2_address)
