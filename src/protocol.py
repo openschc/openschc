@@ -167,6 +167,13 @@ class SCHCProtocol:
 
         # Parse packet as IP packet and apply compression rule
         P = Parser(self)
+        if self.position == T_POSITION_CORE:
+            t_dir = T_DIR_DW
+        elif self.poistion == T_POSITION_DEVICE:
+            t_dir = T_DIR_UP
+        else:
+            raise ValueError ("Unknown postion")
+            
         parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
         if parsed_packet is None:
