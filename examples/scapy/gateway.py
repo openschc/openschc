@@ -10,6 +10,7 @@ import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
 from protocol import SCHCProtocol
+from net_sim_scheduler import SimulScheduler
 
 
 import protocol
