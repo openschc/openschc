@@ -33,7 +33,7 @@ class FragmentBase():
         self.context = context
         self.rule = rule
         self.mtu = None 
-        self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
+        self.l2word = 8 # self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
