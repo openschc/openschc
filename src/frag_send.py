@@ -255,9 +255,8 @@ class FragmentNoAck(FragmentBase):
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
 
-        #self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-        #                                  args)
-        return schc_frag
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+                                          args)
 
 
     def event_sent_frag(self, status): # status == nb actually sent (for now)
