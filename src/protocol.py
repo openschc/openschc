@@ -61,12 +61,12 @@ class SessionManager:
         if self.unique_peer:
             l2_address = None
         mode = rule[T_FRAG][T_FRAG_MODE]
-        if mode == "noAck":
+        if mode == T_FRAG_NO_ACK:
             session = ReassemblerNoAck(
                 self.protocol, context, rule, dtag, l2_address)
-        elif mode == "ackAlways":
+        elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError("FRMode:", mode)
-        elif mode == "ackOnError":
+        elif mode == T_FRAG_ACK_ON_ERROR:
             session = ReassemblerAckOnError(
                 self.protocol, context, rule, dtag, l2_address)
         else:
@@ -120,17 +120,17 @@ class SCHCProtocol:
 
     """
 
-    def __init__(self, config, system, layer2, layer3, role, unique_peer):
+    def __init__(self, config=None, system=None, layer2=None, layer3="None", role="device", unique_peer=None):
         assert role in ["device", "core-server"]
         self.config = config
         self.unique_peer = unique_peer
         self.role = role
         self.system = system
-        self.scheduler = system.get_scheduler()
-        self.layer2 = layer2
-        self.layer3 = layer3
-        self.layer2._set_protocol(self)
-        self.layer3._set_protocol(self)
+        self.scheduler = None
+        # self.layer2 = layer2
+        # self.layer3 = layer3
+        # self.layer2._set_protocol(self)
+        # self.layer3._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
@@ -249,11 +249,12 @@ class SCHCProtocol:
             frag_session.start_sending()
 
     def schc_recv(self, dst_l2_addr, raw_packet):
+        device_id = dst_l2_addr # for compatibility with old code : remove when cleaned
         """Receiving a SCHC packet from a lower layer."""
         packet_bbuf = BitBuffer(raw_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
-        frag_rule = self.rule_manager.FindFragmentationRule(
-                deviceID=dst_l2_addr, packet=packet_bbuf)
+
+        frag_rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
@@ -278,7 +279,7 @@ class SCHCProtocol:
                 context, frag_rule, session_id)
             dprint("New reassembly session created", session.__class__.__name__)
 
-        session.receive_frag(packet_bbuf, dtag)
+        return session.receive_frag(packet_bbuf, dtag)
 
 
     def process_decompress(self, packet_bbuf, dev_l2_addr, direction):
