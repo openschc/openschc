@@ -235,7 +235,7 @@ event_queue = []
 scheduler = SimulScheduler()
 
     
-def send_tunnel():
+def send_tunnel(pkt, dest):
     print ("send tunnel")
 
 def processPkt(pkt):
