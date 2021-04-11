@@ -200,7 +200,7 @@ class SCHCProtocol:
         schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
-        return schc_packet
+        return schc_packet, device_id
 
 
     def _make_frag_session(self, dst_l2_address, direction):
@@ -237,12 +237,12 @@ class SCHCProtocol:
         self._log("recv-from-l3 {} {} {}".format(dst_l2_address, dst_l3_address, raw_packet))
 
         # Perform compression
-        packet_bbuf = self._apply_compression(dst_l3_address, raw_packet)
+        packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
 
         print ("after compression")
 
         # Check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():
+        if packet_bbuf.count_added_bits() < 12:
             self._log("fragmentation not needed size={}".format(
                 packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), dst_l2_address)
