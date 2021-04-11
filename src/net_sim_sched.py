@@ -32,7 +32,7 @@ class SimulScheduler:
 
     def run(self):
         seq = ["|", "/", "-", "\\", "-"]
-        print ("{:s}\b".format(seq[self.item%len(seq)]), end="")
+        print ("{:s}\b".format(seq[self.item%len(seq)]))
         self.item +=1
 
         while len(self.queue) > 0:
