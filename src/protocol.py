@@ -95,12 +95,12 @@ class SessionManager:
             return None
 
         mode = rule[T_FRAG][T_FRAG_MODE]
-        if mode == "noAck":
+        if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(self.protocol, context, rule, dtag)
-        elif mode == "ackAlways":
+        elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
-        elif mode == "ackOnError":
+        elif mode == T_FRAG_ACK_ON_ERROR:
             session = FragmentAckOnError(self.protocol, context, rule, dtag)
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
@@ -254,7 +254,7 @@ class SCHCProtocol:
             direction = T_DIR_UP
         else:
             direction = T_DIR_DW
-            
+
         frag_session = self._make_frag_session(device_id, direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
