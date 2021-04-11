@@ -237,6 +237,7 @@ def processPkt(pkt):
     global parser
     global rm
     global event_queue
+    global SCHC_machine
     
 
     if len(event_queue) > 0 and time.time() > event_queue[0].wakeup:
@@ -260,6 +261,8 @@ def processPkt(pkt):
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     device_id = "udp:"+addr[0]+":"+str(addr[1])
                     print (binascii.hexlify(schc_pkt), addr, device_id)
+
+                    SCHC_machine.schc_send (raw_packet=schc_pkt)
 
                     schc_bb = BitBuffer(schc_pkt)
                     
