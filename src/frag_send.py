@@ -255,7 +255,7 @@ class FragmentNoAck(FragmentBase):
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
 
-        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
+        self.protocol.scheduler.add_event(0, self.protocol.send_layer2,
                                           args)
 
 

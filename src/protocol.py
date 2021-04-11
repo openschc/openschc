@@ -149,6 +149,7 @@ class SCHCProtocol:
         self.position = None #position gives if the SCHC is for device or core to define UP and DOWN
         self.system = system
         self.scheduler = None
+        self.send_layer2 = None
         # self.layer2 = layer2
         # self.layer3 = layer3
         # self.layer2._set_protocol(self)
@@ -178,6 +179,9 @@ class SCHCProtocol:
 
     def set_scheduler(self, scheduler):
         self.scheduler = scheduler
+
+    def set_l2_send_fct(self, fct):
+        self.send_layer2 = fct
 
     def get_system(self):
         return self.system

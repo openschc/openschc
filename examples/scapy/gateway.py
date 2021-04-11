@@ -235,6 +235,9 @@ event_queue = []
 scheduler = SimulScheduler()
 
     
+def send_tunnel():
+    print ("send tunnel")
+
 def processPkt(pkt):
     global parser
     global rm
@@ -319,6 +322,7 @@ SCHC_machine = SCHCProtocol()
 SCHC_machine.set_rulemanager(rm)
 SCHC_machine.set_position(T_POSITION_CORE)
 SCHC_machine.set_scheduler(scheduler)
+SCHC_machine.set_l2_send_fct(send_tunnel)
 
 sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
