@@ -174,8 +174,10 @@ class SCHCProtocol:
 
     def set_position(self, position):
         assert position in [T_POSITION_DEVICE, T_POSITION_CORE]
-
         self.position = position
+
+    def set_scheduler(self, scheduler):
+        self.scheduler = scheduler
 
     def get_system(self):
         return self.system
