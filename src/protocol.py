@@ -250,11 +250,12 @@ class SCHCProtocol:
             return
 
         # Start a fragmentation session from rule database
-        if dst_l2_address == None:
+        if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
         else:
             direction = T_DIR_DW
-        frag_session = self._make_frag_session(dst_l2_address, direction)
+            
+        frag_session = self._make_frag_session(device_id, direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
