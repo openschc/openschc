@@ -114,14 +114,14 @@ class SessionManager:
 
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == T_FRAG_NO_ACK:
-            session = FragmentNoAck(self.protocol, context, rule, dtag)
+            session = FragmentNoAck(rule, 12, self.protocol, context, dtag)
 
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
 
         elif mode == T_FRAG_ACK_ON_ERROR:
-            session = FragmentAckOnError(self.protocol, context, rule, dtag)
+            session = FragmentAckOnError(self.protocol, context, rule, dtag) # see above for param order
 
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
