@@ -215,8 +215,8 @@ class SCHCProtocol:
 
         return session
 
-
-    def schc_send(self, dst_l2_address=None, dst_l3_address=None, raw_packet):
+    # CLEANUP: dst_l2 and l3 should be removed
+    def schc_send(self, raw_packet, dst_l2_address=None, dst_l3_address=None,):
         """Starting to send SCHC packet after called by L3.
         
         If dst_l2_address is None, this function is for sending
