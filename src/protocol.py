@@ -216,7 +216,7 @@ class SCHCProtocol:
         return session
 
 
-    def schc_send(self, dst_l2_address, dst_l3_address, raw_packet):
+    def schc_send(self, dst_l2_address=None, dst_l3_address=None, raw_packet):
         """Starting to send SCHC packet after called by L3.
         
         If dst_l2_address is None, this function is for sending
@@ -229,6 +229,8 @@ class SCHCProtocol:
 
         # Perform compression
         packet_bbuf = self._apply_compression(dst_l3_address, raw_packet)
+
+        print ("after compression")
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.layer2.get_mtu_size():

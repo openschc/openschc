@@ -264,16 +264,16 @@ def processPkt(pkt):
 
                     SCHC_machine.schc_send (raw_packet=schc_pkt)
 
-                    schc_bb = BitBuffer(schc_pkt)
+                    # schc_bb = BitBuffer(schc_pkt)
                     
-                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
-                    #print (rule)
-                    if rule != None:
-                        phd = decomp.decompress(schc_bb, rule, recv_dir)
-                        print (phd)
-                        send_scapy(phd, schc_bb, rule)
-                    else:
-                        print ("unknown rule")
+                    # rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
+                    # #print (rule)
+                    # if rule != None:
+                    #     phd = decomp.decompress(schc_bb, rule, recv_dir)
+                    #     print (phd)
+                    #     send_scapy(phd, schc_bb, rule)
+                    # else:
+                    #     print ("unknown rule")
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
         pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
