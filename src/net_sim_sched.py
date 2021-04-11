@@ -34,7 +34,7 @@ class SimulScheduler:
         factor= 10
         if self.item % factor == 0:
             seq = ["|", "/", "-", "\\", "-"]
-            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b")
+            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="")
         self.item +=1
 
         while len(self.queue) > 0:
