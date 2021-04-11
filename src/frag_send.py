@@ -255,6 +255,8 @@ class FragmentNoAck(FragmentBase):
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
 
+        args = (schc_frag, 'titi')
+
         self.protocol.scheduler.add_event(0, self.protocol.send_layer2,
                                           args)
 
