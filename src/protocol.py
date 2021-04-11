@@ -124,7 +124,8 @@ class SCHCProtocol:
         assert role in ["device", "core-server"]
         self.config = config
         self.unique_peer = unique_peer
-        self.role = role
+        self.role = role # should be remove for position
+        self.position = None #position gives if the SCHC is for device or core to define UP and DOWN
         self.system = system
         self.scheduler = None
         # self.layer2 = layer2
@@ -147,21 +148,22 @@ class SCHCProtocol:
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
 
+    def set_position(self, position):
+        assert position in [T_POSITION_DEVICE, T_POSITION_CORE]
+
+        self.position = position
+
     def get_system(self):
         return self.system
 
-
+    #CLEANUP remove dst_l3_address
     def _apply_compression(self, dst_l3_address, raw_packet):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
         """
-        context = self.rule_manager.find_context_bydstiid(dst_l3_address)
-        if self.role == "device":
-            t_dir = T_DIR_UP
-        else:
-            assert self.role == "core-server"
-            t_dir = T_DIR_DW
+        #context = self.rule_manager.find_context_bydstiid(dst_l3_address)
+ 
 
         # Parse packet as IP packet and apply compression rule
         P = Parser(self)

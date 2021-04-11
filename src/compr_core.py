@@ -126,6 +126,9 @@ T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
 
+T_POSITION_CORE = "core"
+T_POSITION_DEVICE = "device"
+
 # from gen_rulemanager import *
 
 

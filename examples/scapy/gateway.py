@@ -315,6 +315,7 @@ tunnel.bind(("0.0.0.0", 0x5C4C))
 
 SCHC_machine = SCHCProtocol()
 SCHC_machine.set_rulemanager(rm)
+SCHC_machine.set_position(T_POSITION_CORE)
 
 sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
