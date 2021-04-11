@@ -31,8 +31,9 @@ class SimulScheduler:
         self.clock += delay
 
     def run(self):
-        seq = ["|", "/", "-", "\\", "-"]
-        print ("{:s}\b".format(seq[self.item%len(seq)]))
+        if self.item % 100 == 0:
+            seq = ["|", "/", "-", "\\", "-"]
+            print ("{:s}\b".format(seq[(self.item//100)%len(seq)]))
         self.item +=1
 
         while len(self.queue) > 0:
