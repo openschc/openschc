@@ -32,7 +32,7 @@ class FragmentBase():
         self.protocol = protocol
         self.context = context
         self.rule = rule
-        self.mtu = protocol.connectivity_manager.get_mtu("toto")*8  
+        self.mtu = None 
         self.l2word = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
