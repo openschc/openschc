@@ -245,10 +245,7 @@ def processPkt(pkt):
     global SCHC_machine
     
 
-    if len(event_queue) > 0 and time.time() > event_queue[0].wakeup:
-        e = event_queue.pop(0)
-        print (e)
-        e.fct()
+    scheduler.run()
 
     # look for a tunneled SCHC pkt
 
