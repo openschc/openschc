@@ -259,10 +259,6 @@ class FragmentNoAck(FragmentBase):
 
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
-        if transmit_callback:
-            print (self.protocol.scheduler)
-
-        self.protocol.schedule.add_event()
 
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
