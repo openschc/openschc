@@ -458,7 +458,7 @@ SCHC_machine.set_l2_send_fct(send_tunnel)
 
 config = {}
 upper_layer = ScapyUpperLayer()
-lower_layer = ScapyLowerLayer(udp_src, udp_dst)
+lower_layer = ScapyLowerLayer()
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
