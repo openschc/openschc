@@ -12,6 +12,9 @@ from compr_core import *
 from protocol import SCHCProtocol
 from net_sim_sched import SimulScheduler
 
+from gen_utils import dprint, sanitize_value
+
+
 import sched
 
 import protocol
