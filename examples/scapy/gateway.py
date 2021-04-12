@@ -12,6 +12,7 @@ from compr_core import *
 from protocol import SCHCProtocol
 from net_sim_sched import SimulScheduler
 
+import sched
 
 import protocol
 
