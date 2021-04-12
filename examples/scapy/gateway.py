@@ -312,6 +312,9 @@ class ScapyScheduler:
         self.fd_callback_table = {}
 
     # ----- AbstractScheduler Interface (see: architecture.py)
+
+    def get_clock(self):
+        return time.time()
          
     def add_event(self, rel_time, callback, args):
         dprint("Add event {}".format(sanitize_value(self.queue)))
