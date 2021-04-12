@@ -264,11 +264,12 @@ class ScapyUpperLayer:
 # --------------------------------------------------        
 
 class ScapyLowerLayer:
-    def __init__(self, udp_src=None, udp_dst=None):
+    def __init__(self, udp_src=None, udp_dst=None, socket):
         self.protocol = None
         self.sd = None
         self.udp_src = udp_src
         self.udp_dst = udp_dst
+        self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
         
@@ -276,13 +277,16 @@ class ScapyLowerLayer:
         self.protocol = protocol
         self._actual_init()
 
-    def send_packet(self, packet, dst_str_address, transmit_callback=None):
+    def send_packet(self, packet, dest, transmit_callback=None):
         print ("L2 send_packet", transmit_callback, dst_str_address)
-        if dst_str_address is None or dst_str_address == "*":
-            dst_address = self.udp_dst
-        else:
-            dst_address = string_to_address(dst_str_address)
-            print("SENDING", packet, dst_address)            
+        print("SENDING", packet, dst_address)            
+
+        if dest.find("udp") == 0:
+            destination = (device.split(":")[1], int(device.split(":")[2]))
+            print (destination)
+            schc_pkt.hexdump()
+            self.sock.sendto(schc_pkt._content, destination)
+
         if transmit_callback is not None:
             print ("do callback", transmit_callback)
             transmit_callback(1)
