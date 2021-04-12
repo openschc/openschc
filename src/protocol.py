@@ -141,7 +141,7 @@ class SCHCProtocol:
 
     """
 
-    def __init__(self, config=None, system=None, layer2=None, layer3="None", role="device", unique_peer=None):
+    def __init__(self, config=None, system=None, layer2, layer3, role="device", unique_peer=None):
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
