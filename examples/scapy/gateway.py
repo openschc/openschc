@@ -253,9 +253,9 @@ class ScapyUpperLayer:
         scheduler = self.protocol.get_system().get_scheduler()
         scheduler.add_event(delay, self._send_now, (udp_dst, packet))
 
-    def _send_now(self, udp_dst, packet):
+    def _send_now(self, packet):
         dst_address = address_to_string(udp_dst)
-        self.protocol.schc_send(None, dst_address, packet)
+        self.protocol.schc_send(None, packet)
 
 # --------------------------------------------------        
 
@@ -409,7 +409,7 @@ def processPkt(pkt):
                         print ("unknown rule")
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        upper_layer.schc_send(bytes(pkt))
+        upper_layer._send_now(bytes(pkt))
         # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         # print (pkt_fields)
 
