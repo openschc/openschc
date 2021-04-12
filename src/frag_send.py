@@ -167,7 +167,8 @@ class FragmentNoAck(FragmentBase):
         #                    |<- L2 word size ->|<- less than ->|
         #                                         L2 word size
         #                                                       |<- L2 Word
-        mtu = self.protocol.connectivity_manager.get_mtu("toto")
+        mtu = self.protocol.connectivity_manager.get_mtu("toto")*8
+        print("MTU = ", mtu)
         payload_size = (mtu - frag_msg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
         if remaining_data_size >= payload_size:
