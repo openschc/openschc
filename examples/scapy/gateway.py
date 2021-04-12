@@ -286,6 +286,8 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("do callback", transmit_callback)
             transmit_callback(1)
+        else:
+            print ("c'est None")
 
     def get_mtu_size(self):
         return 72 # XXX
