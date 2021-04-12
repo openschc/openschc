@@ -282,7 +282,7 @@ class ScapyLowerLayer:
             dst_address = self.udp_dst
         else:
             dst_address = string_to_address(dst_str_address)
-        self.sd.sendto(packet, dst_address)            
+            print("SENDING", packet, dst_address)            
         if transmit_callback is not None:
             transmit_callback(1)
 
