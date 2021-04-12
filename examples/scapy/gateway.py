@@ -235,10 +235,11 @@ event_queue = []
 scheduler = SimulScheduler()
 
     
-def send_tunnel(pkt, dest):
+def send_tunnel(pkt, dest, callback):
     print ("send tunnel")
     print (dest, pkt)
     print (pkt.display())
+    print (callback)
 
 def processPkt(pkt):
     global parser

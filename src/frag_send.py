@@ -226,8 +226,8 @@ class FragmentNoAck(FragmentBase):
 
 
         # send a SCHC fragment
-        #args = (schc_frag.packet.get_content(), self._session_id[0],
-        #        transmit_callback)
+        args = (schc_frag.packet.get_content(), self._session_id[0],
+                transmit_callback)
         
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
@@ -257,7 +257,7 @@ class FragmentNoAck(FragmentBase):
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
 
-        args = (schc_frag, 'titi')
+        args = (schc_frag, 'titi', transmit_callback)
 
         self.protocol.scheduler.add_event(0, self.protocol.send_layer2,
                                           args)
