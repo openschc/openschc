@@ -277,7 +277,7 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dst_str_address, transmit_callback=None):
-        print ("L2 send_packet", transmit_callback)
+        print ("L2 send_packet", transmit_callback, dst_str_address)
         if dst_str_address is None or dst_str_address == "*":
             dst_address = self.udp_dst
         else:
