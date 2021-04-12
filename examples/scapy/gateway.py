@@ -450,11 +450,11 @@ socket_port = 0x5C4C
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", 0x5C4C))
 
-SCHC_machine = SCHCProtocol()
-SCHC_machine.set_rulemanager(rm)
-SCHC_machine.set_position(T_POSITION_CORE)
-SCHC_machine.set_scheduler(scheduler)
-SCHC_machine.set_l2_send_fct(send_tunnel)
+# SCHC_machine = SCHCProtocol()
+# SCHC_machine.set_rulemanager(rm)
+# SCHC_machine.set_position(T_POSITION_CORE)
+# SCHC_machine.set_scheduler(scheduler)
+# SCHC_machine.set_l2_send_fct(send_tunnel)
 
 
 
