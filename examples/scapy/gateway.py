@@ -300,14 +300,26 @@ class ScapyLowerLayer:
 
 class ScapyScheduler:
     def __init__(self):
+        self.queue = []
+        self.clock = 0
+        self.next_event_id = 0
+        self.current_event_id = None
+        self.observer = None
+        self.item=0
         self.fd_callback_table = {}
-        self.sched = sched.scheduler(delayfunc=self._sleep)
 
     # ----- AbstractScheduler Interface (see: architecture.py)
          
     def add_event(self, rel_time, callback, args):
-        event = self.sched.enter(rel_time, None, callback, args)
-        return event
+        dprint("Add event {}".format(sanitize_value(self.queue)))
+        dprint("callback set -> {}".format(callback.__name__))
+        assert rel_time >= 0
+        event_id = self.next_event_id
+        self.next_event_id += 1
+        clock = self.get_clock()
+        abs_time = clock+rel_time
+        self.queue.append((abs_time, event_id, callback, args))
+        return event_id
 
     def cancel_event(self, event):
         return self.sched.cancel(event)
@@ -343,10 +355,26 @@ class ScapyScheduler:
         self.fd_callback_table[fd] = (callback, args)
 
     def run(self):
-        long_time = 1
-        # while True:
-        #     self.sched.run() # when this returns, there is no event left ...
-        self.wait_one_callback_until(long_time) # hence we wait for input
+        factor= 10
+        if self.item % factor == 0:
+            seq = ["|", "/", "-", "\\", "-"]
+            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
+        self.item +=1
+
+        for q in self.queue:
+            print ("queue ", q)
+
+        while len(self.queue) > 0:
+            self.queue.sort()
+            event_info = self.queue.pop(0)
+            self.clock, event_id, callback, args = event_info
+            self.current_event_id = event_id
+            if self.observer is not None:
+                self.observer("sched-pre-event", event_info)
+            callback(*args)
+            if self.observer is not None:
+                self.observer("sched-post-event", event_info)
+            dprint("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
 
 # --------------------------------------------------        
 
