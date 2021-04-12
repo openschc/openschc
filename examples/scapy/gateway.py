@@ -332,6 +332,7 @@ class ScapyScheduler:
         If so, all associated callbacks are run until there is no input.
         """
         fd_list = list(sorted(self.fd_callback_table.keys()))
+        print (fd_list)
         while True:
             rlist, unused, unused = select.select(fd_list, [], [], max_delay)
             if len(rlist) == 0:
@@ -346,7 +347,7 @@ class ScapyScheduler:
         self.fd_callback_table[fd] = (callback, args)
 
     def run(self):
-        long_time = 3600
+        long_time = 1
         while True:
             self.sched.run() # when this returns, there is no event left ...
             self.wait_one_callback_until(long_time) # hence we wait for input
