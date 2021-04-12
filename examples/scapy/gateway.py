@@ -260,7 +260,7 @@ class ScapyUpperLayer:
 # --------------------------------------------------        
 
 class ScapyLowerLayer:
-    def __init__(self, udp_src, udp_dst):
+    def __init__(self, udp_src=None, udp_dst=None):
         self.protocol = None
         self.sd = None
         self.udp_src = udp_src
