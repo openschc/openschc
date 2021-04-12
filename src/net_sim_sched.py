@@ -37,6 +37,9 @@ class SimulScheduler:
             print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
         self.item +=1
 
+        for q in self.queue:
+            print (q)
+
         while len(self.queue) > 0:
             self.queue.sort()
             event_info = self.queue.pop(0)
