@@ -199,7 +199,7 @@ class SCHCProtocol:
         P = Parser(self)
         if self.position == T_POSITION_CORE:
             t_dir = T_DIR_DW
-        elif self.poistion == T_POSITION_DEVICE:
+        elif self.position == T_POSITION_DEVICE:
             t_dir = T_DIR_UP
         else:
             raise ValueError ("Unknown postion")
