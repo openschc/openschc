@@ -240,6 +240,8 @@ def send_tunnel(pkt, dest, callback):
     print (dest, pkt)
     print (pkt.display())
     print (callback)
+    if callback:
+        callback()
 
 def processPkt(pkt):
     global parser
