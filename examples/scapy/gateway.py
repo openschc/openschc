@@ -255,7 +255,7 @@ class ScapyUpperLayer:
         scheduler.add_event(delay, self._send_now, (udp_dst, packet))
 
     def _send_now(self, packet):
-        dst_address = address_to_string(udp_dst)
+        #dst_address = address_to_string(udp_dst)
         self.protocol.schc_send(None, packet)
 
 # --------------------------------------------------        
