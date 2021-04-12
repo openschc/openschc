@@ -409,7 +409,7 @@ def processPkt(pkt):
                         print ("unknown rule")
         
     elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        SCHC_machine.schc_send(bytes(pkt))
+        upper_layer.schc_send(bytes(pkt))
         # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         # print (pkt_fields)
 
@@ -453,6 +453,19 @@ SCHC_machine.set_rulemanager(rm)
 SCHC_machine.set_position(T_POSITION_CORE)
 SCHC_machine.set_scheduler(scheduler)
 SCHC_machine.set_l2_send_fct(send_tunnel)
+
+
+
+config = {}
+upper_layer = ScapyUpperLayer()
+lower_layer = ScapyLowerLayer(udp_src, udp_dst)
+system = ScapySystem()
+scheduler = system.get_scheduler()
+schc_protocol = protocol.SCHCProtocol(
+    config, system, layer2=lower_layer, layer3=upper_layer, role=role, unique_peer=True)
+
+schc_protocol.set_rulemanager(rm)
+
 
 sniff(prn=processPkt, iface=["he-ipv6", "ens3"])
 
