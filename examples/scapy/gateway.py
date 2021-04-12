@@ -284,7 +284,7 @@ class ScapyLowerLayer:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
             print (destination)
             hexdump(packet)
-            self.sock.sendto(schc_pkt._content, destination)
+            self.sock.sendto(packet, destination)
 
         print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
