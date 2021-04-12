@@ -148,8 +148,8 @@ class SCHCProtocol:
         self.role = role # should be remove for position
         self.position = None #position gives if the SCHC is for device or core to define UP and DOWN
         self.system = system
-        self.scheduler = None
-        self.send_layer2 = None
+        self.scheduler = system.get_scheduler()
+        #self.send_layer2 = None
         self.layer2 = layer2
         self.layer3 = layer3
         self.layer2._set_protocol(self)
