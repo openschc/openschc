@@ -464,7 +464,9 @@ lower_layer = ScapyLowerLayer()
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
-    config, system, layer2=lower_layer, layer3=upper_layer, role=T_POSITION_CORE, unique_peer=True)
+    config=config, system=system, 
+    layer2=lower_layer, layer3=upper_layer, 
+    role=T_POSITION_CORE, unique_peer=True)
 
 schc_protocol.set_rulemanager(rm)
 
