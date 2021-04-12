@@ -371,8 +371,8 @@ class ScapyScheduler:
             print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
         self.item +=1
 
-        for q in self.queue:
-            print ("queue ", q)
+        # for q in self.queue:
+        #     print ("queue ", q)
 
         while len(self.queue) > 0:
             self.queue.sort()
