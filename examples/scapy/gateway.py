@@ -284,6 +284,7 @@ class ScapyLowerLayer:
             dst_address = string_to_address(dst_str_address)
             print("SENDING", packet, dst_address)            
         if transmit_callback is not None:
+            print ("do callback", transmit_callback)
             transmit_callback(1)
 
     def get_mtu_size(self):
@@ -325,6 +326,7 @@ class ScapyScheduler:
         clock = self.get_clock()
         abs_time = clock+rel_time
         self.queue.append((abs_time, event_id, callback, args))
+        print ("QUEUE apppended ", (abs_time, event_id, callback, args))
         return event_id
 
     def cancel_event(self, event):
