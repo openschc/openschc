@@ -239,7 +239,6 @@ def send_tunnel(pkt, dest):
     print ("send tunnel")
     print (dest, pkt)
     print (pkt.display())
-    print (callback)
 
 
 def processPkt(pkt):
