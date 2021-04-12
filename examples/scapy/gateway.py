@@ -376,6 +376,13 @@ class ScapyScheduler:
 
         while len(self.queue) > 0:
             self.queue.sort()
+
+            wake_up_time = self.queue[0][0]
+            print (time.time(), wake_up_time)
+
+            if time.time() < wake_up_time:
+                return
+
             event_info = self.queue.pop(0)
             self.clock, event_id, callback, args = event_info
             self.current_event_id = event_id
