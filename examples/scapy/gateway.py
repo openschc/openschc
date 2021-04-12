@@ -283,7 +283,7 @@ class ScapyLowerLayer:
         if dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
             print (destination)
-            packet.hexdump()
+            hexdump(packet)
             self.sock.sendto(schc_pkt._content, destination)
 
         print ("L2 send_packet", transmit_callback)
