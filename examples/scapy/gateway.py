@@ -278,7 +278,7 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        print("SENDING", packet, dst_address)            
+        print("SENDING", packet, dest)            
 
         if dest.find("udp") == 0:
             destination = (device.split(":")[1], int(device.split(":")[2]))
