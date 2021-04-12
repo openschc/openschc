@@ -378,8 +378,7 @@ class ScapyScheduler:
             self.queue.sort()
 
             wake_up_time = self.queue[0][0]
-            print (time.time(), wake_up_time)
-
+            
             if time.time() < wake_up_time:
                 return
 
