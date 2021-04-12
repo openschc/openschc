@@ -150,10 +150,10 @@ class SCHCProtocol:
         self.system = system
         self.scheduler = None
         self.send_layer2 = None
-        # self.layer2 = layer2
-        # self.layer3 = layer3
-        # self.layer2._set_protocol(self)
-        # self.layer3._set_protocol(self)
+        self.layer2 = layer2
+        self.layer3 = layer3
+        self.layer2._set_protocol(self)
+        self.layer3._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
