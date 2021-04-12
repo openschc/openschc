@@ -348,9 +348,9 @@ class ScapyScheduler:
 
     def run(self):
         long_time = 1
-        while True:
-            self.sched.run() # when this returns, there is no event left ...
-            self.wait_one_callback_until(long_time) # hence we wait for input
+        # while True:
+        #     self.sched.run() # when this returns, there is no event left ...
+        self.wait_one_callback_until(long_time) # hence we wait for input
 
 # --------------------------------------------------        
 
