@@ -142,7 +142,7 @@ class SCHCProtocol:
     """
 
     def __init__(self, config=None, system=None, layer2=None, layer3="None", role="device", unique_peer=None):
-        assert role in ["device", "core-server"]
+        assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
         self.role = role # should be remove for position
