@@ -328,7 +328,7 @@ class ScapyScheduler:
         clock = self.get_clock()
         abs_time = clock+rel_time
         self.queue.append((abs_time, event_id, callback, args))
-        print ("QUEUE apppended ", lend (self.queue), (abs_time, event_id, callback, args))
+        print ("QUEUE apppended ", len(self.queue), (abs_time, event_id, callback, args))
         return event_id
 
     def cancel_event(self, event):
