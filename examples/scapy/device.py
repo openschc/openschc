@@ -3,27 +3,49 @@ import sys
 sys.path.insert(1, '../../src/')
 
 from scapy.all import *
-import binascii
+import scapy.contrib.coap as scapy_coap
+
+
 import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
 from protocol import SCHCProtocol
+from net_sim_sched import SimulScheduler
+
+from gen_utils import dprint, sanitize_value
+
+
+import sched
+
+import protocol
 
 import pprint
 import binascii
 
 import socket
+import ipaddress
 
 import time, datetime
-import struct
 
-import frag_recv
-
-from random import randint
-
-import cbor2 as cbor
-
-# ------
+coap_options = {'If-Match':1,
+            'Uri-Host':3,
+            'ETag':4,
+            'If-None-Match':5,
+            'Observe':6,
+            'Uri-Port':7,
+            'Location-Path':8,
+            'Uri-Path':11,
+            'Content-Format':12,
+            'Max-Age':14,
+            'Uri-Query':15,
+            'Accept':17,
+            'Location-Query':20,
+            'Block2':23,
+            'Block1':27,
+            'Size2':28,
+            'Proxy-Uri':35,
+            'Proxy-Scheme':39,
+            'Size1':60}
 
 class debug_protocol:
     def _log(*arg):
@@ -37,71 +59,371 @@ rm.Print()
 comp = Compressor(debug_protocol)
 decomp = Decompressor(debug_protocol)
 
-# -------
-tunnel = None
+def send_scapy(fields, pkt_bb, rule=None):
+    """" Create and send a packet, rule is needed if containing CoAP options to order them
+    """ 
+
+    pkt_data = bytearray()
+    while (pkt_bb._wpos - pkt_bb._rpos) >= 8:
+        octet = pkt_bb.get_bits(nb_bits=8)
+        pkt_data.append(octet)
+
+    c = {}
+    for k in [T_IPV6_DEV_PREFIX, T_IPV6_DEV_IID, T_IPV6_APP_PREFIX, T_IPV6_APP_IID]:
+        v = fields[(k, 1)][0]
+        if type(v) == bytes:
+            c[k] = int.from_bytes(v, "big")
+        elif type(v) == int:
+            c[k] = v
+        else:
+            raise ValueError ("Type not supported")
+        
+    
+    IPv6Src = (c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID]
+    IPv6Dst = (c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID]
+
+    
+    IPv6Sstr = ipaddress.IPv6Address(IPv6Src)
+    IPv6Dstr = ipaddress.IPv6Address(IPv6Dst)
+    
+    IPv6Header = IPv6 (
+        version= fields[(T_IPV6_VER, 1)][0],
+        tc     = fields[(T_IPV6_TC, 1)][0],
+        fl     = fields[(T_IPV6_FL, 1)][0],
+        nh     = fields[(T_IPV6_NXT, 1)][0],
+        hlim   = fields[(T_IPV6_HOP_LMT, 1)][0],
+        src    =IPv6Sstr.compressed, 
+        dst    =IPv6Dstr.compressed
+    ) 
+
+    if fields[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+        ICMPv6Header = ICMPv6EchoReply(
+            id = fields[(T_ICMPV6_IDENT, 1)][0],
+            seq =  fields[(T_ICMPV6_SEQNO, 1)][0],
+            data = pkt_data
+        )
+
+        full_header = IPv6Header/ICMPv6Header
+    elif fields[(T_IPV6_NXT, 1)][0] == 17: # IPv6 / UDP
+        UDPHeader = UDP (
+            sport = fields[(T_UDP_DEV_PORT, 1)][0],
+            dport = fields[(T_UDP_APP_PORT, 1)][0]
+            )
+        if (T_COAP_VERSION, 1) in fields: # IPv6 / UDP / COAP
+            print ("CoAP Inside")
+
+            b1 = (fields[(T_COAP_VERSION, 1)][0] << 6)|(fields[(T_COAP_TYPE, 1)][0]<<4)|(fields[(T_COAP_TKL, 1)][0])
+            coap_h = struct.pack("!BBH", b1, fields[(T_COAP_CODE, 1)][0], fields[(T_COAP_MID, 1)][0])
+
+            tkl = fields[(T_COAP_TKL, 1)][0]
+            if tkl != 0:
+                token = fields[(T_COAP_TOKEN, 1)][0]
+                for i in range(tkl-1, -1, -1):
+                    bt = (token & (0xFF << 8*i)) >> 8*i
+                    coap_h += struct.pack("!B", bt)
+
+            delta_t = 0
+            comp_rule = rule[T_COMP] # look into the rule to find options 
+            for idx in range(0, len(comp_rule)):
+                if comp_rule[idx][T_FID] == T_COAP_MID:
+                    break
+
+            idx += 1 # after MID is there TOKEN
+            if idx < len(comp_rule) and comp_rule[idx][T_FID] == T_COAP_TOKEN:
+                print ("skip token")
+                idx += 1
+
+            for idx2 in range (idx, len(comp_rule)):
+                print (comp_rule[idx2])
+                opt_name = comp_rule[idx2][T_FID].replace("COAP.", "")
+                
+                delta_t = coap_options[opt_name] - delta_t
+                print (delta_t)
+
+                if delta_t < 13:
+                    dt = delta_t
+                else:
+                    dt = 13
+                    
+                opt_len = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
+                opt_val = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
+                print (opt_len, opt_val)
+
+                if opt_len < 13:
+                    ol = opt_len
+                else:
+                    ol = 13
+                    
+                coap_h += struct.pack("!B", (dt <<4) | ol)
+
+                if dt == 13:
+                    coap_h += struct.pack("!B", delta_t - 13)
+
+                if ol == 13:
+                    coap_h += struct.pack("!B", opt_len - 13)
+
+
+                for i in range (0, opt_len):
+                    print (i)
+                    if type(opt_val) == str:
+                        coap_h += struct.pack("!B", ord(opt_val[i]))
+                    elif type(opt_val) == int:
+                        v = (opt_val & (0xFF << (opt_len - i - 1))) >> (opt_len - i - 1)
+                        coap_h += struct.pack("!B", v)
+
+            if len(pkt_data) > 0:
+                coap_h += b'\xff'
+                coap_h += pkt_data
+
+                    
+            print (binascii.hexlify(coap_h))
+
+            full_header = IPv6Header / UDPHeader / Raw(load=coap_h)
+            pass
+        else: # IPv6/UDP
+            full_header = IPv6Header / UDPHeader / Raw(load=pkt_data)
+    else: # IPv6 only
+        full_header= IPv6Header / Raw(load=pkt_data)
+        
+
+    full_header.show()
+#    full_header.hexdump()
+
+    send(full_header, iface="he-ipv6")
 
 event_queue = []
 
-mid = 0
-token = 0X200
+# class frag_context:
+
+#     def __init__(self, ctxt, sock, dest):
+#         self.wakeup = None
+#         self.ctxt = ctxt
+#         self.fct = None
+#         self.sock = sock
+#         self.dest = dest
+
+#     def fragmentor(self):
+#         global event_queue
+
+#         print ("fragmentor")
+#         frag = self.ctxt.get_frag()
+#         print (frag.packet)
+#         self.sock.sendto(frag.packet.get_content(), self.dest)
+
+#         self.wakeup = time.time()+2
+#         event_queue.append(self)
 
 
 
-frag_ctxt = [] 
 
-def get_frag_ctxt (rule, dev=None):
-    global frag_ctxt
+# def send_frag (pkt, sock, dest, mtu_in_bytes=None):
+#     global event_queue
+#     global RM
 
-    print (frag_ctxt)
-    for fc in frag_ctxt:
-        if fc[T_RULEID] == rule[T_RULEID] and fc[T_RULEIDLENGTH] == rule[T_RULEIDLENGTH]:
-            return fc
-    print ("get_fragCtxt not found", T_FRAG_NO_ACK, rule, rule[T_FRAG][T_FRAG_MODE])
-    fc = None
-    if rule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
-        fc = {}
-        fc[T_RULEID]  = rule[T_RULEID]
-        fc[T_RULEIDLENGTH] = rule[T_RULEIDLENGTH]
-        fc["CONTEXT"] = frag_recv.ReassemblerNoAck(rule=rule)
-        frag_ctxt.append(fc)
-        print (frag_ctxt)
+#     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
 
-    return fc
+#     print ("rule = ", rule)
+#     frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
+#     frag_ctxt.set_packet(pkt)
 
 
-def send_coap_request():
-    global mid, token
-    global tunnel
+
+#     ctxt = frag_context(ctxt=frag_ctxt, sock=sock, dest=dest)
+
+#     ctxt.fct = ctxt.fragmentor
+#     ctxt.wakeup = time.time()+10
+
+#     event_queue.append(ctxt)
+#     print (event_queue)
+
+scheduler = SimulScheduler()
+
+class ScapyUpperLayer:
+    def __init__(self):
+        self.protocol = None
+
+    # ----- AbstractUpperLayer interface (see: architecture.py)
     
-    print ("send CoAP", mid, token, flush=True)
+    def _set_protocol(self, protocol):
+        self.protocol = protocol
 
-    coap_msg = struct.pack("!BHH", 2, mid, token)
-    coap_msg += cbor.dumps(randint(10, 1000))
+    def recv_packet(self, address, raw_packet):
+        raise NotImplementedError("XXX:to be implemented")
 
-    print (binascii.hexlify(coap_msg))
+    # ----- end AbstractUpperLayer interface
 
-    tunnel.sendto(coap_msg, ("tests.openschc.net", 0x5C4C))
+    def send_later(self, delay, udp_dst, packet):
+        assert self.protocol is not None
+        scheduler = self.protocol.get_system().get_scheduler()
+        scheduler.add_event(delay, self._send_now, (udp_dst, packet))
+
+    def _send_now(self, packet):
+        #dst_address = address_to_string(udp_dst)
+        self.protocol.schc_send(packet)
+
+# --------------------------------------------------        
+
+class ScapyLowerLayer:
+    def __init__(self, udp_src=None, udp_dst=None, socket=None):
+        self.protocol = None
+        self.sd = None
+        self.udp_src = udp_src
+        self.udp_dst = udp_dst
+        self.sock = socket
+
+    # ----- AbstractLowerLayer interface (see: architecture.py)
+        
+    def _set_protocol(self, protocol):
+        self.protocol = protocol
+        self._actual_init()
+
+    def send_packet(self, packet, dest, transmit_callback=None):
+        print("SENDING", packet, dest)            
+
+        if dest.find("udp") == 0:
+            destination = (dest.split(":")[1], int(dest.split(":")[2]))
+            print (destination)
+            hexdump(packet)
+            self.sock.sendto(packet, destination)
+
+        print ("L2 send_packet", transmit_callback)
+        if transmit_callback is not None:
+            print ("do callback", transmit_callback)
+            transmit_callback(1)
+        else:
+            print ("c'est None")
+
+    def get_mtu_size(self):
+        return 72 # XXX
+
+    # ----- end AbstractLowerLayer interface
+
+    def _actual_init(self):
+        pass
+
+    def event_packet_received(self):
+        """Called but the SelectScheduler when an UDP packet is received"""
+        packet, address = self.sd.recvfrom(MAX_PACKET_SIZE)
+        sender_address = address_to_string(address)
+        self.protocol.schc_recv(sender_address, packet)
+
+
+class ScapyScheduler:
+    def __init__(self):
+        self.queue = []
+        self.clock = 0
+        self.next_event_id = 0
+        self.current_event_id = None
+        self.observer = None
+        self.item=0
+        self.fd_callback_table = {}
+
+    # ----- AbstractScheduler Interface (see: architecture.py)
+
+    def get_clock(self):
+        return time.time()
+         
+    def add_event(self, rel_time, callback, args):
+        dprint("Add event {}".format(sanitize_value(self.queue)))
+        dprint("callback set -> {}".format(callback.__name__))
+        assert rel_time >= 0
+        event_id = self.next_event_id
+        self.next_event_id += 1
+        clock = self.get_clock()
+        abs_time = clock+rel_time
+        self.queue.append((abs_time, event_id, callback, args))
+        print ("QUEUE apppended ", len(self.queue), (abs_time, event_id, callback, args))
+        return event_id
+
+    def cancel_event(self, event):
+        return self.sched.cancel(event)
+
+    # ----- Additional methods
+
+    def _sleep(self, delay):
+        """Implements a delayfunc for sched.scheduler
+        This delayfunc sleeps for `delay` seconds at most (in real-time,
+        but if any event appears in the fd_table (e.g. packet arrival),
+        the associated callbacks are called and the wait is stop.
+        """
+        self.wait_one_callback_until(delay)
+
+
+    def wait_one_callback_until(self, max_delay):
+        """Wait at most `max_delay` second, for available input (e.g. packet).
+        If so, all associated callbacks are run until there is no input.
+        """
+        fd_list = list(sorted(self.fd_callback_table.keys()))
+        print (fd_list)
+        while True:
+            rlist, unused, unused = select.select(fd_list, [], [], max_delay)
+            if len(rlist) == 0:
+                break
+            for fd in rlist:
+                callback, args = self.fd_callback_table[fd]
+                callback(*args)
+            # note that sched impl. allows to return before sleeping `delay`
+
+    def add_fd_callback(self, fd, callback, args):
+        assert fd not in self.fd_callback_table
+        self.fd_callback_table[fd] = (callback, args)
+
+    def run(self):
+        factor= 10
+        if self.item % factor == 0:
+            seq = ["|", "/", "-", "\\", "-"]
+            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
+        self.item +=1
+
+        while len(self.queue) > 0:
+            self.queue.sort()
+
+            wake_up_time = self.queue[0][0]
+            if time.time() < wake_up_time:
+                return
+
+            event_info = self.queue.pop(0)
+            self.clock, event_id, callback, args = event_info
+            self.current_event_id = event_id
+            if self.observer is not None:
+                self.observer("sched-pre-event", event_info)
+            callback(*args)
+            if self.observer is not None:
+                self.observer("sched-post-event", event_info)
+            dprint("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
+
+# --------------------------------------------------        
+
+class ScapySystem:
+    def __init__(self):
+        self.scheduler = ScapyScheduler()
+
+    def get_scheduler(self):
+        return self.scheduler
+
+    def log(self, name, message):
+        print(name, message)
+
+# --------------------------------------------------
+
     
-    mid += 1
-    token += 2
-    event_queue.append([int(time.time())+10, send_coap_request])
-    
+def send_tunnel(pkt, dest):
+    print ("send tunnel")
+    print (dest, pkt)
+    print (pkt.display())
+
 
 def processPkt(pkt):
     global parser
     global rm
-    global frag_ctxt
+    global event_queue
     global SCHC_machine
-    global device_id
     
-    # look for a tunneled SCHC pkt
-    epoch = int(time.time())
 
-    if len(event_queue) > 0 and epoch > event_queue[0][0]:
-        e = event_queue.pop(0)
-        print (e)
-        e[1]()
-        
+    scheduler.run()
+
+    # look for a tunneled SCHC pkt
+
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x0800:
@@ -110,67 +432,71 @@ def processPkt(pkt):
                 udp_dport = pkt.getlayer(UDP).dport
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")
-
-                    #pkt.show()
-
-            
-                    schc_pkt, addr = tunnel.recvfrom(2000)
-                    r = SCHC_machine.schc_recv(device_id, schc_pkt)
-
-                    print (r)
                     
-                    return
-
-
+                    schc_pkt, addr = tunnel.recvfrom(2000)
+                    r = schc_protocol.schc_recv(device_id, schc_pkt)
+                    print (r)
 
         
     elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
+        upper_layer._send_now(bytes(pkt))
+        # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
+        # print (pkt_fields)
 
-        pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
-        print (pkt_fields)
-
-        if pkt_fields != None:
-            rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW)
-            if rule != None:
-                schc_pkt = comp.compress(rule, pkt_fields, data, T_DIR_DW)
-                if device.find("udp") == 0:
-                    destination = (device.split(":")[1], int(device.split(":")[2]))
-                    print (destination)
-                    schc_pkt.display()
-                    tunnel.sendto(schc_pkt._content, destination)
-                else:
-                    print ("unknown connector" + device)
-    else:
-     print (".", end="", flush=True)           
+        # if pkt_fields != None:
+            # rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW, failed_field=True)
+            # if rule != None:
+            #     schc_pkt = comp.compress(rule, pkt_fields, data, T_DIR_DW)
+            #     if device.find("udp") == 0:
+            #         destination = (device.split(":")[1], int(device.split(":")[2]))
+            #         print (destination)
+            #         schc_pkt.display()
+            #         if len(schc_pkt._content) > 12:
+            #             hexdump(schc_pkt._content)
+            #             send_frag(schc_pkt, mtu_in_bytes=12, sock=tunnel, dest=destination)
+            #         else: 
+            #             tunnel.sendto(schc_pkt._content, destination)
+            #     else:
+            #         print ("unknown connector" + device)
+      
                     
         
 # look at the IP address to define sniff behavior
+
+device_id = "udp:83.199.24.39:8888"
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
 
-if ip_addr == "192.168.1.11":
-    print("device role")
-    send_dir = T_DIR_UP
-    recv_dir = T_DIR_DW
 
-    socket_port = 8888
+socket_port = 8888
 
-    device_id = "udp:83.199.61.5:8888"
+tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tunnel.bind(("0.0.0.0", socket_port))
 
-    tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    tunnel.bind(("0.0.0.0", 8888))
+# SCHC_machine = SCHCProtocol()
+# SCHC_machine.set_rulemanager(rm)
+# SCHC_machine.set_position(T_POSITION_CORE)
+# SCHC_machine.set_scheduler(scheduler)
+# SCHC_machine.set_l2_send_fct(send_tunnel)
 
-    SCHC_machine = SCHCProtocol()
-    SCHC_machine.set_rulemanager(rm)
-    SCHC_machine.set_position(T_POSITION_DEVICE)
 
-    #event_queue.append([int(time.time())+10, send_coap_request]) s
 
-    sniff (filter="ip6 or port 23628 and not arp",
-           prn=processPkt,
-           iface="en0")
+config = {}
+upper_layer = ScapyUpperLayer()
+lower_layer = ScapyLowerLayer(socket=tunnel)
+system = ScapySystem()
+scheduler = system.get_scheduler()
+schc_protocol = protocol.SCHCProtocol(
+    config=config, system=system, 
+    layer2=lower_layer, layer3=upper_layer, 
+    role=T_POSITION_DEVICE, unique_peer=False)
+schc_protocol.set_position(T_POSITION_DEVICE)
+schc_protocol.set_rulemanager(rm)
+
+
+sniff(prn=processPkt, iface=[ "en0"])
 
 
  

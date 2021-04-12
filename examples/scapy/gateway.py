@@ -278,20 +278,13 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        print("SENDING", packet, dest)            
-
         if dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
-            print (destination)
-            hexdump(packet)
             self.sock.sendto(packet, destination)
 
-        print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
-            print ("do callback", transmit_callback)
             transmit_callback(1)
-        else:
-            print ("c'est None")
+
 
     def get_mtu_size(self):
         return 72 # XXX
@@ -332,7 +325,6 @@ class ScapyScheduler:
         clock = self.get_clock()
         abs_time = clock+rel_time
         self.queue.append((abs_time, event_id, callback, args))
-        print ("QUEUE apppended ", len(self.queue), (abs_time, event_id, callback, args))
         return event_id
 
     def cancel_event(self, event):
@@ -450,7 +442,7 @@ def processPkt(pkt):
                     else:
                         print ("unknown rule")
         
-    elif pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
+    elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
         upper_layer._send_now(bytes(pkt))
         # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         # print (pkt_fields)
@@ -481,9 +473,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     ip_addr = s.getsockname()[0]
 
 
-print ("core role")
-send_dir = T_DIR_DW
-recv_dir = T_DIR_UP
 
 socket_port = 0x5C4C
 
