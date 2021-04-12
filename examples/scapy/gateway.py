@@ -256,7 +256,7 @@ class ScapyUpperLayer:
 
     def _send_now(self, packet):
         #dst_address = address_to_string(udp_dst)
-        self.protocol.schc_send(None, packet)
+        self.protocol.schc_send(packet)
 
 # --------------------------------------------------        
 
