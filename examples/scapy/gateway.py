@@ -288,12 +288,7 @@ class ScapyLowerLayer:
     # ----- end AbstractLowerLayer interface
 
     def _actual_init(self):
-        self.sd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sd.bind(self.udp_src)
-        scheduler = self.protocol.get_system().get_scheduler()
-        scheduler.add_fd_callback(self.sd.fileno(),
-                                  self.event_packet_received, ())
+        pass
 
     def event_packet_received(self):
         """Called but the SelectScheduler when an UDP packet is received"""
