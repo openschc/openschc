@@ -278,7 +278,6 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        print ("L2 send_packet", transmit_callback, dst_str_address)
         print("SENDING", packet, dst_address)            
 
         if dest.find("udp") == 0:
@@ -287,6 +286,7 @@ class ScapyLowerLayer:
             schc_pkt.hexdump()
             self.sock.sendto(schc_pkt._content, destination)
 
+        print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
             print ("do callback", transmit_callback)
             transmit_callback(1)
