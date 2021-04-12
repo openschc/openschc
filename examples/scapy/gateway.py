@@ -500,7 +500,7 @@ tunnel.bind(("0.0.0.0", 0x5C4C))
 
 config = {}
 upper_layer = ScapyUpperLayer()
-lower_layer = ScapyLowerLayer()
+lower_layer = ScapyLowerLayer(socket=tunnel)
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
