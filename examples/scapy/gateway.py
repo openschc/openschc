@@ -354,7 +354,7 @@ class ScapyScheduler:
 
 class ScapySystem:
     def __init__(self):
-        self.scheduler = SelectScheduler()
+        self.scheduler = ScapyScheduler()
 
     def get_scheduler(self):
         return self.scheduler
