@@ -38,7 +38,7 @@ class SimulScheduler:
         self.item +=1
 
         for q in self.queue:
-            print (q)
+            print ("queue ", q)
 
         while len(self.queue) > 0:
             self.queue.sort()
