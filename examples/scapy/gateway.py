@@ -423,45 +423,12 @@ def processPkt(pkt):
             if ip_proto == 17:
                 udp_dport = pkt.getlayer(UDP).dport
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
-                    print ("tunneled SCHC msg")
-
-                    pkt.show()
-                    
+                    print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    device_id = "udp:"+addr[0]+":"+str(addr[1])
-                    print (binascii.hexlify(schc_pkt), addr, device_id)
-
-                    schc_bb = BitBuffer(schc_pkt)
-                    
-                    rule = rm.FindRuleFromSCHCpacket(schc_bb, device=device_id)
-                    #print (rule)
-                    if rule != None:
-                        phd = decomp.decompress(schc_bb, rule, recv_dir)
-                        print (phd)
-                        send_scapy(phd, schc_bb, rule)
-                    else:
-                        print ("unknown rule")
-        
+                    r = schc_protocol.schc_recv(device_id, schc_pkt)
+                    print (r)
     elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        upper_layer._send_now(bytes(pkt))
-        # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
-        # print (pkt_fields)
-
-        # if pkt_fields != None:
-            # rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW, failed_field=True)
-            # if rule != None:
-            #     schc_pkt = comp.compress(rule, pkt_fields, data, T_DIR_DW)
-            #     if device.find("udp") == 0:
-            #         destination = (device.split(":")[1], int(device.split(":")[2]))
-            #         print (destination)
-            #         schc_pkt.display()
-            #         if len(schc_pkt._content) > 12:
-            #             hexdump(schc_pkt._content)
-            #             send_frag(schc_pkt, mtu_in_bytes=12, sock=tunnel, dest=destination)
-            #         else: 
-            #             tunnel.sendto(schc_pkt._content, destination)
-            #     else:
-            #         print ("unknown connector" + device)
+        schc_protocol.schc_send(bytes(pkt))
     else:
      print (".", end="", flush=True)           
                     
