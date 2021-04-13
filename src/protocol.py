@@ -300,6 +300,9 @@ class SCHCProtocol:
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
+        print (frag_rule)
+        print (self.position)
+
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
         if dtag_length > 0:
             dtag = packet_bbuf.get_bits(dtag_length, position=frag_rule[T_RULEIDLENGTH])
