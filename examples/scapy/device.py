@@ -304,6 +304,7 @@ class ScapyScheduler:
 
         item_pos = 0
         item_found = False
+        elm = None
         for q in self.queue:
             if q[1] == event:
                 item_found = True
@@ -470,8 +471,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
-
-
 
 config = {}
 upper_layer = ScapyUpperLayer()

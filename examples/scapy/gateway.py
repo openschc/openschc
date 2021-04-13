@@ -439,20 +439,22 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
 
+POSITION = T_POSITION_CORE
 
+if POSITION==T_POSITION_DEVICE:
+    device_id = "udp:83.199.24.39:8888"
+    socket_port = 8888
+    other_end = ("tests.openschc.net", 0x5C4C)
+elif POSITION==T_POSITION_CORE:
+    device_ID = None
+    socket_port = 0x5C4C
+    other_end = None # defined by the rule
+else:
+    print ("not a good position")
 
-socket_port = 0x5C4C
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", 0x5C4C))
-
-# SCHC_machine = SCHCProtocol()
-# SCHC_machine.set_rulemanager(rm)
-# SCHC_machine.set_position(T_POSITION_CORE)
-# SCHC_machine.set_scheduler(scheduler)
-# SCHC_machine.set_l2_send_fct(send_tunnel)
-
-
 
 config = {}
 upper_layer = ScapyUpperLayer()
@@ -462,8 +464,8 @@ scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
     config=config, system=system, 
     layer2=lower_layer, layer3=upper_layer, 
-    role=T_POSITION_CORE, unique_peer=False)
-schc_protocol.set_position(T_POSITION_CORE)
+    role=POSITION, unique_peer=False)
+schc_protocol.set_position(POSITION)
 schc_protocol.set_rulemanager(rm)
 
 
