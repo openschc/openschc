@@ -355,9 +355,13 @@ class ScapyScheduler:
         self.item +=1
 
         if time.time() - self.last_show > 60: # display the event queue every minute
+            print ("*"*40)
+            print ("EVENT QUEUE")
             self.last_show = time.time()
             for q in self.queue:
-                print (q[0]-time.time(), ":", q)
+                print ("{0:6.2f}: id.{1:04d}".format(q[0]-time.time(), q[1]), q[2])
+            print ("*"*40)
+
 
         while len(self.queue) > 0:
             self.queue.sort()
@@ -423,7 +427,7 @@ def processPkt(pkt):
 
         
     elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        upper_layer._send_now(bytes(pkt))
+        schc_protocol.schc_send(bytes(pkt))
         # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
         # print (pkt_fields)
 
@@ -471,7 +475,7 @@ tunnel.bind(("0.0.0.0", socket_port))
 
 config = {}
 upper_layer = ScapyUpperLayer()
-lower_layer = ScapyLowerLayer(socket=tunnel, other_end=other_end)
+lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=other_end)
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol( # rename into SCHC_machine 
