@@ -336,7 +336,22 @@ class ScapyScheduler:
         return event_id
 
     def cancel_event(self, event):
-        return self.sched.cancel(event)
+        print ("remove event", event)
+
+        item_pos = 0
+        item_found = False
+        for q in self.queue:
+            if q[1] == event:
+                item_found = True
+                break
+            item_pos += 1
+
+        if item_found:
+            print ("item found", position)
+            elm = self.queue.pop(item_pos)
+            print (self.queue)
+
+        return elm
 
     # ----- Additional methods
 
