@@ -187,56 +187,9 @@ def send_scapy(fields, pkt_bb, rule=None):
         
 
     full_header.show()
-#    full_header.hexdump()
 
     send(full_header, iface="he-ipv6")
 
-event_queue = []
-
-# class frag_context:
-
-#     def __init__(self, ctxt, sock, dest):
-#         self.wakeup = None
-#         self.ctxt = ctxt
-#         self.fct = None
-#         self.sock = sock
-#         self.dest = dest
-
-#     def fragmentor(self):
-#         global event_queue
-
-#         print ("fragmentor")
-#         frag = self.ctxt.get_frag()
-#         print (frag.packet)
-#         self.sock.sendto(frag.packet.get_content(), self.dest)
-
-#         self.wakeup = time.time()+2
-#         event_queue.append(self)
-
-
-
-
-# def send_frag (pkt, sock, dest, mtu_in_bytes=None):
-#     global event_queue
-#     global RM
-
-#     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
-
-#     print ("rule = ", rule)
-#     frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
-#     frag_ctxt.set_packet(pkt)
-
-
-
-#     ctxt = frag_context(ctxt=frag_ctxt, sock=sock, dest=dest)
-
-#     ctxt.fct = ctxt.fragmentor
-#     ctxt.wakeup = time.time()+10
-
-#     event_queue.append(ctxt)
-#     print (event_queue)
-
-scheduler = SimulScheduler()
 
 class ScapyUpperLayer:
     def __init__(self):
@@ -425,7 +378,9 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    r = schc_protocol.schc_recv(device_id, schc_pkt)
+                    other_end = "udp:"+addr[0]+":"+addr[1]
+                    print("other end =", other_end)
+                    r = schc_protocol.schc_recv(other_end, schc_pkt)
                     print (r)
     elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
         schc_protocol.schc_send(bytes(pkt))
