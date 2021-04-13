@@ -207,25 +207,25 @@ class ReassemblerNoAck(ReassembleBase):
             else:
                 dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
                     schc_frag.mic, mic_calced))
-                return schc_packet.get_content()
+                #return schc_packet.get_content()
             # decompression
-            # dprint("----------------------- Decompression -----------------------")
-            #if not self.protocol.config.get("debug-fragment"):
+            print("----------------------- Decompression -----------------------")
+            if not self.protocol.config.get("debug-fragment"):
                 # XXX
                 # XXX in hack105, we have separate databases for C/D and F/R.
                 # XXX need to merge them into one.  Then, here searching database will
                 # XXX be moved into somewhere.
                 # XXX
-                #rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
-                #dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                #self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
+                rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+                dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
+                self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
             self.state = 'DONE_NO_ACK'
-            #self.protocol.session_manager.delete_session(self._session_id)
-            #dprint(self.state)
+            self.protocol.session_manager.delete_session(self._session_id)
+            dprint(self.state)
             return
         # set inactive timer.
-        #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-        #        self.inactive_timer, self.event_inactive, tuple())
+        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+                self.inactive_timer, self.event_inactive, tuple())
         dprint("---", schc_frag.fcn)
         return None
 
