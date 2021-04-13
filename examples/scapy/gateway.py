@@ -446,7 +446,7 @@ if POSITION==T_POSITION_DEVICE:
     socket_port = 8888
     other_end = ("tests.openschc.net", 0x5C4C)
 elif POSITION==T_POSITION_CORE:
-    device_ID = None
+    device_id = None
     socket_port = 0x5C4C
     other_end = None # defined by the rule
 else:
