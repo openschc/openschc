@@ -347,7 +347,7 @@ class ScapyScheduler:
             item_pos += 1
 
         if item_found:
-            print ("item found", position)
+            print ("item found", item_pos)
             elm = self.queue.pop(item_pos)
             print (self.queue)
 
