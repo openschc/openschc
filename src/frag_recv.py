@@ -112,6 +112,7 @@ class ReassembleBase:
         // TODO : Redaction (here is frag_recv.py)
 
         """
+        print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
         if self.event_id_inactive_timer is None:
             return
         self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
@@ -210,6 +211,8 @@ class ReassemblerNoAck(ReassembleBase):
                 #return schc_packet.get_content()
             # decompression
             print("----------------------- Decompression -----------------------")
+
+            args = False 
             if not self.protocol.config.get("debug-fragment"):
                 # XXX
                 # XXX in hack105, we have separate databases for C/D and F/R.
@@ -218,11 +221,12 @@ class ReassemblerNoAck(ReassembleBase):
                 # XXX
                 rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
                 dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
+                args = self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP") # warning on UP
+                
             self.state = 'DONE_NO_ACK'
             self.protocol.session_manager.delete_session(self._session_id)
             dprint(self.state)
-            return
+            return args  # all-1 return the packet reassembled and fragmented or False
         # set inactive timer.
         self.event_id_inactive_timer = self.protocol.scheduler.add_event(
                 self.inactive_timer, self.event_inactive, tuple())

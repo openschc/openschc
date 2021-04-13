@@ -330,15 +330,15 @@ class SCHCProtocol:
             # reject it.
             self._log("No compression rule for SCHC packet, sender L2addr={}"
                       .format(dev_l2_addr))
-            self.scheduler.add_event(0, self.layer3.recv_packet,
-                                     (dev_l2_addr, packet_bbuf.get_content()))
-            return
+            #self.scheduler.add_event(0, self.layer3.recv_packet,
+            #                         (dev_l2_addr, packet_bbuf.get_content()))
+            return (dev_l2_addr, packet_bbuf.get_content())
 
         if "Compression" not in rule:
             # reject it.
             self._log("Not compression parameters for SCHC packet, sender L2addr={}".format(
                 dev_l2_addr))
-            return
+            return False
 
         if rule["Compression"]:
             dprint("---------------------- Decompression ----------------------")
@@ -351,7 +351,8 @@ class SCHCProtocol:
             dprint("---- Decompression result ----")
             dprint(raw_packet)
             args = (dev_l2_addr, raw_packet)
-            self.scheduler.add_event(0, self.layer3.recv_packet, args)
+            # self.scheduler.add_event(0, self.layer3.recv_packet, args)
+            return args
 
     # def process_decompress(self, context, dev_l2_addr, schc_packet):
     #    self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
