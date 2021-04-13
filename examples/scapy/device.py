@@ -187,54 +187,12 @@ def send_scapy(fields, pkt_bb, rule=None):
         
 
     full_header.show()
-#    full_header.hexdump()
 
     send(full_header, iface="he-ipv6")
 
 event_queue = []
 
-# class frag_context:
 
-#     def __init__(self, ctxt, sock, dest):
-#         self.wakeup = None
-#         self.ctxt = ctxt
-#         self.fct = None
-#         self.sock = sock
-#         self.dest = dest
-
-#     def fragmentor(self):
-#         global event_queue
-
-#         print ("fragmentor")
-#         frag = self.ctxt.get_frag()
-#         print (frag.packet)
-#         self.sock.sendto(frag.packet.get_content(), self.dest)
-
-#         self.wakeup = time.time()+2
-#         event_queue.append(self)
-
-
-
-
-# def send_frag (pkt, sock, dest, mtu_in_bytes=None):
-#     global event_queue
-#     global RM
-
-#     rule = rm.FindFragmentationRule(direction=T_DIR_DW)
-
-#     print ("rule = ", rule)
-#     frag_ctxt = protocol.FragmentNoAck(rule=rule, mtu_in_bytes=mtu_in_bytes, dtag=0)
-#     frag_ctxt.set_packet(pkt)
-
-
-
-#     ctxt = frag_context(ctxt=frag_ctxt, sock=sock, dest=dest)
-
-#     ctxt.fct = ctxt.fragmentor
-#     ctxt.wakeup = time.time()+10
-
-#     event_queue.append(ctxt)
-#     print (event_queue)
 
 scheduler = SimulScheduler()
 
@@ -264,11 +222,10 @@ class ScapyUpperLayer:
 # --------------------------------------------------        
 
 class ScapyLowerLayer:
-    def __init__(self, udp_src=None, udp_dst=None, socket=None):
+    def __init__(self, position, socket=None, other_end=None):
         self.protocol = None
-        self.sd = None
-        self.udp_src = udp_src
-        self.udp_dst = udp_dst
+        self.position = position
+        self.other_end = other_end
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -281,7 +238,11 @@ class ScapyLowerLayer:
         print("SENDING", packet, dest)            
 
         if dest.find("udp") == 0:
-            destination = (dest.split(":")[1], int(dest.split(":")[2]))
+            if self.position == T_POSITION_CORE:
+                destination = (dest.split(":")[1], int(dest.split(":")[2]))
+            else:
+                destination = other_end
+
             print (destination)
             hexdump(packet)
             self.sock.sendto(packet, destination)
@@ -317,6 +278,7 @@ class ScapyScheduler:
         self.observer = None
         self.item=0
         self.fd_callback_table = {}
+        self.last_show = 0 
 
     # ----- AbstractScheduler Interface (see: architecture.py)
 
@@ -333,6 +295,8 @@ class ScapyScheduler:
         abs_time = clock+rel_time
         self.queue.append((abs_time, event_id, callback, args))
         print ("QUEUE apppended ", len(self.queue), (abs_time, event_id, callback, args))
+
+        print (self.queue)
         return event_id
 
     def cancel_event(self, event):
@@ -389,6 +353,11 @@ class ScapyScheduler:
             seq = ["|", "/", "-", "\\", "-"]
             print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
         self.item +=1
+
+        if time.time() - self.last_show > 60: # display the event queue every minute
+            self.last_show = time.time()
+            for q in self.queue:
+                print (q[0]-time.time(), ":", q)
 
         while len(self.queue) > 0:
             self.queue.sort()
@@ -478,36 +447,38 @@ def processPkt(pkt):
         
 # look at the IP address to define sniff behavior
 
-device_id = "udp:83.199.24.39:8888"
+
+POSITION = T_POSITION_DEVICE
+
+if POSITION==T_POSITION_DEVICE:
+    device_id = "udp:83.199.24.39:8888"
+    socket_port = 8888
+    other_end = ("tests.openschc.net", 0x5C4C)
+elif POSITION==T_POSITION_CORE:
+    pass
+else:
+    print ("not a good position")
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
 
-
-socket_port = 8888
-
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
-
-# SCHC_machine = SCHCProtocol()
-# SCHC_machine.set_rulemanager(rm)
-# SCHC_machine.set_position(T_POSITION_CORE)
-# SCHC_machine.set_scheduler(scheduler)
-# SCHC_machine.set_l2_send_fct(send_tunnel)
 
 
 
 config = {}
 upper_layer = ScapyUpperLayer()
-lower_layer = ScapyLowerLayer(socket=tunnel)
+lower_layer = ScapyLowerLayer(socket=tunnel, other_end=other_end)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_protocol = protocol.SCHCProtocol(
+schc_protocol = protocol.SCHCProtocol( # rename into SCHC_machine 
     config=config, system=system, 
     layer2=lower_layer, layer3=upper_layer, 
-    role=T_POSITION_DEVICE, unique_peer=False)
-schc_protocol.set_position(T_POSITION_DEVICE)
+    role=POSITION, unique_peer=False)
+schc_protocol.set_position(POSITION)
 schc_protocol.set_rulemanager(rm)
 
 
