@@ -378,7 +378,7 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    other_end = "udp:"+addr[0]+":"+addr[1]
+                    other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
                     r = schc_protocol.schc_recv(other_end, schc_pkt)
                     print (r)
