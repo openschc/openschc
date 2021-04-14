@@ -137,13 +137,15 @@ class ReassemblerNoAck(ReassembleBase):
         return 
         - None if fragmentation is not finished
         - False if the MIC is wrong
-        - bytearray if fragmentaiton succeed 
+        - bytearray if fragmentation succeed 
         
         """
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
 
         print (binascii.hexlify(bbuf._content))
+
+        print ('SENDER SHOULD NOT BE HERE')
 
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         dprint("receiver frag received:", schc_frag.__dict__)
