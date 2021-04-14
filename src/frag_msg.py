@@ -400,6 +400,12 @@ class frag_sender_rx(frag_rx):
             l2_word=8
             l2_remain = (8-(pos%l2_word))%l2_word
             print (l2_remain)
+            for i in range(0, l2_remain+l2_word):
+                b = self.packet_bbuf.get_bits(1)
+                print (i, b)
+                if b == 0:
+                    return
+            self.abort = True
 
         self.remaining = self.packet_bbuf.get_bits_as_buffer()
 
