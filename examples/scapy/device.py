@@ -205,7 +205,7 @@ def processPkt(pkt):
     global SCHC_machine
     
 
-    scheduler.run()
+    scheduler.run(session=schc_protocol, period=10)
 
     # look for a tunneled SCHC pkt
 
@@ -225,28 +225,7 @@ def processPkt(pkt):
         
     elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
         schc_protocol.schc_send(bytes(pkt))
-        # pkt_fields, data, err = parse.parse( bytes(pkt), T_DIR_DW, layers=["IP", "ICMP"], start="IPv6")
-        # print (pkt_fields)
 
-        # if pkt_fields != None:
-            # rule, device = rm.FindRuleFromPacket(pkt_fields, direction=T_DIR_DW, failed_field=True)
-            # if rule != None:
-            #     schc_pkt = comp.compress(rule, pkt_fields, data, T_DIR_DW)
-            #     if device.find("udp") == 0:
-            #         destination = (device.split(":")[1], int(device.split(":")[2]))
-            #         print (destination)
-            #         schc_pkt.display()
-            #         if len(schc_pkt._content) > 12:
-            #             hexdump(schc_pkt._content)
-            #             send_frag(schc_pkt, mtu_in_bytes=12, sock=tunnel, dest=destination)
-            #         else: 
-            #             tunnel.sendto(schc_pkt._content, destination)
-            #     else:
-            #         print ("unknown connector" + device)
-      
-                    
-        
-# look at the IP address to define sniff behavior
 
 
 POSITION = T_POSITION_DEVICE
