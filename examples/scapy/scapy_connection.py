@@ -1,5 +1,7 @@
 import time
 
+dprint = print
+
 class ScapyUpperLayer:
     def __init__(self):
         self.protocol = None
