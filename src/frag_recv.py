@@ -153,6 +153,7 @@ class ReassemblerNoAck(ReassembleBase):
             (position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
             print ("It smells Abort")
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
+            print (schc_abort)
 
             return None
         else:
