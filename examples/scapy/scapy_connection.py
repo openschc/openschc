@@ -1,3 +1,5 @@
+import time
+
 class ScapyUpperLayer:
     def __init__(self):
         self.protocol = None
