@@ -54,7 +54,7 @@ class ScapyLowerLayer:
             if self.position == T_POSITION_CORE:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
             else:
-                destination = other_end
+                destination = self.other_end
 
             print (destination)
             hexdump(packet)
