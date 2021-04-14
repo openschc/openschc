@@ -132,7 +132,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, position):
         """
         return 
         - None if fragmentation is not finished
@@ -145,97 +145,106 @@ class ReassemblerNoAck(ReassembleBase):
 
         print (binascii.hexlify(bbuf._content))
 
-        print ('SENDER SHOULD NOT BE HERE')
-        print (self.position) # for fragmentation, direction is important, ack or data
+        print ('SENDER COULD  BE HERE')
+        print (position) # for fragmentation, direction is important, ack or data
         print (self.rule)
 
-        schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-        dprint("receiver frag received:", schc_frag.__dict__)
+        if (position == T_POSITION_CORE) and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or
+            (position == T_POSITION_DEVICE) and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
+            print ("It smells Abort")
 
-        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
-            w_dtag = '-'
+            return None
         else:
-            w_dtag = schc_frag.dtag
+            print ("frag data")
+        
 
-        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
-            w_w = '-'
-        else:
-            w_w = schc_frag.win
+            schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
+            dprint("receiver frag received:", schc_frag.__dict__)
 
-        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-        if schc_frag.fcn == all1:
-            w_fcn = "All-1"
-        elif schc_frag.fcn == 0:
-            w_fcn = "All-0"
-        else:
-            w_fcn = schc_frag.fcn
-
-        dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            schc_frag.rule[T_RULEID],
-            schc_frag.rule[T_RULEIDLENGTH],
-            w_dtag,
-            w_w,
-            w_fcn
-            ))
-
-        # XXX how to authenticate the message from the peer. without
-        # authentication, any nodes can cancel the invactive timer.
-        self.cancel_inactive_timer()
-        dprint(schc_frag.__class__.__name__)
-        #
-        if schc_frag.abort == True:
-            dprint("----------------------- Sender-Abort ---------------------------")
-            # XXX needs to release all resources.
-            return False
-        self.tile_list.append(schc_frag.payload)
-        print (self.tile_list)
-        #
-        if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
-            dprint("----------------------- Final Reassembly -----------------------")
-            dprint("ALL1 received")
-            # MIC calculation
-            dprint("tile_list")
-            for _ in self.tile_list:
-                dprint(_)
-            schc_packet = BitBuffer()
-            for i in self.tile_list:
-                schc_packet += i
-            dtrace (binascii.hexlify(schc_packet.get_content()))
-
-            mic_calced = self.get_mic(schc_packet.get_content())
-            if schc_frag.mic != mic_calced:
-                dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
-                        b2hex(schc_frag.mic), b2hex(mic_calced)))
-                self.state = 'ERROR_MIC_NO_ACK'
-                #self.protocol.session_manager.delete_session(self._session_id)
-                return False
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
+                w_dtag = '-'
             else:
-                dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
-                    schc_frag.mic, mic_calced))
-                #return schc_packet.get_content()
-            # decompression
-            print("----------------------- Decompression -----------------------")
+                w_dtag = schc_frag.dtag
 
-            args = False 
-            if not self.protocol.config.get("debug-fragment"):
-                # XXX
-                # XXX in hack105, we have separate databases for C/D and F/R.
-                # XXX need to merge them into one.  Then, here searching database will
-                # XXX be moved into somewhere.
-                # XXX
-                rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
-                dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                args = self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP") # warning on UP
-                
-            self.state = 'DONE_NO_ACK'
-            self.protocol.session_manager.delete_session(self._session_id)
-            dprint(self.state)
-            return args  # all-1 return the packet reassembled and fragmented or False
-        # set inactive timer.
-        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-                self.inactive_timer, self.event_inactive, tuple())
-        dprint("---", schc_frag.fcn)
-        return None
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
+                w_w = '-'
+            else:
+                w_w = schc_frag.win
+
+            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+            if schc_frag.fcn == all1:
+                w_fcn = "All-1"
+            elif schc_frag.fcn == 0:
+                w_fcn = "All-0"
+            else:
+                w_fcn = schc_frag.fcn
+
+            dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                schc_frag.rule[T_RULEID],
+                schc_frag.rule[T_RULEIDLENGTH],
+                w_dtag,
+                w_w,
+                w_fcn
+                ))
+
+            # XXX how to authenticate the message from the peer. without
+            # authentication, any nodes can cancel the invactive timer.
+            self.cancel_inactive_timer()
+            dprint(schc_frag.__class__.__name__)
+            #
+            if schc_frag.abort == True:
+                dprint("----------------------- Sender-Abort ---------------------------")
+                # XXX needs to release all resources.
+                return False
+            self.tile_list.append(schc_frag.payload)
+            print (self.tile_list)
+            #
+            if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
+                dprint("----------------------- Final Reassembly -----------------------")
+                dprint("ALL1 received")
+                # MIC calculation
+                dprint("tile_list")
+                for _ in self.tile_list:
+                    dprint(_)
+                schc_packet = BitBuffer()
+                for i in self.tile_list:
+                    schc_packet += i
+                dtrace (binascii.hexlify(schc_packet.get_content()))
+
+                mic_calced = self.get_mic(schc_packet.get_content())
+                if schc_frag.mic != mic_calced:
+                    dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
+                            b2hex(schc_frag.mic), b2hex(mic_calced)))
+                    self.state = 'ERROR_MIC_NO_ACK'
+                    #self.protocol.session_manager.delete_session(self._session_id)
+                    return False
+                else:
+                    dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
+                        schc_frag.mic, mic_calced))
+                    #return schc_packet.get_content()
+                # decompression
+                print("----------------------- Decompression -----------------------")
+
+                args = False 
+                if not self.protocol.config.get("debug-fragment"):
+                    # XXX
+                    # XXX in hack105, we have separate databases for C/D and F/R.
+                    # XXX need to merge them into one.  Then, here searching database will
+                    # XXX be moved into somewhere.
+                    # XXX
+                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+                    dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
+                    args = self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP") # warning on UP
+                    
+                self.state = 'DONE_NO_ACK'
+                self.protocol.session_manager.delete_session(self._session_id)
+                dprint(self.state)
+                return args  # all-1 return the packet reassembled and fragmented or False
+            # set inactive timer.
+            self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+                    self.inactive_timer, self.event_inactive, tuple())
+            dprint("---", schc_frag.fcn)
+            return None
 
 
     def get_state_info(self, **kw):

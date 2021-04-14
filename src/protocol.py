@@ -318,7 +318,7 @@ class SCHCProtocol:
                 context, frag_rule, session_id)
             dprint("New reassembly session created", session.__class__.__name__)
 
-        return session.receive_frag(packet_bbuf, dtag)
+        return session.receive_frag(packet_bbuf, dtag, position=self.position)
 
 
     def process_decompress(self, packet_bbuf, dev_l2_addr, direction):
