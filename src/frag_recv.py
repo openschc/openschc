@@ -146,6 +146,8 @@ class ReassemblerNoAck(ReassembleBase):
         print (binascii.hexlify(bbuf._content))
 
         print ('SENDER SHOULD NOT BE HERE')
+        print (self.position) # for fragmentation, direction is important, ack or data
+        print (self.rule)
 
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         dprint("receiver frag received:", schc_frag.__dict__)
