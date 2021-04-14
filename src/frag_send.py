@@ -175,8 +175,7 @@ class FragmentNoAck(FragmentBase):
             dprint("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
-            #transmit_callback = self.event_sent_frag  # TRANSITION, before the send schedule the nect event
-            print ("New event 1")
+
             transmit_callback = None
             self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
             fcn = 0
@@ -201,8 +200,9 @@ class FragmentNoAck(FragmentBase):
                             frag_msg.get_mic_size(self.rule) +
                             remaining_data_size)
                 self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
-                # callback doesn't need in No-ACK mode.
-                transmit_callback = None
+
+                self.protocol.session_manager.delete_session(self._session_id)
+
                 fcn = frag_msg.get_fcn_all_1(self.rule)
                 if enable_statsct:
                     Statsct.set_msg_type("SCHC_ALL_1 ")
@@ -214,9 +214,6 @@ class FragmentNoAck(FragmentBase):
                              (frag_msg.get_sender_header_size(self.rule) +
                               remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
-                #transmit_callback = self.event_sent_frag
-                transmit_callback = None
-                print ("event 2")
                 self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
 
                 fcn = 0
