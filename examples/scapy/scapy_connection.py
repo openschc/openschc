@@ -4,6 +4,7 @@ import sys
 sys.path.insert(1, '../../src/')
 
 from gen_utils import dprint, sanitize_value
+from compr_core import *
 
 
 class ScapyUpperLayer:
