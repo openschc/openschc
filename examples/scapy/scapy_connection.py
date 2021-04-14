@@ -1,7 +1,5 @@
 import time
 
-dprint = print
-
 class ScapyUpperLayer:
     def __init__(self):
         self.protocol = None
@@ -93,8 +91,8 @@ class ScapyScheduler:
         return time.time()
          
     def add_event(self, rel_time, callback, args):
-        dprint("Add event {}".format(sanitize_value(self.queue)))
-        dprint("callback set -> {}".format(callback.__name__))
+        print("Add event {}".format(sanitize_value(self.queue)))
+        print("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
@@ -170,7 +168,7 @@ class ScapyScheduler:
             callback(*args)
             if self.observer is not None:
                 self.observer("sched-post-event", event_info)
-            dprint("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
+            print("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
 
 # --------------------------------------------------        
 
