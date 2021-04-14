@@ -176,8 +176,9 @@ class FragmentNoAck(FragmentBase):
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
             #transmit_callback = self.event_sent_frag  # TRANSITION, before the send schedule the nect event
+            print ("New event 1")
             transmit_callback = None
-            self.protocol.scheduler.add_event(0, self.event_sent_frag, (1))
+            self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
             fcn = 0
             self.mic_sent = None
 
@@ -215,7 +216,8 @@ class FragmentNoAck(FragmentBase):
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
                 #transmit_callback = self.event_sent_frag
                 transmit_callback = None
-                self.protocol.scheduler.add_event(0, self.event_sent_frag, (1))
+                print ("event 2")
+                self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
 
                 fcn = 0
                 self.mic_sent = None
@@ -232,8 +234,7 @@ class FragmentNoAck(FragmentBase):
 
 
         # send a SCHC fragment
-        args = (schc_frag.packet.get_content(), self._session_id[0],
-                transmit_callback)
+        args = (schc_frag.packet.get_content(), self._session_id[0], None)
         
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
