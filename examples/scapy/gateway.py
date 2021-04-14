@@ -263,6 +263,8 @@ class ScapyScheduler:
         self.observer = None
         self.item=0
         self.fd_callback_table = {}
+        self.last_show = 0 
+
 
     # ----- AbstractScheduler Interface (see: architecture.py)
 
