@@ -30,7 +30,7 @@ class ReassembleBase:
 
     """
 
-    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None):
+    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None, session_namager=None):
         """
 
         Args :
@@ -60,6 +60,8 @@ class ReassembleBase:
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
+        self.session_manager = session_manager # to which session manager the session belongs
+        print ("AAAAAAA", self.session_manager)
 
         self.fragment_received = False
 
@@ -143,7 +145,7 @@ class ReassemblerNoAck(ReassembleBase):
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
         assert (T_FRAG in self.rule)
-        
+
         print (binascii.hexlify(bbuf._content))
 
         print ('SENDER COULD  BE HERE')

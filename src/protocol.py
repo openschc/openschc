@@ -78,7 +78,7 @@ class SessionManager:
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == T_FRAG_NO_ACK:
             session = ReassemblerNoAck(
-                self.protocol, context, rule, dtag, l2_address)
+                self.protocol, context, rule, dtag, l2_address, session_manager=self)
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError("FRMode:", mode)
         elif mode == T_FRAG_ACK_ON_ERROR:
@@ -309,14 +309,14 @@ class SCHCProtocol:
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
-            dprint("{} session found".format(
+            print("{} session found".format(
                 session.get_session_type().capitalize()),
                 session.__class__.__name__)
         else:
             context = None
             session = self.session_manager.create_reassembly_session(
                 context, frag_rule, session_id)
-            dprint("New reassembly session created", session.__class__.__name__)
+            print("New reassembly session created", session.__class__.__name__)
 
         return session.receive_frag(packet_bbuf, dtag, position=self.position)
 
