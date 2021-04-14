@@ -52,6 +52,9 @@ class ScapyLowerLayer:
 
         if dest.find("udp") == 0:
             if self.position == T_POSITION_CORE:
+                if dest == None: # no destination found
+                    print ("No destination found, not sent")
+                    return False
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
             else:
                 destination = self.other_end

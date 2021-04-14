@@ -394,19 +394,15 @@ class frag_sender_rx(frag_rx):
         pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap()
-        else:
+        else: # is a Abort if next bits are equal to 1
             self.packet_bbuf.display(format="bin")
-            print (pos)
             l2_word=rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
             l2_remain = (l2_word-(pos%l2_word))%l2_word
-            print (l2_word, l2_remain)
             for i in range(0, l2_remain+l2_word):
                 b = self.packet_bbuf.get_bits(1)
-                print (i, b)
                 if b == 0:
                     return
             self.abort = True
-
         self.remaining = self.packet_bbuf.get_bits_as_buffer()
 
 class frag_receiver_rx(frag_rx):
