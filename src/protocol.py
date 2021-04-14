@@ -149,7 +149,6 @@ class SCHCProtocol:
         self.position = None #position gives if the SCHC is for device or core to define UP and DOWN
         self.system = system
         self.scheduler = system.get_scheduler()
-        #self.send_layer2 = None
         self.layer2 = layer2
         self.layer3 = layer3
         self.layer2._set_protocol(self)
@@ -219,11 +218,11 @@ class SCHCProtocol:
         if rule is None:
             # XXX: not putting any SCHC compression header? - need fix
             self._log("rule for compression/no-compression not found")
-            return BitBuffer(raw_packet)
+            return BitBuffer(raw_packet), device_id
 
         if rule["Compression"] == []:  # XXX: should be "NoCompression"
             self._log("compression result no-compression")
-            return BitBuffer(raw_packet)
+            return BitBuffer(raw_packet), device_id
 
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
@@ -269,8 +268,6 @@ class SCHCProtocol:
         # Perform compression
         packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
 
-        print ("after compression")
-
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
@@ -299,9 +296,6 @@ class SCHCProtocol:
         frag_rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
-
-        print (frag_rule)
-        print (self.position)
 
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
         if dtag_length > 0:

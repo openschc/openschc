@@ -100,8 +100,8 @@ class ScapyScheduler:
         return time.time()
          
     def add_event(self, rel_time, callback, args):
-        print("Add event {}".format(sanitize_value(self.queue)))
-        print("callback set -> {}".format(callback.__name__))
+        #print("Add event {}".format(sanitize_value(self.queue)))
+        #print("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
@@ -111,7 +111,23 @@ class ScapyScheduler:
         return event_id
 
     def cancel_event(self, event):
-        return self.sched.cancel(event)
+        print ("remove event", event)
+
+        item_pos = 0
+        item_found = False
+        elm = None
+        for q in self.queue:
+            if q[1] == event:
+                item_found = True
+                break
+            item_pos += 1
+
+        if item_found:
+            print ("item found", item_pos)
+            elm = self.queue.pop(item_pos)
+            print (self.queue)
+
+        return elm
 
     # ----- Additional methods
 
