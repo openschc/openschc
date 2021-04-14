@@ -394,6 +394,13 @@ class frag_sender_rx(frag_rx):
         pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap()
+        else:
+            self.packet_bbuf.display(format="bin")
+            print (pos)
+            l2_word=8
+            l2_remain = (8-(pos%l2_word))%l2_word
+            print (l2_remain)
+
         self.remaining = self.packet_bbuf.get_bits_as_buffer()
 
 class frag_receiver_rx(frag_rx):
