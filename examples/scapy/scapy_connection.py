@@ -1,4 +1,10 @@
 import time
+import sys
+# insert at 1, 0 is the script path (or '' in REPL)
+sys.path.insert(1, '../../src/')
+
+from gen_utils import dprint, sanitize_value
+
 
 class ScapyUpperLayer:
     def __init__(self):
