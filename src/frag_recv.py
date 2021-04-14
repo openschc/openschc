@@ -142,7 +142,8 @@ class ReassemblerNoAck(ReassembleBase):
         """
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
-
+        assert (T_FRAG in self.rule)
+        
         print (binascii.hexlify(bbuf._content))
 
         print ('SENDER COULD  BE HERE')
@@ -153,9 +154,8 @@ class ReassemblerNoAck(ReassembleBase):
             (position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
             print ("It smells Abort")
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
-            print (schc_abort.cbit)
+            print (schc_abort.cbit, schc_abort.abort)
             schc_abort.remaining.display(format="bin")
-
             return None
         else:
             print ("frag data")
