@@ -315,14 +315,14 @@ class ScapyScheduler:
         assert fd not in self.fd_callback_table
         self.fd_callback_table[fd] = (callback, args)
 
-    def run(self, session=None):
+    def run(self, session=None, period=None):
         factor= 10
         if self.item % factor == 0:
             seq = ["|", "/", "-", "\\", "-"]
             print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
         self.item +=1
 
-        if time.time() - self.last_show > 60: # display the event queue every minute
+        if period and time.time() - self.last_show > period: # display the event queue every minute
             print ("*"*40)
             print ("EVENT QUEUE")
             self.last_show = time.time()
@@ -379,7 +379,7 @@ def processPkt(pkt):
     global SCHC_machine
     
 
-    scheduler.run(session=schc_protocol)
+    scheduler.run(session=schc_protocol, period=10)
 
     # look for a tunneled SCHC pkt
 
