@@ -59,9 +59,9 @@ class ScapyLowerLayer:
         else:
             destination = self.other_end
 
-            print (destination)
-            hexdump(packet)
-            self.sock.sendto(packet, destination)
+        print (destination)
+        hexdump(packet)
+        self.sock.sendto(packet, destination)
 
         print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
