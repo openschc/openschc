@@ -26,11 +26,10 @@ class ScapyUpperLayer:
 # --------------------------------------------------        
 
 class ScapyLowerLayer:
-    def __init__(self, udp_src=None, udp_dst=None, socket=None):
+    def __init__(self, position, socket=None, other_end=None):
         self.protocol = None
-        self.sd = None
-        self.udp_src = udp_src
-        self.udp_dst = udp_dst
+        self.position = position
+        self.other_end = other_end
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -40,13 +39,24 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
+        print("SENDING", packet, dest)            
+
         if dest.find("udp") == 0:
-            destination = (dest.split(":")[1], int(dest.split(":")[2]))
+            if self.position == T_POSITION_CORE:
+                destination = (dest.split(":")[1], int(dest.split(":")[2]))
+            else:
+                destination = other_end
+
+            print (destination)
+            hexdump(packet)
             self.sock.sendto(packet, destination)
 
+        print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
+            print ("do callback", transmit_callback)
             transmit_callback(1)
-
+        else:
+            print ("c'est None")
 
     def get_mtu_size(self):
         return 72 # XXX
