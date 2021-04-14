@@ -206,7 +206,7 @@ class SCHCProtocol:
         parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
         if parsed_packet is None:
-            return BitBuffer(raw_packet)
+            return BitBuffer(raw_packet), device_id
 
         # Apply compression rule
         rule, device_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
