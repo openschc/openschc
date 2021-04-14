@@ -50,14 +50,14 @@ class ScapyLowerLayer:
     def send_packet(self, packet, dest, transmit_callback=None):
         print("SENDING", packet, dest)            
 
-        if dest.find("udp") == 0:
-            if self.position == T_POSITION_CORE:
-                if dest == None: # no destination found
-                    print ("No destination found, not sent")
-                    return False
+        if self.position == T_POSITION_CORE:
+            if dest != None and dest.find("udp") == 0:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
             else:
-                destination = self.other_end
+                print ("No destination found, not sent")
+                return False
+        else:
+            destination = self.other_end
 
             print (destination)
             hexdump(packet)

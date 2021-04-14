@@ -78,7 +78,7 @@ class SessionManager:
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == T_FRAG_NO_ACK:
             session = ReassemblerNoAck(
-                self.protocol, context, rule, dtag, l2_address, session_manager=self)
+                self.protocol, context, rule, dtag, l2_address)
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError("FRMode:", mode)
         elif mode == T_FRAG_ACK_ON_ERROR:
@@ -318,7 +318,7 @@ class SCHCProtocol:
                 context, frag_rule, session_id)
             print("New reassembly session created", session.__class__.__name__)
 
-        return session.receive_frag(packet_bbuf, dtag, position=self.position)
+        return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self)
 
 
     def process_decompress(self, packet_bbuf, dev_l2_addr, direction):

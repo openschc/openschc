@@ -30,7 +30,7 @@ class ReassembleBase:
 
     """
 
-    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None, session_namager=None):
+    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None):
         """
 
         Args :
@@ -60,8 +60,6 @@ class ReassembleBase:
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
-        self.session_manager = session_manager # to which session manager the session belongs
-        print ("AAAAAAA", self.session_manager)
 
         self.fragment_received = False
 
@@ -134,7 +132,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, position):
+    def receive_frag(self, bbuf, dtag, position, protocol):
         """
         return 
         - None if fragmentation is not finished
@@ -146,18 +144,12 @@ class ReassemblerNoAck(ReassembleBase):
                                                                      bbuf, self.rule))
         assert (T_FRAG in self.rule)
 
-        print (binascii.hexlify(bbuf._content))
-
-        print ('SENDER COULD  BE HERE')
-        print (position) # for fragmentation, direction is important, ack or data
-        print (self.rule)
-
         if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
             (position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
-            print ("It smells Abort")
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
-            print (schc_abort.cbit, schc_abort.abort)
-            schc_abort.remaining.display(format="bin")
+            if schc_abort.abort:
+                print ("aborting, removing state")
+                print(protocol.session_manager.session_table)
             return None
         else:
             print ("frag data")
@@ -221,7 +213,7 @@ class ReassemblerNoAck(ReassembleBase):
                     dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
                             b2hex(schc_frag.mic), b2hex(mic_calced)))
                     self.state = 'ERROR_MIC_NO_ACK'
-                    #self.protocol.session_manager.delete_session(self._session_id)
+                    self.protocol.session_manager.delete_session(self._session_id)
                     return False
                 else:
                     dtrace("SUCCESS: MIC matched. packet {} == result {}".format(

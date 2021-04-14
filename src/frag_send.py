@@ -175,7 +175,9 @@ class FragmentNoAck(FragmentBase):
             dprint("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
-            transmit_callback = self.event_sent_frag
+            #transmit_callback = self.event_sent_frag  # TRANSITION, before the send schedule the nect event
+            transmit_callback = None
+            self.protocol.scheduler.add_event(0, self.event_sent_frag, (1))
             fcn = 0
             self.mic_sent = None
 
@@ -211,7 +213,10 @@ class FragmentNoAck(FragmentBase):
                              (frag_msg.get_sender_header_size(self.rule) +
                               remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
-                transmit_callback = self.event_sent_frag
+                #transmit_callback = self.event_sent_frag
+                transmit_callback = None
+                self.protocol.scheduler.add_event(0, self.event_sent_frag, (1))
+
                 fcn = 0
                 self.mic_sent = None
                 if enable_statsct:
@@ -269,7 +274,7 @@ class FragmentNoAck(FragmentBase):
 
     def receive_frag(self, schc_frag, dtag):
         # in No-Ack mode, only Receiver Abort message can be acceptable.
-        dprint("sender frag received:", schc_frag.__dict__)
+        print("sender frag received:", schc_frag.__dict__)
         if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] == 0 or
              schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
