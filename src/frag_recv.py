@@ -149,8 +149,8 @@ class ReassemblerNoAck(ReassembleBase):
         print (position) # for fragmentation, direction is important, ack or data
         print (self.rule)
 
-        if (position == T_POSITION_CORE) and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
-            (position == T_POSITION_DEVICE) and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
+        if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or
+            (position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
             print ("It smells Abort")
 
             return None
