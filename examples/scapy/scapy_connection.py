@@ -183,7 +183,7 @@ class ScapyScheduler:
                 for s in session.session_manager.session_table:
                     s_id = "{}-{}/{}-{}".format(s[0], s[1], s[2],s[3])
                     print ("{:10} |".format(s_id), end="")
-                    if isinstance(session.session_manager.session_table[s], ffrag_send.FragmentNoAck):
+                    if isinstance(session.session_manager.session_table[s], frag_send.FragmentNoAck):
                         print ("Sending NoAck")
                     elif isinstance(session.session_manager.session_table[s], frag_recv.ReassemblerNoAck):
                         print ("Receiving NoAck")
