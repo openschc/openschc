@@ -50,8 +50,6 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        print("SENDING", packet, dest)            
-
         if self.position == T_POSITION_CORE:
             if dest != None and dest.find("udp") == 0:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
@@ -111,8 +109,6 @@ class ScapyScheduler:
         return event_id
 
     def cancel_event(self, event):
-        print ("remove event", event)
-
         item_pos = 0
         item_found = False
         elm = None
@@ -123,9 +119,7 @@ class ScapyScheduler:
             item_pos += 1
 
         if item_found:
-            print ("item found", item_pos)
             elm = self.queue.pop(item_pos)
-            print (self.queue)
 
         return elm
 
@@ -181,13 +175,10 @@ class ScapyScheduler:
                     if isinstance(session.session_manager.session_table[s], frag_send.FragmentNoAck):
                         print ("Sending NoAck")
                     elif isinstance(session.session_manager.session_table[s], frag_recv.ReassemblerNoAck):
-                        print ("Receiving NoAck", end="")
+                        print ("Receiving NoAck ", end="")
                         print (len(session.session_manager.session_table[s].tile_list), "tiles")
                     else:
                         print (session.session_manager.session_table[s])
-                       
-                       
-
             print ("*"*40)
 
         while len(self.queue) > 0:
