@@ -5,6 +5,8 @@ sys.path.insert(1, '../../src/')
 
 from gen_utils import dprint, sanitize_value
 from compr_core import *
+import frag_send # to get types
+import frag_recv
 
 from scapy.all import hexdump
 
@@ -180,9 +182,15 @@ class ScapyScheduler:
                 print ("-"*30)
                 for s in session.session_manager.session_table:
                     s_id = "{}-{}/{}-{}".format(s[0], s[1], s[2],s[3])
-                    print ("{:10} |".format(s_id))
-                    print (session.session_manager.session_table[s])
-                    print (type(session.session_manager.session_table[s])==frag_send.FragmentNoAck)
+                    print ("{:10} |".format(s_id), end="")
+                    if type(session.session_manager.session_table[s]) is frag_send.FragmentNoAck:
+                        print ("Sending NoAck")
+                    elif type(session.session_manager.session_table[s]) is frag_recv.FragmentNoAck:
+                        print ("Receiving NoAck")
+                    else:
+                        print (session.session_manager.session_table[s])
+                       
+                       
 
             print ("*"*40)
 
