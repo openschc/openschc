@@ -104,7 +104,7 @@ class ReassembleBase:
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
         # XXX needs to release all resources.
-        self.protocol.scheduler.delete_session(self._session_id)
+        self.protocol.session_manager.delete_session(self._session_id)
         return
 
     def cancel_inactive_timer(self):

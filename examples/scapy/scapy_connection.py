@@ -187,6 +187,7 @@ class ScapyScheduler:
                         print ("Sending NoAck")
                     elif isinstance(session.session_manager.session_table[s], frag_recv.ReassemblerNoAck):
                         print ("Receiving NoAck")
+                        print (session.session_manager.session_table[s].tile_list)
                     else:
                         print (session.session_manager.session_table[s])
                        
