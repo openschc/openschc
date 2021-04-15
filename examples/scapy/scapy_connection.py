@@ -182,7 +182,7 @@ class ScapyScheduler:
                     s_id = "{}-{}/{}-{}".format(s[0], s[1], s[2],s[3])
                     print ("{:10} |".format(s_id))
                     print (session.session_manager.session_table[s])
-                    print (type(session.session_manager.session_table[s]))
+                    print (type(session.session_manager.session_table[s])==frag_send.FragmentNoAck)
 
             print ("*"*40)
 
