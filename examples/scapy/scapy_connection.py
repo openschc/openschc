@@ -179,7 +179,9 @@ class ScapyScheduler:
             if session:
                 print ("-"*30)
                 for s in session.session_manager.session_table:
-                    print (s)
+                    s_id = "{}-{}/{}-{}".format(s[0], s[1], s[3],s[4])
+                    print ("{:10} |", s_id)
+                    print (session.session_manager.session_table[s])
 
             print ("*"*40)
 
