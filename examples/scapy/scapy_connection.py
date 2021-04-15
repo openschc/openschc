@@ -196,7 +196,7 @@ class ScapyScheduler:
             callback(*args)
             if self.observer is not None:
                 self.observer("sched-post-event", event_info)
-            print("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
+            print("{0:6.2f} Queue running event -> {}, callback -> {}".format(time.time()-self.clock, event_id, callback.__name__))
 
 # --------------------------------------------------        
 
