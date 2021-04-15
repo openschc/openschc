@@ -61,16 +61,11 @@ class ScapyLowerLayer:
         else:
             destination = self.other_end
 
-        print (destination)
-        hexdump(packet)
         self.sock.sendto(packet, destination)
 
-        print ("L2 send_packet", transmit_callback)
         if transmit_callback is not None:
-            print ("do callback", transmit_callback)
+            print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
-        else:
-            print ("c'est None")
 
     def get_mtu_size(self):
         return 72 # XXX
@@ -186,8 +181,8 @@ class ScapyScheduler:
                     if isinstance(session.session_manager.session_table[s], frag_send.FragmentNoAck):
                         print ("Sending NoAck")
                     elif isinstance(session.session_manager.session_table[s], frag_recv.ReassemblerNoAck):
-                        print ("Receiving NoAck")
-                        print (session.session_manager.session_table[s].tile_list)
+                        print ("Receiving NoAck", end="")
+                        print (len(session.session_manager.session_table[s].tile_list), "tiles")
                     else:
                         print (session.session_manager.session_table[s])
                        
