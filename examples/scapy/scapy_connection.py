@@ -175,11 +175,13 @@ class ScapyScheduler:
             self.last_show = time.time()
             for q in self.queue:
                 print ("{0:6.2f}: id.{1:04d}".format(q[0]-time.time(), q[1]), q[2])
-            print ("*"*40)
 
             if session:
-                print(session.session_manager.session_table)
+                print ("-"*30)
+                for s in session.session_manager.session_table:
+                    print (s)
 
+            print ("*"*40)
 
         while len(self.queue) > 0:
             self.queue.sort()
