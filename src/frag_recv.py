@@ -149,6 +149,7 @@ class ReassemblerNoAck(ReassembleBase):
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
             if schc_abort.abort:
                 print ("aborting, removing state")
+                protocol.session_manager.delete_session(self._session_id)
                 print(protocol.session_manager.session_table)
             return None
         else:
