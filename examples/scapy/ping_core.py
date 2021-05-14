@@ -106,7 +106,7 @@ lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=other_
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
-    config=config, system=system, 
+    system=system, 
     layer2=lower_layer, layer3=upper_layer, 
     role=POSITION, unique_peer=False)
 schc_protocol.set_position(POSITION)
