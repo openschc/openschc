@@ -14,18 +14,15 @@ from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 
 
-import sched
-import protocol
+#import sched
+#import protocol
 import pprint
 import binascii
 import socket
 import ipaddress
-import time, datetime
+#import time, datetime
 
 
-class debug_protocol:
-    def _log(*arg):
-        print (arg)
 
 # Create a Rule Manager and upload the rules.
 
@@ -41,7 +38,6 @@ def processPkt(pkt):
     scheduler.run(session=schc_machine, display_period=10)
 
     # look for a tunneled SCHC pkt
-
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x0800:
