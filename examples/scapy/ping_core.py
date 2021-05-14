@@ -2,7 +2,7 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
-from scapy.all import *‡
+from scapy.all import *
 
 import gen_rulemanager as RM
 import compr_parser as parser
