@@ -7,6 +7,7 @@ import scapy.contrib.coap as scapy_coap
 from scapy_connection import *
 
 import gen_rulemanager as RM
+import compr_parser as parser
 from compr_core import *
 import protocol
 from gen_utils import dprint, sanitize_value
