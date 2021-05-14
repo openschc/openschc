@@ -38,7 +38,7 @@ def processPkt(pkt):
     schc protocol must be specified as a global variable.
     """
 
-    scheduler.run(session=schc_protocol, period=10)
+    scheduler.run(session=schc_protocol, display_period=10)
 
     # look for a tunneled SCHC pkt
 
