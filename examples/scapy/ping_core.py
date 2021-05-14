@@ -3,7 +3,7 @@ import sys
 sys.path.insert(1, '../../src/')
 
 from scapy.all import *
-import scapy.contrib.coap as scapy_coap
+from scapy_connection import *
 
 
 import gen_rulemanager as RM
@@ -11,9 +11,7 @@ import compr_parser as parser
 from compr_core import *
 import protocol
 from protocol import SCHCProtocol
-from scapy_connection import *
 from gen_utils import dprint, sanitize_value
-
 
 import pprint
 import binascii
@@ -64,7 +62,7 @@ upper_layer = ScapyUpperLayer()
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_machine = protocol.SCHCProtocol(
+schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION)           # DEVICE or CORE
