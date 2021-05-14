@@ -32,7 +32,10 @@ class ConnectivityManager:
         pass
 
     def get_mtu (self, device):
-        return 50
+        """
+        Return the MTU is bits for a specific device, currently returns always 400
+        """
+        return 400
 
 
 # ---------------------------------------------------------------------------
