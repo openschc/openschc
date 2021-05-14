@@ -2,27 +2,21 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
-from scapy.all import *
-import scapy.contrib.coap as scapy_coap
-
+from scapy.all import *‡
 
 import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
-import protocol
+#import protocol
 from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 
-
-#import sched
 import pprint
 import binascii
 import socket
 import ipaddress
-#import time, datetime
-
-
+‡
 
 # Create a Rule Manager and upload the rules.
 
@@ -68,7 +62,7 @@ upper_layer = ScapyUpperLayer()
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_machine = protocol.SCHCProtocol(
+schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION)           # DEVICE or CORE
