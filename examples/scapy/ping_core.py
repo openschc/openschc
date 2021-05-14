@@ -16,7 +16,7 @@ import pprint
 import binascii
 import socket
 import ipaddress
-‡
+
 
 # Create a Rule Manager and upload the rules.
 
