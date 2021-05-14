@@ -9,13 +9,13 @@ import scapy.contrib.coap as scapy_coap
 import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
-from protocol import SCHCProtocol
+import protocol
+#from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 
 
 #import sched
-#import protocol
 import pprint
 import binascii
 import socket
