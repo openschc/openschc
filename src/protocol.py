@@ -32,7 +32,7 @@ class ConnectivityManager:
         pass
 
     def get_mtu (self, device):
-        return 12
+        return 50
 
 
 # ---------------------------------------------------------------------------
