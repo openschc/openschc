@@ -38,7 +38,7 @@ def processPkt(pkt):
     schc protocol must be specified as a global variable.
     """
 
-    scheduler.run(session=schc_protocol, display_period=10)
+    scheduler.run(session=schc_machine, display_period=10)
 
     # look for a tunneled SCHC pkt
 
@@ -53,42 +53,31 @@ def processPkt(pkt):
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
-                    r = schc_protocol.schc_recv(other_end, schc_pkt)
+                    r = schc_machine.schc_recv(other_end, schc_pkt)
                     print (r)
             elif ip_proto==41:
-                schc_protocol.schc_send(bytes(pkt)[34:])
-        
-# look at the IP address to define sniff behavior
+                schc_machine.schc_send(bytes(pkt)[34:])
 
-with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.connect(("8.8.8.8", 80))
-    ip_addr = s.getsockname()[0]
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
-device_id = None
 socket_port = 0x5C4C
-other_end = None # defined by the rule
-
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", 0x5C4C))
 
 config = {}
 upper_layer = ScapyUpperLayer()
-lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=other_end)
+lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_protocol = protocol.SCHCProtocol(
+schc_machine = protocol.SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION)           # DEVICE or CORE
-schc_protocol.set_position(POSITION)
-schc_protocol.set_rulemanager(rm)
+schc_machine.set_rulemanager(rm)
 
-
-#sniff(prn=processPkt, iface=["he-ipv6", "ens3"]) # scappy cannot read multiple interfaces
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
 
 

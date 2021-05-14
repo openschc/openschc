@@ -146,7 +146,7 @@ class SCHCProtocol:
         self.config = config
         self.unique_peer = unique_peer
         self.role = role # should be remove for position
-        self.position = None #position gives if the SCHC is for device or core to define UP and DOWN
+        self.position = self.role #position gives if the SCHC is for device or core to define UP and DOWN
         self.system = system
         self.scheduler = system.get_scheduler()
         self.layer2 = layer2
