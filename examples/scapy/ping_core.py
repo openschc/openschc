@@ -15,14 +15,10 @@ from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 
 
-#import sched
 import pprint
 import binascii
 import socket
 import ipaddress
-#import time, datetime
-
-
 
 # Create a Rule Manager and upload the rules.
 
