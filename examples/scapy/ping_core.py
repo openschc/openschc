@@ -11,7 +11,7 @@ import compr_parser as parser
 from compr_core import *
 import protocol
 from protocol import SCHCProtocol
-from scapy_connection import *
+#from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 
 
