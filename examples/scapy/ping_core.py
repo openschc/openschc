@@ -62,7 +62,7 @@ upper_layer = ScapyUpperLayer()
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_machine = SCHCProtocol(
+schc_machine = protocol.SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION)           # DEVICE or CORE
