@@ -33,24 +33,13 @@ rm = RM.RuleManager()
 rm.Add(file="icmp.json")
 rm.Print()
 
-#comp = Compressor(debug_protocol)
-#decomp = Decompressor(debug_protocol)
-
-def send_scapy(fields, pkt_bb, rule=None):
-    raise ValueError ("should not be here")
-
-    
-def send_tunnel(pkt, dest):
-    print ("send tunnel")
-    print (dest, pkt)
-    print (pkt.display())
-
-
 def processPkt(pkt):
-    global parser
-    global rm
-    global event_queue
-    global SCHC_machine
+    """ called when scapy receives a packet, since this function takes 
+    """
+#    global parser
+#    global rm
+#    global event_queue
+#    global SCHC_machine
     
 
     scheduler.run(session=schc_protocol, period=10)
