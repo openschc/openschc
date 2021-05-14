@@ -107,7 +107,7 @@ system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
     system=system, 
-    layer2=lower_layer, layer3=upper_layer, 
+    layer2=lower_layer, 
     role=POSITION, unique_peer=False)
 schc_protocol.set_position(POSITION)
 schc_protocol.set_rulemanager(rm)
