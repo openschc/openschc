@@ -153,14 +153,14 @@ class ScapyScheduler:
         assert fd not in self.fd_callback_table
         self.fd_callback_table[fd] = (callback, args)
 
-    def run(self, session=None, period=None):
+    def run(self, session=None, display_period=None):
         factor= 10
         if self.item % factor == 0:
             seq = ["|", "/", "-", "\\", "-"]
             print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
         self.item +=1
 
-        if period and time.time() - self.last_show > period: # display the event queue every minute
+        if display_period and time.time() - self.last_show > display_period: # display the event queue every minute
             print ("*"*40)
             print ("EVENT QUEUE")
             self.last_show = time.time()
@@ -196,7 +196,7 @@ class ScapyScheduler:
             callback(*args)
             if self.observer is not None:
                 self.observer("sched-post-event", event_info)
-            print("{:6.2f} Queue running event -> {}, callback -> {}".format(time.time()-self.clock, event_id, callback.__name__))
+            print("Queue running event -> {}, callback -> {}".format(event_id, callback.__name__))
 
 # --------------------------------------------------        
 

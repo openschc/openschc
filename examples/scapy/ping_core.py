@@ -34,13 +34,9 @@ rm.Add(file="icmp.json")
 rm.Print()
 
 def processPkt(pkt):
-    """ called when scapy receives a packet, since this function takes 
+    """ called when scapy receives a packet, since this function takes only one argument,
+    schc protocol must be specified as a global variable.
     """
-#    global parser
-#    global rm
-#    global event_queue
-#    global SCHC_machine
-    
 
     scheduler.run(session=schc_protocol, period=10)
 
@@ -61,11 +57,6 @@ def processPkt(pkt):
                     print (r)
             elif ip_proto==41:
                 schc_protocol.schc_send(bytes(pkt)[34:])
-    elif IP in pkt and pkt.getlayer(IP).version == 6 : # regular IPv6trafic to be compression
-        schc_protocol.schc_send(bytes(pkt))
-    else:
-     print (".", end="", flush=True)           
-                    
         
 # look at the IP address to define sniff behavior
 
