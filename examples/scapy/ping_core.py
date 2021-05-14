@@ -10,22 +10,16 @@ import gen_rulemanager as RM
 import compr_parser as parser
 from compr_core import *
 from protocol import SCHCProtocol
-
 from scapy_connection import *
-
 from gen_utils import dprint, sanitize_value
 
 
 import sched
-
 import protocol
-
 import pprint
 import binascii
-
 import socket
 import ipaddress
-
 import time, datetime
 
 
@@ -33,7 +27,7 @@ class debug_protocol:
     def _log(*arg):
         print (arg)
 
-parse = parser.Parser(debug_protocol)
+#parse = parser.Parser(debug_protocol)
 rm    = RM.RuleManager()
 rm.Add(file="icmp.json")
 rm.Print()
@@ -106,9 +100,9 @@ lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=other_
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_protocol = protocol.SCHCProtocol(
-    system=system, 
-    layer2=lower_layer, 
-    role=POSITION, unique_peer=False)
+    system=system,           # define the scheduler
+    layer2=lower_layer,      # how to send messages
+    role=POSITION)           # DEVICE or CORE
 schc_protocol.set_position(POSITION)
 schc_protocol.set_rulemanager(rm)
 
