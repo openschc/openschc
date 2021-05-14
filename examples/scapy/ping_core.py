@@ -27,13 +27,14 @@ class debug_protocol:
     def _log(*arg):
         print (arg)
 
-#parse = parser.Parser(debug_protocol)
-rm    = RM.RuleManager()
+# Create a Rule Manager and upload the rules.
+
+rm = RM.RuleManager()
 rm.Add(file="icmp.json")
 rm.Print()
 
-comp = Compressor(debug_protocol)
-decomp = Decompressor(debug_protocol)
+#comp = Compressor(debug_protocol)
+#decomp = Decompressor(debug_protocol)
 
 def send_scapy(fields, pkt_bb, rule=None):
     raise ValueError ("should not be here")
