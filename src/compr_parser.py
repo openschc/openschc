@@ -255,7 +255,7 @@ class Unparser:
 
         Layer3 = IPv6Header
 
-        if fields[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
             ICMPv6Header = ICMPv6EchoReply(
                 id = header_d[(T_ICMPV6_IDENT, 1)][0],
                 seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
