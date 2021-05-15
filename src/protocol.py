@@ -35,7 +35,7 @@ class ConnectivityManager:
         """
         Return the MTU is bits for a specific device, currently returns always 400
         """
-        return 400
+        return 500
 
 
 # ---------------------------------------------------------------------------
