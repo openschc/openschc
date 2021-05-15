@@ -302,7 +302,7 @@ class Compressor:
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
             dprint("rule item:", r)
@@ -319,7 +319,7 @@ class Compressor:
             else:
                 dprint("rule skipped, bad direction")
 
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -336,7 +336,7 @@ class Compressor:
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -430,7 +430,7 @@ class Decompressor:
             size = rule[T_FL]
         else:
             raise ValueError("cannot read field length")
-        in_bbuf.display("bin")
+        #in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
 
         return [val, size]
