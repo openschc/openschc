@@ -267,5 +267,7 @@ class Unparser:
 
         full_packet.show()
 
+        return bytes(full_packet)
+
         
 
