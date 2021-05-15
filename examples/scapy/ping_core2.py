@@ -8,6 +8,7 @@ import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
+from compr_parser import Unparser
 
 import pprint
 import binascii
@@ -19,6 +20,8 @@ import ipaddress
 rm = RM.RuleManager()
 rm.Add(file="icmp1.json")
 rm.Print()
+
+unparser = Unparser()
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
