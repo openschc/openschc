@@ -263,7 +263,7 @@ class Unparser:
             )
             L4header = ICMPv6Header
 
-        full_packet = L3header | L4header
+        full_packet = L3header / L4header
 
         full_packet.show()
 
