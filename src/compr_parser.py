@@ -207,3 +207,62 @@ class Parser:
 
 
         return self.header_fields, pkt[pos:], None
+
+
+class Unparser:
+
+    def _init(self):
+        pass
+
+    def unparse (self, header_d, data, direction, d_rule, iface=None):
+        dprint ("unparse", header_d, data, direction)
+
+        L2header = None
+        L3header = None
+        L4header = None
+        L7header = None
+
+        c = {}
+        for k in [T_IPV6_DEV_PREFIX, T_IPV6_DEV_IID, T_IPV6_APP_PREFIX, T_IPV6_APP_IID]:
+            v = header_d[(k, 1)][0]
+            if type(v) == bytes:
+                c[k] = int.from_bytes(v, "big")
+            elif type(v) == int:
+                c[k] = v
+            else:
+                raise ValueError ("Type not supported")
+            
+        
+        IPv6Src = (c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID]
+        IPv6Dst = (c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID]
+
+        
+        IPv6Sstr = ipaddress.IPv6Address(IPv6Src)
+        IPv6Dstr = ipaddress.IPv6Address(IPv6Dst)
+        
+        IPv6Header = IPv6 (
+            version= header_d[(T_IPV6_VER, 1)][0],
+            tc     = header_d[(T_IPV6_TC, 1)][0],
+            fl     = header_d[(T_IPV6_FL, 1)][0],
+            nh     = header_d[(T_IPV6_NXT, 1)][0],
+            hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
+            src    =IPv6Sstr.compressed, 
+            dst    =IPv6Dstr.compressed
+        ) 
+
+        Layer3 = IPv6Header
+
+        if fields[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            ICMPv6Header = ICMPv6EchoReply(
+                id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                data = data
+            )
+            Layer4 = ICMPv6header
+
+        full_packet = Layer3 | layer4
+
+        full_packet.show()
+
+        
+
