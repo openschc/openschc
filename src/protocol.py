@@ -144,7 +144,7 @@ class SCHCProtocol:
 
     """
 
-    def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False):
+    def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False, verbose=True):
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
@@ -159,6 +159,7 @@ class SCHCProtocol:
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
+        self.verbose = True
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -167,7 +168,8 @@ class SCHCProtocol:
             set_debug_output(True)
 
     def _log(self, message):
-        print("schc", message)
+        if self.verbose:
+            print("schc", message)
 
     def log(self, name, message):
         print(name, message)
