@@ -12,6 +12,7 @@ from compr_core import *  # for common variable describing rules (no function ca
 from binascii import hexlify, unhexlify
 from struct import pack, unpack
 import ipaddress
+from scapy.all import *
 
 
 option_names = {
