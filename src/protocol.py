@@ -293,13 +293,32 @@ class SCHCProtocol:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
 
-    def schc_recv(self, dst_l2_addr, raw_packet):
-        device_id = dst_l2_addr # for compatibility with old code : remove when cleaned
+    def schc_recv(self, schc_packet, dst_l2_addr=None,  device_id=None):
+        if device_id == None:
+            device_id = dst_l2_addr # for compatibility with old code : remove when cleaned
+        
         """Receiving a SCHC packet from a lower layer."""
-        packet_bbuf = BitBuffer(raw_packet)
+        packet_bbuf = BitBuffer(schc_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 
-        frag_rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
+        rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
+
+        if rule == None:
+            print ("No rule found")
+            return None
+
+        if T_COMP in rule:
+            print ("compression")
+            if self.position == T_POSITION_DEVICE:
+                direction = T_DIR_DW
+            else:
+                direction = T_DIR_UP
+
+            decomp = Decompressor()
+            return decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
+    
+        # fragmentation rule
+        frag_rule = rule
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 

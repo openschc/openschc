@@ -8,6 +8,7 @@ import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
+from gen_bitarray import *
 
 import pprint
 import binascii
@@ -37,8 +38,14 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt)
-                    print (r)
+                    schc_bbuf = BitBuffer(schc_pkt)
+                    rule = rm.FindRuleFromSCHCpacket(schc=schc_bbuf, device=device_id)
+                    if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH]== 3:
+                        print ("ping")
+                        tunnel.sendto(schc_pkt, addr)
+                    else: 
+                        r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt)
+                        print (r)
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
 

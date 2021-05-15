@@ -344,7 +344,7 @@ class Compressor:
 
 class Decompressor:
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
         self.__func_rx_cda = {
             T_CDA_NOT_SENT : self.rx_cda_not_sent,
@@ -571,7 +571,7 @@ class Decompressor:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
                 dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
-                pprint.pprint (self.parsed_packet)
+                #pprint.pprint (self.parsed_packet)
 
         return self.parsed_packet
 
