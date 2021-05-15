@@ -10,32 +10,6 @@ import frag_recv
 
 from scapy.all import hexdump
 
-
-# class ScapyUpperLayer:
-#     def __init__(self):
-#         self.protocol = None
-
-#     # ----- AbstractUpperLayer interface (see: architecture.py)
-    
-#     def _set_protocol(self, protocol):
-#         self.protocol = protocol
-
-#     def recv_packet(self, address, raw_packet):
-#         raise NotImplementedError("XXX:to be implemented")
-
-#     # ----- end AbstractUpperLayer interface
-
-#     def send_later(self, delay, udp_dst, packet):
-#         assert self.protocol is not None
-#         scheduler = self.protocol.get_system().get_scheduler()
-#         scheduler.add_event(delay, self._send_now, (udp_dst, packet))
-
-#     def _send_now(self, packet):
-#         #dst_address = address_to_string(udp_dst)
-#         self.protocol.schc_send(packet)
-
-# # --------------------------------------------------        
-
 class ScapyLowerLayer:
     def __init__(self, position, socket=None, other_end=None):
         self.protocol = None
@@ -66,7 +40,7 @@ class ScapyLowerLayer:
             transmit_callback(1)
 
     def get_mtu_size(self):
-        return 72 # XXX
+        return 400 # XXX
 
     # ----- end AbstractLowerLayer interface
 

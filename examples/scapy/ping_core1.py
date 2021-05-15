@@ -17,7 +17,7 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp.json")
+rm.Add(file="icmp1.json")
 rm.Print()
 
 def processPkt(pkt):
