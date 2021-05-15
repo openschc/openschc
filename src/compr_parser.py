@@ -261,7 +261,7 @@ class Unparser:
                 seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                 data = data
             )
-            Layer4 = ICMPv6header
+            Layer4 = ICMPv6Header
 
         full_packet = Layer3 | layer4
 
