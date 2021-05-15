@@ -159,7 +159,7 @@ class SCHCProtocol:
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
-        self.verbose = True
+        self.verbose = verbose
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -172,7 +172,8 @@ class SCHCProtocol:
             print("schc", message)
 
     def log(self, name, message):
-        print(name, message)
+        if self.verbose:
+            print(name, message)
 
     def set_rulemanager(self, rule_manager):
         self.rule_manager = rule_manager
