@@ -315,13 +315,15 @@ class SCHCProtocol:
                 direction = T_DIR_UP
 
             decomp = Decompressor()
+            unparser = Unparser()
             header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
             pkt_data = bytearray()
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
-            return header_d, pkt_data
+            pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
+            return pkt
     
         # fragmentation rule
         frag_rule = rule

@@ -44,7 +44,7 @@ def processPkt(pkt):
                     print("other end =", other_end)
                     r = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)
                     print (r)
-                    #pkt = unparser.unparse(header_d, ) # header_d, data, direction, d_rule, iface=None):
+                    pkt = unparser.unparse(r[0], r[1], T_DIR_UP) # header_d, data, direction, d_rule, iface=None):
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
 
