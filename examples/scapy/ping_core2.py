@@ -58,7 +58,7 @@ schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION,           # DEVICE or CORE
-    verbose = True)         
+    verbose = False)         
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
