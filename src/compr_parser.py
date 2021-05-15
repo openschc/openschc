@@ -265,8 +265,6 @@ class Unparser:
 
         full_packet = L3header / L4header
 
-        full_packet.show()
-
         return full_packet
 
         
