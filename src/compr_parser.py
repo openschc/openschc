@@ -253,7 +253,7 @@ class Unparser:
             dst    =IPv6Dstr.compressed
         ) 
 
-        Layer3 = IPv6Header
+        L3header = IPv6Header
 
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
             ICMPv6Header = ICMPv6EchoReply(
@@ -261,9 +261,9 @@ class Unparser:
                 seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                 data = data
             )
-            Layer4 = ICMPv6Header
+            L4header = ICMPv6Header
 
-        full_packet = Layer3 | layer4
+        full_packet = L3header | L4header
 
         full_packet.show()
 
