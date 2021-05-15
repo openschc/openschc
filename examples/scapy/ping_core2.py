@@ -39,7 +39,7 @@ def processPkt(pkt):
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
-                    r = schc_machine.schc_recv(other_end, schc_pkt)
+                    r = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)
                     print (r)
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
