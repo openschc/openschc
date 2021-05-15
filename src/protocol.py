@@ -229,7 +229,7 @@ class SCHCProtocol:
 
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
-        schc_packet.display("bin")
+        #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
         return schc_packet, device_id

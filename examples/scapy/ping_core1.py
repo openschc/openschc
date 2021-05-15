@@ -47,8 +47,6 @@ def processPkt(pkt):
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
-socket_port = 0x5C4C
-
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", 0x5C4C))
 
