@@ -22,7 +22,7 @@ rm.Print()
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
-    schc protocol must be specified as a global variable.
+    schc_machine and scheduler must be specified as a global variable.
     """
 
     scheduler.run(session=schc_machine, display_period=10)
@@ -54,6 +54,7 @@ tunnel.bind(("0.0.0.0", 0x5C4C))
 
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
+scheduler = system.get_scheduler()
 schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
