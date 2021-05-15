@@ -28,7 +28,7 @@ class ScapyLowerLayer:
             if dest != None and dest.find("udp") == 0:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
             else:
-                print ("No destination found, not sent:", dest)
+                print ("No destination found, not sent:", packet, dest)
                 return False
         else:
             destination = self.other_end
