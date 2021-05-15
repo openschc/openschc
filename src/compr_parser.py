@@ -11,6 +11,8 @@ from gen_base_import import *
 from compr_core import *  # for common variable describing rules (no function called from this module)
 from binascii import hexlify, unhexlify
 from struct import pack, unpack
+import ipaddress
+
 
 option_names = {
     1: T_COAP_OPT_IF_MATCH,
