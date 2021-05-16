@@ -221,14 +221,12 @@ class SCHCProtocol:
             rule = self.rule_manager.FindNoCompressionRule(dst_l3_address)
             self._log("no-compression rule {}".format(rule))
 
-        if rule is None:
-            # XXX: not putting any SCHC compression header? - need fix
-            self._log("rule for compression/no-compression not found")
-            return BitBuffer(raw_packet), device_id
+            if rule is None:
+                # XXX: not putting any SCHC compression header? - need fix
+                self._log("rule for compression/no-compression not found")
+                return None, device_id
 
-        if rule["Compression"] == []:  # XXX: should be "NoCompression"
-            self._log("compression result no-compression")
-            return BitBuffer(raw_packet), device_id
+            # /!\ ADD NO COMPRESSION BEHAVIOR
 
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
@@ -273,6 +271,9 @@ class SCHCProtocol:
 
         # Perform compression
         packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
+
+        if packet_bbuf == None: # No compression rule found
+            return 
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
