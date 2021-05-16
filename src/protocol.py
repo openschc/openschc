@@ -309,7 +309,6 @@ class SCHCProtocol:
             return None
 
         if T_COMP in rule:
-            print ("compression")
             if self.position == T_POSITION_DEVICE:
                 direction = T_DIR_DW
             else:
