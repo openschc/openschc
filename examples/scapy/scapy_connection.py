@@ -33,7 +33,6 @@ class ScapyLowerLayer:
         else:
             destination = self.other_end
 
-        print ("==> send to ", destination, packet)
         self.sock.sendto(packet, destination)
 
         if transmit_callback is not None:
