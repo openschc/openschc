@@ -43,6 +43,7 @@ def processPkt(pkt):
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
                     uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)
+                    uncomp_pkt.show()
                     if uncomp_pkt != None:
                         send(uncomp_pkt, iface="he-ipv6")
             elif ip_proto==41:
