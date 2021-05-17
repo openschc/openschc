@@ -33,7 +33,7 @@ class FragmentBase():
         self.context = context
         self.rule = rule
         self.mtu = None 
-        self.l2word = 50 # self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
+        self.l2word = 8 # self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
         self.dtag = dtag
         # self.mic is used to check whether All-1 has been sent or not.
         self.mic_sent = None
@@ -59,7 +59,6 @@ class FragmentBase():
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
         return dtag for the packet """
-        print ("SET PACKET")
         packet_bbuf.display()
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.copy()
@@ -347,6 +346,7 @@ class FragmentAckOnError(FragmentBase):
 
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
+        print ("MTU"*5, mtu_size)
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
         dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
                                                                                                 nb_remaining_tiles,
