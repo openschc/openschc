@@ -24,7 +24,25 @@
 		{"FID": "ICMPV6.SEQNO", "TV": 0,"MO": "ignore","CDA": "value-sent"}
 		
 	    ]
-	 },{
+	 },
+	 {
+		"RuleID": 13,
+		"RuleIDLength" : 3,
+		"Fragmentation": {
+			"FRDirection": "UP",
+			"FRMode": "AckOnError"
+		}
+	 },
+	 {
+		"RuleID": 10,
+		"RuleIDLength": 3,
+		"Fragmentation" : {
+			"FRDirection": "DW",
+			"FRMode": "AckOnError"
+		}
+	  },
+
+	{
 		"RuleID" : 12,
 		"RuleIDLength" : 11,
 		"Fragmentation" : {

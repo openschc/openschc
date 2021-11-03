@@ -283,7 +283,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
             return
 
-        return 
+        # return 
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
