@@ -153,9 +153,53 @@ class Parser:
 
             if self.header_fields[T_UDP_DEV_PORT, 1]  == 5683 or self.header_fields[T_UDP_DEV_PORT, 1] == 5683:
                 next_layer = "COAP"
-            elif self.header_fields[T_UDP_DEV_PORT, 1]  == 0xBAC0 or self.header_fields[T_UDP_DEV_PORT, 1] == 0xBAC0:
+            #elif self.header_fields[T_UDP_DEV_PORT, 1] == 0xBAC0 or self.header_fields[T_UDP_DEV_PORT, 1] == 0xBAC0:
+            elif (unpack("!B", pkt[pos:pos + 1])[0] == 129):  # 129)
                 next_layer = "BACNET"
-        #if "BACNET" in layer and next_layer == "ICMP":
+
+        if "BACNET" in layers and next_layer == "BACNET":
+            self.header_fields[T_BACNET_VLC_TYPE] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_VLC_FUN] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_VLC_LEN] = unpack('!H', pkt[pos:pos + 2])[0]
+            pos += 2
+
+            self.header_fields[T_BACNET_NPDU_VER] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_NPDU_CTRL] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_TYPE] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_SER] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_PID] = unpack('!H', pkt[pos:pos + 2])[0]
+            pos += 2
+
+            self.header_fields[T_BACNET_APDU_DEV_CON] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_DEV_TYPE] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_DEV_ID] = unpack('!I', b'\x00' + pkt[pos:pos + 3])[0]
+            pos += 3
+
+            self.header_fields[T_BACNET_APDU_OBJ_CON] = unpack('!B', pkt[pos:pos + 1])[0]
+            pos += 1
+
+            self.header_fields[T_BACNET_APDU_OBJ_INS] = unpack('!I', pkt[pos:pos + 4])[0]
+            pos += 4
+
+            self.header_fields[T_BACNET_APDU_TRE] = unpack('!H', pkt[pos:pos + 2])[0]
+            pos += 2
+
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
