@@ -290,6 +290,18 @@ class IPv6address:
     addr = b''
 
 FIELD__DEFAULT_PROPERTY = {
+    T_IPV4_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
+    T_IPV4_IHL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
+    T_IPV4_DF              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV4_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV4_ID              : {"FL": 1, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV4_FLAG            : {"FL": 3, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV4_OFF             : {"FL": 21, "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV4_TTL             : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV4_PROTO           : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
+    T_IPV4_CKSUM           : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV4_DEV_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"  },
+    T_IPV4_APP_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"  },
     T_IPV6_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
     T_IPV6_TC              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
     T_IPV6_FL              : {"FL": 20, "TYPE": int, "ALGO": "DIRECT"   },

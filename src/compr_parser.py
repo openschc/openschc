@@ -38,7 +38,6 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
-
 class Parser:
     """
     Parser takes a bytearray and transforms it into a dictionnay indexed by field id.
@@ -64,52 +63,80 @@ class Parser:
 
         pos = 0
         self.header_fields = {}
-
         next_header = start
 
-        if  next_header == "IPv6" :
+        if next_header == "IPv6" or next_header == "IPv4":
             version = unpack ("!B", pkt[:1])
             #assert version[0]>>4 == 6                 # only IPv6
-            if version[0]>>4 == 6 != 6:
-                return None, None, "IP.version != 6"
+            if version[0]>>4 == 6:
+                #assert len(pkt) >= 40  # IPv6 Header is 40 byte long
+                if len(pkt) < 40:
+                    return None, None, "packet too short"
+                firstBytes = unpack('!BBHHBBQQQQ', pkt[:40]) # IPv6 \ UDP \ CoAP header
+                #self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
 
-            #assert len(pkt) >= 40  # IPv6 Header is 40 byte long
-            if len(pkt) < 40:
-                return None, None, "packet too short"
-            firstBytes = unpack('!BBHHBBQQQQ', pkt[:40]) # IPv6 \ UDP \ CoAP header
-            #self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
+                #                                         Value           size nature
+                self.header_fields[T_IPV6_VER, 1]      = [firstBytes[0] >> 4, 4]
+                self.header_fields[T_IPV6_TC, 1]       = [(firstBytes[0] & 0x0F) << 4 | (firstBytes[1] & 0xF0) >> 4, 8]
+                self.header_fields[T_IPV6_FL, 1]       = [(firstBytes[1] & 0x0F ) << 16 | firstBytes[2], 20]
+                self.header_fields[T_IPV6_LEN, 1]      = [firstBytes[3], 16,  'fixed']
+                self.header_fields[T_IPV6_NXT, 1]      = [firstBytes[4], 8,  'fixed']
+                self.header_fields[T_IPV6_HOP_LMT, 1]  = [firstBytes[5], 8,  'fixed']
 
-            #                                         Value           size nature
-            self.header_fields[T_IPV6_VER, 1]      = [firstBytes[0] >> 4, 4]
-            self.header_fields[T_IPV6_TC, 1]       = [(firstBytes[0] & 0x0F) << 4 | (firstBytes[1] & 0xF0) >> 4, 8]
-            self.header_fields[T_IPV6_FL, 1]       = [(firstBytes[1] & 0x0F ) << 16 | firstBytes[2], 20]
-            self.header_fields[T_IPV6_LEN, 1]      = [firstBytes[3], 16,  'fixed']
-            self.header_fields[T_IPV6_NXT, 1]      = [firstBytes[4], 8,  'fixed']
-            self.header_fields[T_IPV6_HOP_LMT, 1]  = [firstBytes[5], 8,  'fixed']
-
-            # The prefix, DEV_PREFIX and APP_PREFIX, should be in bytes
-            # to keep its length and to be aligned to the left.
-            # This is because it will be used to compare with the one
-            # in the src/dst address of IPv6 packet.
-            if direction == T_DIR_UP:
-                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
-            elif direction == T_DIR_DW:
-                self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
-                self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
+                # The prefix, DEV_PREFIX and APP_PREFIX, should be in bytes
+                # to keep its length and to be aligned to the left.
+                # This is because it will be used to compare with the one
+                # in the src/dst address of IPv6 packet.
+                if direction == T_DIR_UP:
+                    self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
+                elif direction == T_DIR_DW:
+                    self.header_fields[T_IPV6_APP_PREFIX, 1]     = [firstBytes[6].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_APP_IID, 1]        = [firstBytes[7].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [firstBytes[8].to_bytes(8, "big"), 64]
+                    self.header_fields[T_IPV6_DEV_IID, 1]        = [firstBytes[9].to_bytes(8, "big"), 64]
 
 
-            if not (self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58):
-                return None, None, "packet neither UDP nor ICMP"
+                if not (self.header_fields[T_IPV6_NXT, 1][0] == 17 or self.header_fields[T_IPV6_NXT, 1][0] == 58):
+                    return None, None, "packet neither UDP nor ICMP"
 
-            if self.header_fields[T_IPV6_NXT, 1][0] == 17: next_layer = "UDP"
-            if self.header_fields[T_IPV6_NXT, 1][0] == 58: next_layer = "ICMP"
+                if self.header_fields[T_IPV6_NXT, 1][0] == 17: next_layer = "UDP"
+                if self.header_fields[T_IPV6_NXT, 1][0] == 58: next_layer = "ICMP"
+                pos = 40 # IPv6 is fully parsed
 
-            pos = 40 # IPv6 is fully parsed
+            elif version[0] >> 4 == 4:
+                if version[0] & 0x0F != 5:
+                    return None, None, "IPv4 with options not supported"
+                if len(pkt) < 20:
+                    return None, None, "packet too short"
+                firstBytes = unpack("!BBHHHBBHLL", pkt[:20])
+                self.header_fields[T_IPV4_VER, 1]   = [firstBytes[0] >> 4, 4]
+                self.header_fields[T_IPV4_IHL, 1]   = [firstBytes[0] & 0x0F, 4]
+                self.header_fields[T_IPV4_DF, 1]    = [firstBytes[1], 8]
+                self.header_fields[T_IPV4_LEN, 1]   = [firstBytes[2], 16]
+                self.header_fields[T_IPV4_ID, 1]    = [firstBytes[3], 16]
+                self.header_fields[T_IPV4_FLAG, 1]  = [firstBytes[4] >> 21, 3]
+                self.header_fields[T_IPV4_OFF, 1]   = [(firstBytes[4] & 0b_0001_1111_11111111_11111111), 21]
+                self.header_fields[T_IPV4_TTL, 1]   = [firstBytes[5], 8]
+                self.header_fields[T_IPV4_PROTO, 1] = [firstBytes[6], 8]
+                self.header_fields[T_IPV4_CKSUM, 1] = [firstBytes[7], 16]
+
+                if direction == T_DIR_UP:
+                    self.header_fields[T_IPV4_DEV_ADDR, 1] = [firstBytes[8], 32]
+                    self.header_fields[T_IPV4_APP_ADDR, 1] = [firstBytes[9], 32]
+                elif direction == T_DIR_DW:
+                    self.header_fields[T_IPV4_APP_ADDR, 1] = [firstBytes[8], 32]
+                    self.header_fields[T_IPV4_DEV_ADDR, 1] = [firstBytes[9], 32]
+
+            pos = 20 # IPv4 is fully parsed
+            #print(self.header_fields)
+            if not(self.header_fields[T_IPV4_PROTO, 1][0] == 17):
+                return None, None, "packet different to UDP"
+            next_layer = "UDP"
+        else:
+            return None, None, "IP.version != 6 nor 4"
 
         if "UDP" in layers and next_layer == "UDP":
             udpBytes = unpack('!HHHH', pkt[pos:pos+8])
@@ -124,7 +151,11 @@ class Parser:
 
             pos += 8
 
-            next_layer = "COAP"
+            if self.header_fields[T_UDP_DEV_PORT, 1]  == 5683 or self.header_fields[T_UDP_DEV_PORT, 1] == 5683:
+                next_layer = "COAP"
+            elif self.header_fields[T_UDP_DEV_PORT, 1]  == 0xBAC0 or self.header_fields[T_UDP_DEV_PORT, 1] == 0xBAC0:
+                next_layer = "BACNET"
+        #if "BACNET" in layer and next_layer == "ICMP":
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
@@ -137,7 +168,7 @@ class Parser:
             if icmpBytes[0] == 128 or icmpBytes[0] == 129: #icmp echo request or reply
                 echoHeader = unpack('!HH', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_IDENT, 1]       = [echoHeader[0], 16]
-                self.header_fields[T_ICMPV6_SEQNO, 1]        = [echoHeader[1], 16]
+                self.header_fields[T_ICMPV6_SEQNO, 1]       = [echoHeader[1], 16]
                 pos += 4
 
 

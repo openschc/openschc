@@ -1,0 +1,34 @@
+ {
+    "DeviceID" : "udp:90.27.174.128:8888",
+    "SoR" : [
+	 {
+	    "RuleID": 6,
+	    "RuleIDLength": 3,
+	    "Compression": [
+		{"FID": "IPV4.VER", "TV": 4, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.IHL", "TV": 5, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.DF",  "MO": "ignore", "CDA": "value-sent"},
+		{"FID": "IPV4.LEN", "MO": "ignore", "CDA": "compute-length"},
+		{"FID": "IPV4.ID", "TV" : 123, "MO": "ignore", "CDA": "not-sent"},
+		{"FID": "IPV4.FLAG", "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.OFF",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.TTL",  "TV": 60, "MO": "ignore", "CDA": "not-sent"},
+		{"FID": "IPV4.PROTO",  "TV": 17, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.CKSUM",  "MO": "ignore", "CDA": "compute-checksum"},
+		{"FID": "IPV4.DEV_ADDR",  "TV": 3232235537, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV4.APP_ADDR",  "TV": 3232235528, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "UDP.APP_PORT",  "TV": 47808, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "UDP.DEV_PORT",  "TV": 47808, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "UDP.LEN",  "MO": "ignore", "CDA": "compute-length"},
+		{"FID": "UDP.CKSUM",  "MO": "ignore", "CDA": "compute-checksum"}
+		]
+	 },{
+		"RuleID" : 12,
+		"RuleIDLength" : 11,
+		"Fragmentation" : {
+			"FRMode": "NoAck",
+			"FRDirection": "UP"
+		}
+	}
+    ]
+  }
