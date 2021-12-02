@@ -332,31 +332,31 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
 }
 
-#    T_PROTO_BACNET = "BACNET"
-#    T_BACNET_FID = "BACNET.FID"
-#    T_BACNET_FL = "BACNET.FL"
-#    T_BACNET_FP = "BACNET.FP"
-#    T_BACNET_DI = "BACNET.DI"
-#    T_BACNET_TV = "BACNET.TV"
-#    T_BACNET_MO = "BACNET.MO"
-#    T_BACNET_MO_VAL = "BACNET.MO.VAL"
-#    T_BACNET_CDA = "BACNET.CDA"
-#    T_BACNET_SB = "BACNET.SB"
-
-#    T_BACNET_VLC_TYPE = "BACnet.type"
-#    T_BACNET_VLC_FUN = "BACnet.fun"
-#    T_BACNET_VLC_LEN = "BACnet.len"
-
-#    T_BACNET_NPDU_VER = "BACnet.NPDU.ver"
-#    T_BACNET_NPDU_CTRL = "BACnet.NPDU.ctrl"
-
-#    T_BACNET_APDU_TYPE = "BACnet.APDU.type"
-#    T_BACNET_APDU_SER = "BACnet.APDU.ser"
-#    T_BACNET_APDU_PID = "BACnet.APDU.pid"
-#    T_BACNET_APDU_DEVID = "BACnet.APDU.devid"
-#    T_BACNET_APDU_OBJID = "BACnet.APDU.objid"
-#    T_BACNET_APDU_TRE = "BACnet.APDU.tre"
-#    T_BACNET_APDU_VALS = "BACnet.APDU.vals"
+   # T_PROTO_BACNET = "BACNET"
+   # T_BACNET_FID = "BACNET.FID"
+   # T_BACNET_FL = "BACNET.FL"
+   # T_BACNET_FP = "BACNET.FP"
+   # T_BACNET_DI = "BACNET.DI"
+   # T_BACNET_TV = "BACNET.TV"
+   # T_BACNET_MO = "BACNET.MO"
+   # T_BACNET_MO_VAL = "BACNET.MO.VAL"
+   # T_BACNET_CDA = "BACNET.CDA"
+   # T_BACNET_SB = "BACNET.SB"
+   #
+   # T_BACNET_VLC_TYPE = "BACnet.type"
+   # T_BACNET_VLC_FUN = "BACnet.fun"
+   # T_BACNET_VLC_LEN = "BACnet.len"
+   #
+   # T_BACNET_NPDU_VER = "BACnet.NPDU.ver"
+   # T_BACNET_NPDU_CTRL = "BACnet.NPDU.ctrl"
+   #
+   # T_BACNET_APDU_TYPE = "BACnet.APDU.type"
+   # T_BACNET_APDU_SER = "BACnet.APDU.ser"
+   # T_BACNET_APDU_PID = "BACnet.APDU.pid"
+   # T_BACNET_APDU_DEVID = "BACnet.APDU.devid"
+   # T_BACNET_APDU_OBJID = "BACnet.APDU.objid"
+   # T_BACNET_APDU_TRE = "BACnet.APDU.tre"
+   # T_BACNET_APDU_VALS = "BACnet.APDU.vals"
 
 class DictToAttrDeep:
 
