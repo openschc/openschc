@@ -9,6 +9,7 @@ import pprint
 
 T_RULEID = "RuleID"
 T_RULEIDLENGTH = "RuleIDLength"
+T_DEVICEID = "DeviceID"
 
 T_FID = "FID"
 T_FL = "FL"
@@ -19,6 +20,22 @@ T_MO = "MO"
 T_MO_VAL = "MO.VAL"
 T_CDA = "CDA"
 T_SB = "SB"
+
+T_PROTO_IPV4 = "IPV4"
+T_IPV4_VER = "IPV4.VER"
+T_IPV4_IHL = "IPV4.IHL"
+T_IPV4_DF = "IPV4.DF"
+T_IPV4_LEN = "IPV4.LEN"
+T_IPV4_ID = "IPV4.ID"
+T_IPV4_FLAG = "IPV4.FLAG"
+T_IPV4_OFF = "IPV4.OFF"
+T_IPV4_LEN = "IPV4.LEN"
+T_IPV4_TTL = "IPV4.TTL"
+T_IPV4_PROTO = "IPV4.PROTO"
+T_IPV4_CKSUM = "IPV4.CKSUM"
+T_IPV4_APP_ADDR = "IPV4.APP_ADDR"
+T_IPV4_DEV_ADDR = "IPV4.DEV_ADDR"
+
 
 T_PROTO_IPV6 = "IPV6"
 T_IPV6_VER = "IPV6.VER"
@@ -52,6 +69,8 @@ T_COAP_TKL = "COAP.TKL"
 T_COAP_CODE = "COAP.CODE"
 T_COAP_MID = "COAP.MID"
 T_COAP_TOKEN = "COAP.TOKEN"
+
+# WARNING: CoAP option string must be writen exactly as in standards and IANA
 T_COAP_OPT_IF_MATCH =  "COAP.If-Match"
 T_COAP_OPT_URI_HOST = "COAP.Uri-Host"
 T_COAP_OPT_ETAG = "COAP.ETag"
@@ -59,10 +78,10 @@ T_COAP_OPT_IF_NONE_MATCH =  "COAP.If-None-Match"
 T_COAP_OPT_OBS =  "COAP.Observe"
 T_COAP_OPT_URI_PORT =  "COAP.Uri-Port"
 T_COAP_OPT_LOC_PATH = "COAP.Location-Path"
-T_COAP_OPT_URI_PATH =  "COAP.URI-PATH"
-T_COAP_OPT_CONT_FORMAT =  "COAP.CONTENT-FORMAT"
+T_COAP_OPT_URI_PATH =  "COAP.Uri-Path"
+T_COAP_OPT_CONT_FORMAT =  "COAP.Content-Format"
 T_COAP_OPT_MAX_AGE =  "COAP.Max-Age"
-T_COAP_OPT_URI_QUERY =  "COAP.URI-QUERY"
+T_COAP_OPT_URI_QUERY =  "COAP.Uri-Query"
 T_COAP_OPT_ACCEPT =  "COAP.Accept"
 T_COAP_OPT_LOC_QUERY =  "COAP.Location-Query"
 T_COAP_OPT_BLOCK2 =  "COAP.Block2"
@@ -72,7 +91,26 @@ T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
 T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
-T_COAP_OPT_END = "COAP.END"
+
+T_BACNET_VLC_TYPE = "BACnet.type"
+T_BACNET_VLC_FUN = "BACnet.fun"
+T_BACNET_VLC_LEN = "BACnet.len"
+
+T_BACNET_NPDU_VER = "BACnet.NPDU.ver"
+T_BACNET_NPDU_CTRL = "BACnet.NPDU.ctrl"
+
+T_BACNET_APDU_TYPE = "BACnet.APDU.type"
+T_BACNET_APDU_SER = "BACnet.APDU.ser"
+T_BACNET_APDU_PID = "BACnet.APDU.pid"
+T_BACNET_APDU_DEVID = "BACnet.APDU.devid"
+T_BACNET_APDU_OBJID = "BACnet.APDU.objid"
+T_BACNET_APDU_TRE = "BACnet.APDU.tre"
+T_BACNET_APDU_VALS = "BACnet.APDU.vals"
+
+
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
@@ -100,6 +138,8 @@ T_META = "META"
 T_UP_RULES = "UP_RULES"
 T_DW_RULES = "DW_RULES"
 
+T_ACTION = "Action"
+
 T_COMP = "Compression"
 T_NO_COMP = "NoCompression"
 T_FRAG = "Fragmentation"
@@ -120,6 +160,111 @@ T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
+T_FRAG_RFC8724 = "RCS_RFC8724"
+
+T_POSITION_CORE = "core"
+T_POSITION_DEVICE = "device"
+
+
+SID = 100000
+
+YANG_ID = {
+    "TBD" : [SID+1, "RCS-algorithm-base-type"],
+    T_FRAG_RFC8724 : [SID+2, "rcs-RFC8724"],
+    "TBD" : [SID+3, "ack-behavior-after-All0"],
+    "TBD" : [SID+4, "ack-behavior-after-All1"],
+    "TBD" : [SID+5, "ack-behavior-always"],
+    "TBD" : [SID+6, "ack-behavior-base-type"],
+    "TBD" : [SID+7, "all1-data-base-type"],
+    "TBD" : [SID+8, "all1-data-no"],
+    "TBD" : [SID+9, "all1-data-sender-choice"],
+    "TBD" : [SID+10, "all1-data-yes"],
+    T_CDA_APPIID : [SID+11, "cda-appiid"],
+    T_CDA_COMP_CKSUM : [SID+12, "cda-compute-checksum"],
+    T_CDA_COMP_LEN : [SID+13, "cda-compute-length"],
+    T_CDA_DEVIID : [SID+14, "cda-deviid"],
+    T_CDA_LSB : [SID+15, "cda-lsb"],
+    T_CDA_MAP_SENT : [SID+16, "cda-mapping-sent"],
+    T_CDA_NOT_SENT : [SID+17, "cda-not-sent"],
+    T_CDA_VAL_SENT : [SID+18, "cda-value-sent"],
+    "TBD" : [SID+19, "compression-decompression-action-base-type"],
+    T_DIR_BI : [SID+20, "di-bidirectional"],
+    T_DIR_DW : [SID+21, "di-down"],
+    T_DIR_UP : [SID+22, "di-up"],
+    "TBD" : [SID+23, "direction-indicator-base-type"],
+    T_COAP_CODE : [SID+24, "fid-coap-code"],
+    "TBD" : [SID+25, "fid-coap-code-class"],
+    "TBD" : [SID+26, "fid-coap-code-detail"],
+    T_COAP_MID : [SID+27, "fid-coap-mid"],
+    T_COAP_OPT_ACCEPT : [SID+28, "fid-coap-option-accept"],
+    T_COAP_OPT_BLOCK1 : [SID+29, "fid-coap-option-block1"],
+    T_COAP_OPT_BLOCK2 : [SID+30, "fid-coap-option-block2"],
+    T_COAP_OPT_CONT_FORMAT : [SID+31, "fid-coap-option-content-format"],
+    T_COAP_OPT_ETAG : [SID+32, "fid-coap-option-etag"],
+    T_COAP_OPT_IF_MATCH : [SID+33, "fid-coap-option-if-match"],
+    T_COAP_OPT_IF_NONE_MATCH : [SID+34, "fid-coap-option-if-none-match"],
+    T_COAP_OPT_LOC_PATH : [SID+35, "fid-coap-option-location-path"],
+    T_COAP_OPT_LOC_QUERY : [SID+36, "fid-coap-option-location-query"],
+    T_COAP_OPT_MAX_AGE : [SID+37, "fid-coap-option-max-age"],
+    T_COAP_OPT_NO_RESP : [SID+38, "fid-coap-option-no-response"],
+    T_COAP_OPT_OBS : [SID+39, "fid-coap-option-observe"],
+    'TBD' : [SID+40, "fid-coap-option-oscore-flags"],
+    "TBD" : [SID+41, "fid-coap-option-oscore-kid"],
+    "TBD" : [SID+42, "fid-coap-option-oscore-kidctx"],
+    "TBD" : [SID+43, "fid-coap-option-oscore-piv"],
+    T_COAP_OPT_PROXY_SCHEME : [SID+44, "fid-coap-option-proxy-scheme"],
+    T_COAP_OPT_PROXY_URI : [SID+45, "fid-coap-option-proxy-uri"],
+    T_COAP_OPT_SIZE1 : [SID+46, "fid-coap-option-size1"],
+    T_COAP_OPT_SIZE2 : [SID+47, "fid-coap-option-size2"],
+    T_COAP_OPT_URI_HOST : [SID+48, "fid-coap-option-uri-host"],
+    T_COAP_OPT_URI_PATH : [SID+49, "fid-coap-option-uri-path"],
+    T_COAP_OPT_URI_PORT : [SID+50, "fid-coap-option-uri-port"],
+    T_COAP_OPT_URI_QUERY : [SID+51, "fid-coap-option-uri-query"],
+    T_COAP_TKL : [SID+52, "fid-coap-tkl"],
+    T_COAP_TOKEN : [SID+53, "fid-coap-token"],
+    T_COAP_TYPE : [SID+54, "fid-coap-type"],
+    T_COAP_VERSION : [SID+55, "fid-coap-version"],
+    T_ICMPV6_CKSUM : [SID+56, "fid-icmpv6-checksum"],
+    T_ICMPV6_CODE : [SID+57, "fid-icmpv6-code"],
+    T_ICMPV6_IDENT : [SID+58, "fid-icmpv6-identifier"],
+    T_ICMPV6_SEQNO : [SID+59, "fid-icmpv6-sequence"],
+    T_ICMPV6_TYPE : [SID+60, "fid-icmpv6-type"],
+    T_IPV6_APP_IID : [SID+61, "fid-ipv6-appiid"],
+    T_IPV6_APP_PREFIX : [SID+62, "fid-ipv6-appprefix"],
+    T_IPV6_DEV_IID : [SID+63, "fid-ipv6-deviid"],
+    T_IPV6_DEV_PREFIX : [SID+64, "fid-ipv6-devprefix"],
+    T_IPV6_FL : [SID+65, "fid-ipv6-flowlabel"],
+    T_IPV6_HOP_LMT : [SID+66, "fid-ipv6-hoplimit"],
+    T_IPV6_NXT : [SID+67, "fid-ipv6-nextheader"],
+    T_IPV6_LEN : [SID+68, "fid-ipv6-payloadlength"],
+    T_IPV6_TC : [SID+69, "fid-ipv6-trafficclass"],
+    "TBD" : [SID+70, "fid-ipv6-trafficclass-ds"],
+    "TBD" : [SID+71, "fid-ipv6-trafficclass-ecn"],
+    T_IPV6_VER : [SID+72, "fid-ipv6-version"],
+    T_UDP_APP_PORT : [SID+73, "fid-udp-app-port"],
+    T_UDP_CKSUM : [SID+74, "fid-udp-checksum"],
+    T_UDP_DEV_PORT : [SID+75, "fid-udp-dev-port"],
+    T_UDP_LEN : [SID+76, "fid-udp-length"],
+    "TBD" : [SID+77, "field-id-base-type"],
+    "TBD" : [SID+78, "field-id-coap-base-type"],
+    "TBD" : [SID+79, "field-id-icmpv6-base-type"],
+    "TBD" : [SID+80, "field-id-ipv6-base-type"],
+    "TBD" : [SID+81, "field-id-udp-base-type"],
+    "TBD" : [SID+82, "field-length-base-type"],
+    T_FUNCTION_TKL : [SID+83, "fl-token-length"],
+    T_FUNCTION_VAR : [SID+84, "fl-variable"],
+    T_FRAG_ACK_ALWAYS : [SID+85, "fragmentation-mode-ack-always"],
+    T_FRAG_ACK_ON_ERROR : [SID+86, "fragmentation-mode-ack-on-error"],
+    "TBD" : [SID+87, "fragmentation-mode-base-type"],
+    T_FRAG_NO_ACK : [SID+88, "fragmentation-mode-no-ack"],
+    "TBD" : [SID+89, "matching-operator-base-type"],
+    T_MO_EQUAL : [SID+90, "mo-equal"],
+    T_MO_IGNORE : [SID+91, "mo-ignore"],
+    T_MO_MMAP : [SID+92, "mo-matching"],
+    T_MO_MSB : [SID+93, "mo-msb"]
+}
+
+
 
 # from gen_rulemanager import *
 
@@ -189,11 +334,13 @@ class Compressor:
         if type(field[0]) is int:
             dprint("+++", bin(field[0]), field[1])
             output.add_bits(field[0], field[1])
-        elif type(field[0]) == str:
+        elif type(field[0]) is str:
             assert (field[1] % 8 == 0) # string is a number of bytes
             for i in range(field[1]//8):
                 dprint(i, field[0][i])
                 output.add_bytes(field[0][i].encode("utf-8"))
+        elif type(field[0]) is bytes:
+            output.add_bits(int.from_bytes(field[0], "big"), field[1])
         else:
             raise ValueError("CA value-sent unknown type")
 
@@ -292,7 +439,7 @@ class Compressor:
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
             dprint("rule item:", r)
@@ -309,7 +456,7 @@ class Compressor:
             else:
                 dprint("rule skipped, bad direction")
 
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -326,7 +473,7 @@ class Compressor:
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -334,7 +481,7 @@ class Compressor:
 
 class Decompressor:
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
         self.__func_rx_cda = {
             T_CDA_NOT_SENT : self.rx_cda_not_sent,
@@ -389,7 +536,21 @@ class Decompressor:
 
 
     def rx_cda_not_sent(self, rule, in_bbuf):
-        return [rule[T_TV], rule[T_FL]]
+        if rule[T_FL] == "var":
+            if type(rule[T_TV]) == str:
+                size = len(rule[T_TV]) * 8
+            elif type(rule[T_TV]) == int: # return the minimal size, used in CoAP
+                size = 0
+                v = rule[T_TV]
+                while v != 0:
+                    size += 8
+                    v >>=8
+            else:
+                size="var" # should never happend
+        else:
+            size = rule[T_FL]
+        
+        return [rule[T_TV], size]
 
     def rx_cda_val_sent(self, rule, in_bbuf):
         # XXX not implemented that the variable length size.
@@ -406,7 +567,7 @@ class Decompressor:
             size = rule[T_FL]
         else:
             raise ValueError("cannot read field length")
-        in_bbuf.display("bin")
+        #in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
 
         return [val, size]
@@ -547,7 +708,7 @@ class Decompressor:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
                 dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
-                pprint.pprint (self.parsed_packet)
+                #pprint.pprint (self.parsed_packet)
 
         return self.parsed_packet
 
