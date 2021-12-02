@@ -2,7 +2,7 @@
 # python3.9 -m pip install scapy
 from scapy.all import *
 import os
-os.sys.path.append('../../src')
+os.sys.path.append('../src')
 
 import compr_parser as parser
 from compr_core import *
@@ -15,7 +15,7 @@ class debug_protocol:
 
 parse = parser.Parser(debug_protocol)
 
-sequence = rdpcap("/home/ivan/Downloads/atomic-read-file-50.cap")
+sequence = rdpcap("atomic-read-file-50.cap")
 
 dst = "192.168.0.8"
 src = "192.168.0.17"
