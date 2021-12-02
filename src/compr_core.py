@@ -109,8 +109,6 @@ T_BACNET_APDU_DEV_ID = "BACnet.APDU.dev.id"
 T_BACNET_APDU_OBJ_CON = "BACnet.APDU.obj.context"
 T_BACNET_APDU_OBJ_INS = "BACnet.APDU.obj.instance"
 T_BACNET_APDU_TRE = "BACnet.APDU.tre"
-T_BACNET_APDU_VALS = "BACnet.APDU.vals"
-
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
