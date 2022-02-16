@@ -5,9 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51ef8160-aae3-46f5-aeb5-ebde0c9199dc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/openschc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/openschc.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/compr_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/compr_core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/bacnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/bacnet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ipv4.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ipv4.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/compr_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/compr_parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gen_rulemanager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gen_rulemanager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,5 +145,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

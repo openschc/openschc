@@ -194,12 +194,11 @@ class Parser:
             self.header_fields[T_BACNET_APDU_OBJ_CON] = unpack('!B', pkt[pos:pos + 1])[0]
             pos += 1
 
-            self.header_fields[T_BACNET_APDU_OBJ_INS] = unpack('!I', pkt[pos:pos + 4])[0]
-            pos += 4
+#            self.header_fields[T_BACNET_APDU_OBJ_INS] = unpack('!I', pkt[pos:pos + 4])[0]
+#            pos += 4
 
-            self.header_fields[T_BACNET_APDU_TRE] = unpack('!H', pkt[pos:pos + 2])[0]
-            pos += 2
-
+#            self.header_fields[T_BACNET_APDU_TRE] = unpack('!H', pkt[pos:pos + 2])[0]
+#            pos += 2
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])

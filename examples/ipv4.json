@@ -20,7 +20,8 @@
 		{"FID": "UDP.APP_PORT",  "TV": 47808, "MO": "equal", "CDA": "not-sent"},
 		{"FID": "UDP.DEV_PORT",  "TV": 47808, "MO": "equal", "CDA": "not-sent"},
 		{"FID": "UDP.LEN",  "MO": "ignore", "CDA": "compute-length"},
-		{"FID": "UDP.CKSUM",  "MO": "ignore", "CDA": "compute-checksum"}
+		{"FID": "UDP.CKSUM",  "MO": "ignore", "CDA": "compute-checksum"},
+		{"FID": "BACnet.len", "MO": "ignore", "CDA": "compute-length"}
 		]
 	 },{
 		"RuleID" : 12,
