@@ -26,14 +26,6 @@ frag_rule_noack = {
     }
 }
 
-#no_compression = {
-#    "RuleID" : 20,
-#    "RuleIDLength": 8,
-#    "NoCompression": None
-#}
-
-
-#rule_set = [compression_rule.copy(), frag_rule_noack.copy(), no_compression.copy()]
 rule_set = [compression_rule.copy(), frag_rule_noack.copy()]
 
 coap_ip_packet = bytearray(b"""`\

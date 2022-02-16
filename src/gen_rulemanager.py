@@ -894,10 +894,10 @@ class RuleManager:
                         # return the 1st one.
                         return r
         elif packet is not None:
-            print("packet dev-id", deviceID)
+            dprint("packet dev-id", deviceID)
             for d in self._ctxt:
                 for r in d["SoR"]:
-                    print("rule dev-id", d["DeviceID"])
+                    dprint("rule dev-id", d["DeviceID"])
                     if T_FRAG in r:
                         rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
                         if r[T_RULEID] == rule_id:

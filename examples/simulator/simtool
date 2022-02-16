@@ -215,11 +215,11 @@ def get_simul_setup(name, spec):
     frag_rule = {
         "RuleID": spec.get("frag-ruleid", 12),
         "RuleIDLength": spec.get("frag-ruleid-size", 6),
-        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "DW"}}
+        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "UP"}}
     if spec.get("frag-mode") == "ack-on-error":
         frag_info = {
             "FRMode": "ackOnError",
-            "FRDirection": "DW",
+            "FRDirection": "UP",
             "FRModeProfile": {
                 "dtagSize": spec.get("dtag-size", 2),
                 "WSize": spec.get("w-size", 3),
@@ -373,12 +373,12 @@ def do_compare_dir(record_dir_name, ref_dir_name, args):
         check = False
         cmp_prog = "cmp"
 
-    elif args.compare_tool is "diff":
+    elif args.compare_tool == "diff":
         with_external_compare = True
         check = False
         cmp_prog = "diff -u"
 
-    elif args.compare_tool is "kdiff3":
+    elif args.compare_tool == "kdiff3":
         with_external_compare = False
         check = "<unapplyabple>"
         cmp_prog = None

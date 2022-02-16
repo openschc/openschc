@@ -7,6 +7,6 @@
   "RuleIDLength" : 6,
   "Fragmentation" :  {
       "FRMode": "noAck",
-      "FRDirection" : "DW"
+      "FRDirection" : "UP"
   }
 }]
