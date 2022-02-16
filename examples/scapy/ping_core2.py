@@ -19,6 +19,7 @@ import ipaddress
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
 rm.Add(file="icmp1.json")
+rm.Add(file="icmp2.json")
 rm.Print()
 
 unparser = Unparser()
@@ -63,7 +64,7 @@ schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION,           # DEVICE or CORE
-    verbose = False)         
+    verbose = True)         
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces

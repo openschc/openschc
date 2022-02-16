@@ -1,3 +1,8 @@
+# This scrip is used to manage two rules (rule1100 and 001100) and displays it
+
+from scapy.all import *
+import os
+os.sys.path.append('../../src')
 from gen_rulemanager import *
 
 RM = RuleManager()
@@ -12,7 +17,7 @@ rule001100 =   {
   "RuleID" : 12,
   "RuleIDLength" : 6,
   "Fragmentation" :  {
-    "FRMode" : "noAck",
+    "FRMode" : "NoAck",
     "FRDirection" : "UP"
   }
 }
