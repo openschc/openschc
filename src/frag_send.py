@@ -143,7 +143,7 @@ class FragmentNoAck(FragmentBase):
         # of an L2 Word.
         print(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
-                        frag_msg.get_mic_size(self.rule) + self.l2word)
+                        frag_msg.get_mic_size(self.rule) + self.l2word)   
         print (self.protocol.connectivity_manager.get_mtu("toto"), min_size)
         if self.protocol.connectivity_manager.get_mtu("toto") < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.mtu, min_size))
@@ -266,7 +266,8 @@ class FragmentNoAck(FragmentBase):
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
         print("event_sent_frag")
-        delay = 10 #self.protocol.config.get("tx_interval", 0)
+        # delay = 10 #self.protocol.config.get("tx_interval", 0)
+        delay = self.protocol.config.get("tx_interval", 0)
         self.protocol.scheduler.add_event(delay, self.send_frag, {})
 
     def receive_frag(self, schc_frag, dtag):
