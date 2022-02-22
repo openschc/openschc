@@ -38,14 +38,12 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+icmpv6_types = {
+    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
+    T_ICMPV6_TYPE_ECHO_REPLY: 129
+}
+
 class Parser:
-
-    icmpv6_types = {
-        ECHO_REQUEST: 128,
-        ECHO_REPLY: 129
-    }
-
-
     """
     Parser takes a bytearray and transforms it into a dictionnay indexed by field id.
     """
@@ -247,7 +245,7 @@ class Unparser:
 
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
             for i in icmpv6_types:
-                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types['ECHO_REQUEST']:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                     IPv6Src = DevStr
                     IPv6Dst = AppStr
                     ICMPv6Header = ICMPv6EchoReply(
