@@ -37,10 +37,17 @@ def create_echoreply(pkt,src,dst):
         fl     = ECHO_REQUEST.fl,
         nh     = ECHO_REQUEST.nh,
         hlim   = ECHO_REQUEST.hlim,
-        src    = ECHO_REQUEST.src, 
-        dst    = ECHO_REQUEST.dst
+        src    = ECHO_REQUEST.dst, 
+        dst    = ECHO_REQUEST.src
     ) 
-    print(IPv6Header.show())
+
+    ICMPv6Header = ICMPv6EchoRequest(
+        id = ECHO_REQUEST.id,
+        seq =  ECHO_REQUEST.seq,
+        data = ECHO_REQUEST.data)
+
+    packet_reply = IPv6Header / ICMPv6Header
+    print(packet_reply.show())
     #print(src)
     #print("len",len(pkt))
 
