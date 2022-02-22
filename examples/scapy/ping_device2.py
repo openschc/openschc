@@ -29,10 +29,18 @@ def create_echoreply(pkt,src,dst):
     print("packet decompresed: ", pkt)
     #packet_bbuf = BitBuffer(pkt)
     #print("IPV6.VER : ", pkt[('IPV6.FL', 1)])
-    IPv6(bytes(pkt)[0:]).show2()
-
+    ECHO_REQUEST = IPv6(bytes(pkt)[0:])
     
-    #print(dst)
+    IPv6Header = IPv6 (
+        version= ECHO_REQUEST.verision ,
+        tc     = ECHO_REQUEST.tc,
+        fl     = ECHO_REQUEST.fl,
+        nh     = ECHO_REQUEST.nh,
+        hlim   = ECHO_REQUEST.hlim,
+        src    = ECHO_REQUEST.src, 
+        dst    = ECHO_REQUEST.dst
+    ) 
+    print(IPv6Header)
     #print(src)
     #print("len",len(pkt))
 
