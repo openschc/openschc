@@ -813,13 +813,10 @@ class RuleManager:
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
                     ruleLength = r[T_RULEIDLENGTH]
-
                     tested_rule = schc.get_bits(ruleLength, position=0)
-
                     dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
-
         return None
 
 

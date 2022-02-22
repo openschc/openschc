@@ -25,11 +25,10 @@ rm.Print()
 #Unparser
 unparser = Unparser()
 
+# Create a ICMPv6 Echo Reply from Echo Request
 def create_echoreply(pkt,src,dst):
     print("packet decompresed: ", pkt)
-    #packet_bbuf = BitBuffer(pkt)
-    #print("IPV6.VER : ", pkt[('IPV6.FL', 1)])
-    ECHO_REQUEST = IPv6(bytes(pkt)[0:])
+    ECHO_REQUEST = IPv6(bytes(pkt))
     
     IPv6Header = IPv6 (
         version= ECHO_REQUEST.version ,
@@ -41,15 +40,14 @@ def create_echoreply(pkt,src,dst):
         dst    = ECHO_REQUEST.src
     ) 
 
-    ICMPv6Header = ICMPv6EchoRequest(
+    ICMPv6Header = ICMPv6EchoReply(
         id = ECHO_REQUEST.id,
         seq =  ECHO_REQUEST.seq,
         data = ECHO_REQUEST.data)
 
     packet_reply = IPv6Header / ICMPv6Header
-    print(packet_reply.show())
-    #print(src)
-    #print("len",len(pkt))
+    dprint("Echo reply", packet_reply.show())
+    return packet_reply
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -74,12 +72,12 @@ def processPkt(pkt):
                         print ("ping")
                         tunnel.sendto(schc_pkt, addr)
                     else:
-                        r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt)
-                        if r is not None: #The schc machine has ressembled and decompressed the packet
-                           print ("ping_device.py, r=", r)
-                           schc_pkt_dec = r[1]
-                           print(len(schc_pkt_dec))
-                           create_echoreply(schc_pkt_dec, ip, addr)
+                        # None when there the edcrompression process is not finished and [device_id, decompressed packet in bytes] when All-1
+                        r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt) 
+                        if r is not None: #The schc machine has reassembled and decompressed the packet
+                           dprint ("ping_device.py, r =", r)
+                           schc_pkt_decompressed = r[1]
+                           pkt_reply = create_echoreply(schc_pkt_decompressed, ip, addr)                     
                            #schc_machine.schc_send(r[1])
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
