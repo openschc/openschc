@@ -272,6 +272,7 @@ class SCHCProtocol:
 
         # Perform compression
         packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
+        print ("schc_send, packet buff nul?", packet_bbuf)
 
         if packet_bbuf == None: # No compression rule found
             return 
