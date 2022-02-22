@@ -38,12 +38,14 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
-icmpv6_types = {
-    ECHO_REQUEST: 128,
-    ECHO_REPLY: 129
-}
-
 class Parser:
+
+    icmpv6_types = {
+        ECHO_REQUEST: 128,
+        ECHO_REPLY: 129
+    }
+
+
     """
     Parser takes a bytearray and transforms it into a dictionnay indexed by field id.
     """
