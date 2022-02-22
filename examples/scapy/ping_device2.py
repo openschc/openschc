@@ -40,7 +40,7 @@ def create_echoreply(pkt,src,dst):
         src    = ECHO_REQUEST.src, 
         dst    = ECHO_REQUEST.dst
     ) 
-    print(IPv6Header)
+    print(IPv6Header.show())
     #print(src)
     #print("len",len(pkt))
 
