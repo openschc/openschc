@@ -133,7 +133,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, position, protocol):
+    def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
         """
         return 
         - None if fragmentation is not finished
@@ -231,10 +231,12 @@ class ReassemblerNoAck(ReassembleBase):
                     # XXX need to merge them into one.  Then, here searching database will
                     # XXX be moved into somewhere.
                     # XXX
-                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
+                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
                     dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                    args = self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP") # warning on UP
-                    
+                    if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION]):
+                        args = self.protocol.decompress_only(schc_packet, devid, "UP")
+                    else:
+                        args = self.protocol.decompress_only(schc_packet, devid, "DW")
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 dprint(self.state)

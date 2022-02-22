@@ -9,6 +9,7 @@ from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 from gen_bitarray import *
+from compr_parser import Unparser
 
 import pprint
 import binascii
@@ -18,8 +19,20 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp1.json")
+rm.Add(file="icmp2.json")
 rm.Print()
+
+#Unparser
+unparser = Unparser()
+
+def create_echoreply(pkt,src,dst):
+    print("packet decompresed: ", pkt)
+    #packet_bbuf = BitBuffer(pkt)
+    #print("IPV6.VER : ", pkt[('IPV6.FL', 1)])
+    IPv6(bytes(pkt)[0:]).show2()
+    #print(dst)
+    #print(src)
+    #print("len",len(pkt))
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -36,18 +49,24 @@ def processPkt(pkt):
             if ip_proto == 17:
                 udp_dport = pkt.getlayer(UDP).dport
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
-                    print ("tunneled SCHC msg")                    
+                    print ("tunneled SCHC msg")
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     schc_bbuf = BitBuffer(schc_pkt)
                     rule = rm.FindRuleFromSCHCpacket(schc=schc_bbuf, device=device_id)
                     if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH]== 3:
                         print ("ping")
                         tunnel.sendto(schc_pkt, addr)
-                    else: 
+                    else:
                         r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt)
-                        print (r)
+                        if r is not None: #The schc machine has ressembled and decompressed the packet
+                           print ("ping_device.py, r=", r)
+                           schc_pkt_dec = r[1]
+                           print(len(schc_pkt_dec))
+                           create_echoreply(schc_pkt_dec, ip, addr)
+                           #schc_machine.schc_send(r[1])
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
+                pkt.show2()
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
@@ -74,7 +93,7 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface="en0") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
 
 
 
