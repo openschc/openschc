@@ -38,6 +38,10 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+icmpv6_types = {
+    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
+    T_ICMPV6_TYPE_ECHO_REPLY: 129
+}
 
 class Parser:
     """
@@ -240,21 +244,23 @@ class Unparser:
         AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
 
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
-            if header_d[('ICMPV6.TYPE', 1)][0] == 129:
-                IPv6Src = DevStr
-                IPv6Dst = AppStr
-                ICMPv6Header = ICMPv6EchoReply(
-                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                    data = data)
-            if header_d[('ICMPV6.TYPE', 1)][0] == 128:
-                IPv6Src = AppStr
-                IPv6Dst = DevStr 
-                ICMPv6Header = ICMPv6EchoRequest(
-                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                    data = data)
-            L4header = ICMPv6Header
+            for i in icmpv6_types:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types["T_ICMPV6_TYPE_ECHO_REQUEST"]:
+                    IPv6Src = DevStr
+                    IPv6Dst = AppStr
+                    ICMPv6Header = ICMPv6EchoReply(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                #if header_d[('ICMPV6.TYPE', 1)][0] == 128:
+                else:
+                    IPv6Src = AppStr
+                    IPv6Dst = DevStr 
+                    ICMPv6Header = ICMPv6EchoRequest(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                L4header = ICMPv6Header
 
         IPv6Header = IPv6 (
             version= header_d[(T_IPV6_VER, 1)][0],
