@@ -252,8 +252,7 @@ class Unparser:
                         id = header_d[(T_ICMPV6_IDENT, 1)][0],
                         seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                         data = data)
-                #if header_d[('ICMPV6.TYPE', 1)][0] == 128:
-                else:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
                     IPv6Src = AppStr
                     IPv6Dst = DevStr 
                     ICMPv6Header = ICMPv6EchoRequest(
