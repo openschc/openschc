@@ -32,7 +32,7 @@ def create_echoreply(pkt,src,dst):
     ECHO_REQUEST = IPv6(bytes(pkt)[0:])
     
     IPv6Header = IPv6 (
-        version= ECHO_REQUEST.verision ,
+        version= ECHO_REQUEST.version ,
         tc     = ECHO_REQUEST.tc,
         fl     = ECHO_REQUEST.fl,
         nh     = ECHO_REQUEST.nh,
