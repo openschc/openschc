@@ -212,8 +212,6 @@ class Parser:
 
                 self.header_fields[T_COAP_OPT_END, 1] = [0xFF, 8]
                 pos += 1
-
-
         return self.header_fields, pkt[pos:], None
 
 

@@ -20,10 +20,6 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-<<<<<<< HEAD
-=======
-#rm.Add(file="icmp1.json")
->>>>>>> 1f693b02ee7ebe85e0956f8575949f34c68e87b2
 rm.Add(file="icmp2.json")
 rm.Print()
 

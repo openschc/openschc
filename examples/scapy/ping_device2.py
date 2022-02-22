@@ -30,6 +30,8 @@ def create_echoreply(pkt,src,dst):
     #packet_bbuf = BitBuffer(pkt)
     #print("IPV6.VER : ", pkt[('IPV6.FL', 1)])
     IPv6(bytes(pkt)[0:]).show2()
+
+    
     #print(dst)
     #print(src)
     #print("len",len(pkt))
