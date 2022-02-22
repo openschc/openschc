@@ -199,8 +199,8 @@ class ReassemblerNoAck(ReassembleBase):
             print (self.tile_list)
             #
             if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
-                dprint("----------------------- Final Reassembly -----------------------")
-                dprint("ALL1 received")
+                print("----------------------- Final Reassembly -----------------------")
+                print("ALL1 received")
                 # MIC calculation
                 dprint("tile_list")
                 for _ in self.tile_list:

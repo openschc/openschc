@@ -312,12 +312,11 @@ class SCHCProtocol:
 
         # If only compressed but not fragmented
         if T_COMP in rule:
-            print ("protocol.py : T_COMP found" )
+            dprint ("protocol.py : T_COMP found" )
             if self.position == T_POSITION_DEVICE:
                 direction = T_DIR_DW
             else:
                 direction = T_DIR_UP
-
             decomp = Decompressor()
             unparser = Unparser()
             header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
@@ -355,7 +354,7 @@ class SCHCProtocol:
                 context, frag_rule, session_id)
             print("New reassembly session created", session.__class__.__name__)
 
-        print("devid ??:", device_id)
+        dprint("devid ??:", device_id)
         return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, devid=device_id)
 
     def decompress_only (self, packet_bbuf, device_id=None, direction=None): # called after reassembly      
