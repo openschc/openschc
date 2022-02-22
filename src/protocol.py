@@ -357,7 +357,7 @@ class SCHCProtocol:
         dprint("devid ??:", device_id)
         return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, devid=device_id)
 
-    def decompress_only (self, packet_bbuf, device_id=None, direction=None): # called after reassembly      
+    def decompress_only (self, packet_bbuf, device_id=None): # called after reassembly      
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
         if rule == None:
             print ("No rule found")

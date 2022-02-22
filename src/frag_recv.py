@@ -233,10 +233,8 @@ class ReassemblerNoAck(ReassembleBase):
                     # XXX
                     rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
                     dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                    if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION]):
-                        args = self.protocol.decompress_only(schc_packet, devid, "UP")
-                    else:
-                        args = self.protocol.decompress_only(schc_packet, devid, "DW")
+                    args = self.protocol.decompress_only(schc_packet, devid)
+                print("Packet reassembled: ", args)
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 dprint(self.state)
