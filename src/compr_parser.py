@@ -39,8 +39,8 @@ option_names = {
 }
 
 icmpv6_types = {
-    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
-    T_ICMPV6_TYPE_ECHO_REPLY: 129
+    ECHO_REQUEST: 128,
+    ECHO_REPLY: 129
 }
 
 class Parser:
@@ -245,7 +245,7 @@ class Unparser:
 
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
             for i in icmpv6_types:
-                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types["T_ICMPV6_TYPE_ECHO_REQUEST"]:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types['ECHO_REQUEST']:
                     IPv6Src = DevStr
                     IPv6Dst = AppStr
                     ICMPv6Header = ICMPv6EchoReply(
