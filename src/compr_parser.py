@@ -250,8 +250,8 @@ class Unparser:
             fl     = header_d[(T_IPV6_FL, 1)][0],
             nh     = header_d[(T_IPV6_NXT, 1)][0],
             hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
-            src    =IPv6Sstr.compressed, 
-            dst    =IPv6Dstr.compressed
+            src    = IPv6Sstr.compressed, 
+            dst    = IPv6Dstr.compressed
         ) 
 
         L3header = IPv6Header

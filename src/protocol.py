@@ -379,7 +379,7 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
             pkt = unparser.unparse(header_d, pkt_data, T_DIR_DW, rule)
-            print ("protocol.py: pkt after unparse", pkt)
+            print ("protocol.py: pkt after unparse : \n", IPv6(bytes(pkt)[0:]).show2())
             return device_id, pkt
 
     def process_decompress(self, packet_bbuf, dev_l2_addr, direction):
