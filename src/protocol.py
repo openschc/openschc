@@ -372,13 +372,13 @@ class SCHCProtocol:
 
             decomp = Decompressor()
             unparser = Unparser()
-            header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=T_DIR_DW)
+            header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
             print("header_d:", header_d)
             pkt_data = bytearray()
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
-            pkt = unparser.unparse(header_d, pkt_data, T_DIR_DW, rule)
+            pkt = unparser.unparse(header_d, pkt_data, direction, rule)
             #print ("protocol.py: pkt after unparse : \n", IPv6(bytes(pkt)[0:]).show2())
             return device_id, pkt
 
