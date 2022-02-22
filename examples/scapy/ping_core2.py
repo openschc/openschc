@@ -9,6 +9,8 @@ from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 from compr_parser import Unparser
+from scapy.layers.inet import IP
+#from scapy.layers.inet6 import IPv6
 
 import pprint
 import binascii
@@ -18,6 +20,10 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
+<<<<<<< HEAD
+=======
+#rm.Add(file="icmp1.json")
+>>>>>>> 1f693b02ee7ebe85e0956f8575949f34c68e87b2
 rm.Add(file="icmp2.json")
 rm.Print()
 

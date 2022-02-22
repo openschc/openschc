@@ -35,7 +35,7 @@ class ConnectivityManager:
         """
         Return the MTU is bits for a specific device, currently returns always 500
         """
-        return 1600
+        return 200
 
 
 # ---------------------------------------------------------------------------
@@ -267,7 +267,8 @@ class SCHCProtocol:
         XXX the order of the args should be:
             schc_send(self, dst_l3_address, raw_packet, dst_l2_address=None)
         """
-        self._log("recv-from-l3 {} {} {}".format(dst_l2_address, dst_l3_address, raw_packet))
+        self._log("recv-from-l3 {} {}".format(dst_l2_address, dst_l3_address))
+	#, raw_packet))
 
         # Perform compression
         packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
@@ -283,7 +284,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
             return
 
-        # return 
+        #return 
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
