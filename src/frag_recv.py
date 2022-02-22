@@ -234,7 +234,7 @@ class ReassemblerNoAck(ReassembleBase):
                     rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
                     dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
                     args = self.protocol.decompress_only(schc_packet, devid)
-                print("Packet reassembled: ", args)
+                print("Packet decompressed at receive_frag: ", args)
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 dprint(self.state)
