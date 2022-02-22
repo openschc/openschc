@@ -235,15 +235,27 @@ class Unparser:
                 c[k] = v
             else:
                 raise ValueError ("Type not supported")
-            
-        
-        IPv6Src = (c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID]
-        IPv6Dst = (c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID]
 
-        
-        IPv6Sstr = ipaddress.IPv6Address(IPv6Src)
-        IPv6Dstr = ipaddress.IPv6Address(IPv6Dst)
-        
+        DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
+        AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
+
+        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            if header_d[('ICMPV6.TYPE', 1)][0] == 129:
+                IPv6Src = DevStr
+                IPv6Dst = AppStr
+                ICMPv6Header = ICMPv6EchoReply(
+                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                    data = data)
+            if header_d[('ICMPV6.TYPE', 1)][0] == 128:
+                IPv6Src = AppStr
+                IPv6Dst = DevStr 
+                ICMPv6Header = ICMPv6EchoRequest(
+                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                    data = data)
+            L4header = ICMPv6Header
+
         IPv6Header = IPv6 (
             version= header_d[(T_IPV6_VER, 1)][0],
             tc     = header_d[(T_IPV6_TC, 1)][0],
@@ -255,20 +267,6 @@ class Unparser:
         ) 
 
         L3header = IPv6Header
-
-        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
-            if header_d[('ICMPV6.TYPE', 1)][0] == 129:
-                ICMPv6Header = ICMPv6EchoReply(
-                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                    data = data)
-            elif header_d[('ICMPV6.TYPE', 1)][0] == 128:
-                ICMPv6Header = ICMPv6EchoRequest(
-                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                    data = data)
-            L4header = ICMPv6Header
-
         full_packet = L3header / L4header
 
         return full_packet
