@@ -257,11 +257,16 @@ class Unparser:
         L3header = IPv6Header
 
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
-            ICMPv6Header = ICMPv6EchoReply(
-                id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                data = data
-            )
+            if header_d[('ICMPV6.TYPE', 1)][0] == 129:
+                ICMPv6Header = ICMPv6EchoReply(
+                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                    data = data)
+            elif header_d[('ICMPV6.TYPE', 1)][0] == 128:
+                ICMPv6Header = ICMPv6EchoRequest(
+                    id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                    seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                    data = data)
             L4header = ICMPv6Header
 
         full_packet = L3header / L4header
