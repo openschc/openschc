@@ -310,7 +310,9 @@ class SCHCProtocol:
             print ("No rule found")
             return None
 
+        # If only compressed but not fragmented
         if T_COMP in rule:
+            print ("protocol.py : T_COMP found" )
             if self.position == T_POSITION_DEVICE:
                 direction = T_DIR_DW
             else:
