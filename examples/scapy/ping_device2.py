@@ -45,9 +45,9 @@ def create_echoreply(pkt,src,dst):
         seq =  ECHO_REQUEST.seq,
         data = ECHO_REQUEST.data)
 
-    packet_reply = IPv6Header / ICMPv6Header
-    dprint("Echo reply", packet_reply.show())
-    return packet_reply
+    Echoreply = IPv6Header / ICMPv6Header
+    dprint("Echo reply", Echoreply.show())
+    return Echoreply
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -72,9 +72,9 @@ def processPkt(pkt):
                         print ("ping")
                         tunnel.sendto(schc_pkt, addr)
                     else:
-                        # None when there the edcrompression process is not finished and [device_id, decompressed packet in bytes] when All-1
+                        # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt) 
-                        if r is not None: #The schc machine has reassembled and decompressed the packet
+                        if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
                            pkt_reply = create_echoreply(schc_pkt_decompressed, ip, addr)                     

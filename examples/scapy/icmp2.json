@@ -30,8 +30,15 @@
 		"Fragmentation" : {
 			"FRMode": "NoAck",
 			"FRDirection": "DW"
-		}
-	} 
-    ]
-  }
+	 }
+	 },{	
+		"RuleID" : 13,
+		"RuleIDLength" : 11,
+		"Fragmentation" : {
+		"FRMode": "NoAck",
+		"FRDirection": "UP"
+		} 
+    }
+]
+}
 
