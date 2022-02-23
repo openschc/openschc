@@ -873,6 +873,7 @@ class RuleManager:
     def FindFragmentationRule(self, deviceID=None, originalSize=None,
                               reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
                               packet=None):
+        print("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
         """Lookup a fragmentation rule.
 
         Find a fragmentation rule regarding parameters:
