@@ -911,9 +911,10 @@ class RuleManager:
             print("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
             for d in self._ctxt:
                 for r in d["SoR"]:
-                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction and r[T_RULEID] == rule_id:
-                        return r
-
+                    if T_FRAG in r:
+                        rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
+                        if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction and r[T_RULEID] == rule_id:
+                            return r
         else:
             for d in self._ctxt:
                 if d["DeviceID"] == deviceID:
