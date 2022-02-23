@@ -287,12 +287,13 @@ class SCHCProtocol:
                 packet_bbuf.count_added_bits()))
             if direction == T_DIR_UP:
                 args = (packet_bbuf.get_content(), dst_l2_address)
+                frag_session = self._make_frag_session(dst_l2_address, direction)
             else: 
                 args = (packet_bbuf.get_content(), device_id)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
+            frag_session = self._make_frag_session(device_id, direction)
             return
-
-        frag_session = self._make_frag_session(dst_l2_address, direction)
+       
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
