@@ -24,6 +24,7 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
+        print ("scapy_conection.py: dest ", dest, "packet", packet)
         if self.position == T_POSITION_DEVICE:
             if dest != None and dest.find("udp") == 0:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
