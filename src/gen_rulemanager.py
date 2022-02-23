@@ -907,7 +907,7 @@ class RuleManager:
                         rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
                         if r[T_RULEID] == rule_id:
                             return r
-        elif packet is not None and deviceID is not None:
+        elif direction is not None and deviceID is not None:
             print("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
             for d in self._ctxt:
                 for r in d["SoR"]:
