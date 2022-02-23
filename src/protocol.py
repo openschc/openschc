@@ -274,6 +274,11 @@ class SCHCProtocol:
         if packet_bbuf == None: # No compression rule found
             return 
 
+        if self.position == T_POSITION_CORE:
+            device_id = device_id
+        else:
+            device_id = dst_l2_address
+
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
