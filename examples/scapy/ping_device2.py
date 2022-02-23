@@ -26,7 +26,7 @@ rm.Print()
 unparser = Unparser()
 
 # Create a ICMPv6 Echo Reply from Echo Request
-def create_echoreply(pkt,src,dst):
+def create_echoreply(pkt):
     print("packet decompresed: ", pkt)
     ECHO_REQUEST = IPv6(bytes(pkt))
     
@@ -77,8 +77,8 @@ def processPkt(pkt):
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
-                           pkt_reply = create_echoreply(schc_pkt_decompressed, ip, addr)                     
-                           schc_machine.schc_send(bytes(pkt_reply),addr,None,)
+                           pkt_reply = create_echoreply(schc_pkt_decompressed)                     
+                           schc_machine.schc_send(bytes(pkt_reply),addr,addr,)
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
                 pkt.show2()
