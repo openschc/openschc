@@ -888,6 +888,8 @@ class RuleManager:
           not configured typically.
         - if raw_packet is not None, it compares the rule_id with the packet.
         - if the direction and the deviceID is matched.
+        - if direction and device ID is specified. It returns the 1st rule 
+          matched with the deviceID and the direction
         """
         if direction is not None and deviceID is None:
             for d in self._ctxt:
@@ -904,6 +906,12 @@ class RuleManager:
                         rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
                         if r[T_RULEID] == rule_id:
                             return r
+        elif packet is not None and deviceID is not None:
+            for d in self._ctxt:
+                for r in d["SoR"]:
+                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction and r[T_RULEID] == rule_id:
+                        return r
+
         else:
             for d in self._ctxt:
                 if d["DeviceID"] == deviceID:
