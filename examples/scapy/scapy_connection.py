@@ -1,11 +1,7 @@
 import time
 import sys
-
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
-
-from src.compr_core import T_POSITION_DEVICE
-from src.compr_core import T_POSITION_CORE
 
 from gen_utils import dprint, sanitize_value
 from compr_core import *
