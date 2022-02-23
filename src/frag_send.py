@@ -259,8 +259,8 @@ class FragmentNoAck(FragmentBase):
             w_fcn
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        print(args)
-        print(self._session_id[0])
+        print("frag_send.py, args: ", args)
+        print("frag_send.py, _session_id: ", self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 

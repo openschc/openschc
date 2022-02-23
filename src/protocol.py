@@ -274,23 +274,23 @@ class SCHCProtocol:
         if packet_bbuf == None: # No compression rule found
             return 
 
-        # If it's is a Device then, it takes the l2 addresss (send from device to core)
-        if self.position == T_POSITION_CORE:
-            device_id = dst_l3_address
-
-        # Check if fragmentation is needed.
-        if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
-            self._log("fragmentation not needed size={}".format(
-                packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), device_id)
-            self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
-            return
 
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
         else:
             direction = T_DIR_DW
+
+        # Check if fragmentation is needed.
+        if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
+            self._log("fragmentation not needed size={}".format(
+                packet_bbuf.count_added_bits()))
+            if direction == T_DIR_UP:
+                args = (packet_bbuf.get_content(), device_id)
+            else: 
+                args = (packet_bbuf.get_content(), device_id)
+            self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
+            return
 
         frag_session = self._make_frag_session(device_id, direction)
         if frag_session is not None:
