@@ -286,7 +286,7 @@ class SCHCProtocol:
             self._log("fragmentation not needed size={}".format(
                 packet_bbuf.count_added_bits()))
             if direction == T_DIR_UP:
-                args = (packet_bbuf.get_content(), device_id)
+                args = (packet_bbuf.get_content(), dst_l2_address)
             else: 
                 args = (packet_bbuf.get_content(), device_id)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
