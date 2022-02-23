@@ -1,5 +1,8 @@
 import time
 import sys
+
+from src.compr_core import T_POSITION_DEVICE
+from src.compr_core import T_POSITION_CORE
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
@@ -24,7 +27,7 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        if self.position == T_POSITION_CORE:
+        if self.position == T_POSITION_DEVICE:
             if dest != None and dest.find("udp") == 0:
                 destination = (dest.split(":")[1], int(dest.split(":")[2]))
             else:
