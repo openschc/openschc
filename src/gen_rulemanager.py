@@ -873,7 +873,7 @@ class RuleManager:
     def FindFragmentationRule(self, deviceID=None, originalSize=None,
                               reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
                               packet=None):
-        print("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
+        dprint("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
         """Lookup a fragmentation rule.
 
         Find a fragmentation rule regarding parameters:
@@ -908,7 +908,7 @@ class RuleManager:
                         if r[T_RULEID] == rule_id:
                             return r
         elif packet is None and direction is not None and deviceID is not None:
-            print("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
+            dprint("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
             for d in self._ctxt:
                 for r in d["SoR"]:
                     if T_FRAG in r:
