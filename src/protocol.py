@@ -292,7 +292,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
             return
 
-        frag_session = self._make_frag_session(device_id, direction)
+        frag_session = self._make_frag_session(dst_l2_address, direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
