@@ -78,7 +78,7 @@ def processPkt(pkt):
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
                            pkt_reply = create_echoreply(schc_pkt_decompressed)                     
-                           schc_machine.schc_send(bytes(pkt_reply),addr,addr,)
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply))
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
                 pkt.show2()
