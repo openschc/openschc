@@ -278,22 +278,20 @@ class SCHCProtocol:
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
+            device_id = dst_l2_address
         else:
             direction = T_DIR_DW
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
-                packet_bbuf.count_added_bits()))
-            if direction == T_DIR_UP:
-                args = (packet_bbuf.get_content(), dst_l2_address)
-                frag_session = self._make_frag_session(dst_l2_address, direction)
-            else: 
-                args = (packet_bbuf.get_content(), device_id)
-            self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?
-            frag_session = self._make_frag_session(device_id, direction)
+            packet_bbuf.count_added_bits()))
+            args = (packet_bbuf.get_content(), device_id)
+
+            self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return
-       
+
+        frag_session = self._make_frag_session(device_id, direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
