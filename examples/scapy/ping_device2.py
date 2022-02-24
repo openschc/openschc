@@ -48,7 +48,7 @@ def create_echoreply(pkt, addr):
     Echoreply = IPv6Header / ICMPv6Header
     dprint("Echo reply", Echoreply.show())
     
-    core_id = 'udp:' + addr[0] + ":" + addr[1]
+    core_id = 'udp:' + str(addr[0]) + ":" + str(addr[1])
 
     return Echoreply, core_id
 
