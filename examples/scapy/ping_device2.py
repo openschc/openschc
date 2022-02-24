@@ -26,7 +26,7 @@ rm.Print()
 unparser = Unparser()
 
 # Create a ICMPv6 Echo Reply from Echo Request
-def create_echoreply(pkt):
+def create_echoreply(pkt, addr):
     print("packet decompresed: ", pkt)
     ECHO_REQUEST = IPv6(bytes(pkt))
     
@@ -47,7 +47,10 @@ def create_echoreply(pkt):
 
     Echoreply = IPv6Header / ICMPv6Header
     dprint("Echo reply", Echoreply.show())
-    return Echoreply
+    
+    core_id = 'udp:' + addr[0] + ":" + addr[1]
+
+    return Echoreply, core_id
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -77,8 +80,8 @@ def processPkt(pkt):
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
-                           pkt_reply = create_echoreply(schc_pkt_decompressed)                     
-                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=addr,)
+                           pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
                            print(uncomp_pkt)
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
