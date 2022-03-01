@@ -79,6 +79,9 @@ T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
 
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
@@ -128,9 +131,111 @@ T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
+T_FRAG_RFC8724 = "RCS_RFC8724"
 
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
+
+
+SID = 100000
+
+YANG_ID = {
+    "TBD" : [SID+1, "RCS-algorithm-base-type"],
+    T_FRAG_RFC8724 : [SID+2, "rcs-RFC8724"],
+    "TBD" : [SID+3, "ack-behavior-after-All0"],
+    "TBD" : [SID+4, "ack-behavior-after-All1"],
+    "TBD" : [SID+5, "ack-behavior-always"],
+    "TBD" : [SID+6, "ack-behavior-base-type"],
+    "TBD" : [SID+7, "all1-data-base-type"],
+    "TBD" : [SID+8, "all1-data-no"],
+    "TBD" : [SID+9, "all1-data-sender-choice"],
+    "TBD" : [SID+10, "all1-data-yes"],
+    T_CDA_APPIID : [SID+11, "cda-appiid"],
+    T_CDA_COMP_CKSUM : [SID+12, "cda-compute-checksum"],
+    T_CDA_COMP_LEN : [SID+13, "cda-compute-length"],
+    T_CDA_DEVIID : [SID+14, "cda-deviid"],
+    T_CDA_LSB : [SID+15, "cda-lsb"],
+    T_CDA_MAP_SENT : [SID+16, "cda-mapping-sent"],
+    T_CDA_NOT_SENT : [SID+17, "cda-not-sent"],
+    T_CDA_VAL_SENT : [SID+18, "cda-value-sent"],
+    "TBD" : [SID+19, "compression-decompression-action-base-type"],
+    T_DIR_BI : [SID+20, "di-bidirectional"],
+    T_DIR_DW : [SID+21, "di-down"],
+    T_DIR_UP : [SID+22, "di-up"],
+    "TBD" : [SID+23, "direction-indicator-base-type"],
+    T_COAP_CODE : [SID+24, "fid-coap-code"],
+    "TBD" : [SID+25, "fid-coap-code-class"],
+    "TBD" : [SID+26, "fid-coap-code-detail"],
+    T_COAP_MID : [SID+27, "fid-coap-mid"],
+    T_COAP_OPT_ACCEPT : [SID+28, "fid-coap-option-accept"],
+    T_COAP_OPT_BLOCK1 : [SID+29, "fid-coap-option-block1"],
+    T_COAP_OPT_BLOCK2 : [SID+30, "fid-coap-option-block2"],
+    T_COAP_OPT_CONT_FORMAT : [SID+31, "fid-coap-option-content-format"],
+    T_COAP_OPT_ETAG : [SID+32, "fid-coap-option-etag"],
+    T_COAP_OPT_IF_MATCH : [SID+33, "fid-coap-option-if-match"],
+    T_COAP_OPT_IF_NONE_MATCH : [SID+34, "fid-coap-option-if-none-match"],
+    T_COAP_OPT_LOC_PATH : [SID+35, "fid-coap-option-location-path"],
+    T_COAP_OPT_LOC_QUERY : [SID+36, "fid-coap-option-location-query"],
+    T_COAP_OPT_MAX_AGE : [SID+37, "fid-coap-option-max-age"],
+    T_COAP_OPT_NO_RESP : [SID+38, "fid-coap-option-no-response"],
+    T_COAP_OPT_OBS : [SID+39, "fid-coap-option-observe"],
+    'TBD' : [SID+40, "fid-coap-option-oscore-flags"],
+    "TBD" : [SID+41, "fid-coap-option-oscore-kid"],
+    "TBD" : [SID+42, "fid-coap-option-oscore-kidctx"],
+    "TBD" : [SID+43, "fid-coap-option-oscore-piv"],
+    T_COAP_OPT_PROXY_SCHEME : [SID+44, "fid-coap-option-proxy-scheme"],
+    T_COAP_OPT_PROXY_URI : [SID+45, "fid-coap-option-proxy-uri"],
+    T_COAP_OPT_SIZE1 : [SID+46, "fid-coap-option-size1"],
+    T_COAP_OPT_SIZE2 : [SID+47, "fid-coap-option-size2"],
+    T_COAP_OPT_URI_HOST : [SID+48, "fid-coap-option-uri-host"],
+    T_COAP_OPT_URI_PATH : [SID+49, "fid-coap-option-uri-path"],
+    T_COAP_OPT_URI_PORT : [SID+50, "fid-coap-option-uri-port"],
+    T_COAP_OPT_URI_QUERY : [SID+51, "fid-coap-option-uri-query"],
+    T_COAP_TKL : [SID+52, "fid-coap-tkl"],
+    T_COAP_TOKEN : [SID+53, "fid-coap-token"],
+    T_COAP_TYPE : [SID+54, "fid-coap-type"],
+    T_COAP_VERSION : [SID+55, "fid-coap-version"],
+    T_ICMPV6_CKSUM : [SID+56, "fid-icmpv6-checksum"],
+    T_ICMPV6_CODE : [SID+57, "fid-icmpv6-code"],
+    T_ICMPV6_IDENT : [SID+58, "fid-icmpv6-identifier"],
+    T_ICMPV6_SEQNO : [SID+59, "fid-icmpv6-sequence"],
+    T_ICMPV6_TYPE : [SID+60, "fid-icmpv6-type"],
+    T_IPV6_APP_IID : [SID+61, "fid-ipv6-appiid"],
+    T_IPV6_APP_PREFIX : [SID+62, "fid-ipv6-appprefix"],
+    T_IPV6_DEV_IID : [SID+63, "fid-ipv6-deviid"],
+    T_IPV6_DEV_PREFIX : [SID+64, "fid-ipv6-devprefix"],
+    T_IPV6_FL : [SID+65, "fid-ipv6-flowlabel"],
+    T_IPV6_HOP_LMT : [SID+66, "fid-ipv6-hoplimit"],
+    T_IPV6_NXT : [SID+67, "fid-ipv6-nextheader"],
+    T_IPV6_LEN : [SID+68, "fid-ipv6-payloadlength"],
+    T_IPV6_TC : [SID+69, "fid-ipv6-trafficclass"],
+    "TBD" : [SID+70, "fid-ipv6-trafficclass-ds"],
+    "TBD" : [SID+71, "fid-ipv6-trafficclass-ecn"],
+    T_IPV6_VER : [SID+72, "fid-ipv6-version"],
+    T_UDP_APP_PORT : [SID+73, "fid-udp-app-port"],
+    T_UDP_CKSUM : [SID+74, "fid-udp-checksum"],
+    T_UDP_DEV_PORT : [SID+75, "fid-udp-dev-port"],
+    T_UDP_LEN : [SID+76, "fid-udp-length"],
+    "TBD" : [SID+77, "field-id-base-type"],
+    "TBD" : [SID+78, "field-id-coap-base-type"],
+    "TBD" : [SID+79, "field-id-icmpv6-base-type"],
+    "TBD" : [SID+80, "field-id-ipv6-base-type"],
+    "TBD" : [SID+81, "field-id-udp-base-type"],
+    "TBD" : [SID+82, "field-length-base-type"],
+    T_FUNCTION_TKL : [SID+83, "fl-token-length"],
+    T_FUNCTION_VAR : [SID+84, "fl-variable"],
+    T_FRAG_ACK_ALWAYS : [SID+85, "fragmentation-mode-ack-always"],
+    T_FRAG_ACK_ON_ERROR : [SID+86, "fragmentation-mode-ack-on-error"],
+    "TBD" : [SID+87, "fragmentation-mode-base-type"],
+    T_FRAG_NO_ACK : [SID+88, "fragmentation-mode-no-ack"],
+    "TBD" : [SID+89, "matching-operator-base-type"],
+    T_MO_EQUAL : [SID+90, "mo-equal"],
+    T_MO_IGNORE : [SID+91, "mo-ignore"],
+    T_MO_MMAP : [SID+92, "mo-matching"],
+    T_MO_MSB : [SID+93, "mo-msb"]
+}
+
+
 
 # from gen_rulemanager import *
 
