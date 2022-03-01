@@ -56,7 +56,6 @@ tunnel.bind(("0.0.0.0", socket_port))
 device_id = 'udp:'+ip+":"+str(socket_port)
 print ("device_id is", device_id)
 
-
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()

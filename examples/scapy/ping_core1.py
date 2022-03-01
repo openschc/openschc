@@ -18,6 +18,7 @@ import ipaddress
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
 rm.Add(file="icmp1.json")
+rm.Add(file="icmp2.json")
 rm.Print()
 
 def processPkt(pkt):
@@ -61,9 +62,5 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces --> use sudo
 
-
-
-
- 

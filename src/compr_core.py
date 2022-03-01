@@ -40,6 +40,9 @@ T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
 T_ICMPV6_IDENT = "ICMPV6.IDENT"
 T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
 
+T_ICMPV6_TYPE_ECHO_REQUEST = "ICMPV6.TYPE.ECHO.REQUEST"
+T_ICMPV6_TYPE_ECHO_REPLY = "ICMPV6.TYPE.ECHO.REPLY"
+
 T_PROTO_UDP = "UDP"
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
 T_UDP_APP_PORT = "UDP.APP_PORT"
@@ -669,12 +672,12 @@ class Decompressor:
 
         rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
         assert (rule_send == rule["RuleID"])
-
+        print("direction at compr_core: ", direction)
         for r in rule["Compression"]:
-            dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
+                print(r[T_DI])
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-                dprint("<<<", full_field)
+                print("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
                 #pprint.pprint (self.parsed_packet)
 

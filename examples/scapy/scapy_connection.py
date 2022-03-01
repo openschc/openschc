@@ -24,14 +24,15 @@ class ScapyLowerLayer:
         self._actual_init()
 
     def send_packet(self, packet, dest, transmit_callback=None):
-        if self.position == T_POSITION_CORE:
-            if dest != None and dest.find("udp") == 0:
-                destination = (dest.split(":")[1], int(dest.split(":")[2]))
-            else:
-                print ("No destination found, not sent:", packet, dest)
-                return False
+        print ("scapy_conection.py: send_pkt, dest ", dest, "packet", packet)
+        if dest != None and dest.find("udp") == 0:
+            destination = (dest.split(":")[1], int(dest.split(":")[2]))
         else:
-            destination = self.other_end
+            print ("No destination found, not sent:", packet, dest)
+            return False
+
+#        else:
+#            destination = self.other_end
 
         self.sock.sendto(packet, destination)
 

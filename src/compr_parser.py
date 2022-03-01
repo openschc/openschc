@@ -38,6 +38,10 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+icmpv6_types = {
+    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
+    T_ICMPV6_TYPE_ECHO_REPLY: 129
+}
 
 class Parser:
     """
@@ -61,6 +65,7 @@ class Parser:
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
+        print("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -207,8 +212,6 @@ class Parser:
 
                 self.header_fields[T_COAP_OPT_END, 1] = [0xFF, 8]
                 pos += 1
-
-
         return self.header_fields, pkt[pos:], None
 
 
@@ -218,7 +221,7 @@ class Unparser:
         pass
 
     def unparse (self, header_d, data, direction, d_rule, iface=None):
-        dprint ("unparse", header_d, data, direction)
+        print ("unparse: ", header_d, data, direction)
 
         L2header = None
         L3header = None
@@ -234,35 +237,39 @@ class Unparser:
                 c[k] = v
             else:
                 raise ValueError ("Type not supported")
-            
-        
-        IPv6Src = (c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID]
-        IPv6Dst = (c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID]
 
-        
-        IPv6Sstr = ipaddress.IPv6Address(IPv6Src)
-        IPv6Dstr = ipaddress.IPv6Address(IPv6Dst)
-        
+        DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
+        AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
+
+        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            for i in icmpv6_types:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                    IPv6Src = DevStr
+                    IPv6Dst = AppStr
+                    ICMPv6Header = ICMPv6EchoReply(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                    IPv6Src = AppStr
+                    IPv6Dst = DevStr 
+                    ICMPv6Header = ICMPv6EchoRequest(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                L4header = ICMPv6Header
+
         IPv6Header = IPv6 (
             version= header_d[(T_IPV6_VER, 1)][0],
             tc     = header_d[(T_IPV6_TC, 1)][0],
             fl     = header_d[(T_IPV6_FL, 1)][0],
             nh     = header_d[(T_IPV6_NXT, 1)][0],
             hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
-            src    =IPv6Sstr.compressed, 
-            dst    =IPv6Dstr.compressed
+            src    = IPv6Src.compressed, 
+            dst    = IPv6Dst.compressed
         ) 
 
         L3header = IPv6Header
-
-        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
-            ICMPv6Header = ICMPv6EchoReply(
-                id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
-                data = data
-            )
-            L4header = ICMPv6Header
-
         full_packet = L3header / L4header
 
         return full_packet

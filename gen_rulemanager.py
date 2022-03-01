@@ -265,8 +265,6 @@ from copy import deepcopy
 from compr_core import *
 import ipaddress
 
-import base64
-
 
 """
 .. module:: gen_rulemanager
@@ -318,6 +316,7 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_END         : {"FL": 1,     "TYPE": int, "TV" : 0xFF, "ALGO": "DIRECT"}
 }
 
 class DictToAttrDeep:
@@ -435,7 +434,8 @@ class RuleManager:
         for d in self._ctxt:
             if device == d["DeviceID"]:
                 break
-        else:
+
+        if d == None:
             d = {"DeviceID": device, "SoR": []}
             self._ctxt.append(d)
 
@@ -533,20 +533,20 @@ class RuleManager:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
 
-            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"]:
+            if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
 
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
-                _default_value (arule, nrule, T_FRAG_MIC, T_FRAG_RFC8724)
+                _default_value (arule, nrule, T_FRAG_MIC, "crc32")
 
-                if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
+                if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
                     _default_value(arule, nrule, T_FRAG_DTAG, 2)
                     _default_value (arule, nrule, T_FRAG_W, 0)
                     _default_value (arule, nrule, T_FRAG_FCN, 3)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif nrule[T_FRAG][T_FRAG_MODE] == "aT_FRAG_ACK_ALWAYS":
+                elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
@@ -582,9 +582,9 @@ class RuleManager:
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
-        if T_ACTION in nrule:
-             print ("Warning: using experimental Action")
-             arule[T_ACTION] = nrule[T_ACTION]
+        # if T_ACTION in nrule:
+        #     print ("Warning: using experimental Action")
+        #     arule[T_ACTION] = nrule[T_ACTION]
 
 
         arule[T_COMP] = []
@@ -599,7 +599,7 @@ class RuleManager:
                 ))
 
             entry = {}
-            FID = r[T_FID]
+            FID = r[T_FID].upper()
             entry[T_FID] = FID
             entry[T_FL] = self._return_default(r, T_FL, FIELD__DEFAULT_PROPERTY[FID][T_FL])
             entry[T_FP] = self._return_default(r, T_FP, 1)
@@ -654,11 +654,11 @@ class RuleManager:
     def _smart_print(self, v):
         if type(v) is str:
             v = '"'+v+'"'
-            print ('{:<30}'.format(v), end="")
+            dprint ('{:<30}'.format(v), end="")
         elif type(v) is int:
-            print ('{:>30}'.format(v), end="")
+            dprint ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            print ('{:>30}'.format(v.hex()), end="")
+            dprint ('{:>30}'.format(b2hex(v), end=""))
 
     def printBin(self, v, l):
         txt = ""
@@ -708,7 +708,7 @@ class RuleManager:
 
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
-                    # print (rule)
+                    print (rule)
                     if rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP:
                         dir_c = "^"
                     else:
@@ -736,7 +736,7 @@ class RuleManager:
 
                     print ("!{} RCS Algorithm: {:<69}{}!".format(dir_c,rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC], dir_c))
 
-                    if rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
+                    if rule[T_FRAG][T_FRAG_MODE] != "noAck":
                         print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
@@ -753,108 +753,15 @@ class RuleManager:
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
 
-    def to_yang (self, format="json"):
-        """
-        Print a context
-        """
-
-        for dev in self._ctxt:
-            print ("*"*40)
-            print ("Device:", dev["DeviceID"])
-
-            yang_rules = []
-            for rule in dev["SoR"]:
-                #txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
-                if T_COMP in rule:
-                    yang_comp = []
-                    for e in rule[T_COMP]:
-
-                        l = e[T_FL]
-                        if type(l) == int:
-                            yang_length = str(l)
-                        else: # function
-                            yang_length = YANG_ID[l][1]
-
-                        yang_entry = {
-                            "field-id" : YANG_ID[e[T_FID]][1],
-                            "field-length" : yang_length,
-                            "field-position" : e[T_FP],
-                            "direction-indicator" : YANG_ID[e[T_DI]][1],
-                            "matching-operator" : YANG_ID[e[T_MO]][1],
-                            "comp-decomp-action" : YANG_ID[e[T_CDA]][1]
-                        }
-
-                        def dictify (val):
-                            dictio = []
-                            if type(val) != list:
-                                val =[val]
-
-                            for i in range(len(val)):
-                                if type(val[i]) == int:
-                                    # find length in byte
-                                    x = val[i]
-                                    size = 1
-                                    while x !=0:
-                                        x >>= 8
-                                        size +=1
-
-                                    b_a = val[i].to_bytes(size, byteorder="big")
-                                    v = base64.b64encode(b_a)
-                                    dictio.append ({"position" : i, "value": v})
-                                elif type(val[i]) == bytes:
-                                    v = base64.b64encode(val[i])
-                                    dictio.append ({"position" : i, "value": v})                                    
-
-                                else: 
-                                    print ("unkown type", type(val[i]))
-                                    v = ""
-
-                            print ("#####", dictio)
-                            return dictio
-
-                        if T_TV in e and e[T_TV] != None:
-                            yang_entry["target-value"] = dictify(e[T_TV])
-
-                        if T_MO_VAL in e and e[T_MO_VAL] != None:
-                            yang_entry["matching-operator-value"] = dictify(e[T_MO_VAL])
-
-                        # if T_CDA_VAL in e and e[T_CDA_VAL] != None:
-                        #     yang_entry.append({"comp-decomp-action-value": dictify(e[T_CDA_VAL])})
-                        
-                        print (yang_entry)
-                        yang_comp.append(yang_entry)
-                    yang_rules.append({
-                        "rule-id-value": rule[T_RULEID],
-                        "rule-id-length": rule[T_RULEIDLENGTH],
-                        "entry" : yang_comp
-                    })
-
-                elif T_FRAG in rule:
-                    yang_rules.append ({
-                        "rule-id-value": rule[T_RULEID],
-                        "rule-id-length": rule[T_RULEIDLENGTH],                        
-                        "direction" : YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1],
-                        "rcs-algorithm" : YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1],
-                        "dtag-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
-                        "fcn-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                        "fragmentation-mode" : YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1],
-                        "w-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_W]
-                    })
-
-                   
-                elif T_NO_COMP in rule:
-                    print ("NO COMPRESSION RULE")
- 
-            print ("#", yang_rules)
-        
-        return {"ietf-schc:schc" : {"rule" : yang_rules}}
-
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True
 
     def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
         if type(TV) != type(FV):
-            return False
+            if type(TV) == bytes and type (FV) == int:
+                FV = FV.to_bytes(len(TV), byteorder="big") # same length both
+            else:
+                return False
 
         if TV != FV: return False
         return True
@@ -906,17 +813,14 @@ class RuleManager:
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
                     ruleLength = r[T_RULEIDLENGTH]
-
                     tested_rule = schc.get_bits(ruleLength, position=0)
-
                     dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
-
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI):
         """ Takes a parsed packet and returns the matching rule.
         """
         for dev in self._ctxt:
@@ -926,6 +830,7 @@ class RuleManager:
                     for r in rule["Compression"]:
                         dprint(r)
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
+                            dprint (r)
                             if (r[T_FID], r[T_FP]) in pkt:
                                 if T_MO_VAL in r:
                                     arg = r[T_MO_VAL]
@@ -938,26 +843,18 @@ class RuleManager:
                                     arg):
                                         matches += 1
                                 else:
-                                    if failed_field:
-                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
-                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
-                                            r[T_FID],
-                                            r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
-                                            r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                            arg))
-                                    break # field does not match, rule does not match
+                                        break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
                                     dprint("Suboptimal rule")
                                 else:
-                                    dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
                             dprint ("->", matches)
-                    dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
-                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule, dev[T_DEVICEID]
-                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule, dev[T_DEVICEID]
-        return None, None
+                    dprint("-"*10, matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
+        return None
 
     def FindNoCompressionRule(self, deviceID=None):
         for d in self._ctxt:
@@ -968,56 +865,20 @@ class RuleManager:
 
         return None        
 
-    def FindFragmentationRule(self, deviceID=None, originalSize=None,
-                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
-                              packet=None):
-        dprint("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
-        """Lookup a fragmentation rule.
-
+    def FindFragmentationRule(self, deviceID=None, originalSize=None, reliability=T_FRAG_NO_ACK, direction=T_DIR_UP):
+        """
         Find a fragmentation rule regarding parameters:
         * original SCHC packet size
         * reliability NoAck, AckOnError, AckAlways
         * direction (UP or DOWN)
         NOTE: Not yet implemented, returns the first fragmentation rule.  
-
-        XXX please check whether the following strategy is okey.
-        - if direction is specified, and deviceID is None, it is assumed that
-          the request is for a device. Return the 1st rule matched with the
-          direction regardless of the deviceID.  A deviceID for a device is
-          not configured typically.
-        - if raw_packet is not None, it compares the rule_id with the packet.
-        - if the direction and the deviceID is matched.
-        - if direction and device ID is specified. It returns the 1st rule 
-          matched with the deviceID and the direction
         """
-        if direction is not None and deviceID is None:
-            for d in self._ctxt:
+        for d in self._ctxt:
+            if d["DeviceID"] == deviceID:
                 for r in d["SoR"]:
-                    if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
-                        # return the 1st one.
+                    if T_FRAG in r:
                         return r
-        elif packet is not None:
-            print("packet dev-id", deviceID)
-            for d in self._ctxt:
-                for r in d["SoR"]:
-                    print("rule dev-id", d["DeviceID"])
-                    if T_FRAG in r:
-                        rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
-                        if r[T_RULEID] == rule_id:
-                            return r
-        elif packet is None and direction is not None and deviceID is not None:
-            dprint("FindFragmentationRule, dir: ", direction, "devid: ", deviceID )
-            for d in self._ctxt:
-                for r in d["SoR"]:
-                    if T_FRAG in r:
-                        if r[T_FRAG][T_FRAG_DIRECTION] == direction:
-                            return r
-        else:
-            for d in self._ctxt:
-                if d["DeviceID"] == deviceID:
-                    for r in d["SoR"]:
-                        if T_FRAG in r:
-                            return r
+
         return None
 
     def _checkRuleValue(self, rule_id, rule_id_length):
@@ -1059,6 +920,16 @@ class RuleManager:
                 if r[T_RULEID] == rule_id:
                     return k, r
         return None, None
+
+    def find_context_bydevL2addr(self, dev_L2addr):
+        """ find a context with dev_L2addr. """
+        # XXX needs to implement wildcard search or something like that.
+        for c in self._db:
+            if c["devL2Addr"] == dev_L2addr:
+                return c
+            if c["devL2Addr"] == "*":
+                return c
+        return None
 
     def find_context_bydstiid(self, dst_iid):
         """ find a context with dst_iid, which can be a wild card. """
@@ -1164,7 +1035,7 @@ class RuleManager:
 
             mode = fragRule["FRMode"]
 
-            if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"):
+            if not mode in ("noAck", "ackAlways", "ackOnError"):
                 raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
 
             if not "FRModeProfile" in fragRule:
@@ -1176,17 +1047,17 @@ class RuleManager:
                 profile["dtagSize"] = 0
 
             if not "WSize" in profile:
-                if  mode == T_FRAG_NO_ACK:
+                if  mode == "noAck":
                     profile["WSize"] = 0
-                elif  mode == T_FRAG_ACK_ALWAYS:
+                elif  mode == "ackAlways":
                     profile["WSize"] = 1
                 elif mode == "ackOnError":
                     profile["WSize"] = 5
 
             if not "FCNSize" in profile:
-                if mode == T_FRAG_NO_ACK:
+                if mode == "noAck":
                     profile["FCNSize"] = 1
-                elif mode == T_FRAG_ACK_ALWAYS:
+                elif mode == "ackAlways":
                     profile["FCNSize"] = 3
                 elif mode == "ackOnError":
                     profile["FCNSize"] = 3
