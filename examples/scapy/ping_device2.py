@@ -46,7 +46,7 @@ def create_echoreply(pkt, addr):
         data = ECHO_REQUEST.data)
 
     Echoreply = IPv6Header / ICMPv6Header
-    dprint("Echo reply", Echoreply.show())
+    dprint("Echo reply at ping-device2.py: \n", Echoreply.show())
     
     core_id = 'udp:' + str(addr[0]) + ":" + str(addr[1])
 

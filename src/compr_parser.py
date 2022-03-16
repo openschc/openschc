@@ -65,7 +65,7 @@ class Parser:
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        print("direction in parser:", direction)
+        dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
