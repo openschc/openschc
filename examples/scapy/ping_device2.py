@@ -27,7 +27,7 @@ unparser = Unparser()
 
 # Create a ICMPv6 Echo Reply from Echo Request
 def create_echoreply(pkt, addr):
-    print("packet decompresed: ", pkt)
+    dprint("packet decompresed: ", pkt)
     ECHO_REQUEST = IPv6(bytes(pkt))
     
     IPv6Header = IPv6 (
@@ -82,7 +82,7 @@ def processPkt(pkt):
                            schc_pkt_decompressed = r[1]
                            pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
                            uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
-                           print(uncomp_pkt)
+                           dprint(uncomp_pkt)
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
                 pkt.show2()
