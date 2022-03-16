@@ -65,7 +65,7 @@ class Parser:
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        print("direction in parser:", direction)
+        dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -221,7 +221,7 @@ class Unparser:
         pass
 
     def unparse (self, header_d, data, direction, d_rule, iface=None):
-        print ("unparse: ", header_d, data, direction)
+        dprint ("unparse: ", header_d, data, direction)
 
         L2header = None
         L3header = None

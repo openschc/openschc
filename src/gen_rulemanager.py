@@ -997,7 +997,7 @@ class RuleManager:
                         # return the 1st one.
                         return r
         elif packet is not None:
-            print("packet dev-id", deviceID)
+            dprint("packet dev-id", deviceID)
             for d in self._ctxt:
                 for r in d["SoR"]:
                     print("rule dev-id", d["DeviceID"])
