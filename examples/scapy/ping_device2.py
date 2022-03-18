@@ -9,7 +9,6 @@ from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 from gen_bitarray import *
-from compr_parser import Unparser
 
 import pprint
 import binascii
@@ -19,7 +18,7 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp2.json")
+rm.Add(file="icmp1.json")
 rm.Print()
 
 #Unparser
@@ -67,13 +66,14 @@ def processPkt(pkt):
             if ip_proto == 17:
                 udp_dport = pkt.getlayer(UDP).dport
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
-                    print ("tunneled SCHC msg")
+                    print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     schc_bbuf = BitBuffer(schc_pkt)
                     rule = rm.FindRuleFromSCHCpacket(schc=schc_bbuf, device=device_id)
                     if rule[T_RULEID] == 6 and rule[T_RULEIDLENGTH]== 3:
                         print ("ping")
                         tunnel.sendto(schc_pkt, addr)
+
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt) 
@@ -83,6 +83,7 @@ def processPkt(pkt):
                            pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
                            uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
                            dprint(uncomp_pkt)
+                            
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
                 pkt.show2()
@@ -112,7 +113,7 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="en0") # scappy cannot read multiple interfaces
 
 
 
