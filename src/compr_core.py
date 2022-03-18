@@ -672,12 +672,12 @@ class Decompressor:
 
         rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
         assert (rule_send == rule["RuleID"])
-        print("direction at compr_core: ", direction)
+        dprint("direction at compr_core: ", direction)
         for r in rule["Compression"]:
             if r[T_DI] in [T_DIR_BI, direction]:
-                print(r[T_DI])
+                dprint('T_DI', r[T_DI])
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-                print("<<<", full_field)
+                dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
                 #pprint.pprint (self.parsed_packet)
 

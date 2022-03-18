@@ -358,9 +358,17 @@ class SCHCProtocol:
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
         
         if T_COMP in rule:
+            if self.position == T_POSITION_DEVICE:
+                direction = T_DIR_DW
+                dprint("direction: ", direction)
+            else:
+                direction = T_DIR_UP
+                dprint("direction: ", direction)
+
             decomp = Decompressor()
             unparser = Unparser()
             header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
+            dprint("header_d:", header_d)
             pkt_data = bytearray()
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
