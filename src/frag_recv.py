@@ -266,7 +266,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # A type of data structure holding tiles in each window is not suitable.
     # So, here just appends a fragment into the tile_list like No-ACK.
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
         self._last_receive_info = []
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
