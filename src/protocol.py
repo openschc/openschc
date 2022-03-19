@@ -116,6 +116,7 @@ class SessionManager:
         print ("PRTOCOL=", self.protocol)
 
         mode = rule[T_FRAG][T_FRAG_MODE]
+        print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(rule, 12, self.protocol, context, dtag)
 
