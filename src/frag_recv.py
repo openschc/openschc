@@ -280,7 +280,7 @@ class ReassemblerAckOnError(ReassembleBase):
         if self.state == "ABORT":
             self._last_receive_info = [("state-abort",)]
             self.send_receiver_abort()
-            return
+            return None # TODO
         #
         # input("")
         if schc_frag.abort == True:
@@ -288,7 +288,7 @@ class ReassemblerAckOnError(ReassembleBase):
             # Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             self._last_receive_info = [("abort",)]
-            return
+            return None  # TODO
 
         if schc_frag.ack_request == True:
             dprint("Received ACK-REQ")
@@ -313,7 +313,7 @@ class ReassemblerAckOnError(ReassembleBase):
             self.state = 'ACK_REQ'
             # input('')
             self.resend_ack(schc_frag)
-            return
+            return None
 
         info = self._last_receive_info
         self.fragment_received = True

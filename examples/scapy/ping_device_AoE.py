@@ -77,6 +77,7 @@ def processPkt(pkt):
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt) 
+                        print ('r = ', r)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
