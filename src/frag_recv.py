@@ -268,12 +268,12 @@ class ReassemblerAckOnError(ReassembleBase):
 
     def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
         self._last_receive_info = []
-        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
+        print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
         assert (T_FRAG in self.rule)
         rule = self.rule
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-        dprint("receiver frag received:", schc_frag.__dict__)
+        print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
@@ -291,7 +291,7 @@ class ReassemblerAckOnError(ReassembleBase):
             return None  # TODO
 
         if schc_frag.ack_request == True:
-            dprint("Received ACK-REQ")
+            print("Received ACK-REQ")
             self._last_receive_info = [("ack-req",)]            
             # if self.state != "DONE":
             #     #this can happen when the ALL-1 is not received, so the state is
