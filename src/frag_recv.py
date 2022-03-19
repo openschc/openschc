@@ -270,7 +270,8 @@ class ReassemblerAckOnError(ReassembleBase):
         self._last_receive_info = []
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
-
+        assert (T_FRAG in self.rule)
+        
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         dprint("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
