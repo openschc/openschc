@@ -18,7 +18,7 @@ class TileList():
     # XXX may it be used in NO-ACK ?
     def __init__(self, rule, packet_bbuf, l2word=8):
         self.rule = rule
-        print('frag_tile.py Fragmentation rule:', rule[T_FRAG][T_FRAG_PROF])
+        print('frag_tile.py Fragmentation rule:', rule)
         self.t_size = rule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE]
         assert self.t_size >= l2word
         self.max_fcn = frag_msg.get_max_fcn(rule)
