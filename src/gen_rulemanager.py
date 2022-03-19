@@ -265,6 +265,8 @@ from copy import deepcopy
 from compr_core import *
 import ipaddress
 
+import base64
+
 
 """
 .. module:: gen_rulemanager
@@ -537,7 +539,7 @@ class RuleManager:
 
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
-                _default_value (arule, nrule, T_FRAG_MIC, "crc32")
+                _default_value (arule, nrule, T_FRAG_MIC, T_FRAG_RFC8724)
 
                 if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG, 2)
@@ -751,6 +753,102 @@ class RuleManager:
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
 
+    def to_yang (self, format="json"):
+        """
+        Print a context
+        """
+
+        for dev in self._ctxt:
+            print ("*"*40)
+            print ("Device:", dev["DeviceID"])
+
+            yang_rules = []
+            for rule in dev["SoR"]:
+                #txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
+                if T_COMP in rule:
+                    yang_comp = []
+                    for e in rule[T_COMP]:
+
+                        l = e[T_FL]
+                        if type(l) == int:
+                            yang_length = str(l)
+                        else: # function
+                            yang_length = YANG_ID[l][1]
+
+                        yang_entry = {
+                            "field-id" : YANG_ID[e[T_FID]][1],
+                            "field-length" : yang_length,
+                            "field-position" : e[T_FP],
+                            "direction-indicator" : YANG_ID[e[T_DI]][1],
+                            "matching-operator" : YANG_ID[e[T_MO]][1],
+                            "comp-decomp-action" : YANG_ID[e[T_CDA]][1]
+                        }
+
+                        def dictify (val):
+                            dictio = []
+                            if type(val) != list:
+                                val =[val]
+
+                            for i in range(len(val)):
+                                if type(val[i]) == int:
+                                    # find length in byte
+                                    x = val[i]
+                                    size = 1
+                                    while x !=0:
+                                        x >>= 8
+                                        size +=1
+
+                                    b_a = val[i].to_bytes(size, byteorder="big")
+                                    v = base64.b64encode(b_a)
+                                    dictio.append ({"position" : i, "value": v})
+                                elif type(val[i]) == bytes:
+                                    v = base64.b64encode(val[i])
+                                    dictio.append ({"position" : i, "value": v})                                    
+
+                                else: 
+                                    print ("unkown type", type(val[i]))
+                                    v = ""
+
+                            print ("#####", dictio)
+                            return dictio
+
+                        if T_TV in e and e[T_TV] != None:
+                            yang_entry["target-value"] = dictify(e[T_TV])
+
+                        if T_MO_VAL in e and e[T_MO_VAL] != None:
+                            yang_entry["matching-operator-value"] = dictify(e[T_MO_VAL])
+
+                        # if T_CDA_VAL in e and e[T_CDA_VAL] != None:
+                        #     yang_entry.append({"comp-decomp-action-value": dictify(e[T_CDA_VAL])})
+                        
+                        print (yang_entry)
+                        yang_comp.append(yang_entry)
+                    yang_rules.append({
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],
+                        "entry" : yang_comp
+                    })
+
+                elif T_FRAG in rule:
+                    yang_rules.append ({
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],                        
+                        "direction" : YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1],
+                        "rcs-algorithm" : YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1],
+                        "dtag-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
+                        "fcn-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
+                        "fragmentation-mode" : YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1],
+                        "w-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_W]
+                    })
+
+                   
+                elif T_NO_COMP in rule:
+                    print ("NO COMPRESSION RULE")
+ 
+            print ("#", yang_rules)
+        
+        return {"ietf-schc:schc" : {"rule" : yang_rules}}
+
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True
 
@@ -899,7 +997,7 @@ class RuleManager:
                         # return the 1st one.
                         return r
         elif packet is not None:
-            print("packet dev-id", deviceID)
+            dprint("packet dev-id", deviceID)
             for d in self._ctxt:
                 for r in d["SoR"]:
                     print("rule dev-id", d["DeviceID"])

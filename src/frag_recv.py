@@ -199,8 +199,8 @@ class ReassemblerNoAck(ReassembleBase):
             print (self.tile_list)
             #
             if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
-                print("----------------------- Final Reassembly -----------------------")
-                print("ALL1 received")
+                dprint("----------------------- Final Reassembly -----------------------")
+                dprint("ALL1 received")
                 # MIC calculation
                 dprint("tile_list")
                 for _ in self.tile_list:
@@ -231,10 +231,13 @@ class ReassemblerNoAck(ReassembleBase):
                     # XXX need to merge them into one.  Then, here searching database will
                     # XXX be moved into somewhere.
                     # XXX
-                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
+                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacprint(self,schc=schc_packet, device=devid)
                     dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                    args = self.protocol.decompress_only(schc_packet, rule, devid)
-                dprint("Packet decompressed at receive_frag: ", args)
+                    if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION]):
+                        args = self.protocol.decompress_only(schc_packet, devid, "UP") 
+                    else:
+                        args = self.protocol.decompress_only(schc_packet, devid, "DW") 
+
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 dprint(self.state)

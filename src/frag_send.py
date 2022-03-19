@@ -259,8 +259,8 @@ class FragmentNoAck(FragmentBase):
             w_fcn
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        print("frag_send.py, args: ", args)
-        print("frag_send.py, _session_id: ", self._session_id[0])
+        dprint("frag_send.py, args: ", args)
+        dprint("frag_send.py, _session_id: ", self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
@@ -348,7 +348,7 @@ class FragmentAckOnError(FragmentBase):
 
         # get contiguous tiles as many as possible fit in MTU.
         mtu_size = self.protocol.layer2.get_mtu_size()
-        print ("MTU"*5, mtu_size) 
+        dprint ("MTU"*5, mtu_size) 
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
         dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
                                                                                                 nb_remaining_tiles,
