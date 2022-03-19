@@ -297,11 +297,6 @@ class FragmentAckOnError(FragmentBase):
 
     def set_packet(self, packet_bbuf):
         super().set_packet(packet_bbuf)
-        print('frag-send.py, rule = ', self.rule)
-        print('packet_bbuf = ', packet_bbuf)
-        print('self.l2word = ', self.l2word)
-        print('frag-send.py, rule frag ?= ', self.rule[T_FRAG])
-        
         self.all_tiles = TileList(self.rule, packet_bbuf, self.l2word)
         # XXX
         # check whether the size of the last tile is less than L2 word
