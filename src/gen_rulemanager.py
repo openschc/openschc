@@ -531,7 +531,7 @@ class RuleManager:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
 
-            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"]:
+            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "AckOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
 
@@ -547,7 +547,7 @@ class RuleManager:
                 elif nrule[T_FRAG][T_FRAG_MODE] == "aT_FRAG_ACK_ALWAYS":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                elif  nrule[T_FRAG][T_FRAG_MODE] == "AckOnError":
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
 
