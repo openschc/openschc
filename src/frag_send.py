@@ -352,8 +352,9 @@ class FragmentAckOnError(FragmentBase):
         #     return
 
         # get contiguous tiles as many as possible fit in MTU.
-        mtu_size = self.protocol.layer2.get_mtu_size()
-        print ("MTU"*5, mtu_size) 
+        # mtu_size = self.protocol.layer2.get_mtu_size()
+        mtu_size = self.protocol.connectivity_manager.get_mtu("toto")
+        print ("MTU = ", mtu_size) 
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
         dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
                                                                                                 nb_remaining_tiles,
@@ -612,7 +613,7 @@ class FragmentAckOnError(FragmentBase):
     def event_sent_frag(self, status): # status == nb actually sent (for now)
         dprint("EVENT SEND FRAG")
         self.send_frag()
-        
+
     def receive_frag(self, bbuf, dtag):
         # the ack timer can be cancelled here, because it's been done whether
         # both rule_id and dtag in the fragment are matched to this session
