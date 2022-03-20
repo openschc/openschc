@@ -40,9 +40,6 @@ T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
 T_ICMPV6_IDENT = "ICMPV6.IDENT"
 T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
 
-T_ICMPV6_TYPE_ECHO_REQUEST = "ICMPV6.TYPE.ECHO.REQUEST"
-T_ICMPV6_TYPE_ECHO_REPLY = "ICMPV6.TYPE.ECHO.REPLY"
-
 T_PROTO_UDP = "UDP"
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
 T_UDP_APP_PORT = "UDP.APP_PORT"
@@ -136,33 +133,161 @@ T_FRAG_RFC8724 = "RCS_RFC8724"
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
 
-
+"""
+100000     module ietf-schc
+100001     identity ack-behavior-after-All0
+100002     identity ack-behavior-after-All1
+100003     identity ack-behavior-base-type
+100004     identity ack-behavior-by-layer2
+100005     identity all1-data-base-type
+100006     identity all1-data-no
+100007     identity all1-data-sender-choice
+100008     identity all1-data-yes
+100009     identity cda-appiid
+100010     identity cda-base-type
+100011     identity cda-compute-checksum
+100012     identity cda-compute-length
+100013     identity cda-deviid
+100014     identity cda-lsb
+100015     identity cda-mapping-sent
+100016     identity cda-not-sent
+100017     identity cda-value-sent
+100018     identity di-base-type
+100019     identity di-bidirectional
+100020     identity di-down
+100021     identity di-up
+100022     identity fid-base-type
+100023     identity fid-coap-base-type
+100024     identity fid-coap-code
+100025     identity fid-coap-code-class
+100026     identity fid-coap-code-detail
+100027     identity fid-coap-mid
+100028     identity fid-coap-option-accept
+100029     identity fid-coap-option-block1
+100030     identity fid-coap-option-block2
+100031     identity fid-coap-option-content-format
+100032     identity fid-coap-option-etag
+100033     identity fid-coap-option-if-match
+100034     identity fid-coap-option-if-none-match
+100035     identity fid-coap-option-location-path
+100036     identity fid-coap-option-location-query
+100037     identity fid-coap-option-max-age
+100038     identity fid-coap-option-no-response
+100039     identity fid-coap-option-observe
+100040     identity fid-coap-option-oscore-flags
+100041     identity fid-coap-option-oscore-kid
+100042     identity fid-coap-option-oscore-kidctx
+100043     identity fid-coap-option-oscore-piv
+100044     identity fid-coap-option-proxy-scheme
+100045     identity fid-coap-option-proxy-uri
+100046     identity fid-coap-option-size1
+100047     identity fid-coap-option-size2
+100048     identity fid-coap-option-uri-host
+100049     identity fid-coap-option-uri-path
+100050     identity fid-coap-option-uri-port
+100051     identity fid-coap-option-uri-query
+100052     identity fid-coap-tkl
+100053     identity fid-coap-token
+100054     identity fid-coap-type
+100055     identity fid-coap-version
+100056     identity fid-ipv6-appiid
+100057     identity fid-ipv6-appprefix
+100058     identity fid-ipv6-base-type
+100059     identity fid-ipv6-deviid
+100060     identity fid-ipv6-devprefix
+100061     identity fid-ipv6-flowlabel
+100062     identity fid-ipv6-hoplimit
+100063     identity fid-ipv6-nextheader
+100064     identity fid-ipv6-payloadlength
+100065     identity fid-ipv6-trafficclass
+100066     identity fid-ipv6-trafficclass-ds
+100067     identity fid-ipv6-trafficclass-ecn
+100068     identity fid-ipv6-version
+100069     identity fid-udp-app-port
+100070     identity fid-udp-base-type
+100071     identity fid-udp-checksum
+100072     identity fid-udp-dev-port
+100073     identity fid-udp-length
+100074     identity fl-base-type
+100075     identity fl-token-length
+100076     identity fl-variable
+100077     identity fragmentation-mode-ack-always
+100078     identity fragmentation-mode-ack-on-error
+100079     identity fragmentation-mode-base-type
+100080     identity fragmentation-mode-no-ack
+100081     identity mo-base-type
+100082     identity mo-equal
+100083     identity mo-ignore
+100084     identity mo-match-mapping
+100085     identity mo-msb
+100086     identity rcs-RFC8724
+100087     identity rcs-algorithm-base-type
+100088     feature compression
+100089     feature fragmentation
+100090     data /ietf-schc:schc
+100091     data /ietf-schc:schc/rule
+100092     data /ietf-schc:schc/rule/ack-behavior
+100093     data /ietf-schc:schc/rule/direction
+100094     data /ietf-schc:schc/rule/dtag-size
+100095     data /ietf-schc:schc/rule/entry
+100096     data /ietf-schc:schc/rule/entry/comp-decomp-action
+100097     data /ietf-schc:schc/rule/entry/comp-decomp-action-value
+100098     data /ietf-schc:schc/rule/entry/comp-decomp-action-value/position
+100099     data /ietf-schc:schc/rule/entry/comp-decomp-action-value/value
+100100     data /ietf-schc:schc/rule/entry/direction-indicator
+100101     data /ietf-schc:schc/rule/entry/field-id
+100102     data /ietf-schc:schc/rule/entry/field-length
+100103     data /ietf-schc:schc/rule/entry/field-position
+100104     data /ietf-schc:schc/rule/entry/matching-operator
+100105     data /ietf-schc:schc/rule/entry/matching-operator-value
+100106     data /ietf-schc:schc/rule/entry/matching-operator-value/position
+100107     data /ietf-schc:schc/rule/entry/matching-operator-value/value
+100108     data /ietf-schc:schc/rule/entry/target-value
+100109     data /ietf-schc:schc/rule/entry/target-value/position
+100110     data /ietf-schc:schc/rule/entry/target-value/value
+100111     data /ietf-schc:schc/rule/fcn-size
+100112     data /ietf-schc:schc/rule/fragmentation-mode
+100113     data /ietf-schc:schc/rule/inactivity-timer
+100114     data /ietf-schc:schc/rule/l2-word-size
+100115     data /ietf-schc:schc/rule/max-ack-requests
+100116     data /ietf-schc:schc/rule/max-interleaved-frames
+100117     data /ietf-schc:schc/rule/maximum-packet-size
+100118     data /ietf-schc:schc/rule/rcs-algorithm
+100119     data /ietf-schc:schc/rule/retransmission-timer
+100120     data /ietf-schc:schc/rule/rule-id-length
+100121     data /ietf-schc:schc/rule/rule-id-value
+100122     data /ietf-schc:schc/rule/tile-in-All1
+100123     data /ietf-schc:schc/rule/tile-size
+100124     data /ietf-schc:schc/rule/w-size
+100125     data /ietf-schc:schc/rule/window-size
+"""
 SID = 100000
 
 YANG_ID = {
-    "TBD" : [SID+1, "RCS-algorithm-base-type"],
-    T_FRAG_RFC8724 : [SID+2, "rcs-RFC8724"],
-    "TBD" : [SID+3, "ack-behavior-after-All0"],
-    "TBD" : [SID+4, "ack-behavior-after-All1"],
-    "TBD" : [SID+5, "ack-behavior-always"],
-    "TBD" : [SID+6, "ack-behavior-base-type"],
-    "TBD" : [SID+7, "all1-data-base-type"],
-    "TBD" : [SID+8, "all1-data-no"],
-    "TBD" : [SID+9, "all1-data-sender-choice"],
-    "TBD" : [SID+10, "all1-data-yes"],
-    T_CDA_APPIID : [SID+11, "cda-appiid"],
-    T_CDA_COMP_CKSUM : [SID+12, "cda-compute-checksum"],
-    T_CDA_COMP_LEN : [SID+13, "cda-compute-length"],
-    T_CDA_DEVIID : [SID+14, "cda-deviid"],
-    T_CDA_LSB : [SID+15, "cda-lsb"],
-    T_CDA_MAP_SENT : [SID+16, "cda-mapping-sent"],
-    T_CDA_NOT_SENT : [SID+17, "cda-not-sent"],
-    T_CDA_VAL_SENT : [SID+18, "cda-value-sent"],
-    "TBD" : [SID+19, "compression-decompression-action-base-type"],
-    T_DIR_BI : [SID+20, "di-bidirectional"],
-    T_DIR_DW : [SID+21, "di-down"],
-    T_DIR_UP : [SID+22, "di-up"],
-    "TBD" : [SID+23, "direction-indicator-base-type"],
+    "module" : [SID, "ietf-schc"],
+    "TBD" : [SID+1, "ack-behavior-after-All0"],
+    "TBD" : [SID+2, "ack-behavior-after-All1"],
+    "TBD" : [SID+3, "ack-behavior-base-type"],
+    "TBD" : [SID+4, "ack-behavior-by-layer2"],
+    "TBD" : [SID+5, "all1-data-base-type"],
+    "TBD" : [SID+6, "all1-data-no"],
+    "TBD" : [SID+7, "all1-data-sender-choice"],
+    "TBD" : [SID+8, "all1-data-yes"],
+    T_CDA_APPIID : [SID+9, "cda-appiid"],
+    "TBD" : [SID+10, "cda-base-type"],
+    T_CDA_COMP_CKSUM : [SID+11, "cda-compute-checksum"],
+    T_CDA_COMP_LEN : [SID+12, "cda-compute-length"],
+    T_CDA_DEVIID : [SID+13, "cda-deviid"],
+    T_CDA_LSB : [SID+14, "cda-lsb"],
+    T_CDA_MAP_SENT : [SID+15, "cda-mapping-sent"],
+    T_CDA_NOT_SENT : [SID+16, "cda-not-sent"],
+    T_CDA_VAL_SENT : [SID+17, "cda-value-sent"],
+     "TBD" : [SID+18, "di-base-type"],   
+    T_DIR_BI : [SID+19, "di-bidirectional"],
+    T_DIR_DW : [SID+20, "di-down"],
+    T_DIR_UP : [SID+21, "di-up"],
+    "TBD" : [SID+22, "fid-base-type"],   
+    "TBD" : [SID+23, "fid-coap-base-type"],   
     T_COAP_CODE : [SID+24, "fid-coap-code"],
     "TBD" : [SID+25, "fid-coap-code-class"],
     "TBD" : [SID+26, "fid-coap-code-detail"],
@@ -195,44 +320,76 @@ YANG_ID = {
     T_COAP_TOKEN : [SID+53, "fid-coap-token"],
     T_COAP_TYPE : [SID+54, "fid-coap-type"],
     T_COAP_VERSION : [SID+55, "fid-coap-version"],
-    T_ICMPV6_CKSUM : [SID+56, "fid-icmpv6-checksum"],
-    T_ICMPV6_CODE : [SID+57, "fid-icmpv6-code"],
-    T_ICMPV6_IDENT : [SID+58, "fid-icmpv6-identifier"],
-    T_ICMPV6_SEQNO : [SID+59, "fid-icmpv6-sequence"],
-    T_ICMPV6_TYPE : [SID+60, "fid-icmpv6-type"],
-    T_IPV6_APP_IID : [SID+61, "fid-ipv6-appiid"],
-    T_IPV6_APP_PREFIX : [SID+62, "fid-ipv6-appprefix"],
-    T_IPV6_DEV_IID : [SID+63, "fid-ipv6-deviid"],
-    T_IPV6_DEV_PREFIX : [SID+64, "fid-ipv6-devprefix"],
-    T_IPV6_FL : [SID+65, "fid-ipv6-flowlabel"],
-    T_IPV6_HOP_LMT : [SID+66, "fid-ipv6-hoplimit"],
-    T_IPV6_NXT : [SID+67, "fid-ipv6-nextheader"],
-    T_IPV6_LEN : [SID+68, "fid-ipv6-payloadlength"],
-    T_IPV6_TC : [SID+69, "fid-ipv6-trafficclass"],
-    "TBD" : [SID+70, "fid-ipv6-trafficclass-ds"],
-    "TBD" : [SID+71, "fid-ipv6-trafficclass-ecn"],
-    T_IPV6_VER : [SID+72, "fid-ipv6-version"],
-    T_UDP_APP_PORT : [SID+73, "fid-udp-app-port"],
-    T_UDP_CKSUM : [SID+74, "fid-udp-checksum"],
-    T_UDP_DEV_PORT : [SID+75, "fid-udp-dev-port"],
-    T_UDP_LEN : [SID+76, "fid-udp-length"],
-    "TBD" : [SID+77, "field-id-base-type"],
-    "TBD" : [SID+78, "field-id-coap-base-type"],
-    "TBD" : [SID+79, "field-id-icmpv6-base-type"],
-    "TBD" : [SID+80, "field-id-ipv6-base-type"],
-    "TBD" : [SID+81, "field-id-udp-base-type"],
-    "TBD" : [SID+82, "field-length-base-type"],
-    T_FUNCTION_TKL : [SID+83, "fl-token-length"],
-    T_FUNCTION_VAR : [SID+84, "fl-variable"],
-    T_FRAG_ACK_ALWAYS : [SID+85, "fragmentation-mode-ack-always"],
-    T_FRAG_ACK_ON_ERROR : [SID+86, "fragmentation-mode-ack-on-error"],
-    "TBD" : [SID+87, "fragmentation-mode-base-type"],
-    T_FRAG_NO_ACK : [SID+88, "fragmentation-mode-no-ack"],
-    "TBD" : [SID+89, "matching-operator-base-type"],
-    T_MO_EQUAL : [SID+90, "mo-equal"],
-    T_MO_IGNORE : [SID+91, "mo-ignore"],
-    T_MO_MMAP : [SID+92, "mo-matching"],
-    T_MO_MSB : [SID+93, "mo-msb"]
+    T_IPV6_APP_IID : [SID+56, "fid-ipv6-appiid"],
+    T_IPV6_APP_PREFIX : [SID+57, "fid-ipv6-appprefix"],
+    "TBD" : [SID+58, "fid-ipv6-base-type"],   
+    T_IPV6_DEV_IID : [SID+59, "fid-ipv6-deviid"],
+    T_IPV6_DEV_PREFIX : [SID+60, "fid-ipv6-devprefix"],
+    T_IPV6_FL : [SID+61, "fid-ipv6-flowlabel"],
+    T_IPV6_HOP_LMT : [SID+62, "fid-ipv6-hoplimit"],
+    T_IPV6_NXT : [SID+63, "fid-ipv6-nextheader"],
+    T_IPV6_LEN : [SID+64, "fid-ipv6-payloadlength"],
+    T_IPV6_TC : [SID+65, "fid-ipv6-trafficclass"],
+    "TBD" : [SID+66, "fid-ipv6-trafficclass-ds"],
+    "TBD" : [SID+67, "fid-ipv6-trafficclass-ecn"],
+    T_IPV6_VER : [SID+68, "fid-ipv6-version"],
+    T_UDP_APP_PORT : [SID+69, "fid-udp-app-port"],
+     "TBD" : [SID+70, "fid-udp-base-type"],      
+    T_UDP_CKSUM : [SID+71, "fid-udp-checksum"],
+    T_UDP_DEV_PORT : [SID+72, "fid-udp-dev-port"],
+    T_UDP_LEN : [SID+73, "fid-udp-length"],
+    "TBD" : [SID+74, "fl-base-type"],      
+    T_FUNCTION_TKL : [SID+75, "fl-token-length"],
+    T_FUNCTION_VAR : [SID+76, "fl-variable"],
+    T_FRAG_ACK_ALWAYS : [SID+77, "fragmentation-mode-ack-always"],
+    T_FRAG_ACK_ON_ERROR : [SID+78, "fragmentation-mode-ack-on-error"],
+    "TBD" : [SID+79, "fragmentation-mode-base-type"],
+    T_FRAG_NO_ACK : [SID+80, "fragmentation-mode-no-ack"],
+    "TBD" : [SID+81, "mo-base-type"],      
+    T_MO_EQUAL : [SID+82, "mo-equal"],
+    T_MO_IGNORE : [SID+83, "mo-ignore"],
+    T_MO_MMAP : [SID+84, "mo-match-mapping"],
+    T_MO_MSB : [SID+85, "mo-msb"],
+    T_FRAG_RFC8724 : [SID+86, "rcs-RFC8724"],
+    "TBD" : [SID+87, "rcs-algorithm-base-type"],
+    "TBD" : [SID+88, "compression"],
+    "TBD" : [SID+89, "fragmentation"],
+    "TBD" : [SID+90, "/ietf-schc:schc"],
+    "TBD" : [SID+91, "/ietf-schc:schc/rule"],
+    "TBD" : [SID+92, "/ietf-schc:schc/rule/ack-behavior"],
+    "TBD" : [SID+93, "/ietf-schc:schc/rule/direction"],
+    "TBD" : [SID+94, "/ietf-schc:schc/rule/dtag-size"],
+    "TBD" : [SID+95, "/ietf-schc:schc/rule/entry"],
+    "TBD" : [SID+96, "/ietf-schc:schc/rule/entry/comp-decomp-action"],
+    "TBD" : [SID+97, "/ietf-schc:schc/rule/entry/comp-decomp-action-value"],
+    "TBD" : [SID+98, "/ietf-schc:schc/rule/entry/comp-decomp-action-value/position"],
+    "TBD" : [SID+99, "/ietf-schc:schc/rule/entry/comp-decomp-action-value/value"],
+    "TBD" : [SID+100, "/ietf-schc:schc/rule/entry/direction-indicator"],
+    "TBD" : [SID+101, "/ietf-schc:schc/rule/entry/field-id"],
+    "TBD" : [SID+102, "/ietf-schc:schc/rule/entry/field-length"],
+    "TBD" : [SID+103, "/ietf-schc:schc/rule/entry/field-position"],
+    "TBD" : [SID+104, "/ietf-schc:schc/rule/entry/matching-operator"],
+    "TBD" : [SID+105, "/ietf-schc:schc/rule/entry/matching-operator-value"],
+    "TBD" : [SID+106, "/ietf-schc:schc/rule/entry/matching-operator-value/position"],
+    "TBD" : [SID+107, "/ietf-schc:schc/rule/entry/matching-operator-value/value"],
+    "TBD" : [SID+108, "/ietf-schc:schc/rule/entry/target-value"],
+    "TBD" : [SID+109, "/ietf-schc:schc/rule/entry/target-value/position"],
+    "TBD" : [SID+110, "/ietf-schc:schc/rule/entry/target-value/value"],
+    "TBD" : [SID+111, "/ietf-schc:schc/rule/fcn-size"],
+    "TBD" : [SID+112, "/ietf-schc:schc/rule/fragmentation-mode"],
+    "TBD" : [SID+113, "/ietf-schc:schc/rule/inactivity-timer"],
+    "TBD" : [SID+114, "/ietf-schc:schc/rule/l2-word-size"],
+    "TBD" : [SID+115, "/ietf-schc:schc/rule/max-ack-requests"],
+    "TBD" : [SID+116, "/ietf-schc:schc/rule/max-interleaved-frames"],
+    "TBD" : [SID+117, "/ietf-schc:schc/rule/maximum-packet-size"],
+    "TBD" : [SID+118, "/ietf-schc:schc/rule/rcs-algorithm"],
+    "TBD" : [SID+119, "/ietf-schc:schc/rule/retransmission-timer"],
+    "TBD" : [SID+120, "/ietf-schc:schc/rule/rule-id-length"],
+    "TBD" : [SID+121, "/ietf-schc:schc/rule/rule-id-value"],
+    "TBD" : [SID+122, "/ietf-schc:schc/rule/tile-in-All1"],
+    "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
+    "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
+    "TBD" : [SID+125, "/ietf-schc:schc/rule/window-size"]
 }
 
 
@@ -672,10 +829,10 @@ class Decompressor:
 
         rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
         assert (rule_send == rule["RuleID"])
-        dprint("direction at compr_core: ", direction)
+
         for r in rule["Compression"]:
+            dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
-                dprint('T_DI', r[T_DI])
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
                 dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field

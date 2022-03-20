@@ -39,13 +39,18 @@ parse = parser.Parser(debug_protocol)
 rm    = RM.RuleManager()
 rm.Add(file="icmp1.json")
 rm.Print()
+
+rm.add_sid_file("ietf-schc@2022-02-15.sid")
 yr = rm.to_yang()
 pprint.pprint (yr)
 
-dm = DataModel.from_file("description.json")
+ycbor = rm.to_yang_coreconf()
+print (binascii.hexlify(ycbor))
 
-print (dm.ascii_tree())
+# dm = DataModel.from_file("description.json")
 
-inst = dm.from_raw(yr)
-print ("validation", inst.validate())
-print(dm.ascii_tree(no_types=True, val_count=True), end='')
+# print (dm.ascii_tree())
+
+# inst = dm.from_raw(yr)
+# print ("validation", inst.validate())
+# print(dm.ascii_tree(no_types=True, val_count=True), end='')
