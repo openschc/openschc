@@ -7,7 +7,7 @@ import scapy.contrib.coap as scapy_coap
 
 
 import gen_rulemanager as RM
-import compr_parser as parser
+#import compr_parser as parser
 from compr_core import *
 from protocol import SCHCProtocol
 
@@ -35,9 +35,9 @@ class debug_protocol:
     def _log(*arg):
         print (arg)
 
-parse = parser.Parser(debug_protocol)
+#parse = parser.Parser(debug_protocol)
 rm    = RM.RuleManager()
-rm.Add(file="icmp1.json")
+rm.Add(file="ipv6.json")
 rm.Print()
 
 rm.add_sid_file("ietf-schc@2022-02-15.sid")
