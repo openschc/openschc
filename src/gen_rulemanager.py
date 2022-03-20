@@ -260,10 +260,13 @@ Given the first bits received from the LPWAN, returns either a fragmentation or 
 
 """
 
+from operator import mod
 from gen_base_import import *
 from copy import deepcopy
 from compr_core import *
 import ipaddress
+
+import base64
 
 
 """
@@ -316,7 +319,6 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
-    T_COAP_OPT_END         : {"FL": 1,     "TYPE": int, "TV" : 0xFF, "ALGO": "DIRECT"}
 }
 
 class DictToAttrDeep:
@@ -532,20 +534,20 @@ class RuleManager:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
 
-            if nrule[T_FRAG][T_FRAG_MODE] in ["noAck", "ackAlways", "ackOnError"]:
+            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
 
                 _default_value (arule, nrule, T_FRAG_FCN)
                 _default_value (arule, nrule, T_FRAG_DTAG, 0)
-                _default_value (arule, nrule, T_FRAG_MIC, "crc32")
+                _default_value (arule, nrule, T_FRAG_MIC, T_FRAG_RFC8724)
 
-                if nrule[T_FRAG][T_FRAG_MODE] == "noAck":
+                if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG, 2)
                     _default_value (arule, nrule, T_FRAG_W, 0)
                     _default_value (arule, nrule, T_FRAG_FCN, 3)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif nrule[T_FRAG][T_FRAG_MODE] == "ackAlways":
+                elif nrule[T_FRAG][T_FRAG_MODE] == "aT_FRAG_ACK_ALWAYS":
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
@@ -581,9 +583,9 @@ class RuleManager:
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
-        # if T_ACTION in nrule:
-        #     print ("Warning: using experimental Action")
-        #     arule[T_ACTION] = nrule[T_ACTION]
+        if T_ACTION in nrule:
+             print ("Warning: using experimental Action")
+             arule[T_ACTION] = nrule[T_ACTION]
 
 
         arule[T_COMP] = []
@@ -598,7 +600,7 @@ class RuleManager:
                 ))
 
             entry = {}
-            FID = r[T_FID].upper()
+            FID = r[T_FID]
             entry[T_FID] = FID
             entry[T_FL] = self._return_default(r, T_FL, FIELD__DEFAULT_PROPERTY[FID][T_FL])
             entry[T_FP] = self._return_default(r, T_FP, 1)
@@ -648,16 +650,17 @@ class RuleManager:
         self._ctxt = []
         self._log = log
         self._db = []
+        self._sid_info = []
 
 
     def _smart_print(self, v):
         if type(v) is str:
             v = '"'+v+'"'
-            dprint ('{:<30}'.format(v), end="")
+            print ('{:<30}'.format(v), end="")
         elif type(v) is int:
-            dprint ('{:>30}'.format(v), end="")
+            print ('{:>30}'.format(v), end="")
         elif type(v) is bytes:
-            dprint ('{:>30}'.format(b2hex(v), end=""))
+            print ('{:>30}'.format(v.hex()), end="")
 
     def printBin(self, v, l):
         txt = ""
@@ -735,7 +738,7 @@ class RuleManager:
 
                     print ("!{} RCS Algorithm: {:<69}{}!".format(dir_c,rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC], dir_c))
 
-                    if rule[T_FRAG][T_FRAG_MODE] != "noAck":
+                    if rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
                         print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
                         if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
@@ -751,6 +754,303 @@ class RuleManager:
                     print ("\\" + "="*87 +"/")
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
+
+    def to_yang (self, format="json"):
+        """
+        Print a context
+        """
+
+        for dev in self._ctxt:
+            print ("*"*40)
+            print ("Device:", dev["DeviceID"])
+
+            yang_rules = []
+            for rule in dev["SoR"]:
+                #txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
+                if T_COMP in rule:
+                    yang_comp = []
+                    for e in rule[T_COMP]:
+
+                        l = e[T_FL]
+                        if type(l) == int:
+                            yang_length = str(l)
+                        else: # function
+                            yang_length = YANG_ID[l][1]
+
+                        yang_entry = {
+                            "field-id" : YANG_ID[e[T_FID]][1],
+                            "field-length" : yang_length,
+                            "field-position" : e[T_FP],
+                            "direction-indicator" : YANG_ID[e[T_DI]][1],
+                            "matching-operator" : YANG_ID[e[T_MO]][1],
+                            "comp-decomp-action" : YANG_ID[e[T_CDA]][1]
+                        }
+
+                        def dictify (val):
+                            dictio = []
+                            if type(val) != list:
+                                val =[val]
+
+                            for i in range(len(val)):
+                                if type(val[i]) == int:
+                                    # find length in byte
+                                    x = val[i]
+                                    size = 1
+                                    while x !=0:
+                                        x >>= 8
+                                        size +=1
+
+                                    b_a = val[i].to_bytes(size, byteorder="big")
+                                    v = base64.b64encode(b_a)
+                                    dictio.append ({"position" : i, "value": v})
+                                elif type(val[i]) == bytes:
+                                    v = base64.b64encode(val[i])
+                                    dictio.append ({"position" : i, "value": v})                                    
+
+                                else: 
+                                    print ("unkown type", type(val[i]))
+                                    v = ""
+
+                            print ("#####", dictio)
+                            return dictio
+
+                        if T_TV in e and e[T_TV] != None:
+                            yang_entry["target-value"] = dictify(e[T_TV])
+
+                        if T_MO_VAL in e and e[T_MO_VAL] != None:
+                            yang_entry["matching-operator-value"] = dictify(e[T_MO_VAL])
+
+                        # if T_CDA_VAL in e and e[T_CDA_VAL] != None:
+                        #     yang_entry.append({"comp-decomp-action-value": dictify(e[T_CDA_VAL])})
+                        
+                        print (yang_entry)
+                        yang_comp.append(yang_entry)
+                    yang_rules.append({
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],
+                        "entry" : yang_comp
+                    })
+
+                elif T_FRAG in rule:
+                    frag_rule = {
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],                        
+                        "direction" : YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1],
+                        "rcs-algorithm" : YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1],
+                        "dtag-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
+                        "fcn-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
+                        "fragmentation-mode" : YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1]
+                    }
+                    if rule[T_FRAG][T_FRAG_MODE] in [T_FRAG_ACK_ALWAYS, T_FRAG_ACK_ON_ERROR]:
+                        frag_rule.append({"w-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_W]})
+
+
+                    yang_rules.append(frag_rule)
+
+                   
+                elif T_NO_COMP in rule:
+                    print ("NO COMPRESSION RULE")
+ 
+            print ("#", yang_rules)
+        
+        return {"ietf-schc:schc" : {"rule" : yang_rules}}
+
+    def add_sid_file(self, name):
+        with open(name) as sid_file:
+            sid_values = json.loads(sid_file.read())
+
+        self._sid_info.append(sid_values)
+
+    def sid_search_for(self, name, space="data"):
+
+        for s in self._sid_info:
+            for e in s["items"]:
+                if e["identifier"] == name and e["namespace"]==space:
+                    return e["sid"]
+
+        return None 
+
+    def cbor_header (self, major, value):
+        if value < 23:
+            return struct.pack ('!B', (major | value))
+        elif value < 255:
+            return struct.pack ('!BB', (major | 24),  value)
+
+ 
+
+    def to_yang_coreconf (self, format="json"):
+        import cbor2 as cbor
+        import binascii
+        """
+        Print a context
+        """
+        module_sid = self.sid_search_for(name="/ietf-schc:schc", space="data")
+        print (module_sid)
+        rule_sid = self.sid_search_for(name="/ietf-schc:schc/rule", space="data")
+        print (rule_sid, rule_sid-module_sid)
+
+
+        for dev in self._ctxt:
+            print ("*"*40)
+            print ("Device:", dev["DeviceID"])
+
+            rule_count = 0
+            full_rules = b''
+            for rule in dev["SoR"]:
+                rule_count += 1
+                if T_COMP in rule:
+                    print ("comp")
+                    entry_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data")
+                
+                    nb_entry = 0
+                    rule_content = b''
+                    for e in rule[T_COMP]:
+                        print ('>>>', e)
+                        nb_elm = 0
+                        nb_entry += 1
+
+                        entry_cbor = \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-id", space="data") - entry_sid) + \
+                            cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_FID]][1], space="identity")) 
+                        nb_elm += 1
+
+                        l=e[T_FL]
+                        print (l, type(l))
+                        if type(l) == int:
+                            entry_cbor += \
+                                cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
+                                struct.pack('!B', l)
+                        elif type(l) == str:
+                            raise ValueError("Field ID not defined")
+                        else:
+                            raise ValueError("unknown field length value")
+                        nb_elm += 1
+
+                        entry_cbor += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-position", space="data") - entry_sid) + \
+                            struct.pack('!B', e[T_FP])
+                        nb_elm += 1
+  
+                        entry_cbor += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/direction-indicator", space="data") - entry_sid) + \
+                            cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_DI]][1], space="identity")) 
+                        nb_elm += 1
+
+                        entry_cbor += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator", space="data") - entry_sid) + \
+                            cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_MO]][1], space="identity")) 
+                        nb_elm += 1
+
+                        entry_cbor += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_sid) + \
+                            cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_CDA]][1], space="identity")) 
+                        nb_elm += 1
+
+                        def dictify_cbor (val, ref_id):
+                                cbor_data = b''
+                                if type(val) != list:
+                                    val = [val]
+
+                                tv_array = b''
+                                for i in range(len(val)):
+
+                                    if type(val[i]) == int:
+                                        x = val[i]
+                                        r = b''
+                                        while x != 0:
+                                            r = struct.pack('!B', x&0xFF) + r
+                                            x >>= 8
+                                    elif type(val[i]) == bytes:
+                                        r = val[i]
+
+                                    tv_array += b'\xA2' + \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/position", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                        struct.pack('!B', i)
+
+                                    tv_array +=  \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                        cbor.dumps(r)
+
+
+                                tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
+                                return tv_array
+
+
+                        if T_TV in e and e[T_TV] != None:
+                            tv_cbor = dictify_cbor(e[T_TV], "/ietf-schc:schc/rule/entry/target-value")
+
+                            entry_cbor += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value", space="data") - entry_sid) + \
+                            tv_cbor
+                            nb_elm += 1
+ 
+                        entry_cbor = self.cbor_header (0b101_00000, nb_elm) + entry_cbor # header MAP and size
+                        rule_content += entry_cbor
+
+                    rule_content = b'\xA3' + \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - module_sid) + \
+                        self.cbor_header(0b100_00000, nb_entry) + rule_content + \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_RULEID]) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_RULEIDLENGTH])
+                elif T_FRAG in rule:
+                    print ("frag")
+                    nb_elm = 2
+                    rule_content = \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_RULEID]) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_RULEIDLENGTH])
+
+                    rule_content += \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1], space="identity")) 
+                    nb_elm += 1
+ 
+                    rule_content += \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1], space="identity")) 
+                    nb_elm += 1
+
+                    rule_content += \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
+                    nb_elm += 1
+
+                    rule_content += \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - module_sid) +\
+                        cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
+                    nb_elm += 1
+
+                    rule_content += \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name= YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1], space="identity")) 
+                    nb_elm += 1
+                    
+                    rule_content = self.cbor_header(0b101_00000, nb_elm) + rule_content
+                elif T_NO_COMP in rule:
+                    print ("no comp")
+                else:
+                    raise ValueError("unkwon rule")
+
+                print ("####", binascii.hexlify(rule_content))
+
+                full_rules += rule_content
+
+        print ("#####", binascii.hexlify(full_rules))
+        print ("!!!!", rule_count)    
+        
+            
+        coreconf = b'\xA1' + cbor.dumps(module_sid) + b'\xA1' + cbor.dumps(rule_sid - module_sid) 
+
+        array_header = self.cbor_header(0b100_00000, rule_count) # array
+
+        coreconf +=  array_header+full_rules
+
+        print ("=", binascii.hexlify(coreconf))
+        return coreconf
+        # end of CORECONF
 
     def MO_IGNORE (self, TV, FV, rlength, flength, arg):
         return True
@@ -819,7 +1119,7 @@ class RuleManager:
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
         """ Takes a parsed packet and returns the matching rule.
         """
         for dev in self._ctxt:
@@ -841,10 +1141,13 @@ class RuleManager:
                                     arg):
                                         matches += 1
                                 else:
-                                    dprint("field does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                    if failed_field:
+                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
+                                            r[T_FID],
                                             r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
                                             r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                            arg), "packet=", pkt)
+                                            arg))
                                     break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  #entry not found, but variable length => accept
@@ -855,9 +1158,9 @@ class RuleManager:
                                     break # field from rule not found in pkt, go to next
                             dprint ("->", matches)
                     dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
-                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
-                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
-        return None
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule, dev[T_DEVICEID]
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule, dev[T_DEVICEID]
+        return None, None
 
     def FindNoCompressionRule(self, deviceID=None):
         for d in self._ctxt:
@@ -894,10 +1197,10 @@ class RuleManager:
                         # return the 1st one.
                         return r
         elif packet is not None:
-            dprint("packet dev-id", deviceID)
+            print("packet dev-id", deviceID)
             for d in self._ctxt:
                 for r in d["SoR"]:
-                    dprint("rule dev-id", d["DeviceID"])
+                    print("rule dev-id", d["DeviceID"])
                     if T_FRAG in r:
                         rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
                         if r[T_RULEID] == rule_id:
@@ -1054,7 +1357,7 @@ class RuleManager:
 
             mode = fragRule["FRMode"]
 
-            if not mode in ("noAck", "ackAlways", "ackOnError"):
+            if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"):
                 raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
 
             if not "FRModeProfile" in fragRule:
@@ -1066,17 +1369,17 @@ class RuleManager:
                 profile["dtagSize"] = 0
 
             if not "WSize" in profile:
-                if  mode == "noAck":
+                if  mode == T_FRAG_NO_ACK:
                     profile["WSize"] = 0
-                elif  mode == "ackAlways":
+                elif  mode == T_FRAG_ACK_ALWAYS:
                     profile["WSize"] = 1
                 elif mode == "ackOnError":
                     profile["WSize"] = 5
 
             if not "FCNSize" in profile:
-                if mode == "noAck":
+                if mode == T_FRAG_NO_ACK:
                     profile["FCNSize"] = 1
-                elif mode == "ackAlways":
+                elif mode == T_FRAG_ACK_ALWAYS:
                     profile["FCNSize"] = 3
                 elif mode == "ackOnError":
                     profile["FCNSize"] = 3
