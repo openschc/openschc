@@ -214,8 +214,6 @@ class FragmentNoAck(FragmentBase):
                               remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
                 self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
-                print ('FCN = ' , fcn)
-                print ('dtag', frag_msg.get_max_dtag(self.rule))
                 fcn = 0
                 self.mic_sent = None
                 if enable_statsct:
@@ -262,6 +260,9 @@ class FragmentNoAck(FragmentBase):
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
         print("frag_send.py, args: ", args)
         print("frag_send.py, _session_id: ", self._session_id[0])
+        print("FCN size=", fcn)
+        print ('dtag', frag_msg.get_max_dtag(self.rule))
+        print ('dtag', frag_msg.get_max_fcn(self.rule))
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
 
