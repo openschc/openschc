@@ -1,0 +1,72 @@
+ {
+    "DeviceID" : "lorawan:1122334455667788",
+    "SoR" : [
+	 {
+	    "RuleID": 4,
+	    "RuleIDLength": 3,
+	    "Compression": [
+		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.DIFFSERV", "TV": 0, "MO": "ignore", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+		{"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.HOP_LMT", "DI": "UP", "TV" : 40, "MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_PREFIX","TV": ["Fe80::/64",
+                                         "Aaaa::/64",
+                                         "Bbbb::/64"],
+                                   "MO": "match-mapping",
+                                   "CDA": "mapping-sent","SB": 2},
+		{"FID": "IPV6.DEV_IID", "MO": "ignore","CDA": "compute-deviid"},
+		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-send"},
+        {"FID": "IPV6.APP_PREFIX","TV": ["Aaaa::/64",
+                                         "Bbbb::/64",
+                                         "cccc::/64",
+                                         "Fe80::/64"],
+                                   "MO": "match-mapping",
+                                   "CDA": "mapping-sent","SB": 2},
+		{"FID": "UDP.DEV_PORT", "TV": 23628, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
+        {"FID": "UDP.APP_PORT", "TV": 4228, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
+        {"FID": "UDP.LEN",      "TV": 0,  "MO": "ignore","CDA": "compute-length"},
+        {"FID": "UDP.CKSUM",    "TV": 0,  "MO": "ignore","CDA": "compute-checksum"}
+	    ]
+	 },
+     {
+	    "RuleID": 5,
+	    "RuleIDLength": 3,
+	    "Compression": [
+		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.DIFFSERV", "TV": 0, "MO": "ignore", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+		{"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.HOP_LMT", "DI": "DW", "TV" : 1,"MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_PREFIX","TV": ["Aaaa::/64",
+                                         "Fe80::/64"],
+                                   "MO": "match-mapping",
+                                   "CDA": "mapping-sent","SB": 1},
+                                               
+		{"FID": "IPV6.DEV_IID", "MO": "ignore","CDA": "compute-deviid"},
+        {"FID": "IPV6.APP_PREFIX","TV": ["Aaaa::/64",
+                                         "Bbbb::/64",
+                                         "Eeee::/64",
+                                         "Fe80::/64"],
+                                   "MO": "match-mapping",
+                                   "CDA": "mapping-sent","SB": 2},
+
+		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-send"},
+		{"FID": "UDP.DEV_PORT", "TV": 23628, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
+        {"FID": "UDP.APP_PORT", "TV": 8304, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
+        {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore","CDA": "compute-length"},
+        {"FID": "UDP.CKSUM",     "TV": 0,  "MO": "ignore","CDA": "compute-checksum"}
+		
+	    ]
+	 }
+]
+}
+
+
+
+
+

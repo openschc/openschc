@@ -269,20 +269,21 @@ class ReassemblerAckOnError(ReassembleBase):
     # A type of data structure holding tiles in each window is not suitable.
     # So, here just appends a fragment into the tile_list like No-ACK.
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
         self._last_receive_info = []
-        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
+        print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
-
+        assert (T_FRAG in self.rule)
+        rule = self.rule
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-        dprint("receiver frag received:", schc_frag.__dict__)
+        print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any nodes can cancel the invactive timer.
         self.cancel_inactive_timer()
         if self.state == "ABORT":
             self._last_receive_info = [("state-abort",)]
             self.send_receiver_abort()
-            return
+            return None # TODO
         #
         # input("")
         if schc_frag.abort == True:
@@ -290,10 +291,10 @@ class ReassemblerAckOnError(ReassembleBase):
             # Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             self._last_receive_info = [("abort",)]
-            return
+            return None  # TODO
 
         if schc_frag.ack_request == True:
-            dprint("Received ACK-REQ")
+            print("Received ACK-REQ")
             self._last_receive_info = [("ack-req",)]            
             # if self.state != "DONE":
             #     #this can happen when the ALL-1 is not received, so the state is
@@ -315,7 +316,7 @@ class ReassemblerAckOnError(ReassembleBase):
             self.state = 'ACK_REQ'
             # input('')
             self.resend_ack(schc_frag)
-            return
+            return None
 
         info = self._last_receive_info
         self.fragment_received = True
@@ -426,10 +427,12 @@ class ReassemblerAckOnError(ReassembleBase):
         should_send_ack = False
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
+            print('MIC calced?')
             if self.mic_received == mic_calced:
+                print('MIC OK')
                 info.append("mic-ok")
-                self.finish(schc_packet, schc_frag)
-                return
+                args = self.finish(schc_packet, schc_frag, rule, devid)
+                return args
             else:
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
@@ -451,8 +454,8 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 info.append("mic-ok")
                 self.mic_missmatched = False
-                self.finish(schc_packet, schc_frag)
-                return
+                args = self.finish(schc_packet, schc_frag, rule, devid)
+                return args
             else:
                 self.mic_missmatched = True
                 self.state = 'ERROR_MIC'
@@ -552,12 +555,13 @@ class ReassemblerAckOnError(ReassembleBase):
         args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
-    def finish(self, schc_packet, schc_frag):
+    def finish(self, schc_packet, schc_frag, rule, devid):
         self.state = "DONE"
         dprint('state DONE -> {}'.format(self.state))
         #input('DONE')
         # decompression
-        self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
+        #self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
+        argsfn = self.protocol.decompress_only(schc_packet, rule, devid)
 
         # ACK message
         schc_ack = frag_msg.frag_receiver_tx_all1_ack(
@@ -578,6 +582,7 @@ class ReassemblerAckOnError(ReassembleBase):
         #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
         #        self.inactive_timer, self.event_inactive, tuple())
         #dprint("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
+        return argsfn
 
     def get_mic_from_tiles_received(self):
         # MIC calculation.
