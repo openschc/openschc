@@ -234,7 +234,7 @@ class ReassemblerNoAck(ReassembleBase):
                     rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
                     dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
                     args = self.protocol.decompress_only(schc_packet, rule, devid)
-                dprint("Packet decompressed at receive_frag: ", args)
+                print("Packet decompressed at receive_frag: ", args)
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
                 dprint(self.state)
@@ -275,7 +275,7 @@ class ReassemblerAckOnError(ReassembleBase):
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
-        # authentication, any nodes can cancel the invactive timer.
+        # authentication, any node can cancel the invactive timer.
         self.cancel_inactive_timer()
         if self.state == "ABORT":
             self._last_receive_info = [("state-abort",)]

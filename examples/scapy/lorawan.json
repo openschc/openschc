@@ -6,8 +6,7 @@
 	    "RuleIDLength": 3,
 	    "Compression": [
 		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-        {"FID": "IPV6.DIFFSERV", "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
 		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
 		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
 		{"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
@@ -18,7 +17,7 @@
                                    "MO": "match-mapping",
                                    "CDA": "mapping-sent","SB": 2},
 		{"FID": "IPV6.DEV_IID", "MO": "ignore","CDA": "compute-deviid"},
-		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-send"},
+		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-sent"},
         {"FID": "IPV6.APP_PREFIX","TV": ["Aaaa::/64",
                                          "Bbbb::/64",
                                          "cccc::/64",
@@ -36,8 +35,7 @@
 	    "RuleIDLength": 3,
 	    "Compression": [
 		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-        {"FID": "IPV6.DIFFSERV", "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
 		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
 		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
 		{"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
@@ -55,7 +53,7 @@
                                    "MO": "match-mapping",
                                    "CDA": "mapping-sent","SB": 2},
 
-		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-send"},
+		{"FID": "IPV6.APP_IID", "TV": "::1", "MO": "equal","CDA": "not-sent"},
 		{"FID": "UDP.DEV_PORT", "TV": 23628, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
         {"FID": "UDP.APP_PORT", "TV": 8304, "MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
         {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore","CDA": "compute-length"},
