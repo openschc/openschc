@@ -584,7 +584,7 @@ class ReassemblerAckOnError(ReassembleBase):
             Statsct.set_msg_type("SCHC_ACK_OK")
 
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
-        args = (schc_ack.packet.get_content(), self._session_id[0])
+        args = (schc_ack.packet.get_content(), self._session_id[0], devid)
         dprint ("dbug: frag_recv.py: ACK args", args)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
