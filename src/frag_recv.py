@@ -569,7 +569,7 @@ class ReassemblerAckOnError(ReassembleBase):
         dprint("debug, frag_recv.py: AckOnError - finc comp_rule: ", comp_rule)
         dprint("debug, frag_recv.py: AckOnError devid", devid)
         dprint("debug, frag_recv.py: AckOnError schc_packet", schc_packet)
-        argsfn = self.protocol.decompress_only(schc_packet, rule, devid)
+        argsfn = self.protocol.decompress_only(schc_packet, comp_rule, devid)
         print ("frag_recv.py, devid and decompressed packet: ", argsfn)
 
         # ACK message
