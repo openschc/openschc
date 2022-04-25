@@ -258,15 +258,20 @@ class ReassemblerNoAck(ReassembleBase):
 
 class ReassemblerAckOnError(ReassembleBase):
     """ ReassemblerAckOnError class
-
-    Todo : Redaction
-
-    """
     # In ACK-on-Error, a fragment contains tiles belonging to different window.
     # A type of data structure holding tiles in each window is not suitable.
     # So, here just appends a fragment into the tile_list like No-ACK.
+    """
 
     def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
+        """
+        return 
+        - None if fragmentation is not finished
+        - False if the MIC is wrong
+        - bytearray if fragmentation succeed 
+        
+        """
+
         self._last_receive_info = []
         print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
@@ -452,6 +457,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 info.append("mic-ok")
                 self.mic_missmatched = False
                 args = self.finish(schc_packet, schc_frag, rule, devid)
+                print("frag_recv.py: AckOnError args: ", args)
                 return args
             else:
                 self.mic_missmatched = True
