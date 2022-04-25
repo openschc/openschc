@@ -566,9 +566,11 @@ class ReassemblerAckOnError(ReassembleBase):
         #self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
 
         #rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
-        dprint("debug: AckOnError rule", rule)
-        dprint("debug: AckOnError devid", devid)
+        dprint("debug, frag_recv.py: AckOnError rule", rule)
+        dprint("debug, frag_recv.py: AckOnError devid", devid)
+        dprint("debug, frag_recv.py: AckOnError schc_packet", schc_packet)
         argsfn = self.protocol.decompress_only(schc_packet, rule, devid)
+        print ("frag_recv.py, devid and decompressed packet: ", argsfn)
 
         # ACK message
         schc_ack = frag_msg.frag_receiver_tx_all1_ack(
@@ -576,6 +578,7 @@ class ReassemblerAckOnError(ReassembleBase):
                 schc_frag.dtag,
                 schc_frag.win,
                 cbit=1)
+                
         dprint("ACK success sent:", schc_ack.__dict__)
         if enable_statsct:
             Statsct.set_msg_type("SCHC_ACK_OK")
