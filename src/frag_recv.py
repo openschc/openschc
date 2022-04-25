@@ -426,9 +426,9 @@ class ReassemblerAckOnError(ReassembleBase):
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
             print('MIC calced?')
             if self.mic_received == mic_calced:
-                print('MIC OK')
                 info.append("mic-ok")
                 args = self.finish(schc_packet, schc_frag, rule, devid)
+                print('MIC OK', args)
                 return args
             else:
                 # XXX waiting for the fragments requested by ACK.
