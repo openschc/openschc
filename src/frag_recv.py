@@ -582,6 +582,7 @@ class ReassemblerAckOnError(ReassembleBase):
         dprint("ACK success sent:", schc_ack.__dict__)
         if enable_statsct:
             Statsct.set_msg_type("SCHC_ACK_OK")
+            
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
         args = (schc_ack.packet.get_content(), self._session_id[0])
         dprint ("dbug: frag_send.py: ACK args", args)

@@ -230,7 +230,7 @@ class FragmentNoAck(FragmentBase):
 
         # send a SCHC fragment
         args = (schc_frag.packet.get_content(), self._session_id[0], None)
-        
+        dprint ("dbug: frag_send.py: Fragment args", args)
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
             w_dtag = '-'
