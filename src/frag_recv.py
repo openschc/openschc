@@ -584,8 +584,7 @@ class ReassemblerAckOnError(ReassembleBase):
             Statsct.set_msg_type("SCHC_ACK_OK")
 
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
-        args = (schc_ack.packet.get_content(), self._session_id[0])
-        dprint ("dbug: frag_recv.py: _session_id", devid)
+        args = (schc_ack.packet.get_content(), devid)
         dprint ("dbug: frag_recv.py: ACK args", args)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
@@ -596,9 +595,7 @@ class ReassemblerAckOnError(ReassembleBase):
         #        self.inactive_timer, self.event_inactive, tuple())
         #dprint("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
 
-        print ("frag_recv.py, finish (MIC OK), sender addr: ", self.sender_L2addr)
         print ("frag_recv.py, finish (MIC OK), devid: ", devid)
-
         print ("frag_recv.py, finish (MIC OK), args: ", argsfn)
         return argsfn
 
