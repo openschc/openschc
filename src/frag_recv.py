@@ -456,8 +456,8 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 info.append("mic-ok")
                 self.mic_missmatched = False
-                print("frag_recv.py: AckOnError args: ", args)
                 args = self.finish(schc_packet, schc_frag, rule, devid)
+                print("frag_recv.py: AckOnError args: ", args)
                 return args
             else:
                 self.mic_missmatched = True
