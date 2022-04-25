@@ -359,6 +359,8 @@ class SCHCProtocol:
         return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, devid=device_id)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
+
+        dprint ("debug: protocol.py, decompress_only : ", packet_bbuf, rule, device_id)
         if rule == None:
             print ("No rule found")
             return None
