@@ -66,6 +66,7 @@ def processPkt(pkt):
             ip_proto = pkt.getlayer(IP).proto
             if ip_proto == 17:
                 udp_dport = pkt.getlayer(UDP).dport
+                print ("tunneled SCHC msg", udp_dport)
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")
                     schc_pkt, addr = tunnel.recvfrom(2000)
