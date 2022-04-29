@@ -91,7 +91,7 @@ class SessionManager:
             raise ValueError("FRMode:", mode)
         self._add_session(session_id, session)
         setattr(session, "_session_id", session_id)
-        print("protocol.py, create_reassembly_session, session :", session)
+        print("protocol.py, create_reassembly_session, session :", session_id)
         print("l2_address : create_reassembly_session, l2addr", l2_address)
         return session
 
