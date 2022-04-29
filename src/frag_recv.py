@@ -585,8 +585,8 @@ class ReassemblerAckOnError(ReassembleBase):
 
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
         args = (schc_ack.packet.get_content(), devid)
-        dprint ("dbug: frag_recv.py: ACK args", args)
-        time.sleep(1)
+        dprint ("++ dbug: frag_recv.py: ACK args", args)
+        #time.sleep(1)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
         #the ack is build everytime
