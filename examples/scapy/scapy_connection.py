@@ -53,6 +53,7 @@ class ScapyLowerLayer:
         packet, address = self.sd.recvfrom(MAX_PACKET_SIZE)
         sender_address = address_to_string(address)
         position = self.position
+        print ("sender address", sender_address)
         if position == T_POSITION_DEVICE:
             self.protocol.schc_recv(core_id = sender_address, schc_packet = packet)
         else :
