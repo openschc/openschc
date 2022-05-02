@@ -263,7 +263,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     """
 
-    def receive_frag(self, bbuf, dtag, position, protocol, devid=None):
+    def receive_frag(self, bbuf, dtag, position, protocol, core_id=None, device_id=None):
         """
         return 
         - None if fragmentation is not finished
@@ -271,6 +271,13 @@ class ReassemblerAckOnError(ReassembleBase):
         - bytearray if fragmentation succeed 
         
         """
+
+        # Define the other end for ACK send:
+        
+        if self.protocol.position == T_POSITION_CORE:
+            receiver_id = device_id
+        else :
+            receiver_id = device_id
 
         self._last_receive_info = []
         print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
@@ -456,7 +463,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 info.append("mic-ok")
                 self.mic_missmatched = False
-                args = self.finish(schc_packet, schc_frag, rule, devid)
+                args = self.finish(schc_packet, schc_frag, rule, receiver_id)
                 print("frag_recv.py: AckOnError args: ", args)
                 return args
             else:
