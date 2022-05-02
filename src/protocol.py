@@ -363,7 +363,7 @@ class SCHCProtocol:
         dprint("device or core?", self.role) 
 
         if self.role == T_POSITION_CORE:
-            print(rule[[T_DI]])
+            print(rule[T_DI])
             if rule[T_DI] == 'UP' : # ACK
                 session = self.session_manager.find_session(session_id)
                 print ("ACK Received, session:", session)
