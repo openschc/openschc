@@ -332,6 +332,7 @@ class SCHCProtocol:
             return device_id, pkt
     
         # fragmentation rule
+
         frag_rule = rule
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
@@ -360,6 +361,13 @@ class SCHCProtocol:
 
         dprint("device_id, core_id:", device_id, core_id)
         dprint("device or core?", self.role) 
+
+        if self.role == T_POSITION_CORE:
+            if rule[T_FRAG_PROF][T_FRAG_DIRECTION] == 'UP' : # ACK
+                session = self.session_manager.find_session(session_id)
+                print ("ACK Received, session:", session)
+                return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, core_id=core_id, device_id=device_id) 
+
         return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, core_id=core_id, device_id=device_id)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
