@@ -302,7 +302,7 @@ class SCHCProtocol:
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None):
         # if device_id == None:
-        
+        print ("core_id : ", core_id)
         """Receiving a SCHC packet from a lower layer."""
         packet_bbuf = BitBuffer(schc_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
@@ -345,6 +345,7 @@ class SCHCProtocol:
         rule_id = frag_rule[T_RULEID]
         rule_id_length = frag_rule[T_RULEIDLENGTH]
         session_id = (core_id, device_id, rule_id, rule_id_length, dtag) #TODO
+        print (session_id)
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
