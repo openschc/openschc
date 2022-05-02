@@ -281,7 +281,7 @@ class ReassemblerAckOnError(ReassembleBase):
         if self.protocol.position == T_POSITION_CORE:
             receiver_id = device_id
         else :
-            receiver_id = device_id
+            receiver_id = core_id
 
         self._last_receive_info = []
         print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
@@ -443,7 +443,7 @@ class ReassemblerAckOnError(ReassembleBase):
             print('MIC calced?')
             if self.mic_received == mic_calced:
                 info.append("mic-ok")
-                args = self.finish(schc_packet, schc_frag, rule, devid)
+                args = self.finish(schc_packet, schc_frag, rule, receiver_id)
                 print('MIC OK', args)
                 return args
             else:
