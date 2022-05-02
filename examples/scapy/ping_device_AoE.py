@@ -77,7 +77,8 @@ def processPkt(pkt):
                         tunnel.sendto(schc_pkt, addr)
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
-                        core_id = 'udp:'+addr+":"+str(socket_port)
+                        print("core address", addr)
+                        core_id = 'udp:'+ str(addr) +":"+str(socket_port)
                         r = schc_machine.schc_recv(core_id = core_id, device_id=device_id, schc_packet=schc_pkt) 
                         print ('r = ', r)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
