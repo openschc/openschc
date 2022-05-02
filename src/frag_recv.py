@@ -64,9 +64,7 @@ class ReassembleBase:
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
-
         self.fragment_received = False
-
         self._last_receive_info = None # for logs
 
     def get_mic(self, mic_target, extra_bits=0):
@@ -282,13 +280,25 @@ class ReassemblerAckOnError(ReassembleBase):
             receiver_id = device_id
         else :
             receiver_id = core_id
-
+       
         self._last_receive_info = []
         print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
+                                                                     
         assert (T_FRAG in self.rule)
         rule = self.rule
+
+        if self.position == T_POSITION_CORE: 
+            if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK or Abort
+                schc_frag = frag_msg.frag_sender_rx(bbuf) 
+        
+        if self.position == T_POSITION_DEVICE:
+            if rule[T_FRAG][T_FRAG_DIRECTION] == 'UP' : # ACK or Abort
+                schc_frag = frag_msg.frag_sender_rx(bbuf) 
+
+        # Regular Fragment        
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
+        
         print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
         # authentication, any node can cancel the invactive timer.
@@ -304,6 +314,16 @@ class ReassemblerAckOnError(ReassembleBase):
             # Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             self._last_receive_info = [("abort",)]
+            return None  # TODO
+        
+        if schc_frag.ack == True:
+            if schc_frag.cbit == True:
+                dprint("------------------- ACK-Success Received -----------------------")
+                self._last_receive_info = [("ack success received",)]
+                protocol.session_manager.delete_session(self._session_id)
+            else:
+                dprint("------------------- ACK-Failure Received -----------------------")
+                self._last_receive_info = [("ack failure received",)]
             return None  # TODO
 
         if schc_frag.ack_request == True:
