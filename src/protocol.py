@@ -74,25 +74,26 @@ class SessionManager:
         print("SessionManager: deleted", session_id)
 
     def create_reassembly_session(self, context, rule, session_id): #TODO
-        session_id = self._filter_session_id(session_id)        
-        l2_address, rule_id, unused, dtag = session_id
+        session_id = self._filter_session_id(session_id)  
+
+        core_id, device_id, rule_id, unused, dtag = session_id
         if self.unique_peer:
-            l2_address = None
+            l2_address = None #TODO
         mode = rule[T_FRAG][T_FRAG_MODE]
         if mode == T_FRAG_NO_ACK:
             session = ReassemblerNoAck(
-                self.protocol, context, rule, dtag, l2_address)
+                self.protocol, context, rule, dtag, core_id, device_id)
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError("FRMode:", mode)
         elif mode == T_FRAG_ACK_ON_ERROR:
             session = ReassemblerAckOnError(
-                self.protocol, context, rule, dtag, l2_address)
+                self.protocol, context, rule, dtag, core_id, device_id)
         else:
             raise ValueError("FRMode:", mode)
         self._add_session(session_id, session)
         setattr(session, "_session_id", session_id)
         print("protocol.py, create_reassembly_session, session :", session_id)
-        print("l2_address : create_reassembly_session, l2addr", l2_address)
+        print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
     def create_fragmentation_session(self, l2_address, context, rule):
