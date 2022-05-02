@@ -102,7 +102,7 @@ class frag_base():
         print ("packet", self.packet)
         print ("abort", self.abort)
         print ("ack_request", self.ack_request)
-        print ("ack_request", self.ack_received)
+        print ("ack", self.ack)
 
 class frag_tx(frag_base):
 
