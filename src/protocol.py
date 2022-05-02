@@ -357,9 +357,9 @@ class SCHCProtocol:
                 context, frag_rule, session_id)
             print("New reassembly session created", session.__class__.__name__)
 
-        dprint("devid, core_id:", device_id, core_id)
+        dprint("device_id, core_id:", device_id, core_id)
         dprint("device or core?", self.role) 
-        return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, devid=device_id)
+        return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, core_id=core_id, device_id=device_id)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
 
