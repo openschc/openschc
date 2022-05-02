@@ -363,7 +363,7 @@ class SCHCProtocol:
         dprint("device or core?", self.role) 
 
         if self.role == T_POSITION_CORE:
-            if rule[T_FRAG][T_FRAG_DIRECTION] == 'UP' : # ACK
+            if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK
                 session = self.session_manager.find_session(session_id)
                 print ("ACK Received, session:", session)
                 return session.receive_frag(packet_bbuf, dtag, position=self.position, protocol=self, core_id=core_id, device_id=device_id) 
