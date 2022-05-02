@@ -30,9 +30,8 @@ class ReassembleBase:
 
     """
 
-    def __init__(self, protocol=None, context=None, rule=None, dtag=None, sender_L2addr=None):
+    def __init__(self, protocol=None, context=None, rule=None, dtag=None, core_id=None, device_id=None):
         """
-
         Args :
             protocol : protocol
             context : context
@@ -40,9 +39,14 @@ class ReassembleBase:
             dtag : ?
             sender_L2addr : None or 'int' containing the sender's address
 
-
         """
         self.protocol = protocol
+
+        if protocol.role == T_POSITION_CORE:
+            sender_L2addr = device_id
+        else: 
+            sender_L2addr = core_id
+
         self.context = context
         self.rule = rule
         self.dtag = dtag
@@ -273,7 +277,7 @@ class ReassemblerAckOnError(ReassembleBase):
         """
 
         # Define the other end for ACK send:
-        
+
         if self.protocol.position == T_POSITION_CORE:
             receiver_id = device_id
         else :
