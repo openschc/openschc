@@ -536,7 +536,12 @@ class FragmentAckOnError(FragmentBase):
             dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # send a SCHC fragment
-        args = (schc_frag.packet.get_content(), self._session_id[0], self.event_sent_frag)
+        if self.position == T_POSITION_DEVICE:
+            dest = self._session_id[0] # core address
+        else:
+            dest = self._session_id[1] # device address
+
+        args = (schc_frag.packet.get_content(), dest, self.event_sent_frag)
         dprint ("dbug: frag_send.py: Sending Fragment, args: ", args)
         dprint("frag sent:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
