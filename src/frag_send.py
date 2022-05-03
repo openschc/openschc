@@ -536,7 +536,7 @@ class FragmentAckOnError(FragmentBase):
             dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # send a SCHC fragment
-        if self.position == T_POSITION_DEVICE:
+        if self.protocol.position == T_POSITION_DEVICE:
             dest = self._session_id[0] # core address
         else:
             dest = self._session_id[1] # device address
