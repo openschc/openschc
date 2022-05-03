@@ -135,7 +135,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, position, protocol, core_id=None, device_id=None):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
         """
         return 
         - None if fragmentation is not finished
@@ -147,8 +147,8 @@ class ReassemblerNoAck(ReassembleBase):
                                                                      bbuf, self.rule))
         assert (T_FRAG in self.rule)
 
-        if (position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
-            (position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
+        if (protocol.position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
+            (protocol.position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
             if schc_abort.abort:
                 print ("aborting, removing state")
@@ -265,7 +265,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     """
 
-    def receive_frag(self, bbuf, dtag, position, protocol, core_id=None, device_id=None):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
         """
         return 
         - None if fragmentation is not finished
