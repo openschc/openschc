@@ -97,7 +97,7 @@ class SessionManager:
         print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
-    def create_fragmentation_session(self, device_id, core_id, context, rule):
+    def create_fragmentation_session(self, core_id, device_id, context, rule):
         if self.unique_peer:
             l2_address = None #TODO
 
