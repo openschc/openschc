@@ -85,7 +85,7 @@ def processPkt(pkt):
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
                            pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
-                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,) #TODO Verify Find Packet from SCHC Rule, it considers some None values
                            dprint(uncomp_pkt)
             elif ip_proto==41:
                 schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
