@@ -319,16 +319,6 @@ class ReassemblerAckOnError(ReassembleBase):
             self._last_receive_info = [("abort",)]
             return None  # TODO
         
-        if schc_frag.ack == True:
-            if schc_frag.cbit == 1:
-                dprint("------------------- ACK-Success Received -----------------------")
-                self._last_receive_info = [("ack success received",)]
-                protocol.session_manager.delete_session(self._session_id)
-            else:
-                dprint("------------------- ACK-Failure Received -----------------------")
-                self._last_receive_info = [("ack failure received",)]
-            return None  # TODO
-
         if schc_frag.ack_request == True:
             print("Received ACK-REQ")
             self._last_receive_info = [("ack-req",)]            

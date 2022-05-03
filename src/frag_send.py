@@ -617,7 +617,8 @@ class FragmentAckOnError(FragmentBase):
         dprint("EVENT SEND FRAG")
         self.send_frag()
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+        #receive_frag(self, bbuf, dtag):
         # the ack timer can be cancelled here, because it's been done whether
         # both rule_id and dtag in the fragment are matched to this session
         # at process_received_packet().
