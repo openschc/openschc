@@ -88,7 +88,7 @@ def processPkt(pkt):
                            #uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
                            #dprint(uncomp_pkt)
             elif ip_proto==41:
-                schc_machine.schc_send(bytes(pkt)[34:])
+                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
                 pkt.show2()
 
 # Start SCHC Machine

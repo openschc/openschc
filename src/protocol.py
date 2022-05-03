@@ -97,9 +97,9 @@ class SessionManager:
         print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
-    def create_fragmentation_session(self, l2_address, context, rule):
+    def create_fragmentation_session(self, device_id, core_id, context, rule):
         if self.unique_peer:
-            l2_address = None
+            l2_address = None #TODO
 
         rule_id = rule[T_RULEID]
         rule_id_length = rule[T_RULEIDLENGTH]
@@ -107,7 +107,7 @@ class SessionManager:
         dtag_limit = 2**dtag_length
 
         for dtag in range(0, dtag_limit):
-            session_id = (l2_address, rule_id, rule_id_length, dtag)
+            session_id = (core_id, device_id, rule_id, rule_id_length, dtag)
             session_id = self._filter_session_id(session_id)            
             if session_id not in self.session_table:
                 break
@@ -122,14 +122,15 @@ class SessionManager:
         mode = rule[T_FRAG][T_FRAG_MODE]
         print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
-            session = FragmentNoAck(rule, 12, self.protocol, context, dtag)
+            session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
 
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
 
         elif mode == T_FRAG_ACK_ON_ERROR:
-            session = FragmentAckOnError(rule, 12, self.protocol, context, dtag) # see above for param order
+            session = FragmentAckOnError(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
+            # see above for param order
 
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
@@ -239,10 +240,10 @@ class SCHCProtocol:
         return schc_packet, device_id
 
 
-    def _make_frag_session(self, dst_l2_address, direction):
+    def _make_frag_session(self, core_id, device_id, direction):
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
-                deviceID=dst_l2_address, direction=direction)
+                deviceID=device_id, direction=direction)
         if frag_rule is None:
             self._log("fragmentation rule not found")
             return None
@@ -253,7 +254,7 @@ class SCHCProtocol:
         self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
 
         session = self.session_manager.create_fragmentation_session(
-            dst_l2_address, context, rule)
+            core_id, device_id, context, rule)
         if session is None:
             self._log("fragmentation session could not be created") # XXX warning
             return None
@@ -261,29 +262,26 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, dst_l2_address=None, dst_l3_address=None,):
-        """Starting to send SCHC packet after called by L3.
+    def schc_send(self, raw_packet, core_id=None, device_id=None,):
+        """Starting to send SCHC packet after called by Application.
         
-        If dst_l2_address is None, this function is for sending
+        If self.position is T_POSITION_DEVICE, this function is for sending
         from device to core.
-
-        XXX the order of the args should be:
-            schc_send(self, dst_l3_address, raw_packet, dst_l2_address=None)
         """
-        self._log("recv-from-l3 {} {}".format(dst_l2_address, dst_l3_address))
+        self._log("schc_send {} {}".format(core_id, device_id))
 	#, raw_packet))
 
-        # Perform compression
-        packet_bbuf, device_id = self._apply_compression(dst_l3_address, raw_packet)
+        #To perform compression, device_id should be on the format as in the rule
+        #Ex: "DeviceID" : "udp:54.37.158.10:8888",
+
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
         
         if packet_bbuf == None: # No compression rule found
             return 
 
-
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
-            device_id = dst_l2_address
         else:
             direction = T_DIR_DW
 
@@ -296,7 +294,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return
 
-        frag_session = self._make_frag_session(device_id, direction)
+        frag_session = self._make_frag_session(core_id=core_id, device_id=core_id, direction=direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
