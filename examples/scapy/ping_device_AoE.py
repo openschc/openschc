@@ -79,7 +79,8 @@ def processPkt(pkt):
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         print("core address", addr)
                         core_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
-                        r = schc_machine.schc_recv(core_id = core_id, device_id=device_id, schc_packet=schc_pkt) 
+                        print ("ping :", core_id, device_id)
+                        r = schc_machine.schc_recv(core_id=core_id, device_id=device_id, schc_packet=schc_pkt) 
                         print ('r = ', r)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
