@@ -265,36 +265,36 @@ class SCHCProtocol:
     def schc_send(self, raw_packet, core_id=None, device_id=None,):
         """Starting to send SCHC packet after called by Application.
         
-        If self.position is T_POSITION_DEVICE, this function is for sending
-        from device to core.
+        If self.position is T_POSITION_DEVICE and device_id = None, 
+        this function is for sending from device to core.
         """
+
         self._log("schc_send {} {}".format(core_id, device_id))
 	#, raw_packet))
 
-        #To perform compression, device_id should be on the format as in the rule
+        #To perform fragmentation, we get the device_id from the rule:
         #Ex: "DeviceID" : "udp:54.37.158.10:8888",
-
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id)
 
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
 
-        print("protocol.py, device_id after apply compression =", device_id)
-        
+        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id)
+
         if packet_bbuf == None: # No compression rule found
             return 
 
         # Start a fragmentation session from rule database
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
+            destination = core_id
         else:
             direction = T_DIR_DW
+            destination = device_id
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), device_id)
-
+            args = (packet_bbuf.get_content(), destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return
 
