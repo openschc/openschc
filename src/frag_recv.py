@@ -594,7 +594,7 @@ class ReassemblerAckOnError(ReassembleBase):
         dprint("debug, frag_recv.py: AckOnError device_id", device_id)
         dprint("debug, frag_recv.py: AckOnError schc_packet", schc_packet)
         argsfn = self.protocol.decompress_only(schc_packet, comp_rule, device_id)
-        print ("frag_recv.py, devid and decompressed packet: ", argsfn)
+        print ("frag_recv.py, device_id and decompressed packet: ", argsfn)
 
         # ACK message
         schc_ack = frag_msg.frag_receiver_tx_all1_ack(
@@ -608,7 +608,7 @@ class ReassemblerAckOnError(ReassembleBase):
             Statsct.set_msg_type("SCHC_ACK_OK")
 
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
-        args = (schc_ack.packet.get_content(), devid)
+        args = (schc_ack.packet.get_content(), device_id)
         dprint ("++ dbug: frag_recv.py: ACK args", args)
         #time.sleep(1)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
