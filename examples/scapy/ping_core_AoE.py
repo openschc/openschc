@@ -54,6 +54,8 @@ def processPkt(pkt):
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
+from requests import get
+
 socket_port = 0x5C4C
 ip = get('https://api.ipify.org').text
 core_id = 'udp:'+ip+":"+str(socket_port)
