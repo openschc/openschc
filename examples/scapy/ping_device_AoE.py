@@ -78,19 +78,14 @@ def processPkt(pkt):
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         print("core address", addr)
-                        receiver_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
-                        if receiver_id == device_id:
-                            r = schc_machine.schc_recv(core_id=core_idd, device_id=device_id, schc_packet=schc_pkt)
-                            print ("+++++ ping :", core_idd, device_id)
-                        else:
-                            r = schc_machine.schc_recv(core_id=receiver_id, device_id=device_id, schc_packet=schc_pkt)
-                         
+                        core_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
+                        r = schc_machine.schc_recv(core_id = core_id, device_id=device_id, schc_packet=schc_pkt) 
                         print ('r = ', r)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
-                           #schc_pkt_decompressed = r[1]
-                           #pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                  
-                           #uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id)
+                           schc_pkt_decompressed = r[1]
+                           pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),core_id=core_id)
                            #dprint(uncomp_pkt)
             elif ip_proto==41:
                 schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
@@ -101,14 +96,13 @@ POSITION = T_POSITION_DEVICE
 
 from requests import get
 
-core_idd = "udp:51.91.121.182:23628"
+ip = get('https://api.ipify.org').text
 
-dev_ip = get('https://api.ipify.org').text
 socket_port = 8888
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 
-device_id = 'udp:'+dev_ip+":"+str(socket_port)
+device_id = 'udp:'+ip+":"+str(socket_port)
 print ("device_id is", device_id)
 
 
