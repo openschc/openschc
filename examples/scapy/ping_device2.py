@@ -76,15 +76,17 @@ def processPkt(pkt):
                         tunnel.sendto(schc_pkt, addr)
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
-                        r = schc_machine.schc_recv(device_id=device_id, schc_packet=schc_pkt) 
+                        print("core address", addr)
+                        core_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
+                        r = schc_machine.schc_recv(core_id=core_id, device_id=device_id, schc_packet=schc_pkt) 
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
                            pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
-                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply),dst_l2_address=core_id,)
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,)
                            dprint(uncomp_pkt)
             elif ip_proto==41:
-                schc_machine.schc_send(bytes(pkt)[34:])
+                schc_machine.schc_send(bytes(pkt)[34:], device_id=device_id)
                 pkt.show2()
 
 # Start SCHC Machine
