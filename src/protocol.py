@@ -305,7 +305,7 @@ class SCHCProtocol:
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None):
         # if device_id == None:
-        dprint ("core_id : ", core_id)
+        dprint ("schc_recv, core_id, dev_id : ", core_id, device_id)
         """Receiving a SCHC packet from a lower layer."""
         packet_bbuf = BitBuffer(schc_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
