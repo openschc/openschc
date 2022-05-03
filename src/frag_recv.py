@@ -234,7 +234,7 @@ class ReassemblerNoAck(ReassembleBase):
                     # XXX be moved into somewhere.
                     # XXX
                     rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
-                    dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
+                    dprint("debug: no-ack FindRuleFromSCHCpacket", rule, device_id)
                     args = self.protocol.decompress_only(schc_packet, rule, device_id)
                 print("Packet decompressed at receive_frag: ", args)
                 self.state = 'DONE_NO_ACK'
@@ -456,7 +456,7 @@ class ReassemblerAckOnError(ReassembleBase):
             print('MIC calced?')
             if self.mic_received == mic_calced:
                 info.append("mic-ok")
-                args = self.finish(schc_packet, schc_frag, rule, receiver_id)
+                args = self.finish(schc_packet, schc_frag, rule, core_id, device_id)
                 print('MIC OK', args)
                 return args
             else:
@@ -480,7 +480,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 info.append("mic-ok")
                 self.mic_missmatched = False
-                args = self.finish(schc_packet, schc_frag, rule, receiver_id)
+                args = self.finish(schc_packet, schc_frag, rule, core_id, device_id)
                 print("frag_recv.py: AckOnError args: ", args)
                 return args
             else:
@@ -582,18 +582,18 @@ class ReassemblerAckOnError(ReassembleBase):
         args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
-    def finish(self, schc_packet, schc_frag, rule, devid):
+    def finish(self, schc_packet, schc_frag, rule, core_id, device_id):
         self.state = "DONE"
         dprint('state DONE -> {}'.format(self.state))
         #input('DONE')
         # decompression
         #self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
 
-        comp_rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=devid)
+        comp_rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
         dprint("debug, frag_recv.py: AckOnError - finc comp_rule: ", comp_rule)
-        dprint("debug, frag_recv.py: AckOnError devid", devid)
+        dprint("debug, frag_recv.py: AckOnError device_id", device_id)
         dprint("debug, frag_recv.py: AckOnError schc_packet", schc_packet)
-        argsfn = self.protocol.decompress_only(schc_packet, comp_rule, devid)
+        argsfn = self.protocol.decompress_only(schc_packet, comp_rule, device_id)
         print ("frag_recv.py, devid and decompressed packet: ", argsfn)
 
         # ACK message
@@ -620,7 +620,7 @@ class ReassemblerAckOnError(ReassembleBase):
         #        self.inactive_timer, self.event_inactive, tuple())
         #dprint("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
 
-        print ("frag_recv.py, finish (MIC OK), devid: ", devid)
+        print ("frag_recv.py, finish (MIC OK), core_id, device_id, : ", core_id, device_id)
         print ("frag_recv.py, finish (MIC OK), args: ", argsfn)
         return argsfn
 
