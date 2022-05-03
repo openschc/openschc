@@ -81,7 +81,7 @@ def processPkt(pkt):
                         receiver_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
                         if receiver_id == device_id:
                             r = schc_machine.schc_recv(core_id=core_idd, device_id=device_id, schc_packet=schc_pkt)
-                            print ("+++++ ping :", core_id, device_id)
+                            print ("+++++ ping :", core_idd, device_id)
                         else:
                             r = schc_machine.schc_recv(core_id=receiver_id, device_id=device_id, schc_packet=schc_pkt)
                          
