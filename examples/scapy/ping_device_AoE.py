@@ -98,8 +98,9 @@ POSITION = T_POSITION_DEVICE
 
 from requests import get
 
-dev_ip = get('https://api.ipify.org').text
+core_id = None
 
+dev_ip = get('https://api.ipify.org').text
 socket_port = 8888
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
