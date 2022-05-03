@@ -274,6 +274,8 @@ class SCHCProtocol:
         #To perform compression, device_id should be on the format as in the rule
         #Ex: "DeviceID" : "udp:54.37.158.10:8888",
 
+        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id)
+
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
         
         if packet_bbuf == None: # No compression rule found
