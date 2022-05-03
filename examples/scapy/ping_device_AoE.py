@@ -80,7 +80,7 @@ def processPkt(pkt):
                         print("core address", addr)
                         receiver_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
                         if receiver_id == device_id:
-                            r = schc_machine.schc_recv(core_id=core_id, device_id=device_id, schc_packet=schc_pkt)
+                            r = schc_machine.schc_recv(core_id=core_idd, device_id=device_id, schc_packet=schc_pkt)
                             print ("+++++ ping :", core_id, device_id)
                         else:
                             r = schc_machine.schc_recv(core_id=receiver_id, device_id=device_id, schc_packet=schc_pkt)
@@ -101,7 +101,7 @@ POSITION = T_POSITION_DEVICE
 
 from requests import get
 
-core_id = "udp:51.91.121.182:23628"
+core_idd = "udp:51.91.121.182:23628"
 
 dev_ip = get('https://api.ipify.org').text
 socket_port = 8888
