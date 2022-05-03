@@ -277,6 +277,8 @@ class SCHCProtocol:
         print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id)
 
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
+
+        print("protocol.py, device_id after apply compression =", device_id)
         
         if packet_bbuf == None: # No compression rule found
             return 
