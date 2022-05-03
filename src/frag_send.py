@@ -229,7 +229,12 @@ class FragmentNoAck(FragmentBase):
 
 
         # send a SCHC fragment
-        args = (schc_frag.packet.get_content(), self._session_id[0], None)
+        if self.protocol.position == T_POSITION_DEVICE:
+            dest = self._session_id[0] # core address
+        else:
+            dest = self._session_id[1] # device address
+
+        args = (schc_frag.packet.get_content(), dest, None)
         dprint ("dbug: frag_send.py: Fragment args", args)
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
@@ -258,8 +263,8 @@ class FragmentNoAck(FragmentBase):
             w_fcn
             ))
         dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        print("frag_send.py, args: ", args)
-        print("frag_send.py, _session_id: ", self._session_id[0])
+        print("frag_send.py, NoAck, args: ", args)
+        print("frag_send.py, _session_id: ", self._session_id)
         print("FCN size=", fcn)
         print ('dtag', frag_msg.get_max_dtag(self.rule))
         print ('dtag', frag_msg.get_max_fcn(self.rule))
