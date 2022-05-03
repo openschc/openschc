@@ -88,8 +88,8 @@ def processPkt(pkt):
                         print ('r = ', r)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
-                           schc_pkt_decompressed = r[1]
-                           pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                  
+                           #schc_pkt_decompressed = r[1]
+                           #pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                  
                            #uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id)
                            #dprint(uncomp_pkt)
             elif ip_proto==41:
