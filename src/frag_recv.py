@@ -287,13 +287,13 @@ class ReassemblerAckOnError(ReassembleBase):
                                                                      
         assert (T_FRAG in self.rule)
         rule = self.rule
-
-        if self.position == T_POSITION_CORE: 
+     
+        if protocol.position == T_POSITION_CORE: 
             if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK or Abort
                 print('frag_recv.py ACK Received CORE')
                 schc_frag = frag_msg.frag_sender_rx(bbuf) 
         
-        if self.position == T_POSITION_DEVICE:
+        if protocol.position == T_POSITION_DEVICE:
             if rule[T_FRAG][T_FRAG_DIRECTION] == 'UP' : # ACK or Abort
                 print('frag_recv.py ACK Received DEVICE')
                 schc_frag = frag_msg.frag_sender_rx(bbuf) 
