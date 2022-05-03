@@ -366,7 +366,13 @@ class SCHCProtocol:
         dprint("device_id, core_id:", device_id, core_id)
         dprint("device or core?", self.role) 
 
-        return session.receive_frag(bbuf=packet_bbuf, dtag=dtag, protocol=self, core_id=core_id, device_id=device_id)
+        type = session.get_session_type()
+
+        if type == 'Fragmentation' :
+            return session.receive_frag(bbuf=packet_bbuf, dtag=dtag)
+        else:
+
+            return session.receive_frag(bbuf=packet_bbuf, dtag=dtag, protocol=self, core_id=core_id, device_id=device_id)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
 
