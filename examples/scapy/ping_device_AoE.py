@@ -78,7 +78,8 @@ def processPkt(pkt):
                     else:
                         # None when the reassambly + decompressing process is not finished and [device_id, decompressed packet in bytes] when All-1
                         print("core address", addr)
-                        core_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
+                        if addr[0] != dev_ip:
+                            core_id = 'udp:'+ str(addr[0]) +":"+str(addr[1])
                         print ("+++++ ping :", core_id, device_id)
                         r = schc_machine.schc_recv(core_id=core_id, device_id=device_id, schc_packet=schc_pkt) 
                         print ('r = ', r)
@@ -97,13 +98,13 @@ POSITION = T_POSITION_DEVICE
 
 from requests import get
 
-ip = get('https://api.ipify.org').text
+dev_ip = get('https://api.ipify.org').text
 
 socket_port = 8888
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 
-device_id = 'udp:'+ip+":"+str(socket_port)
+device_id = 'udp:'+dev_ip+":"+str(socket_port)
 print ("device_id is", device_id)
 
 
