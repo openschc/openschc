@@ -290,10 +290,12 @@ class ReassemblerAckOnError(ReassembleBase):
 
         if self.position == T_POSITION_CORE: 
             if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK or Abort
+                print('frag_recv.py ACK Received CORE')
                 schc_frag = frag_msg.frag_sender_rx(bbuf) 
         
         if self.position == T_POSITION_DEVICE:
             if rule[T_FRAG][T_FRAG_DIRECTION] == 'UP' : # ACK or Abort
+                print('frag_recv.py ACK Received DEVICE')
                 schc_frag = frag_msg.frag_sender_rx(bbuf) 
 
         # Regular Fragment        
@@ -317,7 +319,7 @@ class ReassemblerAckOnError(ReassembleBase):
             return None  # TODO
         
         if schc_frag.ack == True:
-            if schc_frag.cbit == True:
+            if schc_frag.cbit == 1:
                 dprint("------------------- ACK-Success Received -----------------------")
                 self._last_receive_info = [("ack success received",)]
                 protocol.session_manager.delete_session(self._session_id)
