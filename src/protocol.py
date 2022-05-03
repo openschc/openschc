@@ -241,6 +241,7 @@ class SCHCProtocol:
 
 
     def _make_frag_session(self, core_id, device_id, direction):
+        print("make_frag_session, devid: ", device_id)
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
                 deviceID=device_id, direction=direction)
