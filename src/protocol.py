@@ -62,6 +62,7 @@ class SessionManager:
     def find_session(self, session_id):
         session_id = self._filter_session_id(session_id)
         session = self.session_table.get(session_id, None)
+        dprint("protocol.py, session table: ", self.session_table)
         return session
 
     def _add_session(self, session_id, session):

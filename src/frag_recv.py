@@ -270,6 +270,7 @@ class ReassemblerAckOnError(ReassembleBase):
         return 
         - None if fragmentation is not finished
         - False if the MIC is wrong
+        - True if ACK Success received
         - bytearray if fragmentation succeed 
         
         """
@@ -287,7 +288,7 @@ class ReassemblerAckOnError(ReassembleBase):
                                                                      
         assert (T_FRAG in self.rule)
         rule = self.rule
-     
+
         if protocol.position == T_POSITION_CORE: 
             if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK or Abort
                 print('frag_recv.py ACK Received CORE')
