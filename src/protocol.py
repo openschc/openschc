@@ -115,9 +115,8 @@ class SessionManager:
         if dtag == dtag_limit:
             self.protocol.log("cannot create session, no dtag available")
             return None
-
-
-        print ("PRTOCOL=", self.protocol)
+        
+        dprint("protocol.py: creating frag_session with session_id: ", session_id)
 
         mode = rule[T_FRAG][T_FRAG_MODE]
         print ('fragmentation mode:' , mode)
@@ -300,7 +299,6 @@ class SCHCProtocol:
             return
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
-        dprint("protocol.py: creating frag_session: ", frag_session)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
