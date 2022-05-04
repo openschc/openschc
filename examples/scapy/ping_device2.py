@@ -21,9 +21,6 @@ rm = RM.RuleManager()
 rm.Add(file="icmp1.json")
 rm.Print()
 
-#Unparser
-unparser = Unparser()
-
 # Create a ICMPv6 Echo Reply from Echo Request
 def create_echoreply(pkt, addr):
     dprint("packet decompresed: ", pkt)
