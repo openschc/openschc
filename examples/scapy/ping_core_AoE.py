@@ -38,22 +38,28 @@ def processPkt(pkt):
             ip_proto = pkt.getlayer(IP).proto
             if ip_proto == 17:
                 udp_dport = pkt.getlayer(UDP).dport
+                print ("tunneled SCHC msg", udp_dport)  
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
-                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)                       
+                    uncomp_pkt = schc_machine.schc_recv(core_id=core_id, device_id=other_end, schc_packet=schc_pkt)                       
                     if uncomp_pkt != None:
                         uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface="he-ipv6") 
             elif ip_proto==41:
-                schc_machine.schc_send(bytes(pkt)[34:])
+                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id) # device_id is retrieved later from the rule
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
+from requests import get
+
 socket_port = 0x5C4C
+ip = get('https://api.ipify.org').text
+core_id = 'udp:'+ip+":"+str(socket_port)
+
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 

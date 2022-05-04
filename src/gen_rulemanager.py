@@ -631,7 +631,7 @@ class RuleManager:
             entry[T_MO] = MO
 
             CDA = r[T_CDA].upper()
-            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM, T_CDA_DEVIID, T_CDA_APPIID]:
+            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM, T_CDA_DEVIID, T_CDA_APPIID, T_CDA_LORA_DEVIID]:
                 raise ValueError("{} CDA not found".format(CDA))
             entry[T_CDA] = CDA
 

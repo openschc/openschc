@@ -52,7 +52,13 @@ class ScapyLowerLayer:
         """Called but the SelectScheduler when an UDP packet is received"""
         packet, address = self.sd.recvfrom(MAX_PACKET_SIZE)
         sender_address = address_to_string(address)
-        self.protocol.schc_recv(sender_address, packet)
+        position = self.position
+        print ("sender address", sender_address)
+        if position == T_POSITION_DEVICE:
+            self.protocol.schc_recv(core_id = sender_address, schc_packet = packet)
+        else :
+            self.protocol.schc_recv(device_id = sender_address, schc_packet = packet)
+
 
 
 class ScapyScheduler:
