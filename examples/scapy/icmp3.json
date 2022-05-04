@@ -36,7 +36,7 @@
                 "FCNSize": 3,
                 "ackBehavior": "afterAll1",
                 "tileSize": 16,
-                "MICAlgorithm": "rcs-RFC8724",
+                "MICAlgorithm": "crc32",
                 "MICWordSize": 8,
                 "L2WordSize": 8,
                 "lastTileInAll1": false
@@ -54,7 +54,7 @@
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 16,
-            "MICAlgorithm": "rcs-RFC8724",
+            "MICAlgorithm": "crc32",
             "MICWordSize": 8,
             "L2WordSize": 8,
             "lastTileInAll1": false
