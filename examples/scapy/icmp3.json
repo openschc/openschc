@@ -28,7 +28,7 @@
 		"RuleID" : 12,
 		"RuleIDLength" : 11,
 		"Fragmentation" : {
-			"FRMode": "NoAck",
+			"FRMode": "AckOnError",
 			"FRDirection": "DW",
             "FRModeProfile": {
                 "dtagSize": 2,
@@ -46,7 +46,7 @@
 		"RuleID" : 13,
 		"RuleIDLength" : 11,
 		"Fragmentation" : {
-		"FRMode": "NoAck",
+		"FRMode": "AckOnError",
 		"FRDirection": "UP",
         "FRModeProfile": {
             "dtagSize": 2,
