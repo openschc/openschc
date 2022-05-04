@@ -1191,7 +1191,15 @@ class RuleManager:
         - if the direction and the deviceID is matched.
         """
         dprint("FindFragmentationRule", deviceID, direction)
-        if direction is not None and deviceID is None:
+
+        if direction is not None and deviceID is not None:
+            for d in self._ctxt:
+                if d["DeviceID"] == deviceID:
+                    for r in d["SoR"]:
+                        if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
+                            return r
+
+        elif direction is not None and deviceID is None:
             for d in self._ctxt:
                 for r in d["SoR"]:
                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
