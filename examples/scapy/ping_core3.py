@@ -9,6 +9,8 @@ from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
 from compr_parser import Unparser
+from scapy.layers.inet import IP
+#from scapy.layers.inet6 import IPv6
 
 import pprint
 import binascii
@@ -18,7 +20,7 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp1.json")
+rm.Add(file="icmp3.json")
 rm.Print()
 
 unparser = Unparser()
@@ -27,8 +29,7 @@ def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
     schc_machine and scheduler must be specified as a global variable.
     """
-
-    scheduler.run(session=schc_machine, display_period=10)
+    scheduler.run(session=schc_machine)
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
@@ -42,10 +43,10 @@ def processPkt(pkt):
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
-                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)
-                    uncomp_pkt.show()
+                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)                       
                     if uncomp_pkt != None:
-                        send(uncomp_pkt, iface="he-ipv6")
+                        uncomp_pkt[1].show()
+                        send(uncomp_pkt[1], iface="he-ipv6") 
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
 
@@ -63,7 +64,7 @@ schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
     role=POSITION,           # DEVICE or CORE
-    verbose = False)         
+    verbose = True)         
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
