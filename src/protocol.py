@@ -242,10 +242,12 @@ class SCHCProtocol:
 
 
     def _make_frag_session(self, core_id, device_id, direction):
-        print("make_frag_session, devid: ", device_id)
+        print("make_frag_session, devid: ", device_id, "direction", direction)
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
                 deviceID=device_id, direction=direction)
+        print("rule_id found :", frag_rule[T_RULEID])
+
         if frag_rule is None:
             self._log("fragmentation rule not found")
             return None
@@ -289,6 +291,8 @@ class SCHCProtocol:
         else:
             direction = T_DIR_DW
             destination = device_id
+        
+        print ("protocol.py", self.position, direction, destination)
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
