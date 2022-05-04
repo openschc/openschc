@@ -23,8 +23,6 @@ rm = RM.RuleManager()
 rm.Add(file="icmp2.json")
 rm.Print()
 
-unparser = Unparser()
-
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
     schc_machine and scheduler must be specified as a global variable.
