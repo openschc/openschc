@@ -8,7 +8,6 @@ import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
-from compr_parser import Unparser
 from scapy.layers.inet import IP
 #from scapy.layers.inet6 import IPv6
 
