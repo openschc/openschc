@@ -46,7 +46,7 @@ def get_receiver_header_size(rule):
 
 def get_mic_size(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
-    assert rule[T_FRAG_MIC] == "crc32"
+    assert rule[T_FRAG_MIC] == "RCS_RFC8724"
     return 32
 
 
