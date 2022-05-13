@@ -227,7 +227,6 @@ class FragmentNoAck(FragmentBase):
             mic=self.mic_sent,
             payload=tile)
 
-
         # send a SCHC fragment
         if self.protocol.position == T_POSITION_DEVICE:
             dest = self._session_id[0] # core address
@@ -266,11 +265,10 @@ class FragmentNoAck(FragmentBase):
         print("frag_send.py, NoAck, args: ", args)
         print("frag_send.py, _session_id: ", self._session_id)
         print("FCN size=", fcn)
-        print ('dtag', frag_msg.get_max_dtag(self.rule))
-        print ('dtag', frag_msg.get_max_fcn(self.rule))
+        print('dtag', frag_msg.get_max_dtag(self.rule))
+        print('dtag', frag_msg.get_max_fcn(self.rule))
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args)
-
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
         print("event_sent_frag")
@@ -278,7 +276,9 @@ class FragmentNoAck(FragmentBase):
         delay = self.protocol.config.get("tx_interval", 0)
         self.protocol.scheduler.add_event(delay, self.send_frag, {})
 
-    def receive_frag(self, schc_frag, dtag):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+
+        schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf)     
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         print("sender frag received:", schc_frag.__dict__)
         if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] == 0 or

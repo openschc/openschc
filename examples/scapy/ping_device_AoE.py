@@ -104,20 +104,15 @@ tunnel.bind(("0.0.0.0", socket_port))
 device_id = 'udp:'+ip+":"+str(socket_port)
 print ("device_id is", device_id)
 
-
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
+    #default_l2_mtu = 
     role=POSITION,           # DEVICE or CORE
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
-
-
-
-
- 

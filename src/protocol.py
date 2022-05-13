@@ -197,7 +197,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, dst_l3_address, raw_packet):
+    def _apply_compression(self, device_id, raw_packet):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -223,7 +223,7 @@ class SCHCProtocol:
         rule, device_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         self._log("compression rule {}".format(rule))
         if rule is None:
-            rule = self.rule_manager.FindNoCompressionRule(dst_l3_address)
+            rule = self.rule_manager.FindNoCompressionRule(device_id)
             self._log("no-compression rule {}".format(rule))
 
             if rule is None:

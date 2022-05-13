@@ -36,6 +36,9 @@ class ScapyLowerLayer:
 
         self.sock.sendto(packet, destination)
 
+        # define error_rate rand ou un vecteur avec 0 et 1
+        # if error then not send
+
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)

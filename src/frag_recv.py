@@ -93,7 +93,7 @@ class ReassembleBase:
         if self.state == "DONE":
             return
 
-        # sending sender abort.
+        # sending receiver abort.
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
         args = (schc_frag.packet.get_content(), self._session_id[0])
         dprint("Sent Receiver-Abort.", schc_frag.__dict__)
@@ -141,6 +141,7 @@ class ReassemblerNoAck(ReassembleBase):
         - None if fragmentation is not finished
         - False if the MIC is wrong
         - bytearray if fragmentation succeed 
+        - False if abort is received
         
         """
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
@@ -154,11 +155,10 @@ class ReassemblerNoAck(ReassembleBase):
                 print ("aborting, removing state")
                 protocol.session_manager.delete_session(self._session_id)
                 print(protocol.session_manager.session_table)
-            return None
+            return False
         else:
             print ("frag data")
         
-
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
             dprint("receiver frag received:", schc_frag.__dict__)
 
@@ -234,7 +234,7 @@ class ReassemblerNoAck(ReassembleBase):
                     # XXX be moved into somewhere.
                     # XXX
                     rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
-                    dprint("debug: no-ack FindRuleFromSCHCpacket", rule, device_id)
+                    dprint("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
                     args = self.protocol.decompress_only(schc_packet, rule, device_id)
                 print("Packet decompressed at receive_frag: ", args)
                 self.state = 'DONE_NO_ACK'
@@ -255,7 +255,6 @@ class ReassemblerNoAck(ReassembleBase):
         }
         return result
 
-
 #---------------------------------------------------------------------------
 
 class ReassemblerAckOnError(ReassembleBase):
@@ -272,9 +271,7 @@ class ReassemblerAckOnError(ReassembleBase):
         - False if the MIC is wrong
         - True if ACK Success received
         - bytearray if fragmentation succeed 
-        
         """
-      
         self._last_receive_info = []
         print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
@@ -575,6 +572,7 @@ class ReassemblerAckOnError(ReassembleBase):
         args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
+
     def finish(self, schc_packet, schc_frag, rule, core_id, device_id, role):
         self.state = "DONE"
         dprint('state DONE -> {}'.format(self.state))
@@ -669,10 +667,18 @@ class ReassemblerAckOnError(ReassembleBase):
         return schc_packet, mic_calced
 
     def send_receiver_abort(self):
+
+        # Define destination based on possition
+
+        if self.protocol.position == T_POSITION_DEVICE:
+            dest = self._session_id[0] # core address
+        else:
+            dest = self._session_id[1] # device address
+
         # sending Receiver abort.
         self.state = "ABORT"
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        args = (schc_frag.packet.get_content(), self._session_id[0])
+        args = (schc_frag.packet.get_content(), dest)
         dprint("Sent Receiver-Abort.", schc_frag.__dict__)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
