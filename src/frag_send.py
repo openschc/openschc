@@ -335,16 +335,16 @@ class FragmentAckOnError(FragmentBase):
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
                                       self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
                                       self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])
-        dprint("bit_list:", self.bit_list)
-        for tile in self.all_tiles.get_all_tiles():
-            dprint("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
+        #dprint("bit_list:", self.bit_list)
+        #for tile in self.all_tiles.get_all_tiles():
+            #dprint("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
         self.all1_send = False
         self.num_of_windows = 0
         for pos in self.bit_list:
-            dprint("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
+            #dprint("bitmap: {}, length:{}".format(self.bit_list[pos], len(self.bit_list[pos])))
             if len(self.bit_list[pos]) != 0:
                 self.num_of_windows += 1
-        dprint("number of windows = {}".format(self.num_of_windows))
+        dprint("frag_send.py, Number of windows = {}".format(self.num_of_windows))
         #input("")
 
     def send_frag(self):
@@ -356,9 +356,9 @@ class FragmentAckOnError(FragmentBase):
         #dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(scheduler.get_clock()))  # utime.time()
         dprint("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
         #dprint("all tiles unsend -> {}".format(self.all_tiles.get_all_tiles()))
-        for tile in self.all_tiles.get_all_tiles():
-            dprint("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
-        dprint("")
+        #for tile in self.all_tiles.get_all_tiles():
+            #dprint("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
+        #dprint("")
         # if self.state == self.ACK_FAILURE and self.num_of_windows != 1 and self.number_of_ack_waits <= self.num_of_windows:
         #     #waiting for the acks of the others windows
         #     self.number_of_ack_waits += 1 #wait depends on the number of windows
