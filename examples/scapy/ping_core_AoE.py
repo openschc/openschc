@@ -26,7 +26,7 @@ class Sniffer(Thread):
         #self.stop_sniffer = Event()
 
     def run(self):
-        sniff(iface=self.interface, prn=self.processPkt, stop_filter=self.should_stop_sniffer)
+        sniff(iface=self.interface, prn=self.processPkt,)# stop_filter=self.should_stop_sniffer)
 
     def processPkt(pkt):
         """ called when scapy receives a packet, since this function takes only one argument,
