@@ -64,7 +64,7 @@ class Loop_on_contexts(Thread):
         while True:
             for ctx in range(len(contexts)):
                 print("Contexts: ", contexts)
-                print("Session type at ping_core: ", ctx.get_session_type())
+                print("Session type at ping_core: ", contexts[ctx].get_session_type())
                 time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
