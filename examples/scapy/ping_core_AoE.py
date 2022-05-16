@@ -28,7 +28,7 @@ class Sniffer(Thread):
     def run(self):
         sniff(prn=self.processPkt, iface=self.interface) # stop_filter=self.should_stop_sniffer)
 
-    def processPkt(pkt):
+    def processPkt(self, pkt):
         """ called when scapy receives a packet, since this function takes only one argument,
         schc_machine and scheduler must be specified as a global variable.
         """
