@@ -20,7 +20,7 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp3.json")
+rm.Add(file="icmp3_gw.json")
 rm.Print()
 
 unparser = Unparser()
