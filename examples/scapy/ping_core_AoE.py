@@ -26,7 +26,7 @@ def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
     schc_machine and scheduler must be specified as a global variable.
     """
-    scheduler.run(session=schc_machine, display_period = 10)
+    scheduler.run(session=schc_machine, display_period = 1)
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
