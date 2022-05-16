@@ -26,7 +26,7 @@ def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
     schc_machine and scheduler must be specified as a global variable.
     """
-    scheduler.run(session=schc_machine)
+    scheduler.run(session=schc_machine, display_period = 10)
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
@@ -46,8 +46,9 @@ def processPkt(pkt):
                         uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface="he-ipv6") 
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id) # device_id is retrieved later from the rule
-
+                context = schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id) # device_id is retrieved later from the rule
+                print ("frag_context at ping_core", context)
+                pkt.show2()
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
