@@ -353,9 +353,9 @@ class FragmentAckOnError(FragmentBase):
             return
         dprint("----------------------- Preparing to send a message -----------------------")
         scheduler = self.protocol.system.get_scheduler()
-        dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(scheduler.get_clock()))  # utime.time()
+        #dprint("{} send_frag!!!!!!!!!!!!!!!!!".format(scheduler.get_clock()))  # utime.time()
         dprint("all1_send-> {}, resend -> {}, state -> {}".format(self.all1_send, self.resend, self.state))
-        dprint("all tiles unsend -> {}".format(self.all_tiles.get_all_tiles()))
+        #dprint("all tiles unsend -> {}".format(self.all_tiles.get_all_tiles()))
         for tile in self.all_tiles.get_all_tiles():
             dprint("w: {}, t: {}, sent: {}".format(tile['w-num'], tile['t-num'], tile['sent']))
         dprint("")
@@ -508,7 +508,7 @@ class FragmentAckOnError(FragmentBase):
                 dprint("*******event id {}".format(self.event_id_ack_wait_timer))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
-            dprint("self.last_window_tiles -> {}".format(self.last_window_tiles))
+            #dprint("self.last_window_tiles -> {}".format(self.last_window_tiles))
         elif self.mic_sent is not None or self.all1_send:
             dprint("self.mic_sent is not None state -> {}".format(self.state))
             # it looks that all fragments have been sent.
