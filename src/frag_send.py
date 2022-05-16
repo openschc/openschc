@@ -369,11 +369,9 @@ class FragmentAckOnError(FragmentBase):
         # get contiguous tiles as many as possible fit in MTU.
         # mtu_size = self.protocol.layer2.get_mtu_size()
         mtu_size = self.protocol.connectivity_manager.get_mtu("toto")
-        print ("MTU = ", mtu_size) 
+        print ("MTU at frag_send.py = ", mtu_size) 
         window_tiles, nb_remaining_tiles, remaining_size = self.all_tiles.get_tiles(mtu_size)
-        dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles,
-                                                                                                nb_remaining_tiles,
-                                                                                                remaining_size))
+        #dprint("----window tiles to send: {}, nb_remaining_tiles: {}, remaining_size: {}".format(window_tiles, nb_remaining_tiles, remaining_size))
 
         if window_tiles is None and self.resend:
             dprint("no more tiles to resend")
