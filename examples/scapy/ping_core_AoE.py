@@ -62,6 +62,7 @@ class Loop_on_contexts(Thread):
 
     def run(self):
         while True:
+            print("Contexts: ", contexts)
             for ctx in range(len(contexts)):
                 print("Session type at ping_core: ", ctx.get_session_type())
                 time.sleep(5)
