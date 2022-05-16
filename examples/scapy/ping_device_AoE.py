@@ -57,7 +57,7 @@ def processPkt(pkt):
     schc_machine and scheduler must be specified as a global variable.
     """
 
-    scheduler.run(session=schc_machine)
+    scheduler.run(session=schc_machine, display_period = 10, session = True) 
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
@@ -87,7 +87,9 @@ def processPkt(pkt):
                            uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,) #TODO Verify Find Packet from SCHC Rule, it considers some None values
                            dprint(uncomp_pkt)
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
+                # Metre X dans une file d'attante, faire des push regulierment, si trop de temps dans la file on appel X.abort
+                context = schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
+                print ("frag_context at ping_device", context)
                 pkt.show2()
 
 # Start SCHC Machine

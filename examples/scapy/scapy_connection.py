@@ -137,7 +137,7 @@ class ScapyScheduler:
         assert fd not in self.fd_callback_table
         self.fd_callback_table[fd] = (callback, args)
 
-    def run(self, session=None, display_period=None):
+    def run(self, session=None, display_period=None): 
         factor= 10
         if self.item % factor == 0:
             seq = ["|", "/", "-", "\\", "-"]

@@ -55,6 +55,7 @@ class FragmentBase():
         self.last_window_tiles = None
         self.num_of_windows = 0
         self.number_of_ack_waits = 0
+        self.sender_abort_sent = False
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -112,6 +113,18 @@ class FragmentBase():
 
     def get_state_info(self, **kw):
         return "<fragmentation session>"
+
+    def send_sender_abort(self):
+        """ Starting to send SCHC Sender-Abort after called by Application."""
+
+        """ This function can also be used to send Sender-Abort messages from upper layer
+        """
+        #, core_id=None, device_id=None, direction=T_DIR_UP
+        # First we look for the ongoing fragmentation sessions, then we create the 
+        # schc abort
+        # schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
+
+        print("send sender abort")
 
 class FragmentNoAck(FragmentBase):
 
@@ -572,7 +585,8 @@ class FragmentAckOnError(FragmentBase):
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
-            args = (schc_frag.packet.get_content(), self._session_id[0])
+            args = (schc_frag.packet.get_content(), self._session_id[0]) 
+            #TODO Change ID [0] is core and [1] device
             dprint("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
