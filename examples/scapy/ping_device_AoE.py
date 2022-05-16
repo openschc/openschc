@@ -82,10 +82,10 @@ def processPkt(pkt):
                         r = schc_machine.schc_recv(core_id=core_id, device_id=device_id, schc_packet=schc_pkt) #TODO : retrive core_id when we schedule the ack (since we get udp port and ip of the device he)
                         if r is not None: #The SCHC machine has reassembled and decompressed the packet
                            dprint ("ping_device.py, r =", r)
-                           schc_pkt_decompressed = r[1]
-                           pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
-                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,) #TODO Verify Find Packet from SCHC Rule, it considers some None values
-                           dprint(uncomp_pkt)
+                           #schc_pkt_decompressed = r[1]
+                           #pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
+                           #uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,) #TODO Verify Find Packet from SCHC Rule, it considers some None values
+                           #dprint(uncomp_pkt)
             elif ip_proto==41:
                 # Metre X dans une file d'attante, faire des push regulierment, si trop de temps dans la file on appel X.abort
                 context = schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
