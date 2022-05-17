@@ -94,10 +94,12 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
+
+init_time = time.time()
+
 sniffer = Sniffer()
 sniffer.start()
 
 contexts = list()
-init_time = time.time()
 context_tracker = Loop_on_contexts()
 context_tracker.start()
