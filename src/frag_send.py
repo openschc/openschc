@@ -56,6 +56,7 @@ class FragmentBase():
         self.num_of_windows = 0
         self.number_of_ack_waits = 0
         self.sender_abort_sent = False
+        self.last_send_time = None
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -560,6 +561,7 @@ class FragmentAckOnError(FragmentBase):
         args = (schc_frag.packet.get_content(), dest, self.event_sent_frag)
         dprint ("dbug: frag_send.py: Sending Fragment, args: ", args)
         dprint("frag sent:", schc_frag.__dict__)
+        self.last_send_time = time.time()
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
 
     def cancel_ack_wait_timer(self):

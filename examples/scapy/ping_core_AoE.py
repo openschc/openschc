@@ -23,7 +23,7 @@ class Sniffer(Thread):
         super().__init__()
 
         self.interface = interface
-        self.init_time = time.time()
+        self.init_time = init_time
         #self.stop_sniffer = Event()
 
     def run(self):
@@ -58,15 +58,17 @@ class Sniffer(Thread):
                     pkt.show2() 
 
 class Loop_on_contexts(Thread):
-    def __init__(self):
+    def __init__(self, init_time=None):
         super().__init__()
+        self.init_time = time.time()
 
     def run(self):
         while True:
             for ctx in range(len(contexts)):
-                print("Contexts: ", contexts)
-                print("Session time at ping_core: ", contexts[ctx][0])
-                print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
+                print("Contexts at ping_core: ", contexts)
+                print("Context added time : ", contexts[ctx][0])
+                print("Session type at ping_core: ", contexts[ctx][1].get_session_type() - self.init_time)
+                print("Last sent time: ", contexts[ctx][1].last_send_time - self.init_time)
                 time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
@@ -98,5 +100,6 @@ sniffer = Sniffer()
 sniffer.start()
 
 contexts = list()
+init_time = time.time()
 context_tracker = Loop_on_contexts()
 context_tracker.start()
