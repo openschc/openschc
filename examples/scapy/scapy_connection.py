@@ -42,6 +42,7 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
+        self._sleep(5)
 
     def get_mtu_size(self):
         return 400 # XXX
