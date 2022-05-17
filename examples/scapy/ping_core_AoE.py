@@ -97,9 +97,9 @@ schc_machine.set_rulemanager(rm)
 
 init_time = time.time()
 
+contexts = list()
+
 sniffer = Sniffer()
 sniffer.start()
-
-contexts = list()
 context_tracker = Loop_on_contexts()
 context_tracker.start()
