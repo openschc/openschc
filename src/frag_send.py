@@ -125,7 +125,6 @@ class FragmentBase():
         # schc abort
 
         if self.sender_abort_sent == False:
-
             schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)  
             # Send a SCHC Sender Abort
             if self.protocol.position == T_POSITION_DEVICE:
@@ -140,6 +139,9 @@ class FragmentBase():
             self.protocol.scheduler.add_event(0,
                                         self.protocol.layer2.send_packet, args)
             self.sender_abort_sent = True
+            self.protocol.session_manager.delete_session(self._session_id)
+
+
         return self.sender_abort_sent
 
 class FragmentNoAck(FragmentBase):
@@ -297,7 +299,7 @@ class FragmentNoAck(FragmentBase):
         print('dtag', frag_msg.get_max_dtag(self.rule))
         print('dtag', frag_msg.get_max_fcn(self.rule))
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-                                          args)
+                                          args, session_id = self) # Add session_id
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
         print("event_sent_frag")
@@ -600,8 +602,11 @@ class FragmentAckOnError(FragmentBase):
         if self.ack_requests_counter > max_ack_requests:
             # sending sender abort.
             schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
-            args = (schc_frag.packet.get_content(), self._session_id[0]) 
-            #TODO Change ID [0] is core and [1] device
+            if self.protocol.position == T_POSITION_DEVICE:
+                dest = self._session_id[0] # core address
+            else:
+                dest = self._session_id[1] # device address
+            args = (schc_frag.packet.get_content(), self.dest) 
             dprint("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")

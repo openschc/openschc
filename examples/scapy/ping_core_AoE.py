@@ -32,7 +32,7 @@ class Sniffer(Thread):
         """ called when scapy receives a packet, since this function takes only one argument,
         schc_machine and scheduler must be specified as a global variable.
         """
-        scheduler.run(session=schc_machine)
+        scheduler.run(session=schc_machine, display_period=10)
 
         # look for a tunneled SCHC pkt
         if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
@@ -57,11 +57,6 @@ class Sniffer(Thread):
                     pkt.show2() 
 
 class Loop_on_contexts(Thread):
-    def __init__(self):
-        super().__init__()
-
-    def run(self):
-        while True:
             for ctx in range(len(contexts)):
                 print("Contexts at ping_core: ", contexts)
                 print("Context added time : ", contexts[ctx][0])

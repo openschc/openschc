@@ -82,7 +82,7 @@ class ScapyScheduler:
     def get_clock(self):
         return time.time()
          
-    def add_event(self, rel_time, callback, args):
+    def add_event(self, rel_time, callback, args, session_id = None): #TODO
         #print("Add event {}".format(sanitize_value(self.queue)))
         #print("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
@@ -90,7 +90,7 @@ class ScapyScheduler:
         self.next_event_id += 1
         clock = self.get_clock()
         abs_time = clock+rel_time
-        self.queue.append((abs_time, event_id, callback, args))
+        self.queue.append((abs_time, event_id, callback, args, session_id))
         return event_id
 
     def cancel_event(self, event):
