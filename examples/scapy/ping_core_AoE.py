@@ -68,7 +68,8 @@ class Loop_on_contexts(Thread):
                 print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
                 print("Last sent time: ", contexts[ctx][1].last_send_time - init_time)
                 last_time = contexts[ctx][1].last_send_time - init_time
-                if last_time > 10 and contexts[ctx][1].sender_abort_sent:
+                abort = contexts[ctx][1].sender_abort_sent
+                if last_time > 10 and abort == False:
                    abort = contexts[ctx][1].send_sender_abort 
                 time.sleep(5)
 
