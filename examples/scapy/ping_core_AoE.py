@@ -65,7 +65,7 @@ class Loop_on_contexts(Thread):
             for ctx in range(len(contexts)):
                 print("Contexts at ping_core: ", contexts)
                 print("Context added time : ", contexts[ctx][0])
-                print("Session type at ping_core: ", contexts[ctx][1].get_session_type() - init_time)
+                print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
                 print("Last sent time: ", contexts[ctx][1].last_send_time - init_time)
                 time.sleep(5)
 
