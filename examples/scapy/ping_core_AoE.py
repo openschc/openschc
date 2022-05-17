@@ -19,11 +19,10 @@ from threading import Thread
 from requests import get
 
 class Sniffer(Thread):
-    def  __init__(self, interface="ens3", init_time=None):
+    def  __init__(self, interface="ens3"):
         super().__init__()
 
         self.interface = interface
-        self.init_time = init_time
         #self.stop_sniffer = Event()
 
     def run(self):
@@ -53,22 +52,21 @@ class Sniffer(Thread):
                             uncomp_pkt[1].show()
                             send(uncomp_pkt[1], iface="he-ipv6") 
                 elif ip_proto==41:
-                    contexts.append(tuple ([time.time() - self.init_time, schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)])) # device_id is retrieved later from the rule
+                    contexts.append(tuple([ time.time() - self.init_time, schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)])) # device_id is retrieved later from the rule
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
 
 class Loop_on_contexts(Thread):
-    def __init__(self, init_time=None):
+    def __init__(self):
         super().__init__()
-        self.init_time = time.time()
 
     def run(self):
         while True:
             for ctx in range(len(contexts)):
                 print("Contexts at ping_core: ", contexts)
                 print("Context added time : ", contexts[ctx][0])
-                print("Session type at ping_core: ", contexts[ctx][1].get_session_type() - self.init_time)
-                print("Last sent time: ", contexts[ctx][1].last_send_time - self.init_time)
+                print("Session type at ping_core: ", contexts[ctx][1].get_session_type() - init_time)
+                print("Last sent time: ", contexts[ctx][1].last_send_time - init_time)
                 time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
