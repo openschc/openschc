@@ -123,9 +123,24 @@ class FragmentBase():
         #, core_id=None, device_id=None, direction=T_DIR_UP
         # First we look for the ongoing fragmentation sessions, then we create the 
         # schc abort
-        # schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)
 
-        print("send sender abort")
+        if self.sender_abort_sent == False:
+
+            schc_frag = frag_msg.frag_sender_tx_abort(self.rule, self.dtag)  
+            # Send a SCHC Sender Abort
+            if self.protocol.position == T_POSITION_DEVICE:
+                dest = self._session_id[0] # core address
+            else:
+                dest = self._session_id[1] # device address
+            args = (schc_frag.packet.get_content(), dest) 
+            dprint("MESSSAGE TYPE ----> Sent Sender-Abort.", schc_frag.__dict__)
+            if enable_statsct:
+                Statsct.set_msg_type("SCHC_SENDER_ABORT")
+                Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
+            self.protocol.scheduler.add_event(0,
+                                        self.protocol.layer2.send_packet, args)
+            self.sender_abort_sent = True
+        return self.sender_abort_sent
 
 class FragmentNoAck(FragmentBase):
 
