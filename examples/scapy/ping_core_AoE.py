@@ -19,10 +19,11 @@ from threading import Thread
 from requests import get
 
 class Sniffer(Thread):
-    def  __init__(self, interface="ens3"):
+    def  __init__(self, interface="ens3", init_time=None):
         super().__init__()
 
         self.interface = interface
+        self.init_time = time.time()
         #self.stop_sniffer = Event()
 
     def run(self):
@@ -52,7 +53,7 @@ class Sniffer(Thread):
                             uncomp_pkt[1].show()
                             send(uncomp_pkt[1], iface="he-ipv6") 
                 elif ip_proto==41:
-                    contexts.append(tuple ([time.time, schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)])) # device_id is retrieved later from the rule
+                    contexts.append(tuple ([time.time() - self.init_time, schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)])) # device_id is retrieved later from the rule
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
 
@@ -64,7 +65,8 @@ class Loop_on_contexts(Thread):
         while True:
             for ctx in range(len(contexts)):
                 print("Contexts: ", contexts)
-                print("Session type at ping_core: ", contexts[ctx].get_session_type())
+                print("Session time at ping_core: ", contexts[ctx][0])
+                print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
                 time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
