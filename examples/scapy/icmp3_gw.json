@@ -1,9 +1,9 @@
  {
-    "DeviceID" : "lorawan:54.37.158.10:8888",
+    "DeviceID" : "lorawan:70b3d5499069ffd6",
     "SoR" : [
 	 {
 	    "RuleID": 98,
-	    "RuleIDLength": 3,
+	    "RuleIDLength": 8,
 	    "Compression": [
 		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
 		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
@@ -11,17 +11,25 @@
 		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
 		{"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
 		{"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-		{"FID": "IPV6.DEV_PREFIX","TV": "2001:470:1F21:1D2::/64",
+		{"FID": "IPV6.DEV_PREFIX","TV": "2001:470:1f13:59e::/64",
                                                "MO": "equal","CDA": "not-sent"},
 		{"FID": "IPV6.DEV_IID", "TV": "::2","MO": "equal","CDA": "not-sent"},
-		{"FID": "IPV6.APP_PREFIX",         "MO": "ignore","CDA": "value-sent"},
+		{"FID": "IPV6.APP_PREFIX", "TV":"2001:41d0:401:3100::57d7","MO": "equal","CDA": "not-sent"},
 		{"FID": "IPV6.APP_IID",         "MO": "ignore","CDA": "value-sent"},
 		{"FID": "ICMPV6.TYPE",  "DI": "DW", "TV": 128,"MO": "equal","CDA": "not-sent"},
 		{"FID": "ICMPV6.TYPE",  "DI": "UP", "TV": 129,"MO": "equal","CDA": "not-sent"},
 		{"FID": "ICMPV6.CODE",  "TV": 0,  "MO": "equal","CDA": "not-sent"},
 		{"FID": "ICMPV6.CKSUM", "TV": 0, "MO": "ignore","CDA": "compute-checksum"},
 		{"FID": "ICMPV6.IDENT", "TV": 0,"MO": "ignore","CDA": "value-sent"},
-		{"FID": "ICMPV6.SEQNO", "TV": 0,"MO": "ignore","CDA": "value-sent"}
+		{"FID": "ICMPV6.SEQNO", "TV": 0,"MO": "ignore","CDA": "value-sent"},
+		{"FID": "COAP.VER",     "TV":1,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.TYPE",    "TV":1,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.TKL",     "TV":2,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.MID",                  "MO": "ignore","CDA": "value-sent"},
+		{"FID": "COAP.TOKEN",                "MO": "ignore","CDA": "value-sent"},
+		{"FID": "COAP.Uri-Path",  "TV":"humidity", "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.Content-Format", "TV":60, "MO": "equal","CDA": "not-sent"}
 		
 	    ]
 	 },{
