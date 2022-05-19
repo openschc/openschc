@@ -15,7 +15,7 @@
                                                "MO": "equal","CDA": "not-sent"},
 		{"FID": "IPV6.DEV_IID", "TV": "::2","MO": "equal","CDA": "not-sent"},
 		{"FID": "IPV6.APP_PREFIX", "TV":"2001:41d0:401:3100::/64","MO": "equal","CDA": "not-sent"},
-		{"FID": "IPV6.APP_IID",         "MO": "ignore","CDA": "value-sent"},
+		{"FID": "IPV6.APP_IID",         "MO": "equal","CDA": "not-sent"},
 		{"FID": "UDP.DEV_PORT", "TV": 23629, "MO": "equal", "CDA": "not-sent"},
         {"FID": "UDP.APP_PORT", "TV": 5684, "MO": "equal", "CDA": "not-sent"},
         {"FID": "UDP.LEN",      "TV": 0,  "MO": "ignore","CDA": "compute-length"},
@@ -24,7 +24,7 @@
 		{"FID": "COAP.TYPE",    "TV":1,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.TKL",     "TV":2,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
-		{"FID": "COAP.MID",                  "MO": "ignore","CDA": "value-sent"},
+		{"FID": "COAP.MID",     "TV":0,      "MO": "MSB", "MO.VAL": 8, "CDA": "LSB"},
 		{"FID": "COAP.TOKEN",                "MO": "ignore","CDA": "value-sent"},
 		{"FID": "COAP.Uri-Path",  "TV":"humidity", "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.Content-Format", "TV":60, "MO": "equal","CDA": "not-sent"}
