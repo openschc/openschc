@@ -136,8 +136,8 @@ class FragmentBase():
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
+            self.protocol.scheduler.cancel_session(self._session_id) # Cancel previous events of this session
             self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args, session_id = self._session_id)
-            self.protocol.scheduler.cancel_session(self._session_id)
             self.sender_abort_sent = True
             self.protocol.session_manager.delete_session(self._session_id)
 
