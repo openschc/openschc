@@ -295,7 +295,7 @@ class SCHCProtocol:
             return 
 
         # Start a fragmentation session from rule database
-        print ("protocol.py", self.position, direction, destination)
+        print ("protocol.py", self.position, direction, destination, sender_delay)
 
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
