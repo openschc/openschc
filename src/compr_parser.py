@@ -376,7 +376,7 @@ class Unparser:
         
         full_packet = L3header / L4header / Raw(load=coap_h)
 
-        print(binascii.hexlify(bytes(full_packet)))
+        hexdump(full_packet)
         return full_packet
 
         
