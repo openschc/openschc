@@ -13,6 +13,7 @@ from binascii import hexlify, unhexlify
 from struct import pack, unpack
 import ipaddress
 from scapy.all import *
+import binascii
 
 
 option_names = {
