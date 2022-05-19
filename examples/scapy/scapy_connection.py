@@ -117,7 +117,7 @@ class ScapyScheduler:
         print("queue", self.queue)
         if indices is not None:     
             for q in indices:
-                print("q ", q)
+                print("q ", indices[q])
                 elm.append(self.queue.pop(indices[q]))
         return elm
 
