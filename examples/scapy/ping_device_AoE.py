@@ -22,9 +22,6 @@ rm = RM.RuleManager()
 rm.Add(file="icmp3.json")
 rm.Print()
 
-#Unparser
-unparser = Unparser()
-
 # Create a ICMPv6 Echo Reply from Echo Request
 def create_echoreply(pkt, addr):
     dprint("packet decompresed: ", pkt)
@@ -57,7 +54,7 @@ def processPkt(pkt):
     schc_machine and scheduler must be specified as a global variable.
     """
 
-    scheduler.run(session=schc_machine)
+    scheduler.run(session=schc_machine, display_period = 10) 
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
@@ -87,7 +84,9 @@ def processPkt(pkt):
                            uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,) #TODO Verify Find Packet from SCHC Rule, it considers some None values
                            dprint(uncomp_pkt)
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
+                # Metre X dans une file d'attante, faire des push regulierment, si trop de temps dans la file on appel X.abort
+                context = schc_machine.schc_send(raw_packet=bytes(pkt)[34:], device_id=device_id)
+                print ("frag_context at ping_device", context)
                 pkt.show2()
 
 # Start SCHC Machine
@@ -104,20 +103,15 @@ tunnel.bind(("0.0.0.0", socket_port))
 device_id = 'udp:'+ip+":"+str(socket_port)
 print ("device_id is", device_id)
 
-
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
 schc_machine = SCHCProtocol(
     system=system,           # define the scheduler
     layer2=lower_layer,      # how to send messages
+    #default_l2_mtu = 
     role=POSITION,           # DEVICE or CORE
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
-
-
-
-
- 
