@@ -282,10 +282,16 @@ class Unparser:
                 L4header = ICMPv6Header
         elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
             print("KKKK - HERE in UDP section")
-            L4Header = UDP (
-            sport = header_d[(T_UDP_DEV_PORT, 1)][0],
-            dport = header_d[(T_UDP_APP_PORT, 1)][0]
-            )
+            if direction == T_DIR_UP:
+                L4Header = UDP (
+                sport = header_d[(T_UDP_DEV_PORT, 1)][0],
+                dport = header_d[(T_UDP_APP_PORT, 1)][0]
+                )
+                IPv6Src = DevStr
+                IPv6Dst = AppStr
+            else:
+                raise ValueError("TBD")
+                
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
 
