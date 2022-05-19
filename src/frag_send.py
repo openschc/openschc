@@ -616,7 +616,7 @@ class FragmentAckOnError(FragmentBase):
             return
         # set ack waiting timer
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
-                self.ack_wait_timer, self.ack_timeout, args)
+                self.ack_wait_timer, self.ack_timeout, args, session_id = self._session_id)
         dprint("*******event id {}".format(self.event_id_ack_wait_timer))
         schc_frag = frag_msg.frag_sender_ack_req(self.rule, self.dtag, win)
         if enable_statsct:
