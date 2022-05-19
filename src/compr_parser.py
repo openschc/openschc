@@ -259,6 +259,7 @@ class Unparser:
                         data = data)
                 L4header = ICMPv6Header
         elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
+            print("KKKK - HERE in UDP section")
             L4Header = UDP (
             sport = fields[(T_UDP_DEV_PORT, 1)][0],
             dport = fields[(T_UDP_APP_PORT, 1)][0]
