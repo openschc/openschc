@@ -290,13 +290,11 @@ class SCHCProtocol:
         
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id)
+        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay)
         if packet_bbuf == None: # No compression rule found
             return 
 
         # Start a fragmentation session from rule database
-        print ("protocol.py", self.position, direction, destination, sender_delay)
-
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
