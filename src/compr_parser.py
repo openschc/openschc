@@ -261,18 +261,18 @@ class Unparser:
         elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
             print("KKKK - HERE in UDP section")
             L4Header = UDP (
-            sport = fields[(T_UDP_DEV_PORT, 1)][0],
-            dport = fields[(T_UDP_APP_PORT, 1)][0]
+            sport = header_d[(T_UDP_DEV_PORT, 1)][0],
+            dport = header_d[(T_UDP_APP_PORT, 1)][0]
             )
-            if (T_COAP_VERSION, 1) in fields: # IPv6 / UDP / COAP
+            if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
 
-                b1 = (fields[(T_COAP_VERSION, 1)][0] << 6)|(fields[(T_COAP_TYPE, 1)][0]<<4)|(fields[(T_COAP_TKL, 1)][0])
-                coap_h = struct.pack("!BBH", b1, fields[(T_COAP_CODE, 1)][0], fields[(T_COAP_MID, 1)][0])
+                b1 = (header_d[(T_COAP_VERSION, 1)][0] << 6)|(header_d[(T_COAP_TYPE, 1)][0]<<4)|(header_d[(T_COAP_TKL, 1)][0])
+                coap_h = struct.pack("!BBH", b1, header_d[(T_COAP_CODE, 1)][0], header_d[(T_COAP_MID, 1)][0])
 
-                tkl = fields[(T_COAP_TKL, 1)][0]
+                tkl = header_d[(T_COAP_TKL, 1)][0]
                 if tkl != 0:
-                    token = fields[(T_COAP_TOKEN, 1)][0]
+                    token = header_d[(T_COAP_TOKEN, 1)][0]
                     for i in range(tkl-1, -1, -1):
                         bt = (token & (0xFF << 8*i)) >> 8*i
                         coap_h += struct.pack("!B", bt)
@@ -300,8 +300,8 @@ class Unparser:
                     else:
                         dt = 13
                         
-                    opt_len = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
-                    opt_val = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
+                    opt_len = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
+                    opt_val = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
                     print (opt_len, opt_val)
 
                     if opt_len < 13:
