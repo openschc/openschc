@@ -374,9 +374,11 @@ class Unparser:
 
         L3header = IPv6Header
 
-        L4Header.show()
+        L3header.show()
+        L4header.show()
+        
         full_packet = L3header / L4header / Raw(load=coap_h)
-        full_packet.show()
+     
         return full_packet
 
         
