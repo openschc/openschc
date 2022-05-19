@@ -69,7 +69,7 @@ class Loop_on_contexts(Thread):
                 last_time = contexts[ctx][1].last_send_time - init_time
                 abort_sent = contexts[ctx][1].sender_abort_sent
                 all1_send = contexts[ctx][1].all1_send
-                print("last time: ", last_time, "abort : ", abort)
+                print("last time: ", last_time, "abort_sent : ", abort_sent)
                 if all1_send == False and last_time > 7 and not abort_sent:
                     print("Sending Abort")
                     abort = contexts[ctx][1].send_sender_abort()
