@@ -52,7 +52,7 @@ class Sniffer(Thread):
                             uncomp_pkt[1].show()
                             send(uncomp_pkt[1], iface="he-ipv6") 
                 elif ip_proto==41:
-                    contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, sender_delay=5)])) # device_id is retrieved later from the rule
+                    contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, sender_delay=0)])) # device_id is retrieved later from the rule
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
 
