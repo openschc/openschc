@@ -44,7 +44,7 @@ def processPkt(pkt):
                     print("SCHC packet contents:", schc_pkt)
                     other_end = "lorawan:70b3d5499069ffd6"
                     print("other end =", other_end)
-                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)                       
+                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt[:9])                       
                     if uncomp_pkt != None:
                         uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface="he-ipv6") 
