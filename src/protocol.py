@@ -165,6 +165,7 @@ class SCHCProtocol:
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
         self.verbose = verbose
+        self.sender_delay = 0
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -281,6 +282,10 @@ class SCHCProtocol:
         #To perform fragmentation, we get the device_id from the rule:
         #Ex: "DeviceID" : "udp:54.37.158.10:8888",
 
+        #Add sender delay if specified by upper layer
+
+        self.sender_delay = sender_delay
+
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
             destination = core_id
@@ -299,7 +304,7 @@ class SCHCProtocol:
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), destination, sender_delay)
+            args = (packet_bbuf.get_content(), destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return 
 

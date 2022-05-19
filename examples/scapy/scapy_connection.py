@@ -15,6 +15,7 @@ class ScapyLowerLayer:
         self.protocol = None
         self.position = position
         self.other_end = other_end
+        self.sender_delay = 0
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -23,7 +24,7 @@ class ScapyLowerLayer:
         self.protocol = protocol
         self._actual_init()
 
-    def send_packet(self, packet, dest, sender_delay, transmit_callback=None):
+    def send_packet(self, packet, dest, transmit_callback=None):
         print ("scapy_conection.py: send_pkt, dest ", dest, "packet", packet, "sender_delay", sender_delay)
         if dest != None and dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
@@ -42,9 +43,8 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
-        # Add transmission delay
-        print("sender_delay", sender_delay)
-        time.sleep(sender_delay)
+        print (self.protocol.sender_delay)
+        time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
         return 400 # XXX
