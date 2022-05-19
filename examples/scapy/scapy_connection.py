@@ -113,10 +113,11 @@ class ScapyScheduler:
     def cancel_session(self, session_id = None): #TODO
         elm = []
         indices = [i for i, x in enumerate(self.queue) if x[4] == session_id]
-        print("indices")
+        print("indices", indices)
         print("queue", self.queue)
         if indices is not None:     
             for q in indices:
+                print("q ", q)
                 elm.append(self.queue.pop(indices[q]))
         return elm
 
