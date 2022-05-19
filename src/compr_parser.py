@@ -287,9 +287,9 @@ class Unparser:
                 app_port = header_d[(T_UDP_APP_PORT, 1)][0]
 
                 if type(dev_port) == bytes:
-                    dev_port = int(dev_port)
+                    dev_port = int(dev_port,16)
                 if type(app_port) == bytes:
-                    app_port = int(app_port)
+                    app_port = int(app_port,16)
                     
                 L4header = UDP (
                 sport = dev_port,
