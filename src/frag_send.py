@@ -206,7 +206,7 @@ class FragmentNoAck(FragmentBase):
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
 
             transmit_callback = None
-            self.protocol.scheduler.add_event(0, self.event_sent_frag, session_id = self._session_id)
+            self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
             fcn = 0
             self.mic_sent = None
 
@@ -243,7 +243,7 @@ class FragmentNoAck(FragmentBase):
                              (frag_msg.get_sender_header_size(self.rule) +
                               remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
-                self.protocol.scheduler.add_event(0, self.event_sent_frag, session_id = self._session_id)
+                self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
                 fcn = 0
                 self.mic_sent = None
                 if enable_statsct:
