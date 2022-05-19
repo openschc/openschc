@@ -117,7 +117,6 @@ class ScapyScheduler:
         if indices is not None:     
             for q in indices:
                 elm.append(self.queue.pop(indices[q]))
-
         return elm
 
     # ----- Additional methods
@@ -186,7 +185,7 @@ class ScapyScheduler:
                 return
 
             event_info = self.queue.pop(0)
-            self.clock, event_id, callback, args = event_info
+            self.clock, event_id, callback, args, session_id = event_info
             self.current_event_id = event_id
             if self.observer is not None:
                 self.observer("sched-pre-event", event_info)
