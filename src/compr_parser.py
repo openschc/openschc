@@ -291,7 +291,7 @@ class Unparser:
                 IPv6Dst = AppStr
             else:
                 raise ValueError("TBD")
-                
+
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
 
@@ -373,8 +373,10 @@ class Unparser:
         ) 
 
         L3header = IPv6Header
-        full_packet = L3header / L4header
 
+        L4Header.show()
+        full_packet = L3header / L4header
+        
         return full_packet
 
         
