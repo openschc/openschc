@@ -283,7 +283,7 @@ class Unparser:
         elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
             print("KKKK - HERE in UDP section")
             if direction == T_DIR_UP:
-                L4Header = UDP (
+                L4header = UDP (
                 sport = header_d[(T_UDP_DEV_PORT, 1)][0],
                 dport = header_d[(T_UDP_APP_PORT, 1)][0]
                 )
