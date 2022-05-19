@@ -376,7 +376,7 @@ class Unparser:
 
         L4Header.show()
         full_packet = L3header / L4header / Raw(load=coap_h)
-        
+        full_packet.show()
         return full_packet
 
         
