@@ -63,6 +63,7 @@ class Loop_on_contexts(Thread):
     def run(self):
         while True:
             context_pos = 0
+            old_context = False
             for ctx in range(len(contexts)):
                 context_pos += 1
                 print("Contexts at ping_core: ", contexts)
@@ -76,7 +77,9 @@ class Loop_on_contexts(Thread):
                     print("Sending Abort")
                     abort = contexts[ctx][1].send_sender_abort()
                 elif abort == True or all1_send == True:
-                    contexts.pop(context_pos)
+                    old_context = True
+            if old_context:
+                contexts.pop(context_pos)
             time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
