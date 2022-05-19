@@ -258,6 +258,80 @@ class Unparser:
                         seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                         data = data)
                 L4header = ICMPv6Header
+        elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
+            L4Header = UDP (
+            sport = fields[(T_UDP_DEV_PORT, 1)][0],
+            dport = fields[(T_UDP_APP_PORT, 1)][0]
+            )
+            if (T_COAP_VERSION, 1) in fields: # IPv6 / UDP / COAP
+                print ("CoAP Inside")
+
+                b1 = (fields[(T_COAP_VERSION, 1)][0] << 6)|(fields[(T_COAP_TYPE, 1)][0]<<4)|(fields[(T_COAP_TKL, 1)][0])
+                coap_h = struct.pack("!BBH", b1, fields[(T_COAP_CODE, 1)][0], fields[(T_COAP_MID, 1)][0])
+
+                tkl = fields[(T_COAP_TKL, 1)][0]
+                if tkl != 0:
+                    token = fields[(T_COAP_TOKEN, 1)][0]
+                    for i in range(tkl-1, -1, -1):
+                        bt = (token & (0xFF << 8*i)) >> 8*i
+                        coap_h += struct.pack("!B", bt)
+
+                delta_t = 0
+                comp_rule = rule[T_COMP] # look into the rule to find options 
+                for idx in range(0, len(comp_rule)):
+                    if comp_rule[idx][T_FID] == T_COAP_MID:
+                        break
+
+                idx += 1 # after MID is there TOKEN
+                if idx < len(comp_rule) and comp_rule[idx][T_FID] == T_COAP_TOKEN:
+                    print ("skip token")
+                    idx += 1
+
+                for idx2 in range (idx, len(comp_rule)):
+                    print (comp_rule[idx2])
+                    opt_name = comp_rule[idx2][T_FID].replace("COAP.", "")
+                    
+                    delta_t = coap_options[opt_name] - delta_t
+                    print (delta_t)
+
+                    if delta_t < 13:
+                        dt = delta_t
+                    else:
+                        dt = 13
+                        
+                    opt_len = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
+                    opt_val = fields[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
+                    print (opt_len, opt_val)
+
+                    if opt_len < 13:
+                        ol = opt_len
+                    else:
+                        ol = 13
+                        
+                    coap_h += struct.pack("!B", (dt <<4) | ol)
+
+                    if dt == 13:
+                        coap_h += struct.pack("!B", delta_t - 13)
+
+                    if ol == 13:
+                        coap_h += struct.pack("!B", opt_len - 13)
+
+
+                    for i in range (0, opt_len):
+                        print (i)
+                        if type(opt_val) == str:
+                            coap_h += struct.pack("!B", ord(opt_val[i]))
+                        elif type(opt_val) == int:
+                            v = (opt_val & (0xFF << (opt_len - i - 1))) >> (opt_len - i - 1)
+                            coap_h += struct.pack("!B", v)
+
+                if len(data) > 0:
+                    coap_h += b'\xff'
+                    coap_h += data
+                        
+                print (binascii.hexlify(coap_h))
+
+
 
         IPv6Header = IPv6 (
             version= header_d[(T_IPV6_VER, 1)][0],
