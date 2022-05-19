@@ -266,7 +266,7 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, core_id=None, device_id=None):
+    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0):
         """Starting to send SCHC packet after called by Application.
         
         If self.position is T_POSITION_DEVICE and 
@@ -301,14 +301,14 @@ class SCHCProtocol:
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
-            args = (packet_bbuf.get_content(), destination)
+            args = (packet_bbuf.get_content(), destination, sender_delay)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
-            frag_session.start_sending() #TODO: Return frag session, add method abort dans le context
+            frag_session.start_sending() 
         
         return frag_session
 
