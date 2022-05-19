@@ -43,7 +43,7 @@ class ScapyLowerLayer:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
         # Add transmission delay
-        print("sender_delay", sender_delay, sender_delay.type())
+        print("sender_delay", sender_delay)
         time.sleep(sender_delay)
 
     def get_mtu_size(self):
