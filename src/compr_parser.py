@@ -304,7 +304,10 @@ class Unparser:
                 print ("CoAP Inside")
 
                 b1 = (header_d[(T_COAP_VERSION, 1)][0] << 6)|(header_d[(T_COAP_TYPE, 1)][0]<<4)|(header_d[(T_COAP_TKL, 1)][0])
-                coap_h = struct.pack("!BBH", b1, header_d[(T_COAP_CODE, 1)][0], header_d[(T_COAP_MID, 1)][0])
+                c_mid = header_d[(T_COAP_MID, 1)][0]
+                if type(c_mid) == bytes:
+                    c_mid = int.from_bytes(c_mid,"big") 
+                coap_h = struct.pack("!BBH", b1, header_d[(T_COAP_CODE, 1)][0],c_mid )
 
                 tkl = header_d[(T_COAP_TKL, 1)][0]
                 if tkl != 0:
