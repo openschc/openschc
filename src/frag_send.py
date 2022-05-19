@@ -136,11 +136,10 @@ class FragmentBase():
             if enable_statsct:
                 Statsct.set_msg_type("SCHC_SENDER_ABORT")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
-            self.protocol.scheduler.add_event(0,
-                                        self.protocol.layer2.send_packet, args)
+            self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args, session_id = self._session_id)
+            self.protocol.scheduler.cancel_session(self._session_id)
             self.sender_abort_sent = True
             self.protocol.session_manager.delete_session(self._session_id)
-
 
         return self.sender_abort_sent
 
@@ -207,7 +206,7 @@ class FragmentNoAck(FragmentBase):
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
 
             transmit_callback = None
-            self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
+            self.protocol.scheduler.add_event(0, self.event_sent_frag, session_id = self._session_id)
             fcn = 0
             self.mic_sent = None
 
@@ -244,7 +243,7 @@ class FragmentNoAck(FragmentBase):
                              (frag_msg.get_sender_header_size(self.rule) +
                               remaining_data_size) % self.l2word)
                 tile = self.packet_bbuf.get_bits_as_buffer(tile_size)
-                self.protocol.scheduler.add_event(0, self.event_sent_frag, ())
+                self.protocol.scheduler.add_event(0, self.event_sent_frag, session_id = self._session_id)
                 fcn = 0
                 self.mic_sent = None
                 if enable_statsct:
@@ -299,13 +298,13 @@ class FragmentNoAck(FragmentBase):
         print('dtag', frag_msg.get_max_dtag(self.rule))
         print('dtag', frag_msg.get_max_fcn(self.rule))
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-                                          args, session_id = self) # Add session_id
+                                          args, session_id = self._session_id) # Add session_id
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
         print("event_sent_frag")
         # delay = 10 #self.protocol.config.get("tx_interval", 0)
         delay = self.protocol.config.get("tx_interval", 0)
-        self.protocol.scheduler.add_event(delay, self.send_frag, {})
+        self.protocol.scheduler.add_event(delay, self.send_frag, session_id = self._session_id)
 
     def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
 
@@ -406,7 +405,7 @@ class FragmentAckOnError(FragmentBase):
                 # set ack waiting timer
                 args = (schc_frag, win,)
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
-                    self.ack_wait_timer, self.ack_timeout, args)
+                    self.ack_wait_timer, self.ack_timeout, args, session_id = self._session_id)
                 dprint("*******event id {}".format(self.event_id_ack_wait_timer))
                 # if self.all1_send and self.state == self.ACK_FAILURE:
             #     #case when with the bitmap is not possible to identify the missing tile,
@@ -520,7 +519,7 @@ class FragmentAckOnError(FragmentBase):
                 dprint("all ones")
                 self.schc_all_1 = schc_frag
                 self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
-                    self.ack_wait_timer, self.ack_timeout, args)
+                    self.ack_wait_timer, self.ack_timeout, args, session_id = self._session_id)
                 dprint("*******event id {}".format(self.event_id_ack_wait_timer))
             # save the last window tiles.
             self.last_window_tiles = window_tiles
@@ -566,7 +565,7 @@ class FragmentAckOnError(FragmentBase):
             self.schc_all_1 = schc_frag
             self.state = self.SEND_ALL_1
             self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
-                self.ack_wait_timer, self.ack_timeout, args)
+                self.ack_wait_timer, self.ack_timeout, args, session_id = self._session_id)
             dprint("*******event id {}".format(self.event_id_ack_wait_timer))
 
         # send a SCHC fragment
@@ -579,7 +578,7 @@ class FragmentAckOnError(FragmentBase):
         dprint ("dbug: frag_send.py: Sending Fragment, args: ", args)
         dprint("frag sent:", schc_frag.__dict__)
         self.last_send_time = time.time()
-        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args, session_id = self._session_id)
 
     def cancel_ack_wait_timer(self):
         # don't assert here because the receiver sends ACK back anytime.
@@ -613,7 +612,7 @@ class FragmentAckOnError(FragmentBase):
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
 
             self.protocol.scheduler.add_event(0,
-                                        self.protocol.layer2.send_packet, args)
+                                        self.protocol.layer2.send_packet, args, session_id = self._session_id)
             return
         # set ack waiting timer
         self.event_id_ack_wait_timer = self.protocol.scheduler.add_event(
@@ -628,7 +627,7 @@ class FragmentAckOnError(FragmentBase):
 
         dprint("MESSSAGE TYPE ----> SCHC ACK REQ frag:", schc_frag.__dict__)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
-                                        args)
+                                        args, session_id = self._session_id)
         """ waits for all the acks before sending the ack request
 
         self.number_of_ack_waits += 1

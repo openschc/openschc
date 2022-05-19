@@ -75,6 +75,7 @@ class ScapyScheduler:
         self.item=0
         self.fd_callback_table = {}
         self.last_show = 0 
+        self.session_id = None
 
 
     # ----- AbstractScheduler Interface (see: architecture.py)
@@ -88,6 +89,7 @@ class ScapyScheduler:
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
+        self.session_id = session_id
         clock = self.get_clock()
         abs_time = clock+rel_time
         self.queue.append((abs_time, event_id, callback, args, session_id))
@@ -105,6 +107,16 @@ class ScapyScheduler:
 
         if item_found:
             elm = self.queue.pop(item_pos)
+
+        return elm
+
+    def cancel_session(self, session_id = None): #TODO
+        elm = []
+        indices = [i for i, x in enumerate(self.queue) if x == q[4] == session_id]
+
+        if indices is not None:     
+            for q in indices:
+                elm.append(self.queue.pop(indices[q]))
 
         return elm
 
