@@ -48,7 +48,7 @@ def processPkt(pkt):
                     if uncomp_pkt != None:
                         uncomp_pkt[1].show()
                         print("RRRRR", uncomp_pkt)
-                        send(uncomp_pkt[1], iface="he-ipv6") 
+                        send(uncomp_pkt, iface="he-ipv6") 
             elif ip_proto==41:
                 schc_machine.schc_send(bytes(pkt)[34:])
 
