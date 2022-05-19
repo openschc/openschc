@@ -75,7 +75,11 @@ class Loop_on_contexts(Thread):
                     abort = contexts[ctx][1].send_sender_abort()
 
             old_contexts = [i for i, x in enumerate(contexts) if contexts[ctx][1].send_sender_abort() or contexts[ctx][1].all1_send]
-            contexts = [i for j, i in enumerate(contexts) if j not in old_contexts]
+            new_contexts = [i for j, i in enumerate(contexts) if j not in old_contexts]
+            contexts.clear()
+            for ctx in range(len(new_contexts)):
+                contexts.append(new_contexts[ctx])
+
             time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
