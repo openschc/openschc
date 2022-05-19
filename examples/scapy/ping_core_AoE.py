@@ -62,7 +62,9 @@ class Loop_on_contexts(Thread):
 
     def run(self):
         while True:
+            context_pos = 0
             for ctx in range(len(contexts)):
+                item_pos += 1
                 print("Contexts at ping_core: ", contexts)
                 print("Context added time : ", contexts[ctx][0])
                 print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
@@ -73,7 +75,9 @@ class Loop_on_contexts(Thread):
                 if all1_send == False and last_time > 7 and abort == False:
                     print("Sending Abort")
                     abort = contexts[ctx][1].send_sender_abort()
-                time.sleep(5)
+                elif abort == True or all1_send == True:
+                    contexts.pop(context_pos)
+            time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
