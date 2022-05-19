@@ -372,14 +372,13 @@ class Unparser:
             dst    = IPv6Dst.compressed
         ) 
 
-        L3header = IPv6Header
-
-        L3header.show()
-        L4header.show()
+        L3header = IPv6Header  
         
         full_packet = L3header / L4header / Raw(load=coap_h)
-     
+
+        print(binascii.hexlify(byte(full_packet)))
         return full_packet
 
         
 
+    
