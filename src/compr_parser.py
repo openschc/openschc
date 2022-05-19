@@ -240,7 +240,7 @@ class Unparser:
 
         DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
         AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
-
+        print("LLLLLL:", header_d)
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
             for i in icmpv6_types:
                 if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
