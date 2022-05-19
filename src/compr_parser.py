@@ -43,6 +43,27 @@ icmpv6_types = {
     T_ICMPV6_TYPE_ECHO_REPLY: 129
 }
 
+coap_options = {'If-Match':1,
+            'Uri-Host':3,
+            'ETag':4,
+            'If-None-Match':5,
+            'Observe':6,
+            'Uri-Port':7,
+            'Location-Path':8,
+            'Uri-Path':11,
+            'Content-Format':12,
+            'Max-Age':14,
+            'Uri-Query':15,
+            'Accept':17,
+            'Location-Query':20,
+            'Block2':23,
+            'Block1':27,
+            'Size2':28,
+            'Proxy-Uri':35,
+            'Proxy-Scheme':39,
+            'Size1':60}
+
+
 class Parser:
     """
     Parser takes a bytearray and transforms it into a dictionnay indexed by field id.
@@ -278,7 +299,7 @@ class Unparser:
                         coap_h += struct.pack("!B", bt)
 
                 delta_t = 0
-                comp_rule = rule[T_COMP] # look into the rule to find options 
+                comp_rule = d_rule[T_COMP] # look into the rule to find options 
                 for idx in range(0, len(comp_rule)):
                     if comp_rule[idx][T_FID] == T_COAP_MID:
                         break
