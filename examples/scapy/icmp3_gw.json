@@ -22,10 +22,9 @@
         {"FID": "UDP.CKSUM",    "TV": 0,  "MO": "ignore","CDA": "compute-checksum"},
 		{"FID": "COAP.VER",     "TV":1,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.TYPE",    "TV":1,      "MO": "equal","CDA": "not-sent"},
-		{"FID": "COAP.TKL",     "TV":2,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.TKL",     "TV":0,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.MID",     "TV":0,      "MO": "MSB", "MO.VAL": 8, "CDA": "LSB"},
-		{"FID": "COAP.TOKEN",                "MO": "ignore","CDA": "value-sent"},
 		{"FID": "COAP.Uri-Path",  "TV":"humidity", "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.Content-Format", "TV":60, "MO": "equal","CDA": "not-sent"}
 		
