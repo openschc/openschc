@@ -258,7 +258,7 @@ class Unparser:
             elif type(v) == int:
                 c[k] = v
             else:
-                raise ValueError ("Type not supported")
+                raise ValueError ("Type  {} not supported".format(type(v)))
 
         DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
         AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
