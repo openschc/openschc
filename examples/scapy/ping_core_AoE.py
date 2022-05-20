@@ -23,7 +23,7 @@ class Sniffer(Thread):
         super().__init__()
 
         self.interface = interface
-        self.sender_delay = 0
+        self.sender_delay = 5
         #self.stop_sniffer = Event()
 
     def run(self):
