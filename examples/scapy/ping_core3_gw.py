@@ -41,8 +41,8 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    print("SCHC packet contents:", schc_pkt[:8])
-                    other_end = "lorawan:70b3d5499069ffd6"
+                    print("SCHC packet contents:", schc_pkt)
+                    other_end = "lorawan:" + binascii.hexlify(schc_pkt[:8]).decode("utf-8")
                     print("other end =", other_end)
                     uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt[9:])                       
                     if uncomp_pkt != None:
