@@ -24,7 +24,7 @@
 		{"FID": "COAP.TYPE",    "TV":1,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.TKL",     "TV":0,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
-		{"FID": "COAP.MID",     "TV":0,      "MO": "MSB", "MO.VAL": 8, "CDA": "LSB"},
+		{"FID": "COAP.MID",     "TV":0,      "MO": "MSB", "MO.VAL": 4, "CDA": "LSB"},
 		{"FID": "COAP.Uri-Path",  "FP":1, "TV":["humidity","temperature","pressure","memory"], "MO": "match-mapping",
 			"CDA": "mapping-sent"},
 		{"FID": "COAP.Uri-Path",  "FP":2, "TV":"ABCD", "MO": "equal","CDA": "not-sent"},
