@@ -23,7 +23,7 @@ class Sniffer(Thread):
         super().__init__()
 
         self.interface = interface
-        self.sender_delay = 5
+        self.sender_delay = 0
         #self.stop_sniffer = Event()
 
     def run(self):
@@ -79,8 +79,8 @@ class Loop_on_contexts(Thread):
                     print("Sending Abort")
                     abort = contexts[ctx][1].send_sender_abort()
 
-            old_contexts = [i for i, x in range(len(contexts)) if contexts[ctx][1].sender_abort_sent or contexts[ctx][1].all1_send]
-            new_contexts = [i for j, i in range(len(contexts)) if j not in old_contexts]
+            old_contexts = [i for i, x in enumerate(contexts) if contexts[ctx][1].sender_abort_sent or contexts[ctx][1].all1_send]
+            new_contexts = [i for j, i in enumerate(contexts) if j not in old_contexts]
             contexts.clear()
             for ctx in range(len(new_contexts)):
                 contexts.append(new_contexts[ctx])
