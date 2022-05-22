@@ -20,7 +20,9 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="coap_gw.json")
+rm.Add(file="coap_gw_LP1.json")
+rm.Add(file="coap_gw_LP2.json")
+rm.Add(file="coap_gw_LP3.json")
 rm.Print()
 
 unparser = Unparser()

@@ -1,5 +1,5 @@
  {
-    "DeviceID" : "lorawan:70b3d5499069ffd6",
+    "DeviceID" : "lorawan:70b3d54991076c68",
     "SoR" : [
 	 {
 	    "RuleID": 98,
@@ -25,47 +25,11 @@
 		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.MID",     "FL":8,  "TV":0, "MO": "ignore", "CDA": "value-sent"},
 		{"FID": "COAP.Uri-Path", "FL": "var", "FP":1, "TV":"humidity_l", "MO": "equal","CDA": "not-sent"},
-		{"FID": "COAP.Uri-Path", "FL": "var", "FP":2, "TV":"70b3d5499069ffd6", "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.Uri-Path", "FL": "var", "FP":2, "TV":"70b3d54991076c68", "MO": "equal","CDA": "not-sent"},
 		{"FID": "COAP.Content-Format", "TV":60, "MO": "equal","CDA": "not-sent"}
 		
 	    ]
-	 },{
-		"RuleID" : 12,
-		"RuleIDLength" : 11,
-		"Fragmentation" : {
-			"FRMode": "AckOnError",
-			"FRDirection": "DW",
-            "FRModeProfile": {
-                "dtagSize": 2,
-                "WSize": 7,
-                "FCNSize": 3,
-                "ackBehavior": "afterAll1",
-                "tileSize": 16,
-                "MICAlgorithm": "crc32",
-                "MICWordSize": 8,
-                "L2WordSize": 8,
-                "lastTileInAll1": false
-            }
 	 }
-	 },{	
-		"RuleID" : 13,
-		"RuleIDLength" : 11,
-		"Fragmentation" : {
-		"FRMode": "AckOnError",
-		"FRDirection": "UP",
-        "FRModeProfile": {
-            "dtagSize": 2,
-            "WSize": 7,
-            "FCNSize": 3,
-            "ackBehavior": "afterAll1",
-            "tileSize": 16,
-            "MICAlgorithm": "crc32",
-            "MICWordSize": 8,
-            "L2WordSize": 8,
-            "lastTileInAll1": false
-        }
-		} 
-    }
 ]
 }
 
