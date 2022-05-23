@@ -331,9 +331,10 @@ class Unparser:
                     print (comp_rule[idx2])
                     opt_name = comp_rule[idx2][T_FID].replace("COAP.", "")
                     
+                    print("LLLLL",delta_t)
                     delta_t = coap_options[opt_name] - delta_t
                     print (delta_t)
-
+                    
                     if delta_t < 13:
                         dt = delta_t
                     else:
