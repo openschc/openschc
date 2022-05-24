@@ -919,7 +919,7 @@ class RuleManager:
                         if type(l) == int:
                             entry_cbor += \
                                 cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
-                                struct.pack('!B', l)
+                                cbor.dumps(l)
                         elif type(l) == str:
                             raise ValueError("Field ID not defined")
                         else:
@@ -985,46 +985,47 @@ class RuleManager:
                             nb_elm += 1
  
                         entry_cbor = self.cbor_header (0b101_00000, nb_elm) + entry_cbor # header MAP and size
+                        print (binascii.hexlify(entry_cbor))
                         rule_content += entry_cbor
 
                     rule_content = b'\xA3' + \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - module_sid) + \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - rule_sid) + \
                         self.cbor_header(0b100_00000, nb_entry) + rule_content + \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEIDLENGTH])
                 elif T_FRAG in rule:
                     print ("frag")
                     nb_elm = 2
                     rule_content = \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEIDLENGTH])
 
                     rule_content += \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1], space="identity")) 
                     nb_elm += 1
  
                     rule_content += \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1], space="identity")) 
                     nb_elm += 1
 
                     rule_content += \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
                     nb_elm += 1
 
                     rule_content += \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
                     nb_elm += 1
 
                     rule_content += \
-                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - module_sid) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name= YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1], space="identity")) 
                     nb_elm += 1
                     
