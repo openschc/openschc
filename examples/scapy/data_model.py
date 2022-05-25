@@ -47,10 +47,10 @@ pprint.pprint (yr)
 ycbor = rm.to_yang_coreconf()
 print (binascii.hexlify(ycbor))
 
-# dm = DataModel.from_file("description.json")
+dm = DataModel.from_file("description.json")
 
-# print (dm.ascii_tree())
+print (dm.ascii_tree())
 
-# inst = dm.from_raw(yr)
-# print ("validation", inst.validate())
-# print(dm.ascii_tree(no_types=True, val_count=True), end='')
+inst = dm.from_raw(yr)
+print ("validation", inst.validate())
+print(dm.ascii_tree(no_types=True, val_count=True), end='')
