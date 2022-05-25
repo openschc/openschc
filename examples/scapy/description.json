@@ -1,0 +1,13 @@
+{"ietf-yang-library:modules-state": {
+    "module-set-id": "ae4bf1ddf85a67ab94a9ab71593cd1c78b7f231d",
+    "module": [
+	{
+	    "name": "ietf-schc",
+		"feature" : ["compression", "fragmentation"],
+	    "namespace": "urn:ietf:params:xml:ns:yang:ietf-schc",
+	    "revision": "2022-02-15",
+	    "conformance-type": "implement"
+	}
+    ]
+}
+}
