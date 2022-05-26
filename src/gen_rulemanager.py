@@ -802,10 +802,10 @@ class RuleManager:
 
                                     b_a = val[i].to_bytes(size, byteorder="big")
                                     v = base64.b64encode(b_a)
-                                    dictio.append ({"position" : i, "value": v})
+                                    dictio.append ({"index" : i, "value": v})
                                 elif type(val[i]) == bytes:
                                     v = base64.b64encode(val[i])
-                                    dictio.append ({"position" : i, "value": v})                                    
+                                    dictio.append ({"index" : i, "value": v})                                    
 
                                 else: 
                                     print ("unkown type", type(val[i]))
@@ -964,7 +964,7 @@ class RuleManager:
                                         r = val[i]
 
                                     tv_array += b'\xA2' + \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/position", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
                                         struct.pack('!B', i)
 
                                     tv_array +=  \
@@ -1009,6 +1009,8 @@ class RuleManager:
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1], space="identity")) 
                     nb_elm += 1
  
+
+                    #/!\ since there is a defult value should be skipped when value is rcs-RFC8724
                     rule_content += \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1], space="identity")) 
@@ -1028,6 +1030,9 @@ class RuleManager:
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name= YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1], space="identity")) 
                     nb_elm += 1
+
+
+
                     
                     rule_content = self.cbor_header(0b101_00000, nb_elm) + rule_content
                 elif T_NO_COMP in rule:
