@@ -332,7 +332,7 @@ YANG_ID = {
     T_IPV6_FL : [SID+61, "fid-ipv6-flowlabel"],
     T_IPV6_HOP_LMT : [SID+62, "fid-ipv6-hoplimit"],
     T_IPV6_NXT : [SID+63, "fid-ipv6-nextheader"],
-    T_IPV6_LEN : [SID+64, "fid-ipv6-payloadlength"],
+    T_IPV6_LEN : [SID+64, "fid-ipv6-payload-length"],
     T_IPV6_TC : [SID+65, "fid-ipv6-trafficclass"],
     "TBD" : [SID+66, "fid-ipv6-trafficclass-ds"],
     "TBD" : [SID+67, "fid-ipv6-trafficclass-ecn"],
