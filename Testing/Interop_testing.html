@@ -4,15 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Interoperability test tools &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="IETF Hackathons info" href="../News/IETF-Hackathon-LPWAN.html" />
@@ -33,9 +33,9 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="interoperability-test-tools">
+  <section id="interoperability-test-tools">
 <h1>Interoperability test tools<a class="headerlink" href="#interoperability-test-tools" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="summary">
+<section id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
 <p>The <em>interop</em> folder contains material for interoperability testing:</p>
 <ul class="simple">
@@ -45,16 +45,16 @@
 <li><p><cite>golden_samples</cite> is the fodler containing the references test vectors</p></li>
 </ul>
 <p>Remember to setup your PYTHONPATH per the <a class="reference internal" href="../General/Installation_guide.html"><span class="doc">Installation Guide</span></a>.</p>
-</div>
-<div class="section" id="usage-generate-golden-samples-py">
+</section>
+<section id="usage-generate-golden-samples-py">
 <h2>Usage - <cite>generate_golden_samples.py</cite><a class="headerlink" href="#usage-generate-golden-samples-py" title="Permalink to this headline">¶</a></h2>
 <p>Run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">generate_golden_samples</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>with no parameters. Results are generated in the directory <cite>golden_samples</cite>.</p>
-</div>
-<div class="section" id="usage-compare-to-golden-samples-py">
+</section>
+<section id="usage-compare-to-golden-samples-py">
 <h2>Usage - <cite>compare_to_golden_samples.py</cite><a class="headerlink" href="#usage-compare-to-golden-samples-py" title="Permalink to this headline">¶</a></h2>
 <p>Run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">compare_to_golden_samples</span><span class="o">.</span><span class="n">py</span> <span class="n">dut_folder_path</span>
@@ -74,8 +74,8 @@
                               <span class="o">^</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="file-format">
+</section>
+<section id="file-format">
 <h2>File format<a class="headerlink" href="#file-format" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Data is represented as hexadecimal encoded string.</p></li>
@@ -87,8 +87,8 @@
 <dt>Example:</dt><dd><p>Binary data <cite>00100101 01101</cite> (13 bits) should be represented as <cite>2568/13n</cite></p>
 </dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -111,7 +111,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -121,31 +121,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Interoperability test tools</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
@@ -159,7 +159,7 @@
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

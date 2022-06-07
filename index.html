@@ -4,15 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Welcome to OpenSCHC’s documentation! &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="OpenSCHC Project Complete Content" href="main_toc.html" />
@@ -32,52 +32,53 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-openschc-s-documentation">
+  <section id="welcome-to-openschc-s-documentation">
 <h1>Welcome to OpenSCHC’s documentation!<a class="headerlink" href="#welcome-to-openschc-s-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="what-is-openschc">
+<section id="what-is-openschc">
 <h2>What is OpenSCHC ?<a class="headerlink" href="#what-is-openschc" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="openschc">
+<section id="openschc">
 <h3>OpenSCHC<a class="headerlink" href="#openschc" title="Permalink to this headline">¶</a></h3>
-<p>OpenSCHC is a OpenSource Implementation of SCHC (Static Context Header Compression) standardized at the IETF by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> as <a class="reference external" href="https://www.rfc-editor.org/info/rfc8724">RFC8724</a>. Oversimplifying, this is essentially IP protocol headers compression and fragmentation so that they can be transported by low datarate, long range IoT networks.</p>
-<p>The long term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.</p>
+<p>OpenSCHC is an open-source implementation of SCHC (Static Context Header Compression) standardized at the IETF by the <a class="reference external" href="https://tools.ietf.org/wg/lpwan/">LPWAN Working Group</a> as <a class="reference external" href="https://www.rfc-editor.org/info/rfc8724">RFC8724</a>.
+Oversimplifying, this is essentially IP protocol header compression and fragmentation so that they can be transported by low datarate, long range IoT networks.</p>
+<p>The long-term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.</p>
 <p>OpenSCHC is licensed under the <a class="reference external" href="https://github.com/openschc/openschc/blob/master/LICENSE">MIT License</a> .</p>
-</div>
-<div class="section" id="understanding-the-architecture">
+</section>
+<section id="understanding-the-architecture">
 <h3>Understanding the architecture<a class="headerlink" href="#understanding-the-architecture" title="Permalink to this headline">¶</a></h3>
-<p>A global architecture of openSCHC implementation is shown below:</p>
+<p>A global architecture of the OpenSCHC implementation is shown below:</p>
 <img alt="OpenSCHC Architecture" src="_images/openSCHC_arch.png" />
-<p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retreive Rules.</p>
+<p>The <strong>Rule Manager</strong> stores a set of Rules and provides methods to install or retrieve Rules.</p>
 <p>Rules are composed of two elements:</p>
 <ul class="simple">
 <li><p>A <strong>RuleID</strong> which identifies the Rule by its number, and</p></li>
 <li><p>A <strong>content</strong> which contains an array of fields. For details, refer to the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1">SCHC context data model</a>.</p></li>
 </ul>
-<p>The <strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
+<p><strong>App 1 … App n</strong> are the applications that invoke the <strong>SCHC Orchestrator</strong> to run the necessary SCHC operations, which are briefly defined below:</p>
 <p><strong>Compression</strong> is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
 <strong>Decompression</strong>: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.</p>
 <p><strong>Fragmentation</strong> is invoked on the sender side with a RuleID to generate a set of fragments out of a packet (compressed or uncompressed).
 <strong>Reassembly</strong> is used on the receiver side to reconstruct the packet out of the set of fragments.</p>
 <p>Fragmentation modes and the associated parameters are described in the <a class="reference external" href="https://www.rfc-editor.org/info/rfc8724">SCHC protocol</a> .</p>
 <p><strong>Network Connector</strong> interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
-or to a link layer simulator.</p>
-</div>
-</div>
-<div class="section" id="using-openschc">
+or to a link-layer simulator.</p>
+</section>
+</section>
+<section id="using-openschc">
 <h2>Using OpenSCHC<a class="headerlink" href="#using-openschc" title="Permalink to this headline">¶</a></h2>
 <p>Want to give it a try? See <a class="reference internal" href="General/Installation_guide.html"><span class="doc">Installation Guide</span></a> in order to set up OpenSCHC on your computer and <a class="reference internal" href="General/User_guide.html"><span class="doc">User Guide</span></a> to start running it.</p>
-</div>
-<div class="section" id="contributing">
+</section>
+<section id="contributing">
 <h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
 <p>Want to help ? See our <a class="reference internal" href="General/Contributing_Guidelines.html"><span class="doc">Contributing Guidelines</span></a> for more details on the future work on the OpenSCHC project.</p>
-</div>
-<div class="section" id="indices-and-tables">
+</section>
+<section id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-<div class="section" id="table-of-contents">
+<section id="table-of-contents">
 <h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
 <div class="toctree-wrapper compound">
 <ul class="current">
@@ -86,7 +87,7 @@ or to a link layer simulator.</p>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/User_guide.html">User Guide</a></li>
@@ -95,14 +96,14 @@ or to a link layer simulator.</p>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Internals/Simulator.html">Simulator</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/gen_rulemanager.html">Rule Manager</a></li>
@@ -111,21 +112,21 @@ or to a link layer simulator.</p>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Testing/testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Testing/Interop_testing.html">Interoperability test tools</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
           </div>
@@ -145,7 +146,7 @@ or to a link layer simulator.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -155,31 +156,31 @@ or to a link layer simulator.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Testing/testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Testing/Interop_testing.html">Interoperability test tools</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
@@ -193,7 +194,7 @@ or to a link layer simulator.</p>
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -4,15 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Documenting Guidelines &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Contributing Guidelines" href="Contributing_Guidelines.html" />
@@ -33,16 +33,16 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="documenting-guidelines">
+  <section id="documenting-guidelines">
 <h1>Documenting Guidelines<a class="headerlink" href="#documenting-guidelines" title="Permalink to this headline">¶</a></h1>
 <p>Following the guidelines below when documenting the project would be appreciated.</p>
-<div class="section" id="syntax">
+<section id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>Sphinx’s default syntax is called ReStructuredText.</p>
 <p>Sphinx’s documentation provides a <a class="reference external" href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html">syntax guide</a>.</p>
 <p>The original RST documentation is available <a class="reference external" href="http://docutils.sourceforge.net/rst.html">here</a>.</p>
-</div>
-<div class="section" id="building-the-documentation">
+</section>
+<section id="building-the-documentation">
 <h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>The documentation is built using <a class="reference external" href="https://www.sphinx-doc.org">Sphinx</a>.</p>
 <p>After installing Sphinx (depending on your OS), you have to add the sphinx-doc bin directory to your PATH environment variable.</p>
@@ -51,8 +51,9 @@
 </pre></div>
 </div>
 <p>for a check.</p>
-<p>Then you need to setup the git environment.</p>
-<p>We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build the documentation for, and another one synchronised with the gh-pages branch in which the documentation will be stored.</p>
+<p>Then you need to setup the Git environment.</p>
+<p>We advise you to synchronize the OpenSCHC project in two separate directories.
+One for the source code, synchronized with the branch you want to build the documentation for, another synchronized with the gh-pages branch in which the documentation will be stored.</p>
 <p>An example of how to do this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/openschc/openschc.git
 $ cd openschc
@@ -83,7 +84,8 @@ $ tree
         └ _static
 </pre></div>
 </div>
-<p>An important thing to do before building the documentation is to tell Sphinx where to build the documentation. This information is provided in the Makefile that is located under the <strong>docs</strong> folder:</p>
+<p>An important thing to do before building the documentation is to tell Sphinx where to build the documentation.
+This information is provided in the Makefile that is located under the <strong>docs</strong> folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd openschc/docs
 $ head -n 10 Makefile
 # Minimal makefile for Sphinx documentation
@@ -116,8 +118,8 @@ $ git commit -m &quot;meaningful comment&quot;
 $ git push
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -140,7 +142,7 @@ $ git push
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -150,31 +152,31 @@ $ git push
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="User_guide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing_Guidelines.html">Contributing Guidelines</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/Interop_testing.html">Interoperability test tools</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
@@ -188,7 +190,7 @@ $ git push
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

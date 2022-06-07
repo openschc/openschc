@@ -4,15 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fragm. Random Test &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Fragmentation Random Test &#8212; OpenSCHC  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -31,63 +31,55 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="fragm-random-test">
-<h1>Fragm. Random Test<a class="headerlink" href="#fragm-random-test" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="frt-operation">
+  <section id="fragmentation-random-test">
+<h1>Fragmentation Random Test<a class="headerlink" href="#fragmentation-random-test" title="Permalink to this headline">¶</a></h1>
+<section id="frt-operation">
 <h2>FRT operation<a class="headerlink" href="#frt-operation" title="Permalink to this headline">¶</a></h2>
 <p>Fragmentation Random Test generates and runs test cases in a loop in 4 stages:</p>
-<div class="section" id="stage-1">
+<section id="stage-1">
 <h3>Stage 1<a class="headerlink" href="#stage-1" title="Permalink to this headline">¶</a></h3>
-<p>Stage 1 prepares the test case to be run. it generates:</p>
+<p>Stage 1 prepares the test case to be run.
+It generates:</p>
 <ul class="simple">
 <li><p>a bitbuffer of a random length that represents a compressed packet.
-Since the compression is not part of the test,
-all bits are randomly selected as well.</p></li>
-<li><p>A fragmentation rule where all parameters are individually a randomly selected
-from all cases that SCHC supports</p></li>
+Since the compression is not part of the test, all bits are randomly selected as well.</p></li>
+<li><p>A fragmentation rule where all parameters are individually a randomly selected from all cases that SCHC supports</p></li>
 </ul>
-</div>
-<div class="section" id="stage-2">
+</section>
+<section id="stage-2">
 <h3>Stage 2<a class="headerlink" href="#stage-2" title="Permalink to this headline">¶</a></h3>
 <p>Stage 2 runs the fragmentation procedure and injects random transmission errors.</p>
 <ul class="simple">
-<li><p>The procedure randomly decides at which times in the transmission the transmission
-errors are injected</p></li>
-<li><p>The error being injected might be a number of packets in a row or a black out period,
-i.e., all packets in a direction or in both directions are dropped for a selected
-duration.</p></li>
-<li><p>whether the injection of errors should exceed the maximum number of retries
-in which case it sets the expected result as an abort, else it sets the expected
-result as a validation</p></li>
+<li><p>The procedure randomly decides at which times in the transmission the transmission errors are injected</p></li>
+<li><p>The error being injected might be a number of packets in a row or a black-out period, i.e. all packets in a direction or in both directions are dropped for a selected duration.</p></li>
+<li><p>whether the injection of errors should exceed the maximum number of retries in which case it sets the expected result as an abort, else it sets the expected result as a validation</p></li>
 <li><p>the test runs till both sides are complete or a simulated maximum time is reached</p></li>
 </ul>
-</div>
-<div class="section" id="stage-3">
+</section>
+<section id="stage-3">
 <h3>Stage 3<a class="headerlink" href="#stage-3" title="Permalink to this headline">¶</a></h3>
-<p>Stage 3 validates the expected result is reached. It checks:</p>
+<p>Stage 3 validates the expected result is reached.
+It checks:</p>
 <ul class="simple">
-<li><p>if both sides ran to completion or if one side is still waiting or still
-has resources locked for this fragment</p></li>
-<li><p>if an abort condition was reached on one side or both sides</p></li>
-<li><p>if the receiver did not abort, whether the bitbuffer is reassembled correctly up to the expected length
-(extra bits are ignored)</p></li>
+<li><p>whether both sides ran to completion or if one side is still waiting or still has resources locked for this fragment</p></li>
+<li><p>whether an abort condition was reached on one side or both sides</p></li>
+<li><p>if the receiver did not abort, whether the bitbuffer is reassembled correctly up to the expected length (extra bits are ignored)</p></li>
 </ul>
-</div>
-<div class="section" id="stage-4">
+</section>
+<section id="stage-4">
 <h3>Stage 4<a class="headerlink" href="#stage-4" title="Permalink to this headline">¶</a></h3>
 <p>Stage 4 logs the parameters of the test case, including:</p>
 <ul class="simple">
 <li><p>the generated rule and the timeline of events as experienced by the scheduler</p></li>
 <li><p>whether the test case resulted in the expected outcome</p></li>
-<li><p>whether the expected number of test cases where tried; if not
-a new test case is scheduled.</p></li>
+<li><p>whether the expected number of test cases where tried; if not a new test case is scheduled.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="hacking-the-scheduler">
+</section>
+</section>
+<section id="hacking-the-scheduler">
 <h2>Hacking the Scheduler<a class="headerlink" href="#hacking-the-scheduler" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -106,7 +98,7 @@ a new test case is scheduled.</p></li>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -116,31 +108,31 @@ a new test case is scheduled.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../General/Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/User_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../General/Contributing_Guidelines.html">Contributing Guidelines</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interop_testing.html">Interoperability test tools</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
@@ -154,7 +146,7 @@ a new test case is scheduled.</p></li>
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

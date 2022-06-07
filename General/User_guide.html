@@ -4,15 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>User Guide &#8212; OpenSCHC  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Documenting Guidelines" href="Documenting_Guidelines.html" />
@@ -33,34 +33,32 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="user-guide">
+  <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="introduction">
+<section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>This document explains how to run the OpenSCHC fragmentation and compression code.</p>
-<p>This entails the following steps:</p>
+<p>This includes the following steps:</p>
 <ul class="simple">
 <li><p>installing the “context” that will be used for compressing and fragmenting the traffic flows.</p></li>
 <li><p>establishing the flows of traffic to be compressed/decompressed and fragmented/reassembled,
 and potentially setup the channel characteristics (in link simulation mode)</p></li>
 </ul>
-</div>
-<div class="section" id="rule-manager">
+</section>
+<section id="rule-manager">
 <h2>Rule Manager<a class="headerlink" href="#rule-manager" title="Permalink to this headline">¶</a></h2>
-<p>SCHC is based on rules, each of them identified through a Rule ID. A Rule ID designates a rule that is
-common between a SCHC instance in a device and a SCHC instance in the core network.
-Conversely, a same Rule ID can be used to designate different rules in different devices.</p>
-<p>The Rule ID has a variable length, which allows allocating shorter values
-to more frequent rules, if desired.</p>
-<div class="section" id="rule-definition">
+<p>SCHC is based on rules, each of them identified through a Rule ID.
+A Rule ID designates a rule that is common between a SCHC instance in a device and a SCHC instance in the core network.
+Conversely, a same Rule ID can be used to designate different rules on different devices.</p>
+<p>The Rule ID has a variable length, which allows allocating shorter values to more frequent rules, if desired.</p>
+<section id="rule-definition">
 <h3>Rule definition<a class="headerlink" href="#rule-definition" title="Permalink to this headline">¶</a></h3>
-<p>The rule manager is used to manage rules in the SCHC instances in the device and
-in the core network. On the device side, the rules that are installed are likely to be only the ones
-used by the applications running on that particular device. Conversely, on the core network side, the
-rule manager has to maintain a copy of the rules of each associated device.</p>
+<p>The rule manager is used to manage rules in the SCHC instances in the device and in the core network.
+On the device side, the rules that are installed are likely to be only the ones used by the applications running on that particular device.
+Conversely, on the core network side, the rule manager has to maintain a copy of the rules of each associated device.</p>
 <p>The rule semantics is defined in the the <a class="reference external" href="https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1">SCHC context data model</a>.
-However, in openSCHC, rules are written as JSON structures. The common part is the
-following:</p>
+However, in OpenSCHC, rules are written as JSON structures.
+The common part is the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
 <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span>
@@ -77,11 +75,10 @@ This rule is different from that one:</p>
 </pre></div>
 </div>
 <p>which yields the binary value 001100.</p>
-<p>Rule IDs compose a binary tree and can also be noted with the / representation
-(as IP prefixes) 12/4 or 12/6.</p>
-<p>A rule is either a fragmentation rule or a compression rule. They are differentiated
-by the JSON keyword <strong>Fragmentation</strong> or <strong>Compression</strong>. A rule can contain only one of
-these keywords.</p>
+<p>Rule IDs compose a binary tree and can also be noted with the / representation (as IP prefixes) 12/4 or 12/6.</p>
+<p>A rule is either a fragmentation rule or a compression rule.
+They are differentiated by the JSON keyword <strong>Fragmentation</strong> or <strong>Compression</strong>.
+A rule can contain only one of these keywords.</p>
 <p>For compression, the keyword is followed by an array, containing the field descriptions.
 A trivial compression rule is one where this array is empty.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -91,8 +88,7 @@ A trivial compression rule is one where this array is empty.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>For fragmentation, the keyword is followed by the definition of the fragmentation
-parameters, which for example describe the fragmentation mode, the direction of the flow the
+<p>For fragmentation, the keyword is followed by the definition of the fragmentation parameters, which for example describe the fragmentation mode, the direction of the flow the
 rule applies to and optionnally the size of the different fragment SCHC header fields.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
@@ -104,11 +100,11 @@ rule applies to and optionnally the size of the different fragment SCHC header f
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>SCHC differentiates the traffic generated by the device (upstream traffic) from the
-traffic sent to the device (downstream traffic). Fragmentation rules are unidirectional.
-In a fragmentation rule, the direction field is mandatory. It can be “UP” or “DW”.
-Note that for compression rules, the direction has to be specified for each field, so the
-rule by itself is bidirectional.</p>
+<p>SCHC differentiates the traffic generated by the device (upstream traffic) from the traffic sent to the device (downstream traffic).
+Fragmentation rules are unidirectional.
+In a fragmentation rule, the direction field is mandatory.
+It can be “UP” or “DW”.
+Note that for compression rules, the direction has to be specified for each field, so the rule by itself is bidirectional.</p>
 <p>See below for the description of the compression and fragmentation parameters.</p>
 <p>The following Python code adds these 2 basic rules into the OpenSCHC rule manager and displays them.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gen_rulemanager</span> <span class="kn">import</span> <span class="o">*</span>
@@ -137,7 +133,8 @@ rule by itself is bidirectional.</p>
 </pre></div>
 </div>
 <p>The first line imports the rule manager module.</p>
-<p><strong>RM</strong> will be the rule manager instance. If necessary, several rule managers can be instantiated.</p>
+<p><strong>RM</strong> will be the rule manager instance.
+If necessary, several rule managers can be instantiated.</p>
 <p>The two rules are created as Python dictionaries and added to the instance of the rule manager.</p>
 <p>Finally, the rules are displayed as cards on the console output.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>****************************************
@@ -155,18 +152,17 @@ Device: None
 \=======================================================================================/
 </pre></div>
 </div>
-<p>Compression rules contain the field descriptions (here absent) and Fragmentation rules contain the
-fragmentation parameters. As we will notice in the rest of this chapter, the rule manager may add some default
-parameters.</p>
+<p>Compression rules contain the field descriptions (here absent) and Fragmentation rules contain the fragmentation parameters.
+As we will notice in the rest of this chapter, the rule manager may add some default parameters.</p>
 <p>We can notice that, since no device is specified, the rules are associated to the device <strong>None</strong>.</p>
-<p>In the Add() method, we used the <strong>dev_info</strong> named argument to indicate that the rule is contained in
-a Python structure. The named argument  <strong>file</strong> could have been used instead, with the name of the file
-containing the JSON structure.</p>
-</div>
-<div class="section" id="set-of-rules">
+<p>In the Add() method, we used the <strong>dev_info</strong> named argument to indicate that the rule is contained in a Python structure.
+The named argument  <strong>file</strong> could have been used instead, with the name of the file containing the JSON structure.</p>
+</section>
+<section id="set-of-rules">
 <h3>Set of Rules<a class="headerlink" href="#set-of-rules" title="Permalink to this headline">¶</a></h3>
-<p>A device should contain a set of rules related to compression and fragmentation. In OpenSCHC,
-the SoR (set of rules) is a JSON array. The following program has the same behavior as the previous one.:</p>
+<p>A device should contain a set of rules related to compression and fragmentation.
+In OpenSCHC, the SoR (set of rules) is a JSON array.
+The following program has the same behavior as the previous one.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gen_rulemanager</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">RM</span> <span class="o">=</span> <span class="n">RuleManager</span><span class="p">()</span>
@@ -191,16 +187,13 @@ the SoR (set of rules) is a JSON array. The following program has the same behav
 <span class="n">RM</span><span class="o">.</span><span class="n">Print</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="device-definition">
+</section>
+<section id="device-definition">
 <h3>Device definition<a class="headerlink" href="#device-definition" title="Permalink to this headline">¶</a></h3>
-<p>As seen before, when not specified, the device is identified as <strong>None</strong>. This can be appropriate
-when SCHC is instantiated on a device, since there is no ambiguity as to which device the rule set
-applies to. Conversely,
-when the SCHC instance is on the core network side, the set of rules must be associated with
-a device ID.</p>
-<p>Rules associated with a Device ID can be directly stored into the rule manager through the <strong>Add()</strong> method
-as follows:</p>
+<p>As seen before, when not specified, the device is identified as <strong>None</strong>.
+This can be appropriate when SCHC is instantiated on a device, since there is no ambiguity as to which device the rule set applies to.
+Conversely, when the SCHC instance is on the core network side, the set of rules must be associated with a device ID.</p>
+<p>Rules associated with a Device ID can be directly stored into the rule manager through the <strong>Add()</strong> method as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RM</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s2">&quot;1234567890&quot;</span><span class="p">,</span> <span class="n">dev_info</span><span class="o">=</span><span class="p">[</span><span class="n">rule1100</span><span class="p">,</span> <span class="n">rule001100</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -211,16 +204,15 @@ as follows:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>where the <strong>DeviceID</strong> keyword represents the device ID in a specific LPWAN technology, for
-instance the LoRaWAN DevEUI. Note that this should be viewed as a JSON structure. Therefore,
-the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
-</div>
-</div>
-<div class="section" id="fragmenter-reassembler">
+<p>where the <strong>DeviceID</strong> keyword represents the device ID in a specific LPWAN technology, for instance the LoRaWAN DevEUI.
+Note that this should be viewed as a JSON structure.
+Therefore, the DeviceID literal must be expressed in decimal, not hexadecimal.</p>
+</section>
+</section>
+<section id="fragmenter-reassembler">
 <h2>Fragmenter/Reassembler<a class="headerlink" href="#fragmenter-reassembler" title="Permalink to this headline">¶</a></h2>
-<p>Using the client-server simulation, it is possible to observe some important details about noAck mode and
-fragmenter/reassembler. First of all, it is necessary to create a file with any name (e.g. rule1.json)
-into the <strong>examples/configs</strong> folder, which will contain our rules as follows:</p>
+<p>Using the client-server simulation, it is possible to observe some important details about noAck mode and fragmenter/reassembler.
+First of all, it is necessary to create a file with any name (e.g. rule1.json) into the <strong>examples/configs</strong> folder, which will contain our rules as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span>
    <span class="s2">&quot;RuleID&quot;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
    <span class="s2">&quot;RuleIDLength&quot;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
@@ -235,10 +227,10 @@ into the <strong>examples/configs</strong> folder, which will contain our rules 
 <span class="p">}]</span>
 </pre></div>
 </div>
-<p>Then, it is possible to define the message that will be sent from client to server. The <strong>examples/udp/udp_example.py</strong> file
-contains an example that can be used.</p>
-</div>
-<div class="section" id="sending-receiving-over-udp">
+<p>Then, it is possible to define the message that will be sent from client to server.
+The <strong>examples/udp/udp_example.py</strong> file contains an example that can be used.</p>
+</section>
+<section id="sending-receiving-over-udp">
 <h2>Sending/ receiving over UDP<a class="headerlink" href="#sending-receiving-over-udp" title="Permalink to this headline">¶</a></h2>
 <p>This is an example of an openSCHC sender transmitting over UDP to an openSCHC receiver, on the same host computer.
 By default, the example is that of a device sending a single COAP packet processed with one fragmentation rule, but not compressed, to
@@ -307,8 +299,8 @@ you can observe the SCHC Fragments being received by the SCHC core (server),
 being reassembled into one SCHC Packet with sucessful RCS (previously known as MIC) check.
 It is then passed up to the decompression sublayer,
 which has nothing to do except strip off the 12/4 RuleID.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -331,7 +323,7 @@ which has nothing to do except strip off the 12/4 RuleID.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -341,31 +333,31 @@ which has nothing to do except strip off the 12/4 RuleID.</p>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Back to Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../main_toc.html">Detailed Table of Content</a></li>
 </ul>
-<p class="caption"><span class="caption-text">General Information</span></p>
+<p class="caption" role="heading"><span class="caption-text">General Information</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation_guide.html">Installation Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documenting_Guidelines.html">Documenting Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing_Guidelines.html">Contributing Guidelines</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Internals</span></p>
+<p class="caption" role="heading"><span class="caption-text">Internals</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Internals/Simulator.html">Simulator</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Source code, detailed</span></p>
+<p class="caption" role="heading"><span class="caption-text">Source code, detailed</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/File_Classification.html">File Taxonomy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_rulemanager.html">Rule Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/gen_bitarray.html">Bit Buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/frag_recv.html">Fragment Reassembly</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Testing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Testing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/testing.html">OpenSCHC tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Testing/Interop_testing.html">Interoperability test tools</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Other info</span></p>
+<p class="caption" role="heading"><span class="caption-text">Other info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../News/IETF-Hackathon-LPWAN.html">IETF Hackathons info</a></li>
 </ul>
@@ -379,7 +371,7 @@ which has nothing to do except strip off the 12/4 RuleID.</p>
       &copy;2020, OpenSCHC.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
