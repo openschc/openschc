@@ -8,7 +8,7 @@
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8
         }
@@ -23,7 +23,7 @@
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8
         }

@@ -46,7 +46,7 @@ frag_rule1 = {
             "FCNSize": 3, # 3 # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
             "tileSize": 392, # 392 # size of each tile -> 8 bits
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -64,7 +64,7 @@ frag_rule2 = {
             "FCNSize": 3, # 3 # 2^3-2 .. 0 number of sequence de each tile
             "ackBehavior": "afterAll1",
             "tileSize": 392, # 392 # size of each tile -> 8 bits
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -82,7 +82,7 @@ frag_rule3 = {
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -99,7 +99,7 @@ frag_rule4 = {
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }

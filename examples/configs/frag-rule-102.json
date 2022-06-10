@@ -10,7 +10,7 @@
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 392,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }

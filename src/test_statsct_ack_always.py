@@ -43,7 +43,7 @@ frag_rule1 = {
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 392,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -61,7 +61,7 @@ frag_rule2 = {
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 392,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -79,7 +79,7 @@ frag_rule3 = {
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }
@@ -96,7 +96,7 @@ frag_rule4 = {
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8
         }
     }

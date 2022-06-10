@@ -44,7 +44,7 @@ def test_make_tiles():
                     "FRModeProfile": {
                             "dtagSize": 2,
                             "ackBehavior": "afterAll1",
-                            "MICAlgorithm": "crc32",
+                            "MICAlgorithm": "RCS_RFC8724",
                             "MICWordSize": 8,
                             "lastTileInAll1": False
                             }

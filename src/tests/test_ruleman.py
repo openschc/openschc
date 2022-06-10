@@ -28,7 +28,7 @@ rule2 = {
     "RuleID" : 4,
     "RuleIDLength" : 3,
     "profile": {
-        "MICAlgorithm": "crc32",
+        "MICAlgorithm": "RCS_RFC8724",
         "MICWordSize": 8,
         "L2WordSize": 8
     },
@@ -46,7 +46,7 @@ rule3 = {
     "RuleID" : 7,
     "RuleIDLength" : 3,
     "Profile": {
-        "MICAlgorithm": "crc32",
+        "MICAlgorithm": "RCS_RFC8724",
         "MICWordSize": 8,
         "L2WordSize": 8
     },

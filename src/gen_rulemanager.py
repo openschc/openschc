@@ -144,7 +144,7 @@ For AckAlways and AckOnError the value must be specified.
 
 * **lastTileInAll1**: true to append last tile to the All-1 message, false otherwise.
 * **tileSize** gives the size in bit of a tile.
-* **MICAlgorithm** gives the algorithm used to compute the MIB, by default **crc32**,
+* **MICAlgorithm** gives the algorithm used to compute the MIB, by default **RCS_RFC8724** (e.g. crc32),
 * **MICWordSize** gives the size of the RCS word.
 * **maxRetry** indicates to the sender how many time a fragment or ack request can be sent.
 * **timeout** indicated in seconds to the sender how many time between two retransmissions. The receiver can compute the delay before aborting.
@@ -163,7 +163,7 @@ For instance::
                 "FCNSize": 3,
                 "ackBehavior": "afterAll1",
                 "tileSize": 9,
-                "MICAlgorithm": "crc32",
+                "MICAlgorithm": "RCS_RFC8724",
                 "MICWordSize": 8,
                 "maxRetry": 4,
                 "timeout": 600,
