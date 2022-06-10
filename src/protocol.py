@@ -171,7 +171,7 @@ class SCHCProtocol:
             return BitBuffer(raw_packet)
 
         # Apply compression rule
-        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        rule, dev_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         self._log("compression rule {}".format(rule))
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(dst_l3_address)
