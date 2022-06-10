@@ -24,7 +24,7 @@ def rule_no_ack():
       "RuleID":12,
       "RuleIDLength":6,
       "Fragmentation":{
-         "FRMode":"noAck",
+         "FRMode":"NoAck",
          "FRDirection" : "DW"
       }
    }
@@ -43,7 +43,7 @@ def rule_ack_on_error():
       "RuleID":12,
       "RuleIDLength":6,
       "Fragmentation":{
-         "FRMode":"ackOnError",
+         "FRMode":"AckOnError",
          "FRDirection" : "DW",
          "FRModeProfile":{
             "dtagSize":2,
@@ -80,14 +80,14 @@ def frag_generic(rules_filename, packet_loss):
     # Configuration packets loss
 
     if packet_loss:
-        # Configuration with packet loss in noAck and ack-on-error
+        # Configuration with packet loss in NoAck and ack-on-error
         loss_rate = 15  # in %
         collision_lambda = 0.1
         background_frag_size = 54
         loss_config = {"mode": "rate", "cycle": loss_rate}
         # loss_config = {"mode":"collision", "G":collision_lambda, "background_frag_size":background_frag_size}
     else:
-        # Configuration without packet loss in noAck and ack-on-error
+        # Configuration without packet loss in NoAck and ack-on-error
         loss_rate = None
         loss_config = None
 
@@ -203,6 +203,6 @@ def test_frag_no_ack_no_loss(rule_no_ack):
     assert "SUCCESS: MIC matched" in stdout
 
 def test_frag_no_ack_loss(rule_no_ack):
-    # packet loss in noAck obviously will make an error.
+    # packet loss in NoAck obviously will make an error.
     stdout = frag_generic(rule_no_ack, packet_loss=True)
     assert "ERROR: MIC mismatched" in stdout

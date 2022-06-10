@@ -61,12 +61,12 @@ class SessionManager:
         if self.unique_peer:
             l2_address = None
         mode = rule[T_FRAG][T_FRAG_MODE]
-        if mode == "noAck":
+        if mode == T_FRAG_NO_ACK:
             session = ReassemblerNoAck(
                 self.protocol, context, rule, dtag, l2_address)
-        elif mode == "ackAlways":
+        elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError("FRMode:", mode)
-        elif mode == "ackOnError":
+        elif mode == T_FRAG_ACK_ON_ERROR:
             session = ReassemblerAckOnError(
                 self.protocol, context, rule, dtag, l2_address)
         else:
@@ -95,12 +95,12 @@ class SessionManager:
             return None
 
         mode = rule[T_FRAG][T_FRAG_MODE]
-        if mode == "noAck":
+        if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(self.protocol, context, rule, dtag)
-        elif mode == "ackAlways":
+        elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
-        elif mode == "ackOnError":
+        elif mode == T_FRAG_ACK_ON_ERROR:
             session = FragmentAckOnError(self.protocol, context, rule, dtag)
         else:
             raise ValueError("invalid FRMode: {}".format(mode))

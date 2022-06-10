@@ -4,7 +4,7 @@
     "RuleIDLength": 3,
     "Fragmentation" : {
         "FRDirection": "UP",
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,
@@ -23,7 +23,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRDirection": "DW",
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,

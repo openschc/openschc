@@ -126,7 +126,7 @@ Fragmentation Rules
 Fragmentation rules define how the compression and decompression must be performed.
 
 The keyword  **Fragmentation** is followed by a dictionnary containing the different parameters used.
-Inside the keyword **FRMode** indicates which Fragmentation mode is used (**noAck**, **ackAlways**, **ackOnError**).
+Inside the keyword **FRMode** indicates which Fragmentation mode is used (**NoAck**, **AckAlways**, **AckOnError**).
 **FRDirection** give the direction of the fragmentation rule. **UP** means that data fragments are sent by the device,
 **DW** for the opposite direction. This entry is mandatory.
 Then the keyword **FRModeProfiler** gives the information needed to create the SCHC fragmentation header and mode profile:
@@ -134,10 +134,10 @@ Then the keyword **FRModeProfiler** gives the information needed to create the S
 * **dtagSize** gives in bit the size of the dtag field. <<if not present or set to 0, this field is not present \
 in the SCHC fragmentation header>>. This keyword can be used by all the fragmentation modes.
 * **WSize** gives in bit the size of Window field. If not present, the default value is 0 (no window) in \
-noAck and 1 in ackAlways. In ackOnErr this field must be set to 1 or to an higher value.
-* **FCNSize** gives in bit the size of the FCN field. If not present, by default, the value is 1 for noAck.\
-For ackAlways and ackOnError the value must be specified.
-* **ackBehavior** this keyword specifies on ackOnError, when the fragmenter except to receive a bitmap from the reassembler:
+NoAck and 1 in AckAlways. In ackOnErr this field must be set to 1 or to an higher value.
+* **FCNSize** gives in bit the size of the FCN field. If not present, by default, the value is 1 for NoAck.\
+For AckAlways and AckOnError the value must be specified.
+* **ackBehavior** this keyword specifies on AckOnError, when the fragmenter except to receive a bitmap from the reassembler:
 
     * *afterAll1*: the bitmap (or RCS OK) is expected only after the reception of a All-1.
     * *afterAll0*: the bitmap may be expected after the transmission of the window last fragment (All-0 or All-1)
@@ -155,7 +155,7 @@ For instance::
         "RuleID": 1,
         "RuleLength": 3,
         "Fragmentation" : {
-            "FRMode": "ackOnError",
+            "FRMode": "AckOnError",
             "FRDirection": "UP",
             "FRModeProfile": {
                 "dtagSize": 2,
@@ -534,7 +534,7 @@ class RuleManager:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
 
-            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"]:
+            if nrule[T_FRAG][T_FRAG_MODE] in [T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, T_FRAG_ACK_ON_ERROR]:
                 arule[T_FRAG][T_FRAG_MODE] = nrule[T_FRAG][T_FRAG_MODE]
                 arule[T_FRAG][T_FRAG_PROF] ={}
 
@@ -547,10 +547,10 @@ class RuleManager:
                     _default_value (arule, nrule, T_FRAG_W, 0)
                     _default_value (arule, nrule, T_FRAG_FCN, 3)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif nrule[T_FRAG][T_FRAG_MODE] == "aT_FRAG_ACK_ALWAYS":
+                elif nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ALWAYS:
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
-                elif  nrule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                elif  nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ON_ERROR:
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
 
@@ -568,7 +568,7 @@ class RuleManager:
                 # the size include All-*, Max_VLAUE is WINDOW_SIZE-1
                 _default_value(arule, nrule, T_FRAG_WINDOW_SIZE, (0x01 <<(arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]))-1)
             else:
-                raise ValueError ("Unknown fragmentation mode {}".format())
+                raise ValueError ("Unknown fragmentation mode", nrule[T_FRAG][T_FRAG_MODE])
         else:
             raise ValueError("No fragmentation mode")
 
@@ -740,7 +740,7 @@ class RuleManager:
 
                     if rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
                         print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
-                        if  rule[T_FRAG][T_FRAG_MODE] == "ackOnError":
+                        if  rule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ON_ERROR:
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
                             print ("!{} {:<84}{}!".format(dir_c, txt, dir_c))
 
@@ -1358,7 +1358,7 @@ class RuleManager:
 
             mode = fragRule["FRMode"]
 
-            if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, "ackOnError"):
+            if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, T_FRAG_ACK_ON_ERROR):
                 raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
 
             if not "FRModeProfile" in fragRule:
@@ -1374,7 +1374,7 @@ class RuleManager:
                     profile["WSize"] = 0
                 elif  mode == T_FRAG_ACK_ALWAYS:
                     profile["WSize"] = 1
-                elif mode == "ackOnError":
+                elif mode == T_FRAG_ACK_ON_ERROR:
                     profile["WSize"] = 5
 
             if not "FCNSize" in profile:
@@ -1382,7 +1382,7 @@ class RuleManager:
                     profile["FCNSize"] = 1
                 elif mode == T_FRAG_ACK_ALWAYS:
                     profile["FCNSize"] = 3
-                elif mode == "ackOnError":
+                elif mode == T_FRAG_ACK_ON_ERROR:
                     profile["FCNSize"] = 3
 
             if "windowSize" in profile:
@@ -1392,7 +1392,7 @@ class RuleManager:
             else:
                 profile["windowSize"] = (0x01 << profile["FCNSize"]) - 1
 
-            if mode == "ackOnError":
+            if mode == T_FRAG_ACK_ON_ERROR:
                 if not "ackBehavior" in profile:
                     raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
                 if not "tileSize" in profile:

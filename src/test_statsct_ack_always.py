@@ -36,7 +36,7 @@ frag_rule1 = {
     "ruleID": 1,
     "profile": { "L2WordSize": 8 },
     "fragmentation": {
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 3,
@@ -54,7 +54,7 @@ frag_rule2 = {
     "ruleID": 2,
     "profile": { "L2WordSize": 8 },
     "fragmentation": {
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 3,
@@ -75,7 +75,7 @@ frag_rule3 = {
         "L2WordSize": 8
     },
     "fragmentation": {
-        "FRMode": "noAck",
+        "FRMode": "NoAck",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
@@ -92,7 +92,7 @@ frag_rule4 = {
         "L2WordSize": 8
     },
     "fragmentation": {
-        "FRMode": "noAck",
+        "FRMode": "NoAck",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,

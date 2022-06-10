@@ -3,7 +3,7 @@
     "ruleID": 1,
     "profile": { "L2WordSize": 8 },
     "fragmentation": {
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize":3,

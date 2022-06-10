@@ -215,10 +215,10 @@ def get_simul_setup(name, spec):
     frag_rule = {
         "RuleID": spec.get("frag-ruleid", 12),
         "RuleIDLength": spec.get("frag-ruleid-size", 6),
-        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "UP"}}
+        "Fragmentation": {"FRMode": "NoAck", "FRDirection" : "UP"}}
     if spec.get("frag-mode") == "ack-on-error":
         frag_info = {
-            "FRMode": "ackOnError",
+            "FRMode": "AckOnError",
             "FRDirection": "UP",
             "FRModeProfile": {
                 "dtagSize": spec.get("dtag-size", 2),

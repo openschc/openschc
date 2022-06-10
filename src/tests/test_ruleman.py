@@ -34,7 +34,7 @@ rule2 = {
     },
     "Fragmentation" : {
         "dir": "out",
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize" : 2,
             "FCNSize": 3,
@@ -52,7 +52,7 @@ rule3 = {
     },
     "Fragmentation" : {
         "dir": "in",
-        "FRMode" :"noAck"
+        "FRMode" :"NoAck"
     },
 }
 conflictingRule0 = {

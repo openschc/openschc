@@ -70,7 +70,7 @@ rule applies to and optionnally the size of the different fragment SCHC header f
     "RuleID" : 12,
     "RuleIDLength" : 4,
     "Fragmentation" : {
-      "FRMode" : "noAck",
+      "FRMode" : "NoAck",
       "FRDirection" : "UP"
       }
     }
@@ -99,7 +99,7 @@ The following Python code adds these 2 basic rules into the OpenSCHC rule manage
       "RuleID" : 12,
       "RuleIDLength" : 6,
       "Fragmentation" :  {
-        "FRMode" : "noAck",
+        "FRMode" : "NoAck",
         "FRDirection" : "UP"
       }
     }
@@ -127,7 +127,7 @@ Finally, the rules are displayed as cards on the console output. ::
     /-------------------------\
     |Rule 12/6        001100  |
     !=========================+=============================================================\
-    !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+    !^ Fragmentation mode : NoAck    header dtag 2 Window  0 FCN  3                     UP ^!
     !^ No Tile size specified                                                              ^!
     !^ RCS Algorithm: crc32                                                                ^!
     \=======================================================================================/
@@ -161,7 +161,7 @@ The following program has the same behavior as the previous one.::
    "RuleID" : 12,
    "RuleIDLength" : 6,
    "Fragmentation" : {
-     "FRMode": "noAck",
+     "FRMode": "NoAck",
      "FRDirection" : "UP"
    }
   }
@@ -195,7 +195,7 @@ Therefore, the DeviceID literal must be expressed in decimal, not hexadecimal.
 Fragmenter/Reassembler
 ======================
 
-Using the client-server simulation, it is possible to observe some important details about noAck mode and fragmenter/reassembler.
+Using the client-server simulation, it is possible to observe some important details about NoAck mode and fragmenter/reassembler.
 First of all, it is necessary to create a file with any name (e.g. rule1.json) into the **examples/configs** folder, which will contain our rules as follows: ::
 
     [{
@@ -206,7 +206,7 @@ First of all, it is necessary to create a file with any name (e.g. rule1.json) i
       "RuleID" : 12,
       "RuleIDLength" : 6,
       "Fragmentation" :  {
-        "FRMode": "noAck",
+        "FRMode": "NoAck",
         "FRDirection" : "UP"
       }
     }]
