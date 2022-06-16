@@ -34,7 +34,7 @@ RM.Print()
 C = Compressor(debug_protocol)
 D = Decompressor(debug_protocol)
 
-r = RM.FindRuleFromPacket(v[0], direction="UP")
+r,dev_id = RM.FindRuleFromPacket(v[0], direction="UP")
 if r != None:
     print ("selected rule is ", r)
     schc_packet = C.compress(r, v[0], v[1], T_DIR_UP)

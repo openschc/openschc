@@ -215,10 +215,10 @@ def get_simul_setup(name, spec):
     frag_rule = {
         "RuleID": spec.get("frag-ruleid", 12),
         "RuleIDLength": spec.get("frag-ruleid-size", 6),
-        "Fragmentation": {"FRMode": "noAck", "FRDirection" : "UP"}}
+        "Fragmentation": {"FRMode": "NoAck", "FRDirection" : "UP"}}
     if spec.get("frag-mode") == "ack-on-error":
         frag_info = {
-            "FRMode": "ackOnError",
+            "FRMode": "AckOnError",
             "FRDirection": "UP",
             "FRModeProfile": {
                 "dtagSize": spec.get("dtag-size", 2),
@@ -226,7 +226,7 @@ def get_simul_setup(name, spec):
                 "FCNSize": spec.get("fcn-size", 3),
                 "ackBehavior": "afterAll1",
                 "tileSize": spec.get("tile-size", DEFAULT_TILE_SIZE),
-                "MICAlgorithm": "crc32",
+                "MICAlgorithm": "RCS_RFC8724",
                 "MICWordSize": 8,
                 "lastTileInAll1": spec.get("last-tile-in-all1", False),
                 "windowSize": spec.get("window-size", 7)
