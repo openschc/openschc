@@ -56,7 +56,7 @@ from requests import get
 socket_port = 0x5C4C
 ip = get('https://api.ipify.org').text
 core_id = 'udp:'+ip+":"+str(socket_port)
-device_id = rm.self._ctxt[0]["DeviceID"]
+device_id = rm._ctxt[0]["DeviceID"]
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 
