@@ -45,7 +45,7 @@ def processPkt(pkt):
                         uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface="he-ipv6") 
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, sender_delay=0)
+                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, device_id = device_id, sender_delay=0)
 
 
 # Start SCHC Machine
@@ -56,6 +56,7 @@ from requests import get
 socket_port = 0x5C4C
 ip = get('https://api.ipify.org').text
 core_id = 'udp:'+ip+":"+str(socket_port)
+device_id = rm.self._ctxt[0]["DeviceID"]
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 

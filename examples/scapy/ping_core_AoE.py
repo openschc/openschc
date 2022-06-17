@@ -55,7 +55,8 @@ class Sniffer(Thread):
                 elif ip_proto==41:
                     # call schc_send and get the context, device_id is retrieved later from the rule
                     contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], 
-                                                                                core_id=core_id, 
+                                                                                core_id=core_id,
+                                                                                device_id=device_id, 
                                                                                 sender_delay=self.sender_delay)]))                                  
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
@@ -97,6 +98,7 @@ POSITION = T_POSITION_CORE
 socket_port = 0x5C4C
 ip = get('https://api.ipify.org').text
 core_id = 'udp:'+ip+":"+str(socket_port)
+device_id = rm.self._ctxt[0]["DeviceID"]
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
