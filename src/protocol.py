@@ -344,7 +344,7 @@ class SCHCProtocol:
                 pkt_data.append(octet)
 
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
-            return pkt
+            return device_id, pkt
     
         # fragmentation rule
 
