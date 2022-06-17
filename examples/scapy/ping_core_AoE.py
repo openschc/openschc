@@ -56,8 +56,7 @@ class Sniffer(Thread):
                     # call schc_send and get the context, device_id is retrieved later from the rule
                     contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], 
                                                                                 core_id=core_id, 
-                                                                                sender_delay=self.sender_delay)])) 
-                                                                                
+                                                                                sender_delay=self.sender_delay)]))                                  
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
 

@@ -305,7 +305,9 @@ class SCHCProtocol:
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), destination)
+            print("protocol.py", destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
+            print("protocol.py", args)
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)

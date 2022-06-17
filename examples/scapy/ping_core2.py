@@ -45,7 +45,8 @@ def processPkt(pkt):
                         uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface="he-ipv6") 
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)
+                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, sender_delay=0)
+
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
