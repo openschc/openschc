@@ -295,7 +295,7 @@ class SCHCProtocol:
         
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination)
+        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
         if packet_bbuf == None: # No compression rule found
             return 
 
