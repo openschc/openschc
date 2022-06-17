@@ -4,7 +4,7 @@ import sys
 import pprint
 import types
 
-enable_debug_print = True
+enable_debug_print = False
 
 def set_debug_output(state):
     global enable_debug_print
