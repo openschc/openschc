@@ -341,6 +341,7 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
+            print("The HEADER D:", header_d)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
     
