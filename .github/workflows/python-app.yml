@@ -13,6 +13,9 @@ jobs:
       run: |
         pip install pytest
     - name: Install Python dependencies
+      uses: py-actions/py-dependency-install@v3
+      with:
+        path: "requirements.txt"
     - name: Test with pytest
       run: |
         cd src
