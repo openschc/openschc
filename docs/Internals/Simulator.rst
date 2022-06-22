@@ -9,8 +9,6 @@ to use it, one sets up, one creates nodes,
 
 An example of simulation is in `examples/simulator`.
 
-
-
 Configuration
 =============
 

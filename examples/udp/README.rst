@@ -28,7 +28,7 @@ In order to run the example, move to the examples/udp directory, then
     /-------------------------\
     |Rule 12/6        001100  |
     !=========================+=============================================================\
-    !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+    !^ Fragmentation mode : NoAck    header dtag 2 Window  0 FCN  3                     UP ^!
     !^ No Tile size specified                                                              ^!
     !^ RCS Algorithm: crc32                                                                ^!
     \=======================================================================================/
@@ -51,7 +51,7 @@ In order to run the example, move to the examples/udp directory, then
    /-------------------------\
    |Rule 12/6        001100  |
    !=========================+=============================================================\
-   !^ Fragmentation mode : noAck    header dtag 2 Window  0 FCN  3                     UP ^!
+   !^ Fragmentation mode : NoAck    header dtag 2 Window  0 FCN  3                     UP ^!
    !^ No Tile size specified                                                              ^!
    !^ RCS Algorithm: crc32                                                                ^!
    \=======================================================================================/

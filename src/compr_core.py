@@ -78,6 +78,11 @@ T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
 T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
+T_COAP_OPT_END = "COAP.End"
+
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"

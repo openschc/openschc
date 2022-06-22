@@ -15,6 +15,7 @@ class ScapyLowerLayer:
         self.protocol = None
         self.position = position
         self.other_end = other_end
+        self.sender_delay = 0
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -36,9 +37,14 @@ class ScapyLowerLayer:
 
         self.sock.sendto(packet, destination)
 
+        # define error_rate rand ou un vecteur avec 0 et 1
+        # if error then not send
+
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
+        print (self.protocol.sender_delay)
+        time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
         return 400 # XXX
@@ -71,6 +77,7 @@ class ScapyScheduler:
         self.item=0
         self.fd_callback_table = {}
         self.last_show = 0 
+        self.session_id = None
 
 
     # ----- AbstractScheduler Interface (see: architecture.py)
@@ -78,15 +85,16 @@ class ScapyScheduler:
     def get_clock(self):
         return time.time()
          
-    def add_event(self, rel_time, callback, args):
+    def add_event(self, rel_time, callback, args, session_id = None): #TODO
         #print("Add event {}".format(sanitize_value(self.queue)))
         #print("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
+        self.session_id = session_id
         clock = self.get_clock()
         abs_time = clock+rel_time
-        self.queue.append((abs_time, event_id, callback, args))
+        self.queue.append((abs_time, event_id, callback, args, session_id))
         return event_id
 
     def cancel_event(self, event):
@@ -101,6 +109,16 @@ class ScapyScheduler:
 
         if item_found:
             elm = self.queue.pop(item_pos)
+
+        return elm
+
+    def cancel_session(self, session_id = None): #TODO
+        elm = []
+        indices = [i for i, x in enumerate(self.queue) if x[4] == session_id]
+        print("queue before", self.queue)
+        self.queue = [i for j, i in enumerate(self.queue) if j not in indices]
+        print("indices", indices)
+        print("queue after", self.queue)
 
         return elm
 
@@ -134,7 +152,7 @@ class ScapyScheduler:
         assert fd not in self.fd_callback_table
         self.fd_callback_table[fd] = (callback, args)
 
-    def run(self, session=None, display_period=None):
+    def run(self, session=None, display_period=None): 
         factor= 10
         if self.item % factor == 0:
             seq = ["|", "/", "-", "\\", "-"]
@@ -170,7 +188,7 @@ class ScapyScheduler:
                 return
 
             event_info = self.queue.pop(0)
-            self.clock, event_id, callback, args = event_info
+            self.clock, event_id, callback, args, session_id = event_info
             self.current_event_id = event_id
             if self.observer is not None:
                 self.observer("sched-pre-event", event_info)

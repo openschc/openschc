@@ -25,9 +25,10 @@ Type::
 
 for a check.
 
-Then you need to setup the git environment.
+Then you need to setup the Git environment.
 
-We advise you to synchronise the Openschc project in two separate directories. One for the source code, synchronised with the branch you want to build the documentation for, and another one synchronised with the gh-pages branch in which the documentation will be stored.
+We advise you to synchronize the OpenSCHC project in two separate directories.
+One for the source code, synchronized with the branch you want to build the documentation for, another synchronized with the gh-pages branch in which the documentation will be stored.
 
 An example of how to do this::
 
@@ -59,7 +60,8 @@ An example of how to do this::
           ├ _sources
           └ _static
 
-An important thing to do before building the documentation is to tell Sphinx where to build the documentation. This information is provided in the Makefile that is located under the **docs** folder::
+An important thing to do before building the documentation is to tell Sphinx where to build the documentation.
+This information is provided in the Makefile that is located under the **docs** folder::
 
   $ cd openschc/docs
   $ head -n 10 Makefile
@@ -91,4 +93,3 @@ Normally the documentation will be built automatically, you can open it in your 
   $ git add xxx
   $ git commit -m "meaningful comment"
   $ git push
-

@@ -81,7 +81,6 @@ class Parser:
         - direction can be T_DIR_UP or T_DIR_DW
         - layer is a optional argument: 3 means which protocols can be parsed
         - start where to start parsing
-
         example to start at COAP layer start="COAP"
         to stop before CoAP layers = ["IPv6, "UDP"]
         """
@@ -390,7 +389,3 @@ class Unparser:
 
         hexdump(full_packet)
         return full_packet
-
-        
-
-    
