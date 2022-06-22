@@ -16,6 +16,7 @@ class SimulScheduler:
         self.next_event_id = 0
         self.current_event_id = None
         self.observer = None
+        self.item=0
 
     def set_observer(self, observer):
         assert self.observer is None
@@ -30,6 +31,15 @@ class SimulScheduler:
         self.clock += delay
 
     def run(self):
+        factor= 10
+        if self.item % factor == 0:
+            seq = ["|", "/", "-", "\\", "-"]
+            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
+        self.item +=1
+
+        for q in self.queue:
+            print ("queue ", q)
+
         while len(self.queue) > 0:
             self.queue.sort()
             event_info = self.queue.pop(0)
