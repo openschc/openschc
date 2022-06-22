@@ -720,9 +720,10 @@ class Decompressor:
         val = in_bbuf.get_bits(size)
 
         dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
+ 
 
         if rule[T_FL] == "var":
-            size = len(rule[T_TV][val])
+            size = len(rule[T_TV][val]) * 8
         else:
             size = rule[T_FL]
 
