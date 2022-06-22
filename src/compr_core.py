@@ -78,6 +78,11 @@ T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
 T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
+T_COAP_OPT_END = "COAP.End"
+
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
@@ -715,9 +720,10 @@ class Decompressor:
         val = in_bbuf.get_bits(size)
 
         dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
+ 
 
         if rule[T_FL] == "var":
-            size = len(rule[T_TV][val])
+            size = len(rule[T_TV][val]) * 8
         else:
             size = rule[T_FL]
 

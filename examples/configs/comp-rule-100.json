@@ -28,12 +28,12 @@
       {"FID": "COAP.CODE",                "MO": "ignore","CDA": "value-sent"},
       {"FID": "COAP.MID",                 "MO": "ignore","CDA": "value-sent"},
       {"FID": "COAP.TOKEN",                 "MO": "ignore","CDA": "value-sent"},
-      {"FID": "COAP.URI-PATH", "FL": "var", "FP": 1, "DI": "UP", "TV": "foo","MO": "equal","CDA": "not-sent"},
-      {"FID": "COAP.URI-PATH", "FL": "var", "FP": 2, "DI": "UP", "TV": ["bar", "toto"] ,"MO": "match-mapping","CDA": "mapping-sent"},
-      {"FID": "COAP.URI-PATH", "FL": "var", "FP": 3, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
-      {"FID": "COAP.URI-PATH", "FL": "var", "FP": 4, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
-      {"FID": "COAP.URI-QUERY", "FL": "var", "FP": 1, "DI": "UP", "TV":"k=", "MO": "MSB", "MO.VAL": 16, "CDA": "LSB"},
-      {"FID": "COAP.CONTENT-FORMAT",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"},
+      {"FID": "COAP.Uri-Path", "FL": "var", "FP": 1, "DI": "UP", "TV": "foo","MO": "equal","CDA": "not-sent"},
+      {"FID": "COAP.Uri-Path", "FL": "var", "FP": 2, "DI": "UP", "TV": ["bar", "toto"] ,"MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "COAP.Uri-Path", "FL": "var", "FP": 3, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
+      {"FID": "COAP.Uri-Path", "FL": "var", "FP": 4, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
+      {"FID": "COAP.Uri-Query", "FL": "var", "FP": 1, "DI": "UP", "TV":"k=", "MO": "MSB", "MO.VAL": 16, "CDA": "LSB"},
+      {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"},
       {"FID": "COAP.END",                             "DI": "BI", "TV": 255, "MO": "equal", "CDA": "not-sent"}
     ]
 },{
@@ -66,7 +66,7 @@
     "RuleID": 1,
     "RuleIDLength": 3,
     "Fragmentation" : {
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -74,7 +74,7 @@
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 17,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8,
             "lastTileInAll1": false
@@ -84,7 +84,7 @@
     "RuleID": 2,
     "RuleIDLength": 3,
     "Fragmentation": {
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
@@ -92,7 +92,7 @@
             "FCNSize": 3,
             "ackBehavior": "afterAll1",
             "tileSize": 16,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8,
             "lastTileInAll1": false
@@ -102,12 +102,12 @@
     "RuleID": 3,
     "RuleIDLength": 3,
     "Fragmentation": {
-        "FRMode": "noAck",
+        "FRMode": "NoAck",
         "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8
         }
@@ -116,12 +116,12 @@
     "RuleID": 4,
     "RuleIDLength": 3,
     "Fragmentation": {
-        "FRMode": "noAck",
+        "FRMode": "NoAck",
         "FRDirection" : "DW",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "crc32",
+            "MICAlgorithm": "RCS_RFC8724",
             "MICWordSize": 8,
             "L2WordSize": 8
         }

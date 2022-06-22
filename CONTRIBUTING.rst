@@ -11,7 +11,6 @@ Open a Pull Request
 
 If you have a fix for one of the current `issues <https://github.com/openschc/openschc/issues>`_, please submit a Pull Request from your fork.
 
-
 Install a development environment
 =================================
 

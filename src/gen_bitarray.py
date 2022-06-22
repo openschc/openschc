@@ -292,7 +292,7 @@ class BitBuffer:
         buffer is in binary, underline shows its size.
         """
         with redirect_stdout(file_descriptor):
-            self.display(format)
+            self.display(format, file=file_descriptor)
 
 
     def allones(self, position=None):

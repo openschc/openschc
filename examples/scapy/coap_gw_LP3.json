@@ -1,0 +1,36 @@
+ {
+    "DeviceID" : "lorawan:70b3d5499069ffd6",
+    "SoR" : [
+	 {
+	    "RuleID": 98,
+	    "RuleIDLength": 8,
+	    "Compression": [
+		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+		{"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.DEV_PREFIX","TV": "2001:470:1f13:59e::/64","MO": "equal","CDA": "not-sent"},
+		{"FID": "IPV6.DEV_IID", "TV": "::2","MO": "equal","CDA": "not-sent"},
+		{"FID": "IPV6.APP_PREFIX", "TV":"2001:41d0:401:3100::/64","MO": "equal","CDA": "not-sent"},
+		{"FID": "IPV6.APP_IID",   "TV":22487, "MO": "equal","CDA": "not-sent"},
+		{"FID": "UDP.DEV_PORT", "TV": 23629, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "UDP.APP_PORT", "TV": 5684, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "UDP.LEN",      "TV": 0,  "MO": "ignore","CDA": "compute-length"},
+        {"FID": "UDP.CKSUM",    "TV": 0,  "MO": "ignore","CDA": "compute-checksum"},
+		{"FID": "COAP.VER",     "TV":1,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.TYPE",    "TV":1,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.TKL",     "TV":0,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.CODE",    "TV":2,      "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.MID",     "FL":16,     "TV":0, "MO": "MSB", "MO.VAL":12, "CDA": "LSB"},
+		{"FID": "COAP.Uri-Path", "FL": "var", "FP":1, "TV":["humidity_l","temperature_l","pressure_l","memory_l","","","","","","","","","","","",""], "MO": "match-mapping","CDA": "mapping-sent"},
+		{"FID": "COAP.Uri-Path", "FL": "var", "FP":2, "TV":"70b3d5499069ffd6", "MO": "equal","CDA": "not-sent"},
+		{"FID": "COAP.Content-Format", "TV":60, "MO": "equal","CDA": "not-sent"}		
+	    ]
+	 }
+]
+}
+
+
+

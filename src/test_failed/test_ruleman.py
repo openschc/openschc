@@ -28,13 +28,13 @@ rule2 = {
     "RuleID" : 4,
     "RuleIDLength" : 3,
     "profile": {
-        "MICAlgorithm": "crc32",
+        "MICAlgorithm": "RCS_RFC8724",
         "MICWordSize": 8,
         "L2WordSize": 8
     },
     "Fragmentation" : {
         "dir": "out",
-        "FRMode": "ackOnError",
+        "FRMode": "AckOnError",
         "FRModeProfile": {
             "dtagSize" : 2,
             "FCNSize": 3,
@@ -46,13 +46,13 @@ rule3 = {
     "RuleID" : 7,
     "RuleIDLength" : 3,
     "Profile": {
-        "MICAlgorithm": "crc32",
+        "MICAlgorithm": "RCS_RFC8724",
         "MICWordSize": 8,
         "L2WordSize": 8
     },
     "Fragmentation" : {
         "dir": "in",
-        "FRMode" :"noAck"
+        "FRMode" :"NoAck"
     },
 }
 conflictingRule0 = {

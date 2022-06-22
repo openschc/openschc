@@ -57,5 +57,3 @@ The different components are
   * test_simsched.py
 
 * UNKNOWN STATUS
-
-

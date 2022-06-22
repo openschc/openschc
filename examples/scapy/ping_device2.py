@@ -80,7 +80,7 @@ def processPkt(pkt):
                            dprint ("ping_device.py, r =", r)
                            schc_pkt_decompressed = r[1]
                            pkt_reply, core_id = create_echoreply(schc_pkt_decompressed, addr)                     
-                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id,)
+                           uncomp_pkt = schc_machine.schc_send(bytes(pkt_reply), core_id=core_id)
                            dprint(uncomp_pkt)
                             
             elif ip_proto==41:
@@ -113,8 +113,3 @@ schc_machine = SCHCProtocol(
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
-
-
-
-
- 

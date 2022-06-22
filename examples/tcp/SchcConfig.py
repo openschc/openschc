@@ -50,14 +50,14 @@ class SchcConfig:
 
         # Configuration packets loss
         if self.configuration['packet_loss_simulation']:
-            # Configuration with packet loss in noAck and ack-on-error
+            # Configuration with packet loss in NoAck and ack-on-error
             loss_rate = 15  # in %
             collision_lambda = 0.1
             background_frag_size = 54
             loss_config = {"mode": "rate", "cycle": loss_rate}
             # loss_config = {"mode":"collision", "G":collision_lambda, "background_frag_size":background_frag_size}
         else:
-            # Configuration without packet loss in noAck and ack-on-error
+            # Configuration without packet loss in NoAck and ack-on-error
             loss_config = None
 
         if loss_config is not None:
