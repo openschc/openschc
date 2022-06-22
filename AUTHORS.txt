@@ -26,5 +26,3 @@ Alexander Pelov (Acklio, France)
 Ivaylo Petrov (Acklio, France)
 Pascal Thubert (Cisco, France)
 Juan Carlos Zuniga (Sigfox, Canada)
-
-

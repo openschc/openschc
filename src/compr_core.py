@@ -83,6 +83,10 @@ T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
 
 
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
+
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
 T_DIR_BI = "BI"

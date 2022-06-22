@@ -122,7 +122,6 @@ class SessionManager:
         print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
-
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
@@ -130,7 +129,6 @@ class SessionManager:
         elif mode == T_FRAG_ACK_ON_ERROR:
             session = FragmentAckOnError(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
             # see above for param order
-
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
         self._add_session(session_id, session)        
@@ -221,6 +219,7 @@ class SCHCProtocol:
             return BitBuffer(raw_packet), None
 
         # Apply compression rule
+
         rule, device_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         self._log("compression rule {}".format(rule))
         if rule is None:
@@ -240,7 +239,6 @@ class SCHCProtocol:
         self._log("compression result {}".format(schc_packet))
 
         return schc_packet, device_id
-
 
     def _make_frag_session(self, core_id, device_id, direction):
         print("make_frag_session, devid: ", device_id, "direction", direction)
