@@ -29,13 +29,20 @@ class ConnectivityManager:
     """
 
     def __init__(self):
-        pass
+        self.mtu = 500
 
     def get_mtu (self, device):
         """
         Return the MTU is bits for a specific device, currently returns always 500
         """
-        return 600
+        return self.mtu
+
+    def set_mtu (self, mtu, device = None):
+        """
+        Return the MTU is bits for a specific device, currently returns always 500
+        """
+        self.mtu = mtu
+        
 
 
 # ---------------------------------------------------------------------------
@@ -98,6 +105,7 @@ class SessionManager:
         return session
 
     def create_fragmentation_session(self, core_id, device_id, context, rule):
+        print("create frag session: core_id, device_id", core_id, device_id )
         if self.unique_peer:
             l2_address = None #TODO
 
@@ -108,7 +116,7 @@ class SessionManager:
 
         for dtag in range(0, dtag_limit):
             session_id = (core_id, device_id, rule_id, rule_id_length, dtag)
-            session_id = self._filter_session_id(session_id)            
+            session_id = self._filter_session_id(session_id)         
             if session_id not in self.session_table:
                 break
 
@@ -148,6 +156,7 @@ class SCHCProtocol:
     """
 
     def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False, verbose=True):
+        print("role at protocol.py", role)
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
@@ -156,9 +165,7 @@ class SCHCProtocol:
         self.system = system
         self.scheduler = system.get_scheduler()
         self.layer2 = layer2
-        self.layer3 = layer3
         self.layer2._set_protocol(self)
-#        self.layer3._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
         self.session_manager = SessionManager(self, unique_peer)
@@ -173,7 +180,7 @@ class SCHCProtocol:
 
     def _log(self, message):
         if self.verbose:
-            print("schc", message)
+            print("rotocol", message)
 
     def log(self, name, message):
         if self.verbose:
@@ -202,8 +209,6 @@ class SCHCProtocol:
         In any case return a SCHC packet (compressed or not) as a BitBuffer
         """
         #context = self.rule_manager.find_context_bydstiid(dst_l3_address)
- 
-
         # Parse packet as IP packet and apply compression rule
         P = Parser(self)
         if self.position == T_POSITION_CORE:
@@ -215,23 +220,28 @@ class SCHCProtocol:
 
         parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
+
         if parsed_packet is None:
             return BitBuffer(raw_packet), None
 
         # Apply compression rule
 
-        rule, device_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        print("compr rule", rule)
         self._log("compression rule {}".format(rule))
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id)
+            print("No Compress rule:", rule)
             self._log("no-compression rule {}".format(rule))
 
             if rule is None:
                 # XXX: not putting any SCHC compression header? - need fix
                 self._log("rule for compression/no-compression not found")
                 return None, device_id
-
-            # /!\ ADD NO COMPRESSION BEHAVIOR
+                
+            schc_packet = self.compressor.no_compress(rule, raw_packet)
+            print("raw_packet", raw_packet)
+            return schc_packet, device_id
 
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
@@ -241,16 +251,16 @@ class SCHCProtocol:
         return schc_packet, device_id
 
     def _make_frag_session(self, core_id, device_id, direction):
-        print("make_frag_session, devid: ", device_id, "direction", direction)
+        print("make_frag_session, device_id: ", device_id, "core_id", core_id, "direction", direction)
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
                 deviceID=device_id, direction=direction)
-        print("rule_id found :", frag_rule[T_RULEID])
 
         if frag_rule is None:
             self._log("fragmentation rule not found")
             return None
-
+        
+        print("rule_id found :", frag_rule[T_RULEID])
         # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
@@ -266,15 +276,13 @@ class SCHCProtocol:
 
     # CLEANUP: dst_l2 and l3 should be removed
     def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0):
-        """Starting to send SCHC packet after called by Application.
-        
+        """Starting to send SCHC packet after called by Application.       
         If self.position is T_POSITION_DEVICE and 
         this function is for sending from device to core.
-
-        TODO: If only compress retun True
-        If Compres and Frag, return context
+        TODO: If only compress retun True If Compres and Frag, return context
         """
         self._log("schc_send {} {}".format(core_id, device_id))
+
 	#, raw_packet))
 
         #To perform fragmentation, we get the device_id from the rule:
@@ -290,10 +298,14 @@ class SCHCProtocol:
         else:
             direction = T_DIR_DW
             destination = device_id
-        
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
 
         print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
+                
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
+        print("+++ packet_bbuf", packet_bbuf)
+        print("+++ device_id", device_id)
+        print("+++ position", self.position)
+
         if packet_bbuf == None: # No compression rule found
             return 
 
@@ -303,9 +315,9 @@ class SCHCProtocol:
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), destination)
-            print("protocol.py", destination)
+            print("protocol.py destination", destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
-            print("protocol.py", args)
+            print("AAAAA protocol.py", args)
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
@@ -316,8 +328,10 @@ class SCHCProtocol:
         return frag_session
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None):
-        dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id)
+        dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
+
+        print("schc_packet at schc_recv", schc_packet)
         packet_bbuf = BitBuffer(schc_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 

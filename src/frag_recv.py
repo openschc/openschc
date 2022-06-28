@@ -53,7 +53,7 @@ class ReassembleBase:
         self.sender_L2addr = sender_L2addr
         self.tile_list = []
         self.mic_received = None
-        self.inactive_timer = 60 #last value 120
+        self.inactive_timer = 200 #last value 120
         self.event_id_inactive_timer = None
         # state:
         #   INIT:
@@ -93,10 +93,16 @@ class ReassembleBase:
         if self.state == "DONE":
             return
 
+        if self.protocol.position == T_POSITION_CORE:
+            dest = self._session_id[1]
+        else:
+            dest = self._session_id[0]
+
         # sending receiver abort.
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        args = (schc_frag.packet.get_content(), self._session_id[0])
-        dprint("Sent Receiver-Abort.", schc_frag.__dict__)
+        args = (schc_frag.packet.get_content(), dest)
+        dprint("Sent Receiver-Abort.", schc_frag.__dict__, "Position:", self.protocol.position)
+        dprint("Sent Receiver-Abort to: ", dest)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
         if enable_statsct:
@@ -118,6 +124,7 @@ class ReassembleBase:
         print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
         if self.event_id_inactive_timer is None:
             return
+
         self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
         self.event_id_inactive_timer = None
 
@@ -242,8 +249,8 @@ class ReassemblerNoAck(ReassembleBase):
                 dprint(self.state)
                 return args  # all-1 return the packet reassembled and fragmented or False
             # set inactive timer.
-            self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-                    self.inactive_timer, self.event_inactive, tuple())
+            #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+            #        self.inactive_timer, self.event_inactive, tuple())
             dprint("---", schc_frag.fcn)
             return None
 

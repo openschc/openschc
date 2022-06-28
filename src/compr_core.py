@@ -604,13 +604,12 @@ class Compressor:
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
         assert T_NO_COMP in rule
-
         output_bbuf = BitBuffer()
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            #output_bbuf.display(format="bin")
+            output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
