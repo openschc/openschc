@@ -4,7 +4,7 @@ import os
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
-path = '/home/marino/openschc/src/tests'
+path = 'src/tests'
 os.chdir(path)
 
 from gen_base_import import *  # used for now for differing modules in py/upy
