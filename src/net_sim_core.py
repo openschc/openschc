@@ -11,6 +11,7 @@ from net_sim_loss import PacketLossModel
 import net_sim_record
 from gen_utils import dprint
 import gen_utils
+import warnings
 
 
 try:
@@ -105,14 +106,12 @@ class Channel:
         self.node_time_table = {}
 
     def transmit_packet(self, src_id, packet, callback, callback_args):
-        print("TX ?", src_id)
         clock = self.sim.scheduler.get_clock()
         available_time = self.node_time_table.get(src_id, clock)
         available_time = max(available_time, clock)
         available_time += 1/PACKET_PER_SECOND
         self.node_time_table[src_id] = available_time
         delivery_rel_time = (available_time + PROPAGATION_DELAY) - clock
-        callback(*callback_args)
         self.sim.scheduler.add_event(delivery_rel_time, callback, callback_args)
 
 # ---------------------------------------------------------------------------
@@ -194,7 +193,6 @@ class Simul:
             return self.channel.transmit_packet(
                 src_id, packet, self.deliver_packet,
                 (packet, src_id, dst_id, callback, callback_args))
-
 
     def deliver_packet(self, packet, src_id, dst_id, callback=None, callback_args=tuple()):
         self._log("----------------------- SEND PACKET -----------------------")
@@ -295,7 +293,7 @@ class Simul:
 
     def _filter_event(self, event):
         import inspect
-        (abs_time, event_id, callback, args) = event
+        (abs_time, event_id, callback, args, xxx_extra) = event # XXX: another argument was added?
         result = {"clock":abs_time, "event-id": event_id}
         result["callback"] = self._filter_value(callback)
         result["args"] = tuple(self._filter_value(x) for x in args)
