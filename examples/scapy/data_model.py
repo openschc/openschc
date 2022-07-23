@@ -40,7 +40,7 @@ rm    = RM.RuleManager()
 rm.Add(file="ipv6.json")
 rm.Print()
 
-rm.add_sid_file("ietf-schc@2022-02-15.sid")
+rm.add_sid_file("ietf-schc@2022-07-22.sid")
 yr = rm.to_yang()
 pprint.pprint (yr)
 

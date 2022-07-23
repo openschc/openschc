@@ -828,13 +828,15 @@ class RuleManager:
                     yang_rules.append({
                         "rule-id-value": rule[T_RULEID],
                         "rule-id-length": rule[T_RULEIDLENGTH],
+                        "rule-nature" : "nature-compression",
                         "entry" : yang_comp
                     })
 
                 elif T_FRAG in rule:
                     frag_rule = {
                         "rule-id-value": rule[T_RULEID],
-                        "rule-id-length": rule[T_RULEIDLENGTH],                        
+                        "rule-id-length": rule[T_RULEIDLENGTH],     
+                        "rule-nature" : "nature-fragmentation",                   
                         "direction" : YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1],
                         "rcs-algorithm" : YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1],
                         "dtag-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
@@ -850,6 +852,11 @@ class RuleManager:
                    
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
+                    yang_rules.append({
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],
+                        "rule-nature" : "nature-no-compression"
+                    })
  
             print ("#", yang_rules)
         
@@ -988,21 +995,27 @@ class RuleManager:
                         print (binascii.hexlify(entry_cbor))
                         rule_content += entry_cbor
 
-                    rule_content = b'\xA3' + \
+                    rule_content = b'\xA4' + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - rule_sid) + \
                         self.cbor_header(0b100_00000, nb_entry) + rule_content + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
-                        cbor.dumps(rule[T_RULEIDLENGTH])
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-compression", space="identity"))                                               
+
                 elif T_FRAG in rule:
                     print ("frag")
-                    nb_elm = 2
+                    nb_elm = 3
                     rule_content = \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
-                        cbor.dumps(rule[T_RULEIDLENGTH])
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-fragmentation", space="identity"))                                               
+
 
                     rule_content += \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - rule_sid) +\
@@ -1036,7 +1049,14 @@ class RuleManager:
                     
                     rule_content = self.cbor_header(0b101_00000, nb_elm) + rule_content
                 elif T_NO_COMP in rule:
-                    print ("no comp")
+                        rule_content = b'\xA3' + \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
+                        cbor.dumps(rule[T_RULEID]) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-no-compression", space="identity"))                     
+                        print ("no comp")
                 else:
                     raise ValueError("unkwon rule")
 

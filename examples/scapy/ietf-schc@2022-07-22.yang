@@ -1108,7 +1108,12 @@ module ietf-schc {
   }
 
   grouping compression-content {
+
     list entry {
+      must "derived-from-or-self(../rule-nature, 'nature-compression')"{
+        error-message 
+          "Rule nature must be compression";
+      }
       key "field-id field-position direction-indicator";
       uses compression-rule-entry;
       description
@@ -1129,9 +1134,14 @@ module ietf-schc {
       "This grouping defines the fragmentation parameters for
        all the modes (No-ACK, ACK-Always and ACK-on-Error) specified
        in RFC 8724.";
+         
     leaf fragmentation-mode {
       type schc:fragmentation-mode-type;
       mandatory true;
+      must "derived-from-or-self(../rule-nature, 'nature-fragmentation')"{
+        error-message 
+          "Rule nature must be fragmentation";
+      }
       description
         "Which fragmentation mode is used (No-Ack, ACK-Always,
          ACK-on-Error).";
@@ -1318,6 +1328,11 @@ module ietf-schc {
       "";
   }
 
+  identity nature-fragmentation {
+    base nature-base-type;
+    description
+      "";
+  }
   identity nature-no-compression {
     base nature-base-type;
     description
@@ -1345,12 +1360,10 @@ module ietf-schc {
       }
       choice nature {
         case fragmentation {
-          when "derived-from-or-self(./rule-nature, 'nature-fragmentation')";
           if-feature "fragmentation";
           uses fragmentation-content;
         }
         case compression {
-           when "derived-from-or-self(./rule-nature, 'nature-compression')";
            if-feature "compression";
           uses compression-content;
         }
