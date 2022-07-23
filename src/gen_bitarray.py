@@ -225,6 +225,17 @@ class BitBuffer:
 
             return value
 
+
+    def get_remaining_content(self):
+        res = bytearray()
+
+        while self._wpos - self._rpos >= 8:
+            x = self.get_bits(nb_bits=8)
+            print (hex(x))
+            res.append(x)
+
+        return res
+
 #to be optimized
     def get_bits_as_buffer(self, nb_bits=None):
         """ _rpos does change.
