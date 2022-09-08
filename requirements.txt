@@ -1,2 +1,3 @@
 kamene==0.32
 python-pcapng
+scapy
