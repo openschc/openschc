@@ -1,0 +1,20 @@
+name: pytest
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install Python dependencies
+      uses: py-actions/py-dependency-install@v3
+      with:
+        path: "requirements.txt"
+    - name: Install dependencies
+      run: |
+        pip install pytest
+    - name: Test with pytest
+      run: pytest tests/
