@@ -4,6 +4,8 @@ import pcapng
 import sys
 sys.path.insert(0, "src/")
 
+ETHERNET_HEADER_LENGTH = 14
+
 def test_import():
     import compr_parser
 
@@ -12,15 +14,18 @@ def test_parse():
     
     parser = compr_parser.Parser(None)
     
-    frames = []
+    packets = []
     with open('tests/coap.pcapng', 'rb') as fp:
         pcapngScanner = pcapng.FileScanner(fp)
         for block in pcapngScanner:
             if type(block)==pcapng.blocks.EnhancedPacket:
-                 frames += [block.packet_data]
+                 packets += [block.packet_data[ETHERNET_HEADER_LENGTH:]]
     
-    for frame in frames:
-        parser.parse(
-            pkt       = frame,
+    for packet in packets:
+        parsedFrame = parser.parse(
+            pkt       = packet,
             direction = 'UP',
+            layers    = ["IPv6", "ICMP", "UDP"]
         )
+        with open('poipoi.txt','a') as f:
+            f.write(str(parsedFrame)+'\n')
