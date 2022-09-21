@@ -18,3 +18,39 @@ Project Documentation
 
 The full documentation about OpenSCHC is available 
 `here <https://openschc.github.io/openschc>`_ .
+
+run from source
+===============
+
+- `pip install -r requirements.txt`
+- `python -m openschc`
+
+build
+=====
+
+- `pip install --upgrade pip setuptools build`
+- `python -m build`
+
+install locally
+===============
+
+- `pip install .`
+
+After installation, verify you can the `openschc` commmand from any directory.
+
+uninstall locally
+=================
+
+- `pip uninstall openschc`
+
+After installation, verify you can no longer run the `openschc` commmand.
+
+upload to PyPI
+==============
+
+- create an API token after logging in at https://pypi.org/ (it's a long string starting with `pypi-`)
+- `pip install --upgrade twine`
+- `twine upload dist/*`
+    - username: `__token__`
+    - password: the entire token above, including the `pypi-` prefix
+- update appears at https://pypi.org/project/openschc/
