@@ -248,15 +248,18 @@ class SCHCProtocol:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending()
 
-    def schc_recv(self, dst_l2_addr, raw_packet):
+    def schc_recv(self, dst_l2_addr, raw_packet, direction=T_DIR_UP):
         """Receiving a SCHC packet from a lower layer."""
         packet_bbuf = BitBuffer(raw_packet)
         dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
         frag_rule = self.rule_manager.FindFragmentationRule(
-                deviceID=dst_l2_addr, packet=packet_bbuf)
+                deviceID=dst_l2_addr, packet=packet_bbuf, direction=direction)
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
+        if frag_rule is None:
+            self.process_decompress(packet_bbuf, dst_l2_addr, direction)
+            return
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
         if dtag_length > 0:
             dtag = packet_bbuf.get_bits(dtag_length, position=frag_rule[T_RULEIDLENGTH])
@@ -309,6 +312,12 @@ class SCHCProtocol:
             dprint(raw_packet)
             args = (dev_l2_addr, raw_packet)
             self.scheduler.add_event(0, self.layer3.recv_packet, args)
+        else:  # Compression rule is empty, so the packet is sent uncompressed
+            # progress position in bit buffer beyond rule
+            rule_id = packet_bbuf.get_bits(rule[T_RULEIDLENGTH])
+            assert rule_id == rule[T_RULEID];
+            self.scheduler.add_event(0, self.layer3.recv_packet,
+                                     (dev_l2_addr, packet_bbuf.get_content()))
 
     # def process_decompress(self, context, dev_l2_addr, schc_packet):
     #    self._log("compression rule_id={}".format(context["comp"]["ruleID"]))
