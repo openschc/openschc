@@ -9,6 +9,8 @@ interop/dut
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
+
+src/stats/__pycache__
 __pycache__/
 *.py[cod]
 *$py.class
