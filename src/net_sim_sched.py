@@ -16,6 +16,7 @@ class SimulScheduler:
         self.next_event_id = 0
         self.current_event_id = None
         self.observer = None
+        self.item=0
 
     def set_observer(self, observer):
         assert self.observer is None
@@ -30,10 +31,19 @@ class SimulScheduler:
         self.clock += delay
 
     def run(self):
+        factor= 10
+        if self.item % factor == 0:
+            seq = ["|", "/", "-", "\\", "-"]
+            print ("{:s}".format(seq[(self.item//factor)%len(seq)]),end="\b", flush=True)
+        self.item +=1
+
+        for q in self.queue:
+            print ("queue ", q)
+
         while len(self.queue) > 0:
             self.queue.sort()
             event_info = self.queue.pop(0)
-            self.clock, event_id, callback, args = event_info
+            self.clock, event_id, callback, args, session_id = event_info
             self.current_event_id = event_id
             if self.observer is not None:
                 self.observer("sched-pre-event", event_info)
@@ -44,23 +54,31 @@ class SimulScheduler:
 
     # external API
 
-    def add_event(self, rel_time, callback, args):
-        dprint("Add event {}".format(sanitize_value(self.queue)))
+    def add_event(self, rel_time, callback, args, session_id = None):
+        dprint("AAdd event {}".format(sanitize_value(self.queue)))
+        dprint("AAargs", session_id)
         dprint("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
         clock = self.get_clock()
-        abs_time = clock+rel_time
-        self.queue.append((abs_time, event_id, callback, args))
+        abs_time = clock + rel_time
+        self.queue.append((abs_time, event_id, callback, args, session_id))
         return event_id
 
     def cancel_event(self, event_id):
         for i,full_event in enumerate(self.queue):
             if full_event[1] == event_id:
                 self.queue.pop(i)
+                print("Here Cancel Event?")
                 return True
         return False
+
+    def cancel_session(self, session_id = None): #TODO
+        elm = []
+        indices = [i for i, x in enumerate(self.queue) if x[4] == session_id]
+        self.queue = [i for j, i in enumerate(self.queue) if j not in indices]
+        return elm
 
     def get_next_event_time(self):
         if len(self.queue) == 0:

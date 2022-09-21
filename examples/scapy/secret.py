@@ -1,0 +1,4 @@
+server = "http://remote_lns.plido.net:8080"
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiZmUyNDM3MWMtNjFkNC00NDI0LTgyZWYtNDA4MjNhYWRmY2Q0IiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY0NzI3MTE0Niwic3ViIjoiYXBpX2tleSJ9.UtTHVDN9WMOKWQwojn8_mu3jiOI3gE1zu1G9RZc_UPQ"
+#api_1
+#fe24371c-61d4-4424-82ef-40823aadfcd4

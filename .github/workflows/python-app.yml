@@ -8,14 +8,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.6.9
+    - name: Install dependencies
+      run: |
+        pip install pytest
     - name: Install Python dependencies
       uses: py-actions/py-dependency-install@v3
       with:
         path: "requirements.txt"
-    - name: Install dependencies
-      run: |
-        pip install pytest
     - name: Test with pytest
       run: |
         cd src

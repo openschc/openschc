@@ -74,6 +74,7 @@ class frag_base():
         self.packet = None
         self.abort = False
         self.ack_request = False
+        self.ack = False
 
     def set_param(self, rule_id, dtag=None, win=None, fcn=None, mic=None,
                   bitmap=None, cbit=None, payload=None):
@@ -88,6 +89,20 @@ class frag_base():
         # check the field size.
         if dtag > get_max_dtag(self.rule):
             raise ValueError("dtag is bigger than the field size.")
+
+    def display(self):
+        print ("rule id", self.rule_id)
+        print ("dtag", self.dtag)
+        print ("win", self.win)
+        print ("fcn", self.fcn)
+        print ("mic", self.mic)
+        print ("bitmap", self.bitmap)
+        print ("cbit", self.cbit)
+        print ("payload", self.payload)
+        print ("packet", self.packet)
+        print ("abort", self.abort)
+        print ("ack_request", self.ack_request)
+        print ("ack", self.ack)
 
 class frag_tx(frag_base):
 
@@ -381,6 +396,17 @@ class frag_sender_rx(frag_rx):
         pos += self.parse_cbit()
         if self.cbit == 0:
             pos += self.parse_bitmap()
+            self.ack = True
+        else: # is a Abort if next bits are equal to 1
+            self.packet_bbuf.display(format="bin")
+            l2_word=rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE]
+            l2_remain = (l2_word-(pos%l2_word))%l2_word
+            for i in range(0, l2_remain+l2_word):
+                b = self.packet_bbuf.get_bits(1)
+                if b == 0:
+                    self.ack = True
+                    return
+            self.abort = True
         self.remaining = self.packet_bbuf.get_bits_as_buffer()
 
 class frag_receiver_rx(frag_rx):

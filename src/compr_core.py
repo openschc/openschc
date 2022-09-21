@@ -40,6 +40,9 @@ T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
 T_ICMPV6_IDENT = "ICMPV6.IDENT"
 T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
 
+T_ICMPV6_TYPE_ECHO_REQUEST = "ICMPV6.TYPE.ECHO.REQUEST"
+T_ICMPV6_TYPE_ECHO_REPLY = "ICMPV6.TYPE.ECHO.REPLY"
+
 T_PROTO_UDP = "UDP"
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
 T_UDP_APP_PORT = "UDP.APP_PORT"
@@ -75,7 +78,11 @@ T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
 T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
-T_COAP_OPT_END = "COAP.END"
+T_COAP_OPT_END = "COAP.End"
+
+T_FUNCTION_VAR = "var"
+T_FUNCTION_TKL = "tkl"
+
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
@@ -98,6 +105,7 @@ T_CDA_COMP_LEN = "COMPUTE-LENGTH"
 T_CDA_COMP_CKSUM = "COMPUTE-CHECKSUM"
 T_CDA_DEVIID = "DEVIID"
 T_CDA_APPIID = "APPIID"
+T_CDA_LORA_DEVIID = "COMPUTE-DEVIID"
 
 T_ALGO = "ALGO"
 T_ALGO_DIRECT = "DIRECT"
@@ -596,13 +604,12 @@ class Compressor:
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
         assert T_NO_COMP in rule
-
         output_bbuf = BitBuffer()
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
             dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            #output_bbuf.display(format="bin")
+            output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -712,9 +719,10 @@ class Decompressor:
         val = in_bbuf.get_bits(size)
 
         dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
+ 
 
         if rule[T_FL] == "var":
-            size = len(rule[T_TV][val])
+            size = len(rule[T_TV][val]) * 8
         else:
             size = rule[T_FL]
 

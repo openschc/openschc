@@ -11,6 +11,7 @@ from net_sim_loss import PacketLossModel
 import net_sim_record
 from gen_utils import dprint
 import gen_utils
+import warnings
 
 
 try:
@@ -34,61 +35,33 @@ Link = namedtuple("Link", "from_id to_id delay")
 
 SimulNode = SimulLayer2
 
-class SimulLayer3:
-    # Using prefix 2001:DB8::/32, as it is reserved for documentation (see RFC 3849):
-    __v6addr_prefix = "2001:0db8:85a3:0000:0000:0000:0000:000"
-    __v6addr_base = 0
-
-    def __init__(self, sim):
-        self.sim = sim
-        self.protocol = None
-        self.L3addr = SimulLayer3.__get_unique_addr() #XXX: remove
-
-    def send_later(self, rel_time, dst_l2_address, dst_l3_address, raw_packet):
-        self._log("send-later Devaddr={} Packet={}".format(
-                dst_l2_address, dst_l3_address, b2hex(raw_packet)))
-        self.sim.scheduler.add_event(
-            rel_time, self.protocol.schc_send,
-            (dst_l2_address, dst_l3_address, raw_packet,))
-
-    # XXX need to confirm whether this should be here or not.
-    def recv_packet(self, dev_L2addr, raw_packet):
-        """ Two lines below commented"""
-        # self._log("recv-from-L2 Devaddr={} Packet={}".format(
-        #         dev_L2addr, b2hex(raw_packet.get_content())))
-        # XXX do more work
-
-    def _set_protocol(self, protocol): # called by SCHCProtocol
-        self.protocol = protocol
-
-    def _log(self, message):
-        self.protocol.system.log("L3", message)
-
-    @classmethod
-    def __get_unique_addr(cls):
-        assert cls.__v6addr_base < 10 # XXX: should never be larger than 10
-        result = "{}{}".format(cls.__v6addr_prefix, cls.__v6addr_base)
-        cls.__v6addr_base += 1
-        return result
-
-#---------------------------------------------------------------------------
-
 class SimulNode: # object
     pass
 
 class SimulSCHCNode(SimulNode):
-    def __init__(self, sim, extra_config={}, role="undefined"):
+    def __init__(self, sim, extra_config={}, id= None, role="undefined"):
         self.sim = sim
         self.config = sim.simul_config.get("node-config", {}).copy() # XXX: remove?
         self.config.update(extra_config)
         unique_peer = self.config.get("unique-peer", True) # XXX:remove default
 
         self.layer2 = SimulLayer2(sim)
-        self.layer3 = SimulLayer3(sim)
         self.protocol = protocol.SCHCProtocol(
-            self.config, self, self.layer2, self.layer3, role, unique_peer)
-        self.id = self.layer2.mac_id
+                                    system=self,           # define the scheduler
+                                    layer2=self.layer2,      # how to send messages
+                                    role=role,               # DEVICE or CORE
+                                    unique_peer = unique_peer,
+                                    verbose = True)      
+        self.id = id
         self.sim._add_node(self)
+
+    def send_later(self, protocol, rel_time, core_id, device_id, raw_packet):
+        print("send_later at net_sim_core.py, core_id, device_id, this device id", core_id, device_id)
+        protocol._log("send-later core_id={} device_id={} Packet={}".format(
+                core_id, device_id, b2hex(raw_packet)))
+        print("send_later", self.sim.scheduler)
+        self.sim.scheduler.add_event(rel_time, protocol.schc_send, (raw_packet, core_id, device_id, 0), True)
+        #self, raw_packet, core_id=None, device_id=None, sender_delay=0
 
     def event_receive(self, sender_id, packet):
         self._log("----------------------- RECEIVED PACKET -----------------------")
@@ -102,7 +75,7 @@ class SimulSCHCNode(SimulNode):
         self.log("node", message)
 
     def log(self, name, message):
-        self.sim.log(name, "@{} {}".format(self.layer2.mac_id, message))
+        self.sim.log(name, "@{} {}".format(self.layer2.id, message))
 
     def get_state_info(self, **kw):
         result = {
@@ -124,7 +97,7 @@ class SimulNullNode(SimulNode):
 
 #---------------------------------------------------------------------------
 
-PACKET_PER_SECOND = 1
+PACKET_PER_SECOND = 0.5
 PROPAGATION_DELAY = 0 # XXX: if >0, the callback gets called too late
 
 class Channel:
@@ -139,7 +112,6 @@ class Channel:
         available_time += 1/PACKET_PER_SECOND
         self.node_time_table[src_id] = available_time
         delivery_rel_time = (available_time + PROPAGATION_DELAY) - clock
-        #callback(*callback_args)
         self.sim.scheduler.add_event(delivery_rel_time, callback, callback_args)
 
 # ---------------------------------------------------------------------------
@@ -212,18 +184,19 @@ class Simul:
         return result
 
     def send_packet(self, packet, src_id, dst_id=None,
-                    callback=None, callback_args=tuple(), with_hack=False):
+                    callback=None, callback_args=tuple()):
+        print("src, dst, channel", src_id, dst_id, self.channel)
         if self.channel is None:
             return self.deliver_packet(
-                packet, src_id, dst_id, callback, callback_args, with_hack)
+                packet, src_id, dst_id, callback, callback_args)
         else:
             return self.channel.transmit_packet(
                 src_id, packet, self.deliver_packet,
-                (packet, src_id, dst_id, callback, callback_args, with_hack))
+                (packet, src_id, dst_id, callback, callback_args))
 
-    def deliver_packet(self, packet, src_id, dst_id=None,
-                    callback=None, callback_args=tuple(), with_hack=False):
+    def deliver_packet(self, packet, src_id, dst_id, callback=None, callback_args=tuple()):
         self._log("----------------------- SEND PACKET -----------------------")
+        print ("deliver packet src, dst", src_id, dst_id)
         lost = self.frame_loss.is_lost(len(packet))
         if not lost:
             self._log("----------------------- OK -----------------------")
@@ -232,15 +205,10 @@ class Simul:
                 Statsct.log("send-packet {}->{} {}".format(src_id, dst_id, packet))
                 clock = self.scheduler.get_clock()
                 Statsct.add_packet_info(clock, packet, src_id, dst_id, True)
-            # if dst_id == None, it is a broadcast
             link_list = self.get_link_by_id(src_id, dst_id)
-            if not with_hack:
-                count = 0
-                for link in link_list:
-                    count += self.send_packet_on_link(link, packet)
-            else:
-                count = 1
-                self._send_packetX_hack() # [CA] should be removed
+            count = 0
+            for link in link_list:
+                count += self.send_packet_on_link(link, packet)
         else:
             self._log("----------------------- KO -----------------------")
             self._log("packet was lost {}->{}".format(src_id, dst_id))
@@ -257,54 +225,23 @@ class Simul:
             self.observer.record_packet(info)
 
         if callback != None: #XXX: should called by channel after delay
-            args = callback_args+(count,) # XXX need to check. - CA:
+            args = callback_args #+(count,) # XXX need to check. - CA:
+            print("args at deliver", args)
             # [CA] the 'count' is now passed as 'status' in:
             #  SimulLayer2._event_sent_callback(self, transmit_callback, status
             # the idea is that is transmission fails, at least you can pass
             # count == 0 (status == 0), and you can do something there.
             # (in general case, some meta_information need to be sent)
 
-            #args = callback_args
-            callback(*args)
+            args = callback_args
+            callback(args)
         return count
-
-    # XXX: this method should be removed, and object oriented style should be used:
-    # [CA] didn't understood the logic here, so kept as is:
-    def _send_packetX_hack(self):
-            self.ACK_SUCCESS = "ACK_SUCCESS" # XXX: this should not be here
-            self.ACK_FAILURE = "ACK_FAILURE"
-            self.RECEIVER_ABORT = "RECEIVER_ABORT"
-            self.SEND_ALL_1 = "SEND_ALL_1"
-            self.WAITING_FOR_ACK = "WAITING_FOR_ACK"
-            self.ACK_TIMEOUT = "ACK_TIMEOUT"
-
-            count = 1
-            # for link in link_list:
-            #     count += self.send_packet_on_link(link, packet)
-            note_table_list = list(self.node_table.items())[-1][1]
-            #self.node_table[0].protocol.layer2.clientSend.send(packet)
-
-            note_table_list.protocol.layer2.roleSend.send(packet) # XXX: should not be changed
-
-            try:
-                number_tiles_send = \
-                    note_table_list.protocol.fragment_session.session_list[0]["session"].current_number_tiles_sent()
-                state = note_table_list.protocol.fragment_session.session_list[0]["session"].state
-                dprint("STATE : ", state)
-                dprint("Lenght queue", len(self.scheduler.queue))
-                if (state == self.SEND_ALL_1 or state == self.ACK_FAILURE or state == self.ACK_TIMEOUT) \
-                        and number_tiles_send == 0:
-                    dprint("------------------------------- RECEIVE PACKET ------------------------------")
-                    message = note_table_list.protocol.layer2.roleSend.Receive() # XXX: should not be here
-                    dprint("Message from Server", message)
-                    note_table_list.protocol.layer2.event_receive_packet(note_table_list.id, message)
-                    # note_table_list1.protocol.fragment_session.session_list[0]["session"].state = 'START'
-            except:
-                dprint("Not fragment state")
 
     def send_packet_on_link(self, link, packet):
         node_to = self.node_table[link.to_id]
-        node_to.event_receive(link.from_id, packet)
+        node_to.event_receive(link.to_id, packet) 
+        print("++++++++++++ node_from", link.from_id)
+        print("++++++++++++ node_to", link.to_id)
         return 1   # 1 -> one packet was sent
 
     def add_link(self, from_node, to_node, delay=1):
@@ -326,6 +263,8 @@ class Simul:
 
     # don't call: automatically called by Node(...)
     def _add_node(self, node):
+
+        print("net_sim_core: add_node ??", node)
         """Internal: add a node in the node_table
         (automatically called by Node constructor)"""
         assert node.id not in self.node_table
@@ -354,7 +293,7 @@ class Simul:
 
     def _filter_event(self, event):
         import inspect
-        (abs_time, event_id, callback, args) = event
+        (abs_time, event_id, callback, args, xxx_extra) = event # XXX: another argument was added?
         result = {"clock":abs_time, "event-id": event_id}
         result["callback"] = self._filter_value(callback)
         result["args"] = tuple(self._filter_value(x) for x in args)
