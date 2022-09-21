@@ -225,7 +225,7 @@ def frag_generic(rules_filename, packet_loss):
     return simulation_output
 
 
-<<<<<<< HEAD
+
 @pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_ack_on_error_no_loss(rule_ack_on_error):
     stdout = frag_generic(rule_ack_on_error, packet_loss=False)
@@ -237,19 +237,6 @@ def test_frag_ack_on_error_loss(rule_ack_on_error):
     stdout = frag_generic(rule_ack_on_error, packet_loss=True)
     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
     assert "----------------------- ACK Success" in stdout
-=======
-
-#def test_frag_ack_on_error_no_loss(rule_ack_on_error):
-#    stdout = frag_generic(rule_ack_on_error, packet_loss=False)
-#    print(stdout)
-#    assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
-#    assert "----------------------- ACK Success" in stdout
-
-#def test_frag_ack_on_error_loss(rule_ack_on_error):
-#    stdout = frag_generic(rule_ack_on_error, packet_loss=True)
-#    assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
-#    assert "----------------------- ACK Success" in stdout
->>>>>>> c7959f5cc3e4c54c5715e663fdb9e8781f2b6862
 
 @pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_no_ack_no_loss(rule_no_ack):
