@@ -61,6 +61,7 @@ conflictingRule0 = {
     "compression" : { "rule_set": [] }
     }
 
+@pytest.mark.skip(reason="no way of currently testing this") 
 def test_ruleman_01():
     # XXX actually, it is not test code right now.
     RM = RuleManager()

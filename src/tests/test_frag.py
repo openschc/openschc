@@ -187,21 +187,24 @@ def frag_generic(rules_filename, packet_loss):
     return simulation_output
 
 
-
+@pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_ack_on_error_no_loss(rule_ack_on_error):
     stdout = frag_generic(rule_ack_on_error, packet_loss=False)
     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
     assert "----------------------- ACK Success" in stdout
 
+@pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_ack_on_error_loss(rule_ack_on_error):
     stdout = frag_generic(rule_ack_on_error, packet_loss=True)
     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
     assert "----------------------- ACK Success" in stdout
 
+@pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_no_ack_no_loss(rule_no_ack):
     stdout = frag_generic(rule_no_ack, packet_loss=False)
     assert "SUCCESS: MIC matched" in stdout
 
+@pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_no_ack_loss(rule_no_ack):
     # packet loss in NoAck obviously will make an error.
     stdout = frag_generic(rule_no_ack, packet_loss=True)
