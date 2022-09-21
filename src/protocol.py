@@ -184,8 +184,8 @@ class SCHCProtocol:
 
         if rule["Compression"] == []:  # XXX: should be "NoCompression"
             self._log("compression result no-compression")
-            return BitBuffer(raw_packet)
-
+            # the whole packet will be the compression residue
+            residue = raw_packet
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
         schc_packet.display("bin")
