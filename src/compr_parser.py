@@ -11,6 +11,10 @@ from gen_base_import import *
 from compr_core import *  # for common variable describing rules (no function called from this module)
 from binascii import hexlify, unhexlify
 from struct import pack, unpack
+import ipaddress
+from scapy.all import *
+import binascii
+
 
 option_names = {
     1: T_COAP_OPT_IF_MATCH,
@@ -35,6 +39,31 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+icmpv6_types = {
+    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
+    T_ICMPV6_TYPE_ECHO_REPLY: 129
+}
+
+coap_options = {'If-Match':1,
+            'Uri-Host':3,
+            'ETag':4,
+            'If-None-Match':5,
+            'Observe':6,
+            'Uri-Port':7,
+            'Location-Path':8,
+            'Uri-Path':11,
+            'Content-Format':12,
+            'Max-Age':14,
+            'Uri-Query':15,
+            'Accept':17,
+            'Location-Query':20,
+            'Block2':23,
+            'Block1':27,
+            'Size2':28,
+            'Proxy-Uri':35,
+            'Proxy-Scheme':39,
+            'Size1':60}
+
 
 class Parser:
     """
@@ -52,12 +81,12 @@ class Parser:
         - direction can be T_DIR_UP or T_DIR_DW
         - layer is a optional argument: 3 means which protocols can be parsed
         - start where to start parsing
-
         example to start at COAP layer start="COAP"
         to stop before CoAP layers = ["IPv6, "UDP"]
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
+        dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -74,7 +103,7 @@ class Parser:
             if len(pkt) < 40:
                 return None, None, "packet too short"
             firstBytes = unpack('!BBHHBBQQQQ', pkt[:40]) # IPv6 \ UDP \ CoAP header
-            self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
+            #self.protocol._log("compr_parser - firstBytes {}".format(firstBytes))
 
             #                                         Value           size nature
             self.header_fields[T_IPV6_VER, 1]      = [firstBytes[0] >> 4, 4]
@@ -204,6 +233,159 @@ class Parser:
 
                 self.header_fields[T_COAP_OPT_END, 1] = [0xFF, 8]
                 pos += 1
-
-
         return self.header_fields, pkt[pos:], None
+
+
+class Unparser:
+
+    def _init(self):
+        pass
+
+    def unparse (self, header_d, data, direction, d_rule, iface=None):
+        #dprint ("unparse: ", header_d, data, direction)
+
+        L2header = None
+        L3header = None
+        L4header = None
+        L7header = None
+
+        c = {}
+        for k in [T_IPV6_DEV_PREFIX, T_IPV6_DEV_IID, T_IPV6_APP_PREFIX, T_IPV6_APP_IID]:
+            v = header_d[(k, 1)][0]
+            if type(v) == bytes:
+                c[k] = int.from_bytes(v, "big")
+            elif type(v) == int:
+                c[k] = v
+            else:
+                raise ValueError ("Type  {} not supported".format(type(v)))
+
+        DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
+        AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
+        print("LLLLLL:", header_d)
+        if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            for i in icmpv6_types:
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                    IPv6Src = DevStr
+                    IPv6Dst = AppStr
+                    ICMPv6Header = ICMPv6EchoReply(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                    IPv6Src = AppStr
+                    IPv6Dst = DevStr 
+                    ICMPv6Header = ICMPv6EchoRequest(
+                        id = header_d[(T_ICMPV6_IDENT, 1)][0],
+                        seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                        data = data)
+                L4header = ICMPv6Header
+        elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
+            print("KKKK - HERE in UDP section")
+            if direction == T_DIR_UP:
+                dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
+                app_port = header_d[(T_UDP_APP_PORT, 1)][0]
+
+                if type(dev_port) == bytes:
+                    dev_port = int.from_bytes(dev_port,"big")
+                if type(app_port) == bytes:
+                    app_port = int.from_bytes(app_port,"big")
+                    
+                L4header = UDP (
+                sport = dev_port,
+                dport = app_port
+                )
+                IPv6Src = DevStr
+                IPv6Dst = AppStr
+            else:
+                raise ValueError("TBD")
+
+            if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
+                print ("CoAP Inside")
+
+                b1 = (header_d[(T_COAP_VERSION, 1)][0] << 6)|(header_d[(T_COAP_TYPE, 1)][0]<<4)|(header_d[(T_COAP_TKL, 1)][0])
+                c_mid = header_d[(T_COAP_MID, 1)][0]
+                if type(c_mid) == bytes:
+                    c_mid = int.from_bytes(c_mid,"big") 
+                coap_h = struct.pack("!BBH", b1, header_d[(T_COAP_CODE, 1)][0],c_mid )
+
+                tkl = header_d[(T_COAP_TKL, 1)][0]
+                if tkl != 0:
+                    token = header_d[(T_COAP_TOKEN, 1)][0]
+                    for i in range(tkl-1, -1, -1):
+                        bt = (token & (0xFF << 8*i)) >> 8*i
+                        coap_h += struct.pack("!B", bt)
+
+                delta_t = 0
+                comp_rule = d_rule[T_COMP] # look into the rule to find options 
+                for idx in range(0, len(comp_rule)):
+                    if comp_rule[idx][T_FID] == T_COAP_MID:
+                        break
+
+                idx += 1 # after MID is there TOKEN
+                if idx < len(comp_rule) and comp_rule[idx][T_FID] == T_COAP_TOKEN:
+                    print ("skip token")
+                    idx += 1
+
+                for idx2 in range (idx, len(comp_rule)):
+                    print (comp_rule[idx2])
+                    opt_name = comp_rule[idx2][T_FID].replace("COAP.", "")
+                    
+                    print("LLLLL",delta_t)
+                    delta_t = coap_options[opt_name] - delta_t
+                    print (delta_t)
+                    
+                    if delta_t < 13:
+                        dt = delta_t
+                    else:
+                        dt = 13
+                        
+                    opt_len = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
+                    opt_val = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
+                    print (opt_len, opt_val)
+
+                    if opt_len < 13:
+                        ol = opt_len
+                    else:
+                        ol = 13
+                        
+                    coap_h += struct.pack("!B", (dt <<4) | ol)
+
+                    if dt == 13:
+                        coap_h += struct.pack("!B", delta_t - 13)
+
+                    if ol == 13:
+                        coap_h += struct.pack("!B", opt_len - 13)
+
+
+                    for i in range (0, opt_len):
+                        print (i)
+                        if type(opt_val) == str:
+                            coap_h += struct.pack("!B", ord(opt_val[i]))
+                        elif type(opt_val) == int:
+                            v = (opt_val & (0xFF << (opt_len - i - 1))) >> (opt_len - i - 1)
+                            coap_h += struct.pack("!B", v)
+
+                if len(data) > 0:
+                    coap_h += b'\xff'
+                    coap_h += data
+                        
+                print (binascii.hexlify(coap_h))
+
+
+
+        IPv6Header = IPv6 (
+            version= header_d[(T_IPV6_VER, 1)][0],
+            tc     = header_d[(T_IPV6_TC, 1)][0],
+            fl     = header_d[(T_IPV6_FL, 1)][0],
+            nh     = header_d[(T_IPV6_NXT, 1)][0],
+            hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
+            src    = IPv6Src.compressed, 
+            dst    = IPv6Dst.compressed
+        ) 
+
+        L3header = IPv6Header  
+        
+        full_packet = L3header / L4header / Raw(load=coap_h)
+
+        hexdump(full_packet)
+        return full_packet

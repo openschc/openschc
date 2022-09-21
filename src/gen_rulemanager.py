@@ -269,6 +269,8 @@ import warnings
 
 import base64
 
+import base64
+
 
 """
 .. module:: gen_rulemanager
@@ -1166,9 +1168,10 @@ class RuleManager:
                                     break # field from rule not found in pkt, go to next
                             dprint ("->", matches)
                     dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
-                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule, dev[T_DEVICEID]
-                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule, dev[T_DEVICEID]
-        return None, None
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
+        print("here")
+        return None
 
     def FindNoCompressionRule(self, deviceID=None):
         for d in self._ctxt:
@@ -1198,7 +1201,16 @@ class RuleManager:
         - if raw_packet is not None, it compares the rule_id with the packet.
         - if the direction and the deviceID is matched.
         """
-        if direction is not None and deviceID is None:
+        dprint("FindFragmentationRule", deviceID, direction)
+
+        if direction is not None and deviceID is not None:
+            for d in self._ctxt:
+                if d["DeviceID"] == deviceID:
+                    for r in d["SoR"]:
+                        if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
+                            return r
+
+        elif direction is not None and deviceID is None:
             for d in self._ctxt:
                 for r in d["SoR"]:
                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:

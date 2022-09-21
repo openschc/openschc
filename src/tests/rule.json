@@ -1,0 +1,20 @@
+
+ {
+    "DeviceID" : "lorawan:0000000000000001",
+    "SoR" : [
+	{
+        "RuleID": 11,
+	    "RuleIDLength": 6,
+	    "NoCompression": []
+    },
+    {
+      "RuleID":12,
+      "RuleIDLength":6,
+      "Fragmentation":{
+         "FRMode":"NoAck",
+         "FRDirection" : "DW"
+        }
+   }
+   ]
+}   
+    
