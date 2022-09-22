@@ -22,6 +22,7 @@ T_CDA = "CDA"
 T_SB = "SB"
 
 T_PROTO_IPV6 = "IPV6"
+# IPv6 header fields
 T_IPV6_VER = "IPV6.VER"
 T_IPV6_TC = "IPV6.TC"
 T_IPV6_FL = "IPV6.FL"
@@ -34,30 +35,32 @@ T_IPV6_APP_PREFIX = "IPV6.APP_PREFIX"
 T_IPV6_APP_IID = "IPV6.APP_IID"
 
 T_PROTO_ICMPV6 = "ICMPV6"
+# ICMPv6 header fields
 T_ICMPV6_TYPE = "ICMPV6.TYPE"
 T_ICMPV6_CODE = "ICMPV6.CODE"
 T_ICMPV6_CKSUM = "ICMPV6.CKSUM"
 T_ICMPV6_IDENT = "ICMPV6.IDENT"
 T_ICMPV6_SEQNO = "ICMPV6.SEQNO"
-
+# ICMPv6 types
 T_ICMPV6_TYPE_ECHO_REQUEST = "ICMPV6.TYPE.ECHO.REQUEST"
 T_ICMPV6_TYPE_ECHO_REPLY = "ICMPV6.TYPE.ECHO.REPLY"
 
 T_PROTO_UDP = "UDP"
+# UDP fields
 T_UDP_DEV_PORT = "UDP.DEV_PORT"
 T_UDP_APP_PORT = "UDP.APP_PORT"
 T_UDP_LEN = "UDP.LEN"
 T_UDP_CKSUM = "UDP.CKSUM"
 
 T_PROTO_COAP = "COAP"
+# CoAP fields
 T_COAP_VERSION = "COAP.VER"
 T_COAP_TYPE = "COAP.TYPE"
 T_COAP_TKL = "COAP.TKL"
 T_COAP_CODE = "COAP.CODE"
 T_COAP_MID = "COAP.MID"
 T_COAP_TOKEN = "COAP.TOKEN"
-
-# WARNING: CoAP option string must be writen exactly as in standards and IANA
+# CoAP options string (written exactly as in standards)
 T_COAP_OPT_IF_MATCH =  "COAP.If-Match"
 T_COAP_OPT_URI_HOST = "COAP.Uri-Host"
 T_COAP_OPT_ETAG = "COAP.ETag"
@@ -82,7 +85,6 @@ T_COAP_OPT_END = "COAP.End"
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
-
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
@@ -126,8 +128,8 @@ T_FRAG_ACK_ALWAYS = "AckAlways"
 T_FRAG_ACK_ON_ERROR = "AckOnError"
 T_FRAG_DIRECTION = "FRDirection"
 T_FRAG_PROF = "FRModeProfile"
-T_FRAG_DTAG = "dtagSize" # XXX: should be T_FRAG_DTAG_SIZE
-T_FRAG_W = "WSize" # XXX: should be T_FRAG_W_SIZE
+T_FRAG_DTAG                  = "dtagSize" # FIXME should be T_FRAG_DTAG_SIZE
+T_FRAG_W                     = "WSize" # FIXME should be T_FRAG_W_SIZE
 T_FRAG_FCN = "FCNSize"
 T_FRAG_WINDOW_SIZE = "windowSize"
 T_FRAG_ACK_BEHAVIOR = "ackBehavior"
@@ -313,7 +315,7 @@ YANG_ID = {
     T_COAP_OPT_MAX_AGE : [SID+37, "fid-coap-option-max-age"],
     T_COAP_OPT_NO_RESP : [SID+38, "fid-coap-option-no-response"],
     T_COAP_OPT_OBS : [SID+39, "fid-coap-option-observe"],
-    'TBD' : [SID+40, "fid-coap-option-oscore-flags"],
+    "TBD":                    [SID+40, "fid-coap-option-oscore-flags"],
     "TBD" : [SID+41, "fid-coap-option-oscore-kid"],
     "TBD" : [SID+42, "fid-coap-option-oscore-kidctx"],
     "TBD" : [SID+43, "fid-coap-option-oscore-piv"],
@@ -398,13 +400,10 @@ YANG_ID = {
     "TBD" : [SID+122, "/ietf-schc:schc/rule/tile-in-All1"],
     "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
     "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
-    "TBD" : [SID+125, "/ietf-schc:schc/rule/window-size"]
+    "TBD":                    [SID+125, "/ietf-schc:schc/rule/window-size"],
 }
 
-
-
 # from gen_rulemanager import *
-
 
 #---------------------------------------------------------------------------
 # MO operation
@@ -434,7 +433,6 @@ YANG_ID = {
 #    |AppIID              |elided       |build IID from L2 App addr  |
 #    \--------------------+-------------+----------------------------/
 
-#---------------------------------------------------------------------------
 class Compressor:
 
     def __init__(self, protocol):
