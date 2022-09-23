@@ -1,9 +1,6 @@
 import pytest
 import pcapng
 
-import sys
-sys.path.insert(0, "src/")
-
 ETHERNET_HEADER_LENGTH = 14
 
 def test_import():
@@ -27,5 +24,3 @@ def test_parse():
             direction = 'UP',
             layers    = ["IPv6", "ICMP", "UDP"]
         )
-        with open('poipoi.txt','a') as f:
-            f.write(str(parsedFrame)+'\n')
