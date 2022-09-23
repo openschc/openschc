@@ -260,7 +260,7 @@ Given the first bits received from the LPWAN, returns either a fragmentation or 
 
 """
 
-from multiprocessing import Value
+#from multiprocessing import Value
 from operator import mod
 from gen_base_import import *
 from copy import deepcopy
