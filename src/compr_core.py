@@ -132,10 +132,13 @@ T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
-T_FRAG_RFC8724 = "RCS_RFC8724"
+T_FRAG_RFC8724 = "RCS_CRC32"
 
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
+
+T_INDEXES = "Indexes"
+T_CMD_INDIRECT = "INDIRECT"
 
 """
 100000     module ietf-schc
@@ -354,7 +357,7 @@ YANG_ID = {
     T_MO_IGNORE : [SID+83, "mo-ignore"],
     T_MO_MMAP : [SID+84, "mo-match-mapping"],
     T_MO_MSB : [SID+85, "mo-msb"],
-    T_FRAG_RFC8724 : [SID+86, "rcs-RFC8724"],
+    T_FRAG_RFC8724 : [SID+86, "rcs-crc32"],
     "TBD" : [SID+87, "rcs-algorithm-base-type"],
     "TBD" : [SID+88, "compression"],
     "TBD" : [SID+89, "fragmentation"],
@@ -393,7 +396,8 @@ YANG_ID = {
     "TBD" : [SID+122, "/ietf-schc:schc/rule/tile-in-All1"],
     "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
     "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
-    "TBD" : [SID+125, "/ietf-schc:schc/rule/window-size"]
+    "TBD" : [SID+125, "/ietf-schc:schc/rule/window-size"],
+    T_CMD_INDIRECT : [-1, "value-indirect"]
 }
 
 
