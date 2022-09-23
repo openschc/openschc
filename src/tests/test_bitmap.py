@@ -7,7 +7,6 @@ from gen_bitarray import BitBuffer
 if sys.implementation.name != "micropython":
     import pytest
 
-
 def check_bitmaps(bitmaps, expected):
     print("bitmaps:", bitmaps)
     for i in bitmaps:
