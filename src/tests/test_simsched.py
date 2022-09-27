@@ -31,8 +31,6 @@ def callback(arg1, arg2, scheduler=scheduler):
 #============================ tests ===========================================
 
 def test_simsched():
-    
-    
     scheduler.add_event(3, callback, ("4", "four"))
     scheduler.add_event(1, callback, ("1", "one"))
     scheduler.run()
