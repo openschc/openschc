@@ -1,11 +1,7 @@
 import sys
-sys.path.insert(0, ".")
-sys.path.insert(0, "..")
-
 from gen_bitarray import BitBuffer
 if sys.implementation.name != "micropython":
     import pytest
-
 
 # XXX better to separate into each test case.
 def test_bitarray2():

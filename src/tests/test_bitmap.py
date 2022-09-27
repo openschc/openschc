@@ -1,7 +1,4 @@
 import sys
-sys.path.insert(0, ".")
-sys.path.insert(0, "..")
-
 from frag_bitmap import find_missing_tiles, make_bit_list
 from gen_bitarray import BitBuffer
 if sys.implementation.name != "micropython":

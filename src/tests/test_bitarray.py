@@ -1,11 +1,9 @@
 import sys
 sys.path.insert(0, ".")
 sys.path.insert(0, "..")
-
 from gen_base_import import *  # used for now for differing modules in py/upy
 if sys.implementation.name != "micropython":
     import pytest
-
 
 def make_bits_list():
     bits_list = [
@@ -27,7 +25,6 @@ def make_bits_list():
         bits_list.append((v, i))
 
     return bits_list
-
 
 def test_bitbuffer_consistency():
     bits_list = make_bits_list()
@@ -55,7 +52,6 @@ def test_bitbuffer_consistency():
     assert bitbuffer2.get_bits(padding_bitsize) == 0
     assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception when not
 
-
 def test_check_newbitbuffer_consistency():
     bits_list = make_bits_list()
     print (bits_list)
@@ -73,7 +69,6 @@ def test_check_newbitbuffer_consistency():
         print (bits, nb_bits, bits2)
         assert bits == bits2  # XXX: raise exception
 #    assert len(bitbuffer2.get_content()) == 0  # XXX: raise exception
-
 
 # for micropython and other tester.
 if __name__ == "__main__":

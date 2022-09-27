@@ -1,8 +1,3 @@
-# ---------------------------------------------------------------------------
-import sys
-sys.path.insert(0, ".")
-sys.path.insert(0, "..")
-
 from gen_base_import import *  # used for now for differing modules in py/upy
 import net_sim_core
 from gen_rulemanager import *
