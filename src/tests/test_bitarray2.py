@@ -1,7 +1,11 @@
-import sys
+import pytest
 from gen_bitarray import BitBuffer
-if sys.implementation.name != "micropython":
-    import pytest
+
+#============================ defines =========================================
+
+#============================ helpers =========================================
+
+#============================ tests ===========================================
 
 # XXX better to separate into each test case.
 def test_bitarray2():
@@ -186,7 +190,3 @@ def test_bitarray2():
     a = BitBuffer("b'\xd2\x01\x00'/17")
     print(a)
     assert str(a) == r"b'\xd2\x01\x00'/17"
-
-# for micropython and other tester.
-if __name__ == "__main__":
-    test_bitarray2()

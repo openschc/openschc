@@ -1,3 +1,8 @@
+import io
+import pytest
+import sys
+import tempfile
+
 from gen_base_import import *  # used for now for differing modules in py/upy
 import net_sim_core
 from gen_rulemanager import *
@@ -5,12 +10,10 @@ from stats.statsct import Statsct
 from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint, set_debug_output
-import io
-import pytest
-import sys
-import tempfile
 
 set_debug_output(False)
+
+#============================ fixtures ========================================
 
 @pytest.fixture
 def rule_no_ack():
@@ -38,8 +41,6 @@ def rule_no_ack():
     file_rules.seek(0)
     # Use yield instead of return so the temp file survives
     yield file_rules.name
-
-
 
 @pytest.fixture
 def rule_ack_on_error():
@@ -81,9 +82,10 @@ def rule_ack_on_error():
     # Use yield instead of return so the temp file survives
     yield file_rules.name
 
+#============================ helpers =========================================
 
 def frag_generic(rules_filename, packet_loss):
-     # --------------------------------------------------
+    # --------------------------------------------------
     # General configuration
 
     l2_mtu = 72  # bits
@@ -114,7 +116,6 @@ def frag_generic(rules_filename, packet_loss):
     if loss_config is not None:
         simul_config["loss"] = loss_config
 
-
     # ---------------------------------------------------------------------------
 
     def make_node(sim, rule_manager, device_id=None, core_id=None, extra_config={}, role=None):
@@ -135,13 +136,14 @@ def frag_generic(rules_filename, packet_loss):
     Statsct.log("Statsct test")
     Statsct.set_packet_size(data_size)
     Statsct.set_SF(SF)
+    
     # ---------------------------------------------------------------------------
     
     #devaddr1 = b"\xaa\xbb\xcc\xdd"
     #devaddr2 = b"\xaa\xbb\xcc\xee"
 
     device_id = "lorawan:0000000000000001"
-    core_id = "lorawan:0000000000000002"
+    core_id   = "lorawan:0000000000000002"
 
     print("---------Rules Device -----------")
     rm0 = RuleManager()
@@ -166,7 +168,6 @@ def frag_generic(rules_filename, packet_loss):
 
     device.layer2.set_mtu(l2_mtu)   
     core.layer2.set_mtu(l2_mtu)
-
 
     # ---------------------------------------------------------------------------
     # Information about the devices
@@ -219,7 +220,7 @@ def frag_generic(rules_filename, packet_loss):
     print(simulation_output)
     return simulation_output
 
-
+#============================ tests ===========================================
 
 @pytest.mark.skip(reason="no way of currently testing this") 
 def test_frag_ack_on_error_no_loss(rule_ack_on_error):
@@ -245,4 +246,3 @@ def test_frag_no_ack_loss(rule_no_ack):
     stdout = frag_generic(rule_no_ack, packet_loss=True)
     print ("++++", stdout)
     assert "ERROR: MIC mismatched" in stdout
-

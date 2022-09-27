@@ -1,17 +1,13 @@
+import pprint
+import binascii
 from gen_base_import import b2hex
 from compr_core import *
 from compr_parser import *
 from gen_rulemanager import *
 
-import pprint
-import binascii
+#============================ defines =========================================
 
-
-class debug_protocol:
-    def _log(*arg):
-        print(*arg)
-
-coap = bytearray(b"""`\
+COAPPKT = bytearray(b"""`\
 \x12\x34\x56\x00\x1e\x11\x1e\xfe\x80\x00\
 \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
 \x00\x00\x01\xfe\x80\x00\x00\x00\x00\x00\
@@ -20,14 +16,20 @@ coap = bytearray(b"""`\
 foo\x03bar\x06ABCD==Fk=eth0\xff\x84\x01\
 \x82  &Ehello""")
 
+#============================ helpers =========================================
 
+class debug_protocol:
+    def _log(*arg):
+        print(*arg)
+
+#============================ tests ===========================================
 
 def test_compress():
     p = Parser(debug_protocol)
 
-    print (b2hex(coap))
+    print (b2hex(COAPPKT))
 
-    v = p.parse(coap, T_DIR_UP)  # or T_DIR_DW
+    v = p.parse(COAPPKT, T_DIR_UP)  # or T_DIR_DW
     pprint.pprint(v[0])
 
     RM = RuleManager(log=debug_protocol)
