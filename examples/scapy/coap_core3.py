@@ -61,7 +61,8 @@ def processPkt(pkt):
                         other_end +=  binascii.hexlify(msg[2]).decode("utf-8")
                         other_end += "@" + addr[0]+":"+str(addr[1])
                         
-                        rm.FindRuleBySCHCPacket(
+                        rule = rm.FindRuleFromSCHCpacket(schc=msg[4], device=other_end)
+                        print (rule)
                     else:
                         print ("unknown technology")
 
