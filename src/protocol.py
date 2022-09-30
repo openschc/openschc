@@ -358,6 +358,8 @@ class SCHCProtocol:
             print("The HEADER D:", header_d)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
+        elif T_NO_COMP in rule:
+            return device_id, packet_bbuf
     
         # fragmentation rule
 
