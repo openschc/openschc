@@ -15,7 +15,11 @@
 			{"FID": "IPV6.DEV_IID", "TV": "::0202","MO": "equal","CDA": "not-sent"},
 			{"FID": "IPV6.APP_PREFIX", "TV": "2001:470:1F21:1D2::/64",
 													"MO": "equal","CDA": "not-sent"},
-			{"FID": "IPV6.APP_IID",   "TV": "::0202","MO": "equal","CDA": "not-sent"}
+			{"FID": "IPV6.APP_IID",   "TV": "::0202","MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.DEV_PORT", "TV": 12345  ,"MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.APP_PORT", "TV": 8356  ,"MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.LEN"                    ,"MO": "ignore","CDA": "compute-length"},
+			{"FID": "UDP.CKSUM"                  ,"MO": "ignore","CDA": "compute-checksum"}			
 		]		
 	}
     ]
