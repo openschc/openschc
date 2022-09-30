@@ -60,11 +60,7 @@
             "lastTileInAll1": false
         }
 		} 
-    }, {
-		"RuleID" : 38,
-		"RuleIDLength" : 8,
-		"NoCompression": []		
-	}
+    }
 ]
 }
 
