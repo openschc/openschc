@@ -22,6 +22,7 @@ import cbor2 as cbor
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
 rm.Add(file="icmp3.json")
+rm.Add(file="coap1.json")
 rm.Print()
 
 unparser = Unparser()
