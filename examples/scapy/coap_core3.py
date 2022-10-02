@@ -73,7 +73,7 @@ def processPkt(pkt):
                     print ("other_end = ", other_end)
                     
         elif e_type == 0x86dd:
-                print ("IPv6:\n", bytes(pkt)[14:])
+                print ("IPv6:\n", binascii.hexlify(bytes(pkt)[14:]))
                 schc_machine.schc_send(bytes(pkt)[14:])
 
 # Start SCHC Machine
