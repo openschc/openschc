@@ -317,7 +317,7 @@ class Unparser:
 
                 delta_t = 0
 
-                for opt in header_d.items:
+                for opt in header_d.items():
                     if not "COAP" in opt[0][0]:  
                         continue
 
