@@ -322,8 +322,8 @@ class Unparser:
                         continue
 
                     opt_name = opt[0][0].replace("COAP.", "")
-                    opt_val  = opt[1][0]//8
-                    opt_len  = opt[1][1]
+                    opt_val  = opt[1][0]
+                    opt_len  = opt[1][1]//8
                     
                     print("LLLLL",delta_t)
                     delta_t = coap_options[opt_name] - delta_t
