@@ -63,7 +63,10 @@ def processPkt(pkt):
                         other_end += "@" + addr[0]+":"+str(addr[1])
                         
                         uncomp_pkt = schc_machine.schc_recv(schc_packet=msg[4], device_id=other_end)
-                        print ("--->", uncomp_pkt)
+                        print ("--->", uncomp_pkt) 
+                        if uncomp_pkt != None:
+                            uncomp_pkt[1].show()
+                            send(uncomp_pkt[1], iface="ens3")
                     else:
                         print ("unknown technology")
 
