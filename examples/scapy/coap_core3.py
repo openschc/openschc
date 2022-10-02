@@ -66,7 +66,7 @@ def processPkt(pkt):
                         print ("--->", uncomp_pkt) 
                         if uncomp_pkt != None:
                             uncomp_pkt[1].show()
-                            send(uncomp_pkt[1], iface="he-ipv6")
+                            send(uncomp_pkt[1], iface="ens3")
                     else:
                         print ("unknown technology")
 
