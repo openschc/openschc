@@ -96,5 +96,5 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface=["ens3", "lo"], filter="udp port 5683") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface=["ens3", "lo"], filter="udp port 5683 or udp port 33033") # scappy cannot read multiple interfaces
 
