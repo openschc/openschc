@@ -74,7 +74,7 @@ def processPkt(pkt):
                     
         elif e_type == 0x86dd:
                 print ("IPv6:\n", binascii.hexlify(bytes(pkt)[14:]))
-                #schc_machine.schc_send(bytes(pkt)[14:])
+                schc_machine.schc_send(bytes(pkt)[14:])
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
