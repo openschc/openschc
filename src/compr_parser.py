@@ -318,7 +318,7 @@ class Unparser:
                 delta_t = 0
 
                 for opt in header_d.items():
-                    if not ("COAP" in opt[0][0]) and not (opt[0][0] in [T_COAP_VER, T_COAP_TYPE, T_COAP_TLK, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
+                    if not ("COAP" in opt[0][0]) and not (opt[0][0] in [T_COAP_VERSION, T_COAP_TYPE, T_COAP_TKL, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
                         continue
 
                     opt_name = opt[0][0].replace("COAP.", "")
