@@ -80,7 +80,7 @@ pprint.pprint(headers)
 print (binascii.hexlify(data))
 
 
-rule = RM.FindRuleFromPacket(headers, direction="UP")
+rule, dev_id = RM.FindRuleFromPacket(headers, direction="UP")
 print (rule)
 
 C = Compressor(debug_protocol)

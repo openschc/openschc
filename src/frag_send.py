@@ -197,6 +197,7 @@ class FragmentNoAck(FragmentBase):
         #                                         L2 word size
         #                                                       |<- L2 Word
         mtu = self.protocol.connectivity_manager.get_mtu("toto")
+        mtu = self.protocol.layer2.get_mtu_size()
         print("MTU = ", mtu)
         payload_size = (mtu - frag_msg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
@@ -229,7 +230,6 @@ class FragmentNoAck(FragmentBase):
                             frag_msg.get_mic_size(self.rule) +
                             remaining_data_size)
                 self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
-
                 self.protocol.session_manager.delete_session(self._session_id)
                 print('MIC Size = ', frag_msg.get_mic_size(self.rule))
                 fcn = frag_msg.get_fcn_all_1(self.rule)
@@ -263,7 +263,7 @@ class FragmentNoAck(FragmentBase):
         else:
             dest = self._session_id[1] # device address
 
-        args = (schc_frag.packet.get_content(), dest, None)
+        args = (schc_frag.packet.get_content(), dest)
         dprint ("dbug: frag_send.py: Fragment args", args)
         dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
@@ -297,6 +297,7 @@ class FragmentNoAck(FragmentBase):
         print("FCN size=", fcn)
         print('dtag', frag_msg.get_max_dtag(self.rule))
         print('dtag', frag_msg.get_max_fcn(self.rule))
+        print("session_id", self._session_id)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
 

@@ -99,7 +99,7 @@ class SimulRecordingObserver:
         if event_name == "sched-pre-event":
             return # only record post-event to avoid redundancy
 
-        clock, event_id, callback, args = event_info
+        clock, event_id, callback, args, xxx_extra = event_info # XXX: another argument?
         info = {
             "event": event_name,
             "clock": clock,

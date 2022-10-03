@@ -15,6 +15,7 @@ class ScapyLowerLayer:
         self.protocol = None
         self.position = position
         self.other_end = other_end
+        self.sender_delay = 0
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -42,7 +43,8 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
-        #time.sleep(5)
+        print (self.protocol.sender_delay)
+        time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
         return 400 # XXX
@@ -91,7 +93,7 @@ class ScapyScheduler:
         self.next_event_id += 1
         self.session_id = session_id
         clock = self.get_clock()
-        abs_time = clock+rel_time
+        abs_time = clock + rel_time
         self.queue.append((abs_time, event_id, callback, args, session_id))
         return event_id
 
@@ -113,11 +115,7 @@ class ScapyScheduler:
     def cancel_session(self, session_id = None): #TODO
         elm = []
         indices = [i for i, x in enumerate(self.queue) if x[4] == session_id]
-        print("queue before", self.queue)
         self.queue = [i for j, i in enumerate(self.queue) if j not in indices]
-        print("indices", indices)
-        print("queue after", self.queue)
-
         return elm
 
     # ----- Additional methods
