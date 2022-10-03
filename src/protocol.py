@@ -292,12 +292,6 @@ class SCHCProtocol:
 
         self.sender_delay = sender_delay
 
-        if self.position == T_POSITION_DEVICE:
-            direction = T_DIR_UP
-            destination = core_id
-        else:
-            direction = T_DIR_DW
-            destination = device_id
 
         print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
                 
@@ -305,6 +299,13 @@ class SCHCProtocol:
         print("+++ packet_bbuf", packet_bbuf)
         print("+++ device_id", device_id)
         print("+++ position", self.position)
+
+        if self.position == T_POSITION_DEVICE:
+            direction = T_DIR_UP
+            destination = core_id
+        else:
+            direction = T_DIR_DW
+            destination = device_id
 
         if packet_bbuf == None: # No compression rule found
             return 
