@@ -31,6 +31,9 @@ class ScapyLowerLayer:
         print ("scapy_conection.py: send_pkt, dest ", dest, "packet", packet)
         if dest != None and dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
+
+            self.sock.sendto(packet, destination)
+
         elif dest != None and dest.find("lorawan") == 0:
             destination = ("127.0.0.1", 33033)
             device_id = dest.split(":")[1]
@@ -44,6 +47,8 @@ class ScapyLowerLayer:
             }
 
             print (binascii.hexlify(cbor.dumps(msg)))
+            self.sock.sendto(cbor.dumps(msg), destination)
+
         else:
             print ("No destination found, not sent:", packet, dest)
             return False
@@ -51,7 +56,6 @@ class ScapyLowerLayer:
 #        else:
 #            destination = self.other_end
 
-        self.sock.sendto(packet, destination)
 
         # define error_rate rand ou un vecteur avec 0 et 1
         # if error then not send
