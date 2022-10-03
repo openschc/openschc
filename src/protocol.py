@@ -293,12 +293,13 @@ class SCHCProtocol:
         self.sender_delay = sender_delay
 
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
                 
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
         print("+++ packet_bbuf", packet_bbuf)
         print("+++ device_id", device_id)
         print("+++ position", self.position)
+
+        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
 
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
