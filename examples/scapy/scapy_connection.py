@@ -32,9 +32,8 @@ class ScapyLowerLayer:
         if dest != None and dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
         elif dest != None and dest.find("lorawan") == 0:
-            dev_id, relay = dest.split("@")
             destination = ("127.0.0.1", 33033)
-            device_id = dev_id.split(":")[1]
+            device_id = dest.split(":")[1]
 
             print (destination, device_id)
 
