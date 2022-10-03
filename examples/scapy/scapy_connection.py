@@ -10,6 +10,9 @@ import frag_recv
 
 from scapy.all import hexdump
 
+import binascii
+import cbor2 as cbor
+
 class ScapyLowerLayer:
     def __init__(self, position, socket=None, other_end=None):
         self.protocol = None
@@ -30,10 +33,18 @@ class ScapyLowerLayer:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
         elif dest != None and dest.find("lorawan") == 0:
             dev_id, relay = dest.split("@")
-            destination = (relay.split(":")[0], relay.split(":")[1] )
+            destination = ("127.0.0.1", 33033)
             device_id = dev_id.split(":")[1]
 
             print (destination, device_id)
+
+            msg = {
+                1: 1,
+                2: binascii.unhexlify(device_id),
+                4: packet
+            }
+
+            print (binascii.hexlify(cbor.dumps(msg)))
         else:
             print ("No destination found, not sent:", packet, dest)
             return False
