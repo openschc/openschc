@@ -28,6 +28,12 @@ class ScapyLowerLayer:
         print ("scapy_conection.py: send_pkt, dest ", dest, "packet", packet)
         if dest != None and dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
+        elif dest != None and dest.find("lorawan"):
+            dev_id, relay = dest.split("@")
+            destination = (relay.split(":")[0], relay.split(":")[1] )
+            device_id = dev_id.split(":")[1]
+
+            print (destination, device_id)
         else:
             print ("No destination found, not sent:", packet, dest)
             return False
