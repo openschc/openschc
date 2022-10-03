@@ -248,7 +248,7 @@ class SCHCProtocol:
         #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
-        return schc_packet, device_id
+        return schc_packet, dev_id
 
     def _make_frag_session(self, core_id, device_id, direction):
         print("make_frag_session, device_id: ", device_id, "core_id", core_id, "direction", direction)
