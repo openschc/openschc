@@ -24,7 +24,12 @@
 			"FRMode": "NoAck",
 			"FRDirection": "UP"
 		}
-	} 
+	} ,
+	{
+	    "RuleID": 100,
+	    "RuleIDLength": 8,
+	    "NoCompression": []		
+	}
     ]
   }
 

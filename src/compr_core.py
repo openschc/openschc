@@ -139,10 +139,13 @@ T_FRAG_MAX_RETRY = "maxRetry"
 T_FRAG_TIMEOUT  = "timeout"
 T_FRAG_L2WORDSIZE = "L2WordSize"
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
-T_FRAG_RFC8724 = "RCS_RFC8724"
+T_FRAG_RFC8724 = "RCS_CRC32"
 
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
+
+T_INDEXES = "Indexes"
+T_CMD_INDIRECT = "INDIRECT"
 
 """
 100000     module ietf-schc
@@ -286,8 +289,8 @@ YANG_ID = {
     "TBD" : [SID+8, "all1-data-yes"],
     T_CDA_APPIID : [SID+9, "cda-appiid"],
     "TBD" : [SID+10, "cda-base-type"],
-    T_CDA_COMP_CKSUM : [SID+11, "cda-compute-checksum"],
-    T_CDA_COMP_LEN : [SID+12, "cda-compute-length"],
+    T_CDA_COMP_CKSUM : [SID+11, "cda-compute"],
+    T_CDA_COMP_LEN : [SID+12, "cda-compute"],
     T_CDA_DEVIID : [SID+13, "cda-deviid"],
     T_CDA_LSB : [SID+14, "cda-lsb"],
     T_CDA_MAP_SENT : [SID+15, "cda-mapping-sent"],
@@ -339,7 +342,7 @@ YANG_ID = {
     T_IPV6_FL : [SID+61, "fid-ipv6-flowlabel"],
     T_IPV6_HOP_LMT : [SID+62, "fid-ipv6-hoplimit"],
     T_IPV6_NXT : [SID+63, "fid-ipv6-nextheader"],
-    T_IPV6_LEN : [SID+64, "fid-ipv6-payloadlength"],
+    T_IPV6_LEN : [SID+64, "fid-ipv6-payload-length"],
     T_IPV6_TC : [SID+65, "fid-ipv6-trafficclass"],
     "TBD" : [SID+66, "fid-ipv6-trafficclass-ds"],
     "TBD" : [SID+67, "fid-ipv6-trafficclass-ecn"],
@@ -361,7 +364,7 @@ YANG_ID = {
     T_MO_IGNORE : [SID+83, "mo-ignore"],
     T_MO_MMAP : [SID+84, "mo-match-mapping"],
     T_MO_MSB : [SID+85, "mo-msb"],
-    T_FRAG_RFC8724 : [SID+86, "rcs-RFC8724"],
+    T_FRAG_RFC8724 : [SID+86, "rcs-crc32"],
     "TBD" : [SID+87, "rcs-algorithm-base-type"],
     "TBD" : [SID+88, "compression"],
     "TBD" : [SID+89, "fragmentation"],
@@ -400,7 +403,7 @@ YANG_ID = {
     "TBD" : [SID+122, "/ietf-schc:schc/rule/tile-in-All1"],
     "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
     "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
-    "TBD":                    [SID+125, "/ietf-schc:schc/rule/window-size"],
+    "TBD": [SID+125, "/ietf-schc:schc/rule/window-size"],
 }
 
 # from gen_rulemanager import *

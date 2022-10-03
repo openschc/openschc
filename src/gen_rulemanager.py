@@ -260,6 +260,7 @@ Given the first bits received from the LPWAN, returns either a fragmentation or 
 
 """
 
+#from multiprocessing import Value
 from operator import mod
 from gen_base_import import *
 from copy import deepcopy
@@ -270,7 +271,6 @@ import warnings
 import base64
 
 import base64
-
 
 """
 .. module:: gen_rulemanager
@@ -441,7 +441,7 @@ class RuleManager:
             if device == d["DeviceID"]:
                 break
         else:
-            d = {"DeviceID": device, "SoR": []}
+            d = {"DeviceID": device, "SoR": [], "Indexes" : {}}
             self._ctxt.append(d)
 
         for n_rule in sor:
@@ -459,7 +459,7 @@ class RuleManager:
 
 
             if not overlap:
-                if "Compression" in n_rule:
+                if T_COMP in n_rule:
                     r = self._create_compression_rule(n_rule)
                     d["SoR"].append(r)
                 elif T_FRAG in n_rule:
@@ -477,19 +477,26 @@ class RuleManager:
                         print ("Warning 'no compression' rule already exists")
                 else:
                     raise ValueError ("Rule type undefined")
+                print (n_rule)
 
-    def _adapt_value (self, FID, value):
-        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == int:
+        if T_INDEXES in dev_info:
+            print ("%",dev_info[T_INDEXES])
+            for x, v in dev_info[T_INDEXES].items():
+                print (x)
+                d["Indexes"] |= {x:v}
+
+    def _adapt_value (self, FID, value, allow_dict=False):
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] is int:
             if type(value) != int:
                 raise ValueError ("{} TV type not appropriate for field {}".format(value, FID))
             else:
                 return value
-        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == str:
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] is str:
             if type(value) != str:
                 raise ValueError ("{} TV type not appropriate for field {}".format(value, FID))
             else:
                 return value
-        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] == bytes: # convert string with IPv6 address to bytes
+        if FIELD__DEFAULT_PROPERTY[FID]["TYPE"] is bytes: # convert string with IPv6 address to bytes
             if type(value) is str:
                 slash_pos = value.find("/")
                 if slash_pos != -1:
@@ -508,6 +515,9 @@ class RuleManager:
                     raise ValueError ("{} Fid not found".format(FID))
             elif type(value) is int:
                 return (value).to_bytes(8, byteorder="big")
+
+        if allow_dict: # TV can contain a dict to code functions
+            return value
 
     def _create_fragmentation_rule (self, nrule):
         arule = {}
@@ -626,7 +636,21 @@ class RuleManager:
                         raise ValueError ("MO Value missing for {}".format(FID))
 
                 if T_TV in  r:
-                    entry[T_TV] = self._adapt_value(FID, r[T_TV])
+                    if type(r[T_TV]) is dict:
+                        if len(r[T_TV]) != 1:
+                            raise ValueError(FID+": Only one command for TV.")
+
+                        if  not list(r[T_TV])[0] in [T_CMD_INDIRECT]:
+                            raise ValueError(FID+": Unknown TV command.")
+
+                        dic = r[T_TV] # set value to bytearray
+                        key = next(iter(dic))
+                        val = list(dic.values())[0]
+
+
+                        print ("---------> ", key, val)
+
+                    entry[T_TV] = self._adapt_value(FID, r[T_TV], allow_dict=True)
                 else:
                     entry[T_TV] = None
 
@@ -699,6 +723,8 @@ class RuleManager:
                         if 'TV' in e:
                             if type(e[T_TV]) is list:
                                 self._smart_print(e[T_TV][0])
+                            elif type(e[T_TV]) is dict:
+                                self._smart_print(list(e[T_TV])[0]+'('+list(e[T_TV].values())[0]+')' )
                             else:
                                 self._smart_print(e[T_TV])
                         if not T_TV in e or e[T_TV] == None:
@@ -763,6 +789,10 @@ class RuleManager:
                     print ("\\" + "="*87 +"/")
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
+            if T_INDEXES in dev and len(dev[T_INDEXES]) > 0:
+                print ("INDEXES:")
+                for x, y in dev[T_INDEXES].items():
+                    print (x,"-->", y)
 
     def to_yang (self, format="json"):
         """
@@ -810,11 +840,11 @@ class RuleManager:
                                         size +=1
 
                                     b_a = val[i].to_bytes(size, byteorder="big")
-                                    v = base64.b64encode(b_a)
-                                    dictio.append ({"position" : i, "value": v})
+                                    v = base64.b64encode(b_a).decode()
+                                    dictio.append ({"index" : i, "value": v})
                                 elif type(val[i]) == bytes:
-                                    v = base64.b64encode(val[i])
-                                    dictio.append ({"position" : i, "value": v})                                    
+                                    v = base64.b64encode(val[i]).decode()
+                                    dictio.append ({"index" : i, "value": v})                                    
 
                                 else: 
                                     print ("unkown type", type(val[i]))
@@ -837,13 +867,15 @@ class RuleManager:
                     yang_rules.append({
                         "rule-id-value": rule[T_RULEID],
                         "rule-id-length": rule[T_RULEIDLENGTH],
+                        "rule-nature" : "nature-compression",
                         "entry" : yang_comp
                     })
 
                 elif T_FRAG in rule:
                     frag_rule = {
                         "rule-id-value": rule[T_RULEID],
-                        "rule-id-length": rule[T_RULEIDLENGTH],                        
+                        "rule-id-length": rule[T_RULEIDLENGTH],     
+                        "rule-nature" : "nature-fragmentation",                   
                         "direction" : YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1],
                         "rcs-algorithm" : YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1],
                         "dtag-size" : rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG],
@@ -859,6 +891,11 @@ class RuleManager:
                    
                 elif T_NO_COMP in rule:
                     print ("NO COMPRESSION RULE")
+                    yang_rules.append({
+                        "rule-id-value": rule[T_RULEID],
+                        "rule-id-length": rule[T_RULEIDLENGTH],
+                        "rule-nature" : "nature-no-compression"
+                    })
  
             print ("#", yang_rules)
         
@@ -963,22 +1000,46 @@ class RuleManager:
                                 tv_array = b''
                                 for i in range(len(val)):
 
-                                    if type(val[i]) == int:
+                                    if type(val[i]) is int:
                                         x = val[i]
                                         r = b''
                                         while x != 0:
                                             r = struct.pack('!B', x&0xFF) + r
                                             x >>= 8
-                                    elif type(val[i]) == bytes:
+                                    elif type(val[i]) is bytes:
                                         r = val[i]
+                                    elif type(val[i]) is dict:
+                                        print ("List")
+                                        r = val[i]
+                                    else:
+                                        raise ValueError("TV type is not covered")
 
-                                    tv_array += b'\xA2' + \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/position", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        struct.pack('!B', i)
+                                    if type(r) is bytes:
+                                        tv_array += b'\xA2' + \
+                                            cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                            struct.pack('!B', i)
 
-                                    tv_array +=  \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        cbor.dumps(r)
+                                        tv_array +=  \
+                                            cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                            cbor.dumps(r)
+                                    elif type(r) is dict:
+                                        tv_array += b'\xA3' + \
+                                            cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                            struct.pack('!B', i)
+
+                                        tv_array +=  \
+                                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value/ietf-schc-indirect-values:operator", space="data") - \
+                                                        self.sid_search_for(name=ref_id, space="data")) + \
+                                            cbor.dumps(self.sid_search_for(name=YANG_ID[next(iter(r))][1], space="identity"))
+
+                                        op_val = list(r.values())[0]
+
+                                        tv_array +=  \
+                                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value/ietf-schc-indirect-values:operator-index", space="data") - \
+                                                        self.sid_search_for(name=ref_id, space="data")) + \
+                                            cbor.dumps(op_val)
+                                    else:
+                                        raise ValueError("TV type is unknown")
 
 
                                 tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
@@ -997,27 +1058,35 @@ class RuleManager:
                         print (binascii.hexlify(entry_cbor))
                         rule_content += entry_cbor
 
-                    rule_content = b'\xA3' + \
+                    rule_content = b'\xA4' + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - rule_sid) + \
                         self.cbor_header(0b100_00000, nb_entry) + rule_content + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
-                        cbor.dumps(rule[T_RULEIDLENGTH])
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-compression", space="identity"))                                               
+
                 elif T_FRAG in rule:
                     print ("frag")
-                    nb_elm = 2
+                    nb_elm = 3
                     rule_content = \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
-                        cbor.dumps(rule[T_RULEIDLENGTH])
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-fragmentation", space="identity"))                                               
+
 
                     rule_content += \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_DIRECTION]][1], space="identity")) 
                     nb_elm += 1
  
+
+                    #/!\ since there is a defult value should be skipped when value is rcs-crc32
                     rule_content += \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name=YANG_ID[rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC]][1], space="identity")) 
@@ -1037,10 +1106,20 @@ class RuleManager:
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - rule_sid) +\
                         cbor.dumps(self.sid_search_for(name= YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1], space="identity")) 
                     nb_elm += 1
+
+
+
                     
                     rule_content = self.cbor_header(0b101_00000, nb_elm) + rule_content
                 elif T_NO_COMP in rule:
-                    print ("no comp")
+                        rule_content = b'\xA3' + \
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
+                        cbor.dumps(rule[T_RULEID]) +\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
+                        cbor.dumps(rule[T_RULEIDLENGTH])+\
+                        cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - rule_sid) +\
+                        cbor.dumps(self.sid_search_for(name="nature-no-compression", space="identity"))                     
+                        print ("no comp")
                 else:
                     raise ValueError("unkwon rule")
 
