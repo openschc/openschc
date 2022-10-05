@@ -3,6 +3,7 @@ import socket
 import time
 import base64
 import binascii
+from turtle import down
 import cbor2 as cbor
 import json
 
@@ -91,6 +92,10 @@ def recv_data(sock):
             'Content-Type': 'application/json',
             'Authorization' : 'Bearer ' + TTN_Downlink_Key
         }
+
+        print (downlink_url)
+        print (downlink_msg)
+        print ( headers)
 
         x = requests.post(downlink_url, 
                             data = json.dumps(downlink_msg), 
