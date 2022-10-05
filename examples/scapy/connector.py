@@ -66,6 +66,7 @@ app = Flask(__name__)
 @app.route('/ttn', methods=['POST']) # API V3 current
 def get_from_ttn():
     fromGW = request.get_json(force=True)
+    print (fromGW)
 
     downlink = None
     if "uplink_message" in fromGW:
