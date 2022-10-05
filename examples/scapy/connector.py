@@ -2,6 +2,7 @@
 import socket
 import time
 import base64
+import binascii
 
 # import thread module
 from _thread import *
