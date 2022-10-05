@@ -1,6 +1,7 @@
 # import socket programming library
 import socket
 import time
+import base64
 
 # import thread module
 from _thread import *
@@ -23,29 +24,29 @@ def recv_data(sock):
         print (">>>", data)
 
 
-        if downlink != None:
-            from ttn_config import TTN_Downlink_Key
+        # if downlink != None:
+        #     from ttn_config import TTN_Downlink_Key
 
-            downlink_msg = {
-                "downlinks": [{
-                    "f_port":   fromGW["uplink_message"]["f_port"],
-                    "frm_payload": base64.b64encode(downlink).decode()
-                }]}
-            downlink_url = \
-            "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
-            fromGW["end_device_ids"]["application_ids"]["application_id"] + \
-                            "/devices/" + \
-                            fromGW["end_device_ids"]["device_id"] + \
-                            "/down/push"
+        #     downlink_msg = {
+        #         "downlinks": [{
+        #             "f_port":   fromGW["uplink_message"]["f_port"],
+        #             "frm_payload": base64.b64encode(downlink).decode()
+        #         }]}
+        #     downlink_url = \
+        #     "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
+        #     fromGW["end_device_ids"]["application_ids"]["application_id"] + \
+        #                     "/devices/" + \
+        #                     fromGW["end_device_ids"]["device_id"] + \
+        #                     "/down/push"
 
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization' : 'Bearer ' + TTN_Downlink_Key
-            }
+        #     headers = {
+        #         'Content-Type': 'application/json',
+        #         'Authorization' : 'Bearer ' + TTN_Downlink_Key
+        #     }
 
-            x = requests.post(downlink_url, 
-                                data = json.dumps(downlink_msg), 
-                                headers=headers)
+        #     x = requests.post(downlink_url, 
+        #                         data = json.dumps(downlink_msg), 
+        #                         headers=headers)
 
 
 
@@ -70,7 +71,7 @@ def get_from_ttn():
     if "uplink_message" in fromGW:
 
         payload = base64.b64decode(fromGW["uplink_message"]["frm_payload"])
-        downlink = forward_data(payload)
+        #downlink = forward_data(payload)
 
 
 
