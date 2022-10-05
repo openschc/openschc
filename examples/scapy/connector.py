@@ -3,6 +3,7 @@ import socket
 import time
 import base64
 import binascii
+import cbor2 as cbor
 
 # import thread module
 from _thread import *
@@ -18,6 +19,7 @@ sock_r = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_r.bind(("0.0.0.0",12345))
 
 sock_w = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+openschc_port = 33033
 
 SF_MTU = [None, #0
           None, #1
@@ -101,6 +103,7 @@ def get_from_ttn():
             -2: fromGW["uplink_message"]["f_port"]   
         }
         print (message)
+        sock_w.sento(cbor.dumps(message), ("127.0.0.1", openschc_port))
 
 
     resp = Response(status=200)
