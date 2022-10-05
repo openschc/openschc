@@ -68,7 +68,7 @@ def recv_data(sock):
             continue
 
         if not msg[2] in app_id:
-            print ("device unknown")
+            print ("device unknown", msg[2])
             continue
 
 
