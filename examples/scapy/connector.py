@@ -103,7 +103,7 @@ def get_from_ttn():
             -2: fromGW["uplink_message"]["f_port"]   
         }
         print (message)
-        sock_w.sento(cbor.dumps(message), ("127.0.0.1", openschc_port))
+        sock_w.sendto(cbor.dumps(message), ("127.0.0.1", openschc_port))
 
 
     resp = Response(status=200)
