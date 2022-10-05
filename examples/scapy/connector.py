@@ -90,7 +90,8 @@ def recv_data(sock):
 
         headers = {
             'Content-Type': 'application/json',
-            'Authorization' : 'Bearer ' + TTN_Downlink_Key
+            'Authorization' : 'Bearer ' + TTN_Downlink_Key,
+            'priority': 'NORMAL'
         }
 
         print (downlink_url)
