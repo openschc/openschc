@@ -13,8 +13,6 @@ from flask import Flask
 from flask import request
 from flask import Response
 
-print_lock = threading.Lock()
-
 sock_r = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_r.bind(("0.0.0.0",12345))
 
@@ -36,11 +34,28 @@ SF_MTU = [None, #0
           59    #12
           ]
 
+"""
+Structure of the exchange, a CBOR structure 
+
+{ # generic values
+    1: technology : 1 lorawan, ...
+    2: ID (e.g. devEUI in LoRaWAN)
+    3: possible MTU # in LoRaWAN regarding the DR the possible frame size
+    4: payload 
+# informational values regarding the technology
+   -1: LoRaWAN SF
+   -2: fPort
+}
+
+"""
+
 
 def recv_data(sock):
     while True:
         data = sock_r.recvfrom(2000)
         print (">>>", data)
+        msg = cbor.loads(data)
+        print (msg)
 
 
         # if downlink != None:
@@ -69,14 +84,7 @@ def recv_data(sock):
 
 
 
-def send_data(sock):
-    while True:
-        sock_w.sendto (b"toto", ("127.0.0.1", 33033))
-        time.sleep(10)
-
-
 x = threading.Thread(target=recv_data, args=(1,))
-#y = threading.Thread(target=send_data, args=(1,))
 
 app = Flask(__name__)
 
