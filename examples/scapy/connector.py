@@ -66,7 +66,7 @@ def recv_data(sock):
             print ("not LoraWAN Technology")
             break
 
-        if not msg[2] in app_id;
+        if not msg[2] in app_id:
             print ("device unknown")
             break
 
