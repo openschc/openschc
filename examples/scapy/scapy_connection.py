@@ -35,7 +35,7 @@ class ScapyLowerLayer:
             self.sock.sendto(packet, destination)
 
         elif dest != None and dest.find("lorawan") == 0:
-            destination = ("127.0.0.1", 33033)
+            destination = ("127.0.0.1", 12345)
             device_id = dest.split(":")[1]
 
             print (destination, device_id)
