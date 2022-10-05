@@ -4,6 +4,7 @@ import time
 import base64
 import binascii
 import cbor2 as cbor
+import json
 
 # import thread module
 from _thread import *
@@ -12,6 +13,11 @@ import threading
 from flask import Flask
 from flask import request
 from flask import Response
+
+import requests
+
+TTN_Downlink_Key = "NNSXS.PQBBC2TARHN6XXNESIYCG4JM2DO4PSHF45FWLYY.MFXGU63UKOPV5FYFXHX4KWA7XLF347Z75W6Q6DHWHCNVDEOGMMLA"
+
 
 sock_r = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_r.bind(("0.0.0.0",12345))
@@ -52,37 +58,46 @@ Structure of the exchange, a CBOR structure
 
 def recv_data(sock):
     while True:
-        data = sock_r.recvfrom(2000)
+        data, addr = sock_r.recvfrom(2000)
         print (">>>", data)
         msg = cbor.loads(data)
-        print (msg)
+
+        if msg[1] != 1:
+            print ("not LoraWAN Technology")
+            break
+
+        if not msg[2] in app_id;
+            print ("device unknown")
+            break
 
 
-        # if downlink != None:
-        #     from ttn_config import TTN_Downlink_Key
+        payload = msg[4]
 
-        #     downlink_msg = {
-        #         "downlinks": [{
-        #             "f_port":   fromGW["uplink_message"]["f_port"],
-        #             "frm_payload": base64.b64encode(downlink).decode()
-        #         }]}
-        #     downlink_url = \
-        #     "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
-        #     fromGW["end_device_ids"]["application_ids"]["application_id"] + \
-        #                     "/devices/" + \
-        #                     fromGW["end_device_ids"]["device_id"] + \
-        #                     "/down/push"
+        fport = payload[0] # first byte is the rule ID
+        content = payload[1:]
 
-        #     headers = {
-        #         'Content-Type': 'application/json',
-        #         'Authorization' : 'Bearer ' + TTN_Downlink_Key
-        #     }
+        dev_eui = msg[2]
 
-        #     x = requests.post(downlink_url, 
-        #                         data = json.dumps(downlink_msg), 
-        #                         headers=headers)
+        downlink_msg = {
+            "downlinks": [{
+                "f_port":   fport,
+                "frm_payload": base64.b64encode(content).decode()
+            }]}
+        downlink_url = \
+        "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
+        app_id[dev_eui] + "/devices/" +  dev_eui + "/down/push"
 
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization' : 'Bearer ' + TTN_Downlink_Key
+        }
 
+        x = requests.post(downlink_url, 
+                            data = json.dumps(downlink_msg), 
+                            headers=headers)
+        print ("downlink sent")
+
+app_id = {} # contains the mapping between TTN application_id and dev_eui
 
 x = threading.Thread(target=recv_data, args=(1,))
 
@@ -113,6 +128,10 @@ def get_from_ttn():
         print (message)
         print (binascii.hexlify(cbor.dumps(message)))
         sock_w.sendto(cbor.dumps(message), ("127.0.0.1", openschc_port))
+
+        app_id [fromGW["end_device_ids"]["dev_eui"]] = fromGW["end_device_ids"]["application_ids"]["application_id"]
+
+        print (app_id)
 
 
     resp = Response(status=200)
