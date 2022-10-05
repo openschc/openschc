@@ -86,7 +86,7 @@ def recv_data(sock):
             }]}
         downlink_url = \
         "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
-        app_id[dev_eui] + "/devices/" +  dev_eui.lower() + "/down/push"
+        app_id[dev_eui] + "/devices/" +  dev_eui.upper() + "/down/push"
 
         headers = {
             'Content-Type': 'application/json',
