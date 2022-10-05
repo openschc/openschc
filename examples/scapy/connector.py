@@ -67,7 +67,7 @@ def recv_data(sock):
             print ("not LoraWAN Technology")
             continue
 
-        if not msg[2] in app_id:
+        if not binascii.hexlify(msg[2]) in app_id:
             print ("device unknown", msg[2])
             continue
 
