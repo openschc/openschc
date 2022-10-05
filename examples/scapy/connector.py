@@ -78,8 +78,6 @@ def recv_data(sock):
         fport = payload[0] # first byte is the rule ID
         content = payload[1:]
 
-        dev_eui = msg[2]
-
         downlink_msg = {
             "downlinks": [{
                 "f_port":   fport,
@@ -131,7 +129,7 @@ def get_from_ttn():
         print (binascii.hexlify(cbor.dumps(message)))
         sock_w.sendto(cbor.dumps(message), ("127.0.0.1", openschc_port))
 
-        app_id [fromGW["end_device_ids"]["dev_eui"]] = fromGW["end_device_ids"]["application_ids"]["application_id"]
+        app_id [fromGW["end_device_ids"]["dev_eui"].upper()] = fromGW["end_device_ids"]["application_ids"]["application_id"]
 
         print (app_id)
 
