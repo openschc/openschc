@@ -95,7 +95,7 @@ def recv_data(sock):
         x = requests.post(downlink_url, 
                             data = json.dumps(downlink_msg), 
                             headers=headers)
-        print ("downlink sent")
+        print ("downlink sent", x)
 
 app_id = {} # contains the mapping between TTN application_id and dev_eui
 
