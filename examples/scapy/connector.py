@@ -18,6 +18,22 @@ sock_r.bind(("0.0.0.0",12345))
 
 sock_w = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+SF_MTU = [None, #0
+          None, #1
+          None, #2
+          None, #3
+          None, #4
+          None, #5
+          None, #6
+          250,  #7
+          250,  #8
+          123,  #9
+          59,   #10
+          59,   #11
+          59    #12
+          ]
+
+
 def recv_data(sock):
     while True:
         data = sock_r.recvfrom(2000)
@@ -74,6 +90,16 @@ def get_from_ttn():
         payload = base64.b64decode(fromGW["uplink_message"]["frm_payload"])
         #downlink = forward_data(payload)
 
+        message = {
+            1 : 1, # Techo LoRaWAN
+            2 : binascii.unhexlify(fromGW["end_device_ids"]["dev_eui"]),
+            3 : SF_MTU[fromGW["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]],
+            4 : fromGW["uplink_message"]["f_port"].to_bytes(1, byteorder="big") + payload,
+
+            -1: fromGW["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"],
+            -2: fromGW["uplink_message"]["f_port"]   
+        }
+        print (message)
 
 
     resp = Response(status=200)
