@@ -57,6 +57,7 @@ Structure of the exchange, a CBOR structure
 
 
 def recv_data(sock):
+    print ("starting listening")
     while True:
         data, addr = sock_r.recvfrom(2000)
         print (">>>", data)
@@ -100,12 +101,12 @@ def recv_data(sock):
 app_id = {} # contains the mapping between TTN application_id and dev_eui
 
 x = threading.Thread(target=recv_data, args=(1,))
+x.start()
 
 app = Flask(__name__)
 
 
 @app.route('/ttn', methods=['POST', 'GET']) # API V3 current
-@app.route('/ttn', methods=['POST']) # API V3 current
 def get_from_ttn():
     fromGW = request.get_json(force=True)
     print (fromGW)
@@ -138,7 +139,6 @@ def get_from_ttn():
     return resp
 
 
-x.start()
 
 
 app.run(host="0.0.0.0", port=7002)
