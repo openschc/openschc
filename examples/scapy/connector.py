@@ -111,10 +111,11 @@ def recv_data(sock):
                                 data = json.dumps(downlink_msg), 
                                 headers=headers)
             print ("downlink sent", x)
+
         elif app_id[dev_eui][0] == 'chirpstack':
             print("chirpstack")
 
-            print (">>>>>", content, base64.b64encode(content).decode('utf-8'))
+            print (">>>>>", binascii.hexlify(content), base64.b64encode(content).decode('utf-8'))
 
             answer = {
                 "deviceQueueItem": {
