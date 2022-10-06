@@ -159,7 +159,7 @@ def get_from_chirpstack():
         payload = base64.b64decode(fromGW["data"])
         print(binascii.hexlify(payload))
 
-        dev_eui = base64.b64decode(fromGW["devEUI"])
+        dev_eui = binascii.hexlify(base64.b64decode(fromGW["devEUI"]))
         fport = fromGW["fPort"]
 
         print (dev_eui, fport)
