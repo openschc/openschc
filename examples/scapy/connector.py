@@ -19,6 +19,8 @@ import requests
 
 TTN_Downlink_Key = "NNSXS.PQBBC2TARHN6XXNESIYCG4JM2DO4PSHF45FWLYY.MFXGU63UKOPV5FYFXHX4KWA7XLF347Z75W6Q6DHWHCNVDEOGMMLA"
 
+chirpstack_server = "http://outils.plido.net:8080"
+
 
 sock_r = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_r.bind(("0.0.0.0",12345))
@@ -119,6 +121,10 @@ def recv_data(sock):
                 }
             }
             print(answer)
+
+            downlink_url = chirpstack_server + '/api/devices/'+dev_eui+'/queue'
+
+            print (downlink_url)
 
         else:
             print ("unknown LNS")
