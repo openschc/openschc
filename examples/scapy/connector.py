@@ -149,11 +149,12 @@ def get_from_ttn():
     resp = Response(status=200)
     return resp
 
-@app.route('/chirpstack', methods=['POST']) # API V3 current
+@app.route('/chirpstack', methods=['POST']) 
 def get_from_chirpstack():
     fromGW = request.get_json(force=True)
     print (fromGW)
-
+    resp = Response(status=200)
+    return resp
 
 app.run(host="0.0.0.0", port=7002)
 
