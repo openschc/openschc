@@ -114,7 +114,7 @@ x.start()
 app = Flask(__name__)
 
 
-@app.route('/ttn', methods=['POST', 'GET']) # API V3 current
+@app.route('/ttn', methods=['POST']) # API V3 current
 def get_from_ttn():
     fromGW = request.get_json(force=True)
     print (fromGW)
@@ -149,7 +149,10 @@ def get_from_ttn():
     resp = Response(status=200)
     return resp
 
-
+@app.route('/chirpstack', methods=['POST']) # API V3 current
+def get_from_chirpstack():
+    fromGW = request.get_json(force=True)
+    print (fromGW)
 
 
 app.run(host="0.0.0.0", port=7002)
