@@ -158,7 +158,11 @@ def get_from_chirpstack():
     if "data" in fromGW:
         payload = base64.b64decode(fromGW["data"])
         print(binascii.hexlify(payload))
-        
+
+        dev_eui = base64.b64decode(fromGW("devEUI"))
+        fport = fromGW["fPort"]
+
+        print (dev_eui, fport)
     resp = Response(status=200)
     return resp
 
