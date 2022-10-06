@@ -141,7 +141,7 @@ def get_from_ttn():
 
         app_id [fromGW["end_device_ids"]["dev_eui"].upper()] = [
                 fromGW["end_device_ids"]["application_ids"]["application_id"],
-                fromGW["end_device_ids"]["application_ids"]["device_id"]
+                fromGW["end_device_ids"]["device_id"]
                 ]
 
         print (app_id)
