@@ -159,10 +159,28 @@ def get_from_chirpstack():
         payload = base64.b64decode(fromGW["data"])
         print(binascii.hexlify(payload))
 
-        dev_eui = binascii.hexlify(base64.b64decode(fromGW["devEUI"])).decode()
+        dev_eui = binascii.hexlify(base64.b64decode(fromGW["devEUI"]))
         fport = fromGW["fPort"]
 
         print (dev_eui, fport)
+        app_id[dev_eui.decode().upper()] = ['chirpstack']
+
+        print (app_id)
+
+        message = {
+            1 : 1,
+            2 : dev_eui,
+            3 : SF_MTU(fromGW["txInfo"]["loRaModulationInfo"]["spreadingFactor"])
+            4 : fport.to_bytes(1, byteorder="big") + payload,
+
+            -1: fromGW["txInfo"]["loRaModulationInfo"]["spreadingFactor"],
+            -2 : fport
+        }
+        print (message)
+        print (binascii.hexlify(cbor.dumps(message)))
+
+
+
     resp = Response(status=200)
     return resp
 
