@@ -85,7 +85,6 @@ def recv_data(sock):
 
         downlink_msg = {
             "downlinks": [{
-                "dev_id": dev_eui.lower(),
                 "f_port":   fport,
                 "frm_payload": base64.b64encode(content).decode()
             }]}
