@@ -90,7 +90,7 @@ def recv_data(sock):
             }]}
         downlink_url = \
         "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
-        app_id[dev_eui][0] + "/devices/" +  app_id[dev_eui][1] + "/down/push"
+        app_id[dev_eui][1] + "/devices/" +  app_id[dev_eui][2] + "/down/push"
 
         headers = {
             'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ def get_from_ttn():
         print (binascii.hexlify(cbor.dumps(message)))
         sock_w.sendto(cbor.dumps(message), ("127.0.0.1", openschc_port))
 
-        app_id [fromGW["end_device_ids"]["dev_eui"].upper()] = [
+        app_id [fromGW["end_device_ids"]["dev_eui"].upper()] = ["ttn",
                 fromGW["end_device_ids"]["application_ids"]["application_id"],
                 fromGW["end_device_ids"]["device_id"]
                 ]
@@ -153,6 +153,12 @@ def get_from_ttn():
 def get_from_chirpstack():
     fromGW = request.get_json(force=True)
     print (fromGW)
+
+
+    if "data" in fromGW:
+        payload = base64.b64decode(fromGW["data"])
+        print(binascii.hexlify(payload))
+        
     resp = Response(status=200)
     return resp
 
