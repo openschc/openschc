@@ -74,38 +74,43 @@ def recv_data(sock):
             continue
 
 
-        payload = msg[4]
+        if app_id[dev_eui][0] == 'ttn':
+            payload = msg[4]
 
-        print (">>", binascii.hexlify(payload))
+            print (">>", binascii.hexlify(payload))
 
-        fport = payload[0] # first byte is the rule ID
-        content = payload[1:]
+            fport = payload[0] # first byte is the rule ID
+            content = payload[1:]
 
-        print (">>>>", binascii.hexlify(content))
+            print (">>>>", binascii.hexlify(content))
 
-        downlink_msg = {
-            "downlinks": [{
-                "f_port":   fport,
-                "frm_payload": base64.b64encode(content).decode()
-            }]}
-        downlink_url = \
-        "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
-        app_id[dev_eui][1] + "/devices/" +  app_id[dev_eui][2] + "/down/push"
+            downlink_msg = {
+                "downlinks": [{
+                    "f_port":   fport,
+                    "frm_payload": base64.b64encode(content).decode()
+                }]}
+            downlink_url = \
+            "https://eu1.cloud.thethings.network/api/v3/as/applications/" + \
+            app_id[dev_eui][1] + "/devices/" +  app_id[dev_eui][2] + "/down/push"
 
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization' : 'Bearer ' + TTN_Downlink_Key
-        }
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer ' + TTN_Downlink_Key
+            }
 
-        print (downlink_url)
-        print (downlink_msg)
-        print ( headers)
+            print (downlink_url)
+            print (downlink_msg)
+            print ( headers)
 
-        x = requests.post(downlink_url, 
-                            data = json.dumps(downlink_msg), 
-                            headers=headers)
-        print ("downlink sent", x)
-
+            x = requests.post(downlink_url, 
+                                data = json.dumps(downlink_msg), 
+                                headers=headers)
+            print ("downlink sent", x)
+        elif app_id[dev_eui][0] == 'chirpstack':
+            print("chirpstack")
+        else:
+            print ("unknown LNS")
+            
 app_id = {} # contains the mapping between TTN application_id and dev_eui
 
 x = threading.Thread(target=recv_data, args=(1,))
