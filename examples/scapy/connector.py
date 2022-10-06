@@ -20,7 +20,7 @@ import requests
 TTN_Downlink_Key = "NNSXS.PQBBC2TARHN6XXNESIYCG4JM2DO4PSHF45FWLYY.MFXGU63UKOPV5FYFXHX4KWA7XLF347Z75W6Q6DHWHCNVDEOGMMLA"
 
 chirpstack_server = "http://outils.plido.net:8080"
-
+chirpstack_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiMzU2NGEwNTEtYjIzNS00YTdlLThkZjAtZWY5MjBjYzk2MTYxIiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTY2NTA3NjEyMywic3ViIjoiYXBpX2tleSJ9.w5Ru_q7GqmU1A8YyBXb8iWsClgaDNEOs1CzABLtEvgw"
 
 sock_r = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_r.bind(("0.0.0.0",12345))
@@ -123,8 +123,19 @@ def recv_data(sock):
             print(answer)
 
             downlink_url = chirpstack_server + '/api/devices/'+dev_eui+'/queue'
-
             print (downlink_url)
+
+            headers = {
+                "content-type": "application/json",
+                "grpc-metadata-authorization" : "Bearer "+ chirpstack_key
+            }
+            print (headers)
+            
+            x = requests.post(downlink_url, data = json.dumps(answer), headers=headers)
+
+            print(x)
+
+
 
         else:
             print ("unknown LNS")
