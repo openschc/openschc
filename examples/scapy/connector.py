@@ -119,7 +119,6 @@ def recv_data(sock):
                 }
             }
             print(answer)
-        }
 
         else:
             print ("unknown LNS")
