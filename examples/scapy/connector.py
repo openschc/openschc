@@ -110,7 +110,7 @@ def recv_data(sock):
             print("chirpstack")
         else:
             print ("unknown LNS")
-            
+
 app_id = {} # contains the mapping between TTN application_id and dev_eui
 
 x = threading.Thread(target=recv_data, args=(1,))
@@ -184,7 +184,7 @@ def get_from_chirpstack():
         print (message)
         print (binascii.hexlify(cbor.dumps(message)))
 
-
+        sock_w.sendto(cbor.dumps(message), ("127.0.0.1", openschc_port))
 
     resp = Response(status=200)
     return resp
