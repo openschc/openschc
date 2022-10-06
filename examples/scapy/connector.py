@@ -73,14 +73,17 @@ def recv_data(sock):
             print ("device unknown", dev_eui)
             continue
 
+# we are in LoRaWAN technology
+
+        payload = msg[4]
+
+        print (">>", binascii.hexlify(payload))
+
+        fport = payload[0] # first byte is the rule ID
+        content = payload[1:]
 
         if app_id[dev_eui][0] == 'ttn':
-            payload = msg[4]
-
-            print (">>", binascii.hexlify(payload))
-
-            fport = payload[0] # first byte is the rule ID
-            content = payload[1:]
+ 
 
             print (">>>>", binascii.hexlify(content))
 
@@ -108,6 +111,15 @@ def recv_data(sock):
             print ("downlink sent", x)
         elif app_id[dev_eui][0] == 'chirpstack':
             print("chirpstack")
+
+            answer = {
+                "deviceQueueItem": {
+		            "data": base64.b64encode(content).decode('utf-78')
+                    "fPort": fport
+            }
+            print(answer)
+        }
+
         else:
             print ("unknown LNS")
 
