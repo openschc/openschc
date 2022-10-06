@@ -76,6 +76,8 @@ def recv_data(sock):
 
         payload = msg[4]
 
+        print (">>", binascii.hexlify(payload))
+
         fport = payload[0] # first byte is the rule ID
         content = payload[1:]
 
@@ -83,6 +85,7 @@ def recv_data(sock):
 
         downlink_msg = {
             "downlinks": [{
+                "dev_id": dev_eui.lower(),
                 "f_port":   fport,
                 "frm_payload": base64.b64encode(content).decode()
             }]}
