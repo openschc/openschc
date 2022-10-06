@@ -114,6 +114,8 @@ def recv_data(sock):
         elif app_id[dev_eui][0] == 'chirpstack':
             print("chirpstack")
 
+            print (">>>>>", content, base64.b64encode(content).decode('utf-8'))
+
             answer = {
                 "deviceQueueItem": {
 		            "data": base64.b64encode(content).decode('utf-8'),
@@ -130,7 +132,7 @@ def recv_data(sock):
                 "grpc-metadata-authorization" : "Bearer "+ chirpstack_key
             }
             print (headers)
-            
+
             x = requests.post(downlink_url, data = json.dumps(answer), headers=headers)
 
             print(x)
