@@ -170,7 +170,7 @@ def get_from_chirpstack():
         message = {
             1 : 1,
             2 : dev_eui,
-            3 : SF_MTU(fromGW["txInfo"]["loRaModulationInfo"]["spreadingFactor"]),
+            3 : SF_MTU[fromGW["txInfo"]["loRaModulationInfo"]["spreadingFactor"]],
             4 : fport.to_bytes(1, byteorder="big") + payload,
 
             -1: fromGW["txInfo"]["loRaModulationInfo"]["spreadingFactor"],
