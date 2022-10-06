@@ -168,7 +168,7 @@ def get_from_chirpstack():
         fport = fromGW["fPort"]
 
         print (dev_eui, fport)
-        app_id[dev_eui.decode().upper()] = ['chirpstack']
+        app_id[binascii.hexlify(dev_eui.decode()).upper()] = ['chirpstack']
 
         print (app_id)
 
