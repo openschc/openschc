@@ -299,6 +299,18 @@ class Unparser:
                     )
                     IPv6Src = DevStr
                     IPv6Dst = AppStr
+
+                    IPv6Header = IPv6 (
+                        version= header_d[(T_IPV6_VER, 1)][0],
+                        tc     = header_d[(T_IPV6_TC, 1)][0],
+                        fl     = header_d[(T_IPV6_FL, 1)][0],
+                        nh     = header_d[(T_IPV6_NXT, 1)][0],
+                        hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
+                        src    = IPv6Src.compressed, 
+                        dst    = IPv6Dst.compressed
+                    ) 
+
+                    L3header = IPv6Header  
                 else:
                     raise ValueError("TBD")
 
@@ -370,17 +382,7 @@ class Unparser:
 
 
 
-        IPv6Header = IPv6 (
-            version= header_d[(T_IPV6_VER, 1)][0],
-            tc     = header_d[(T_IPV6_TC, 1)][0],
-            fl     = header_d[(T_IPV6_FL, 1)][0],
-            nh     = header_d[(T_IPV6_NXT, 1)][0],
-            hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
-            src    = IPv6Src.compressed, 
-            dst    = IPv6Dst.compressed
-        ) 
-
-        L3header = IPv6Header  
+    
         
         full_packet = L3header / L4header / Raw(load=coap_h)
 
