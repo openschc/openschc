@@ -25,14 +25,15 @@
 			{"FID": "COAP.VER",                         "TV":1,      "MO": "equal", "CDA": "not-sent"},
 			{"FID": "COAP.TYPE",                        "TV":1,      "MO": "equal","CDA": "not-sent"},
 			{"FID": "COAP.TKL",                         "TV":0,      "MO": "equal","CDA": "not-sent"},
-			{"FID": "COAP.CODE",           "DI": "UP",  "TV":2,      "MO": "equal","CDA": "not-sent"},
-			{"FID": "COAP.CODE",           "DI": "DW",               "MO": "ignore","CDA": "value-sent"},
-			{"FID": "COAP.MID",            "DI": "UP",  "TV":0,      "MO": "MSB",  "MO.VAL": 10, "CDA": "LSB"},
-			{"FID": "COAP.MID",            "DI": "DW",               "MO": "ignore","CDA": "value-sent"},			
-			{"FID": "COAP.Uri-Path",       "DI": "UP",  "TV":["temp",
+			{"FID": "COAP.CODE",            "DI": "UP", "TV":2,      "MO": "equal","CDA": "not-sent"},
+			{"FID": "COAP.CODE",            "DI": "DW",              "MO": "ignore","CDA": "value-sent"},
+			{"FID": "COAP.MID",             "DI": "UP", "TV":0,      "MO": "MSB",  "MO.VAL": 10, "CDA": "LSB"},
+			{"FID": "COAP.MID",             "DI": "DW",               "MO": "ignore","CDA": "value-sent"},			
+			{"FID": "COAP.Uri-Path", "FP":1, "DI": "UP", "TV":["temp",
 															  "test",
 															  "",
 															  ""], "MO": "match-mapping","CDA": "mapping-sent"},
+			{"FID": "COAP.Uri-Path", "FP":2, "FL": "var", "DI": "UP", "MO": "ignore","CDA": "value-sent"},
 			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"}
 		]		
 	}
