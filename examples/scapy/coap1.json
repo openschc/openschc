@@ -28,7 +28,7 @@
 			{"FID": "COAP.CODE",            "DI": "UP", "TV":2,      "MO": "equal","CDA": "not-sent"},
 			{"FID": "COAP.CODE",            "DI": "DW",              "MO": "ignore","CDA": "value-sent"},
 			{"FID": "COAP.MID",             "DI": "UP", "TV":0,      "MO": "MSB",  "MO.VAL": 10, "CDA": "LSB"},
-			{"FID": "COAP.MID",             "DI": "DW",               "MO": "ignore","CDA": "value-sent"},			
+			{"FID": "COAP.MID",             "DI": "DW",              "MO": "ignore","CDA": "not-sent"},			
 			{"FID": "COAP.Uri-Path",        "DI": "UP", "TV":["temp",
 															  "test",
 															  "",
