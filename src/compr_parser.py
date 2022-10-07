@@ -250,7 +250,7 @@ class Unparser:
         L4header = None
         L7header = None
 
-        if T_IPV6_VER in header_d: # doing IPv6 and UDP
+        if (T_IPV6_VER, 1) in header_d: # doing IPv6 and UDP
 
             c = {}
             for k in [T_IPV6_DEV_PREFIX, T_IPV6_DEV_IID, T_IPV6_APP_PREFIX, T_IPV6_APP_IID]:
