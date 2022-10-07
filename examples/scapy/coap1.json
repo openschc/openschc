@@ -31,8 +31,8 @@
 			{"FID": "COAP.MID",            "DI": "DW",               "MO": "ignore","CDA": "value-sent"},			
 			{"FID": "COAP.Uri-Path",       "DI": "UP",  "TV":["temp",
 															  "test",
-															  "null",
-															  "null"], "MO": "match-mapping","CDA": "mapping-sent"},
+															  "",
+															  ""], "MO": "match-mapping","CDA": "mapping-sent"},
 			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"}
 		]		
 	}
