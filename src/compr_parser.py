@@ -330,7 +330,7 @@ class Unparser:
                         bt = (token & (0xFF << 8*i)) >> 8*i
                         coap_h += struct.pack("!B", bt)
 
-                delta_t = 0
+                cumul_t = 0
 
                 for opt in header_d.items():
                     if not ("COAP" in opt[0][0]) or (opt[0][0] in [T_COAP_VERSION, T_COAP_TYPE, T_COAP_TKL, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
@@ -341,7 +341,8 @@ class Unparser:
                     opt_len  = opt[1][1]//8
                     
                     print("LLLLL",delta_t)
-                    delta_t = coap_options[opt_name] - delta_t
+                    delta_t = coap_options[opt_name] - cumul_t
+                    cumul_t = coap_options[opt_name]
                     print (opt_name, coap_options[opt_name], delta_t)
                     
                     if delta_t < 13:
