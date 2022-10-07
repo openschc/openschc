@@ -316,19 +316,14 @@ class Unparser:
                         coap_h += struct.pack("!B", bt)
 
                 delta_t = 0
-                comp_rule = d_rule[T_COMP] # look into the rule to find options 
-                for idx in range(0, len(comp_rule)):
-                    if comp_rule[idx][T_FID] == T_COAP_MID:
-                        break
 
-                idx += 1 # after MID is there TOKEN
-                if idx < len(comp_rule) and comp_rule[idx][T_FID] == T_COAP_TOKEN:
-                    print ("skip token")
-                    idx += 1
+                for opt in header_d.items():
+                    if not ("COAP" in opt[0][0]) or (opt[0][0] in [T_COAP_VERSION, T_COAP_TYPE, T_COAP_TKL, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
+                        continue
 
-                for idx2 in range (idx, len(comp_rule)):
-                    print (comp_rule[idx2])
-                    opt_name = comp_rule[idx2][T_FID].replace("COAP.", "")
+                    opt_name = opt[0][0].replace("COAP.", "")
+                    opt_val  = opt[1][0]
+                    opt_len  = opt[1][1]//8
                     
                     print("LLLLL",delta_t)
                     delta_t = coap_options[opt_name] - delta_t
@@ -339,8 +334,6 @@ class Unparser:
                     else:
                         dt = 13
                         
-                    opt_len = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][1] // 8
-                    opt_val = header_d[(comp_rule[idx2][T_FID], comp_rule[idx2][T_FP])][0]
                     print (opt_len, opt_val)
 
                     if opt_len < 13:
