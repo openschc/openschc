@@ -34,7 +34,7 @@
 															  "",
 															  ""], "MO": "match-mapping","CDA": "mapping-sent"},
 			{"FID": "COAP.Uri-Path", "FP":2, "FL": "var", "DI": "UP", "MO": "ignore","CDA": "value-sent"},
-			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"}
+			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"},
 			{"FID": "COAP.No-Response",    "DI": "UP",  "TV":17,     "MO": "equal","CDA": "not-sent"}
 		]		
 	}
