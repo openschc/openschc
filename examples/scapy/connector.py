@@ -119,6 +119,7 @@ def recv_data(sock):
 
             answer = {
                 "deviceQueueItem": {
+                    "confirmed": false,
 		            "data": base64.b64encode(content).decode('utf-8'),
                     "fPort": fport
                 }
