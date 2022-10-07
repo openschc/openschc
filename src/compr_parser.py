@@ -340,7 +340,6 @@ class Unparser:
                     opt_val  = opt[1][0]
                     opt_len  = opt[1][1]//8
                     
-                    print("LLLLL",delta_t)
                     delta_t = coap_options[opt_name] - cumul_t
                     cumul_t = coap_options[opt_name]
                     print (opt_name, coap_options[opt_name], delta_t)
