@@ -32,7 +32,7 @@
 			{"FID": "COAP.Uri-Path",       "DI": "UP",  "TV":["temp",
 															  "test",
 															  null,
-															  null], "MO": "match_mapping","CDA": "mapping-sent"},
+															  null], "MO": "match-mapping","CDA": "mapping-sent"},
 			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"}
 		]		
 	}
