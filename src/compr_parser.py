@@ -62,7 +62,8 @@ coap_options = {'If-Match':1,
             'Size2':28,
             'Proxy-Uri':35,
             'Proxy-Scheme':39,
-            'Size1':60}
+            'Size1':60,
+            'No-Response': 258}
 
 
 class Parser:
