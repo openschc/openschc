@@ -18,7 +18,7 @@
 												         	         "MO": "equal","CDA": "not-sent"},
 			{"FID": "IPV6.APP_IID",                     "TV": "::424a",
 			                                                         "MO": "equal","CDA": "not-sent"},
-			{"FID": "UDP.DEV_PORT",                     "TV": 12345, "MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.DEV_PORT",                     "TV": 54123, "MO": "equal","CDA": "not-sent"},
 			{"FID": "UDP.APP_PORT",                     "TV": 5683,  "MO": "equal","CDA": "not-sent"},
 			{"FID": "UDP.LEN",                                       "MO": "ignore","CDA": "compute-length"},
 			{"FID": "UDP.CKSUM",                                     "MO": "ignore","CDA": "compute-checksum"},
