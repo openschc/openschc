@@ -347,7 +347,7 @@ class SCHCProtocol:
 
         if rule == None:
             print ("No rule found")
-            return None
+            return None, None
 
         if T_COMP in rule:
             if self.position == T_POSITION_DEVICE:
