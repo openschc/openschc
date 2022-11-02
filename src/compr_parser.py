@@ -248,6 +248,7 @@ class Unparser:
         L3header = None
         L4header = None
         L7header = None
+        coap_h = b""
 
         c = {}
         for k in [T_IPV6_DEV_PREFIX, T_IPV6_DEV_IID, T_IPV6_APP_PREFIX, T_IPV6_APP_IID]:
@@ -257,28 +258,34 @@ class Unparser:
             elif type(v) == int:
                 c[k] = v
             else:
-                raise ValueError ("Type  {} not supported".format(type(v)))
+                raise ValueError ("Type  {} not supported for")
 
         DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
         AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
         print("LLLLLL:", header_d)
+        if direction == T_DIR_UP:
+            IPv6Src = DevStr
+            IPv6Dst = AppStr
+        else:
+            IPv6Src = AppStr
+            IPv6Dst = DevStr
         if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            ICMPv6Header = None
             for i in icmpv6_types:
                 if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
-                    IPv6Src = DevStr
-                    IPv6Dst = AppStr
                     ICMPv6Header = ICMPv6EchoReply(
                         id = header_d[(T_ICMPV6_IDENT, 1)][0],
                         seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                         data = data)
                 if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
-                    IPv6Src = AppStr
-                    IPv6Dst = DevStr 
                     ICMPv6Header = ICMPv6EchoRequest(
                         id = header_d[(T_ICMPV6_IDENT, 1)][0],
                         seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                         data = data)
+            if ICMPv6Header is not None:
                 L4header = ICMPv6Header
+            else:
+                L4header = data
         elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
             print("KKKK - HERE in UDP section")
             if direction == T_DIR_UP:
@@ -294,8 +301,7 @@ class Unparser:
                 sport = dev_port,
                 dport = app_port
                 )
-                IPv6Src = DevStr
-                IPv6Dst = AppStr
+                coap_h = data
             else:
                 raise ValueError("TBD")
 
