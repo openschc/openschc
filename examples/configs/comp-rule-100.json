@@ -33,8 +33,7 @@
       {"FID": "COAP.Uri-Path", "FL": "var", "FP": 3, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
       {"FID": "COAP.Uri-Path", "FL": "var", "FP": 4, "DI": "UP",             "MO": "ignore","CDA": "value-sent"},
       {"FID": "COAP.Uri-Query", "FL": "var", "FP": 1, "DI": "UP", "TV":"k=", "MO": "MSB", "MO.VAL": 16, "CDA": "LSB"},
-      {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"},
-      {"FID": "COAP.End",                             "DI": "BI", "TV": 255, "MO": "equal", "CDA": "not-sent"}
+      {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"}
     ]
 },{
     "RuleID": 6,

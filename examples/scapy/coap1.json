@@ -1,0 +1,41 @@
+{
+    "DeviceID" : "lorawan:70b3d54991f30a79",
+    "SoR" : [ {
+		"RuleID" : 38,
+		"RuleIDLength" : 8,
+		"Compression": [
+			{"FID": "IPV6.VER",                         "TV": 6,     "MO": "equal", "CDA": "not-sent"},
+			{"FID": "IPV6.TC",                          "TV": 0,     "MO": "ignore", "CDA": "not-sent"},
+			{"FID": "IPV6.FL",                          "TV": 0,     "MO": "ignore","CDA": "not-sent"},
+			{"FID": "IPV6.LEN",                                      "MO": "ignore","CDA": "compute-length"},
+			{"FID": "IPV6.NXT",                         "TV": 17,    "MO": "equal", "CDA": "not-sent"},
+			{"FID": "IPV6.HOP_LMT",                     "TV" : 255,  "MO": "ignore","CDA": "not-sent"},
+			{"FID": "IPV6.DEV_PREFIX",                  "TV": "2001:41d0:302:2200::/64",
+												                     "MO": "equal","CDA": "not-sent"},
+			{"FID": "IPV6.DEV_IID",                     "TV": "::13b3",
+			                                                         "MO": "equal","CDA": "not-sent"},
+			{"FID": "IPV6.APP_PREFIX",                  "TV": "2001:41d0:305:2100::/64",
+												         	         "MO": "equal","CDA": "not-sent"},
+			{"FID": "IPV6.APP_IID",                     "TV": "::424a",
+			                                                         "MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.DEV_PORT",                     "TV": 54123, "MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.APP_PORT",                     "TV": 5683,  "MO": "equal","CDA": "not-sent"},
+			{"FID": "UDP.LEN",                                       "MO": "ignore","CDA": "compute-length"},
+			{"FID": "UDP.CKSUM",                                     "MO": "ignore","CDA": "compute-checksum"},
+			{"FID": "COAP.VER",                         "TV":1,      "MO": "equal", "CDA": "not-sent"},
+			{"FID": "COAP.TYPE",                        "TV":1,      "MO": "equal","CDA": "not-sent"},
+			{"FID": "COAP.TKL",                         "TV":0,      "MO": "equal","CDA": "not-sent"},
+			{"FID": "COAP.CODE",            "DI": "UP", "TV":2,      "MO": "equal","CDA": "not-sent"},
+			{"FID": "COAP.CODE",            "DI": "DW",              "MO": "ignore","CDA": "value-sent"},
+			{"FID": "COAP.MID",             "DI": "UP", "TV":0,      "MO": "MSB",  "MO.VAL": 10, "CDA": "LSB"},
+			{"FID": "COAP.MID",             "DI": "DW",              "MO": "ignore","CDA": "not-sent"},			
+			{"FID": "COAP.Uri-Path",        "DI": "UP", "TV":["temperature",
+															  "test",
+															  "",
+															  ""],   "MO": "match-mapping","CDA": "mapping-sent"},
+			{"FID": "COAP.Content-Format", "DI": "UP",  "TV":60,     "MO": "equal","CDA": "not-sent"},
+			{"FID": "COAP.No-Response",    "DI": "UP",  "TV":2,     "MO": "equal","CDA": "not-sent"}
+		]		
+	}
+    ]
+}
