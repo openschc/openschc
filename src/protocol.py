@@ -230,7 +230,7 @@ class SCHCProtocol:
         print("compr rule", rule)
         self._log("compression rule {}".format(rule))
         if rule is None:
-            rule = self.rule_manager.FindNoCompressionRule(device_id)
+            rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
             print("No Compress rule:", rule)
             self._log("no-compression rule {}".format(rule))
 
@@ -243,6 +243,8 @@ class SCHCProtocol:
             print("raw_packet", raw_packet)
             return schc_packet, device_id
 
+        device_id = rule[T_META][T_DEVICEID]
+        
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
         #schc_packet.display("bin")
@@ -292,6 +294,14 @@ class SCHCProtocol:
 
         self.sender_delay = sender_delay
 
+
+                
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
+        print("+++ packet_bbuf", packet_bbuf)
+        print("+++ device_id", device_id)
+        print("+++ position", self.position)
+
+
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
             destination = core_id
@@ -300,11 +310,6 @@ class SCHCProtocol:
             destination = device_id
 
         print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
-                
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
-        print("+++ packet_bbuf", packet_bbuf)
-        print("+++ device_id", device_id)
-        print("+++ position", self.position)
 
         if packet_bbuf == None: # No compression rule found
             return 
@@ -358,6 +363,15 @@ class SCHCProtocol:
             print("The HEADER D:", header_d)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
+        elif T_NO_COMP in rule:
+            #remove ruleID
+            ruleID = packet_bbuf.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+            pkt_data = bytearray()
+            while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
+                octet = packet_bbuf.get_bits(nb_bits=8)
+                pkt_data.append(octet)
+
+            return device_id, pkt_data
     
         # fragmentation rule
 
