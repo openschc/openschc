@@ -460,7 +460,7 @@ class RuleManager:
 
             if not overlap:
                 if "Compression" in n_rule:
-                    r = self._create_compression_rule(n_rule)
+                    r = self._create_compression_rule(n_rule, device)
                     d["SoR"].append(r)
                 elif T_FRAG in n_rule:
                     r = self._create_fragmentation_rule(n_rule)
@@ -578,7 +578,7 @@ class RuleManager:
 
         return arule
 
-    def _create_compression_rule (self, nrule):
+    def _create_compression_rule (self, nrule, device_id = None):
         """
         parse a rule to verify values and fill defaults
         """
@@ -650,6 +650,7 @@ class RuleManager:
             arule[T_META] = {}
         arule[T_META][T_UP_RULES] = up_rules
         arule[T_META][T_DW_RULES] = dw_rules
+        arule[T_META][T_DEVICEID] = device_id
 
         return arule
 
