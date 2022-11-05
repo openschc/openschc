@@ -1176,7 +1176,7 @@ class RuleManager:
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         print("here")
-        return None, None
+        return None
 
     def FindNoCompressionRule(self, deviceID=None):
         for d in self._ctxt:
