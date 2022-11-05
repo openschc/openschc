@@ -226,7 +226,7 @@ class SCHCProtocol:
 
         # Apply compression rule
 
-        rule, dev_id = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
         print("compr rule", rule)
         self._log("compression rule {}".format(rule))
         if rule is None:
