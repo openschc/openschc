@@ -243,6 +243,8 @@ class SCHCProtocol:
             print("raw_packet", raw_packet)
             return schc_packet, device_id
 
+        device_id = rule[T_META][T_DEVICEID]
+        
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
         #schc_packet.display("bin")
