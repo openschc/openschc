@@ -241,14 +241,14 @@ class SCHCProtocol:
                 
             schc_packet = self.compressor.no_compress(rule, raw_packet)
             print("raw_packet", raw_packet)
-            return schc_packet, dev_id
+            return schc_packet, device_id
 
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
         dprint(schc_packet)
         #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
-        return schc_packet, dev_id
+        return schc_packet, device_id
 
     def _make_frag_session(self, core_id, device_id, direction):
         print("make_frag_session, device_id: ", device_id, "core_id", core_id, "direction", direction)
