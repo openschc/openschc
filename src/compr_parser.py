@@ -265,7 +265,27 @@ class Unparser:
 
             DevStr = ipaddress.IPv6Address((c[T_IPV6_DEV_PREFIX] <<64) + c[T_IPV6_DEV_IID])
             AppStr = ipaddress.IPv6Address((c[T_IPV6_APP_PREFIX] <<64) + c[T_IPV6_APP_IID])
-            print("LLLLLL:", header_d)
+            
+            if direction == T_DIR_UP:
+                IPv6Src = DevStr
+                IPv6Dst = AppStr
+            else:
+                IPv6Dst = DevStr
+                IPv6Src = AppStr                
+
+            IPv6Header = IPv6 (
+                version= header_d[(T_IPV6_VER, 1)][0],
+                tc     = header_d[(T_IPV6_TC, 1)][0],
+                fl     = header_d[(T_IPV6_FL, 1)][0],
+                nh     = header_d[(T_IPV6_NXT, 1)][0],
+                hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
+                src    = IPv6Src.compressed, 
+                dst    = IPv6Dst.compressed
+            ) 
+
+            L3header = IPv6Header  
+
+
             if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
                 for i in icmpv6_types:
                     if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
@@ -283,37 +303,21 @@ class Unparser:
                             seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
                             data = data)
                     L4header = ICMPv6Header
+
             elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
-                print("KKKK - HERE in UDP section")
-                if direction == T_DIR_UP:
-                    dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
-                    app_port = header_d[(T_UDP_APP_PORT, 1)][0]
+                dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
+                app_port = header_d[(T_UDP_APP_PORT, 1)][0]                    
 
-                    if type(dev_port) == bytes:
-                        dev_port = int.from_bytes(dev_port,"big")
-                    if type(app_port) == bytes:
-                        app_port = int.from_bytes(app_port,"big")
-                        
-                    L4header = UDP (
-                    sport = dev_port,
-                    dport = app_port
-                    )
-                    IPv6Src = DevStr
-                    IPv6Dst = AppStr
-
-                    IPv6Header = IPv6 (
-                        version= header_d[(T_IPV6_VER, 1)][0],
-                        tc     = header_d[(T_IPV6_TC, 1)][0],
-                        fl     = header_d[(T_IPV6_FL, 1)][0],
-                        nh     = header_d[(T_IPV6_NXT, 1)][0],
-                        hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
-                        src    = IPv6Src.compressed, 
-                        dst    = IPv6Dst.compressed
-                    ) 
-
-                    L3header = IPv6Header  
+                if type(dev_port) == bytes:
+                    dev_port = int.from_bytes(dev_port,"big")
+                if type(app_port) == bytes:
+                    app_port = int.from_bytes(app_port,"big")
+                if direction == T_DIR_UP:    
+                    L4header = UDP (sport=dev_port, dport=app_port)
                 else:
-                    raise ValueError("TBD")
+                    L4header = UDP (dport=dev_port, sport=app_port)
+            else:
+                raise ValueError("TBD")
 
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
