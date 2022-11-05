@@ -249,6 +249,7 @@ class Unparser:
         L3header = None
         L4header = None
         L7header = None
+        coap_h   = None
 
         if (T_IPV6_VER, 1) in header_d: # doing IPv6 and UDP
 
@@ -382,9 +383,11 @@ class Unparser:
 
 
 
-    
-        
-        full_packet = L3header / L4header / Raw(load=coap_h)
+
+        if coap_h != None;
+            full_packet = L3header / L4header / Raw(load=coap_h)
+        else: 
+            full_packet = L3header / L4header
 
         hexdump(full_packet)
         return full_packet
