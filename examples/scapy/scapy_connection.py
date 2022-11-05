@@ -10,6 +10,9 @@ import frag_recv
 
 from scapy.all import hexdump
 
+import binascii
+import cbor2 as cbor
+
 class ScapyLowerLayer:
     def __init__(self, position, socket=None, other_end=None):
         self.protocol = None
@@ -28,6 +31,24 @@ class ScapyLowerLayer:
         print ("scapy_conection.py: send_pkt, dest ", dest, "packet", packet)
         if dest != None and dest.find("udp") == 0:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
+
+            self.sock.sendto(packet, destination)
+
+        elif dest != None and dest.find("lorawan") == 0:
+            destination = ("127.0.0.1", 12345)
+            device_id = dest.split(":")[1]
+
+            print (destination, device_id)
+
+            msg = {
+                1: 1,
+                2: binascii.unhexlify(device_id),
+                4: packet
+            }
+
+            print (binascii.hexlify(cbor.dumps(msg)))
+            self.sock.sendto(cbor.dumps(msg), destination)
+
         else:
             print ("No destination found, not sent:", packet, dest)
             return False
@@ -35,7 +56,6 @@ class ScapyLowerLayer:
 #        else:
 #            destination = self.other_end
 
-        self.sock.sendto(packet, destination)
 
         # define error_rate rand ou un vecteur avec 0 et 1
         # if error then not send
