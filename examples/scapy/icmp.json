@@ -1,6 +1,6 @@
  {
     "DeviceID" : "udp:83.199.24.39:8888",
-    "SoR" : [
+    "SoR" : [  
 	{
 	    "RuleID": 6,
 	    "RuleIDLength": 3,
