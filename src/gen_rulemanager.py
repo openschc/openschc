@@ -1173,8 +1173,8 @@ class RuleManager:
                                     break # field from rule not found in pkt, go to next
                             dprint ("->", matches)
                     dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
-                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule, dev[T_DEVICEID]
-                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule, dev[T_DEVICEID]
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         print("here")
         return None, None
 
