@@ -60,7 +60,6 @@ def processPkt(pkt):
                     if techno == 1:
                         other_end += "lorawan:"
                         other_end +=  binascii.hexlify(msg[2]).decode("utf-8")
-                        other_end += "@" + addr[0]+":"+str(addr[1])
                         
                         uncomp_pkt = schc_machine.schc_recv(schc_packet=msg[4], device_id=other_end)
                         print ("--->", uncomp_pkt) 
