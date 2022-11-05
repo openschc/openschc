@@ -373,6 +373,15 @@ class SCHCProtocol:
 
             return device_id, pkt_data
     
+        elif T_NO_COMP in rule:
+            #remove ruleID
+            ruleID = packet_bbuf.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+            pkt_data = bytearray()
+            while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
+                octet = packet_bbuf.get_bits(nb_bits=8)
+                pkt_data.append(octet)
+            return device_id, pkt_data
+
         # fragmentation rule
 
         frag_rule = rule
