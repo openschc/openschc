@@ -1114,10 +1114,6 @@ class RuleManager:
         beginning of the SCHC packet.
         """
 
-        # remove what is following @ to get a stable deviceID
-
-        device = device.split("@")[0]
-
         for d in self._ctxt:
             dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
