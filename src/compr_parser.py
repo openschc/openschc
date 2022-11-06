@@ -393,7 +393,7 @@ class Unparser:
         elif L4header != None: 
             full_packet = L3header / L4header
         else:
-            full_header = L3header
+            full_packet = L3header
 
         hexdump(full_packet)
         return full_packet
