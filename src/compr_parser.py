@@ -227,6 +227,9 @@ class Parser:
                 try:
                     self.header_fields[option_names[option_number], field_position[option_number]] = [option_value, L*8,  "variable"]
                 except:
+                    print (binascii.hexlify(pkt))
+                    print ("position:", pos)
+                    print (self.header_fields)
                     raise ValueError("CoAP Option {} not found".format(option_number))
 
             if(pos < len(pkt)):
@@ -286,7 +289,7 @@ class Unparser:
             L3header = IPv6Header  
 
 
-            if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            if header_d[(T_IPV6_NXT, 1)][0] == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
                 for i in icmpv6_types:
                     if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
@@ -316,8 +319,8 @@ class Unparser:
                     L4header = UDP (sport=dev_port, dport=app_port)
                 else:
                     L4header = UDP (dport=dev_port, sport=app_port)
-            else:
-                raise ValueError("TBD")
+#            else:
+#                raise ValueError("TBD")
 
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
@@ -390,8 +393,10 @@ class Unparser:
 
         if coap_h != None:
             full_packet = L3header / L4header / Raw(load=coap_h)
-        else: 
-            full_packet = L3header / L4header
+        elif L4header != None: 
+            full_packet = L3header / L4header / Raw(load=data)
+        else:
+            full_packet = L3header / Raw(load=data)
 
         hexdump(full_packet)
         return full_packet
