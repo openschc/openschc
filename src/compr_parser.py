@@ -391,9 +391,9 @@ class Unparser:
         if coap_h != None:
             full_packet = L3header / L4header / Raw(load=coap_h)
         elif L4header != None: 
-            full_packet = L3header / L4header
+            full_packet = L3header / L4header / Raw(load=data)
         else:
-            full_packet = L3header
+            full_packet = L3header / Raw(load=data)
 
         hexdump(full_packet)
         return full_packet
