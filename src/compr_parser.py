@@ -227,6 +227,9 @@ class Parser:
                 try:
                     self.header_fields[option_names[option_number], field_position[option_number]] = [option_value, L*8,  "variable"]
                 except:
+                    print (binascii.hexlify(pkt))
+                    print ("position:", pos)
+                    print (self.header_fields)
                     raise ValueError("CoAP Option {} not found".format(option_number))
 
             if(pos < len(pkt)):
