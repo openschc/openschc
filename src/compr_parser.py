@@ -316,8 +316,8 @@ class Unparser:
                     L4header = UDP (sport=dev_port, dport=app_port)
                 else:
                     L4header = UDP (dport=dev_port, sport=app_port)
-            else:
-                raise ValueError("TBD")
+#            else:
+#                raise ValueError("TBD")
 
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
