@@ -286,7 +286,7 @@ class Unparser:
             L3header = IPv6Header  
 
 
-            if header_d[(T_IPV6_NXT, 1)][0] == 58: #IPv6 /  ICMPv6
+            if header_d[(T_IPV6_NXT, 1)][0] == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
                 for i in icmpv6_types:
                     if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
@@ -390,8 +390,10 @@ class Unparser:
 
         if coap_h != None:
             full_packet = L3header / L4header / Raw(load=coap_h)
-        else: 
+        elif L4header != None: 
             full_packet = L3header / L4header
+        else:
+            full_header = L3header
 
         hexdump(full_packet)
         return full_packet
