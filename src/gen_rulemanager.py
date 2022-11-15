@@ -379,6 +379,45 @@ FIELD__DEFAULT_PROPERTY = {
 #         else:
 #             return repr(t)
 
+def _adapt_value(self, FID, value): 
+    """transform any value of any type in the smallest bytearray.
+    FID allows to convert properly the string to IPv6 address."""
+    if type(value) == int:
+        
+        size = 0
+        v = value
+        while v != 0:
+            v = v >> 8
+            size += 1
+
+        if size == 0: # when value == 0 store 0
+            size=1 
+
+        return value.to_bytes (size, byteorder='big')
+    if type(value) == str:
+        if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX]:
+            # string has to be converted as IPv6 addresses
+
+            slash_pos = value.find("/") 
+            if slash_pos != -1:
+                # a prefix is given, remove / to be compatible with ip_address
+                value = value[:slash_pos]
+
+            addr = ipaddress.ip_address(value)
+            if addr.version != 6: # expect an IPv6 address
+                raise ValueError ("only IPv6 is supported, can not support {}".format(addr.version))
+
+            if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
+                return addr.packed[:8]
+            elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
+                return addr.packed[8:]
+            else:
+                raise ValueError ("{} Fid not found".format(FID))   
+        else: # a regular string
+            return value.encode()              
+    else:
+        raise ValueError("Unknown type", type(value))
+
 class RuleManager:
     """
     # Class RuleManager
@@ -484,45 +523,6 @@ class RuleManager:
             for x, v in dev_info[T_INDEXES].items():
                 print (x)
                 d["Indexes"] |= {x:v}
-
-    def _adapt_value(self, FID, value): 
-        """transform any value in the smallest bytearray"""
-        if type(value) == int:
-            
-            size = 0
-            v = value
-            while v != 0:
-                v = v >> 8
-                size += 1
-
-            if size == 0: # when value == 0 store 0
-                size=1 
-
-            return value.to_bytes (size, byteorder='big')
-        if type(value) == str:
-            if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX]:
-                # string has to be converted as IPv6 addresses
-
-                slash_pos = value.find("/") 
-                if slash_pos != -1:
-                 # a prefix is given, remove / to be compatible with ip_address
-                    value = value[:slash_pos]
-
-                addr = ipaddress.ip_address(value)
-                if addr.version != 6: # expect an IPv6 address
-                    raise ValueError ("only IPv6 is supported, can not support {}".format(addr.version))
-
-                if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
-                    return addr.packed[:8]
-                elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
-                    return addr.packed[8:]
-                else:
-                    raise ValueError ("{} Fid not found".format(FID))   
-            else: # a regular string
-                return value.encode()              
-        else:
-            raise ValueError("Unknown type", type(value))
-
 
     def _create_fragmentation_rule (self, nrule):
         arule = {}
@@ -655,14 +655,14 @@ class RuleManager:
 
                         print ("---------> ", key, val)
 
-                    entry[T_TV] = self._adapt_value(FID, r[T_TV])
+                    entry[T_TV] = _adapt_value(FID, r[T_TV])
                 else:
                     entry[T_TV] = None
 
             elif MO == T_MO_MMAP:
                 entry[T_TV] = []
                 for e in r[T_TV]:
-                    entry[T_TV].append(self._adapt_value(FID, e))
+                    entry[T_TV].append(_adapt_value(FID, e))
 
             else:
                 raise ValueError("{} MO unknown".format(MO))
