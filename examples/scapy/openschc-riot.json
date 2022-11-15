@@ -1,0 +1,112 @@
+[
+  {
+    "RuleID" : 1,
+    "RuleIDLength" : 8,
+    "Compression" : [
+      {"FID": "IPV6.VER",       "FL":  4, "FP": 1, "DI": "BI", "TV": 6,             "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.TC",        "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.FL",        "FL": 20, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.LEN",       "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "IPV6.NXT",       "FL":  8, "FP": 1, "DI": "BI", "TV": 58,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "BI", "TV": [64, 255],     "MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "DW", "TV": ["fe80::/64",
+                                                                      "ff02::/64"], "MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "UP", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.DEV_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "UP", "TV": ["fe80::/64",
+                                                                      "ff02::/64"], "MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "DW", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.APP_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"}
+    ]
+  },
+  {
+    "RuleID" : 2,
+    "RuleIDLength" : 8,
+    "Compression" : [
+      {"FID": "IPV6.VER",       "FL":  4, "FP": 1, "DI": "BI", "TV": 6,             "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.TC",        "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.FL",        "FL": 20, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.LEN",       "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "IPV6.NXT",       "FL":  8, "FP": 1, "DI": "BI", "TV": 17,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "BI", "TV": 64,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.DEV_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.APP_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "UDP.DEV_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 1337,          "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "UDP.APP_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 1337,          "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "UDP.LEN",        "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "UDP.CKSUM",      "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"}
+    ]
+  },
+  {
+    "RuleID" : 3,
+    "RuleIDLength" : 8,
+    "Compression" : [
+      {"FID": "IPV6.VER",       "FL":  4, "FP": 1, "DI": "BI", "TV": 6,             "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.TC",        "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.FL",        "FL": 20, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.LEN",       "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "IPV6.NXT",       "FL":  8, "FP": 1, "DI": "BI", "TV": 17,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "BI", "TV": 64,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.DEV_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "fe80::/64",   "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.APP_IID",   "FL": 64, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "UDP.DEV_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 61616,         "MO": "MSB",          "CDA": "LSB", "MO.VAL": 12},
+      {"FID": "UDP.APP_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 61616,         "MO": "MSB",          "CDA": "LSB", "MO.VAL": 12},
+      {"FID": "UDP.LEN",        "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "UDP.CKSUM",      "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"}
+    ]
+  },
+  {
+    "RuleID" : 4,
+    "RuleIDLength" : 8,
+    "Compression" : [
+      {"FID": "IPV6.VER",       "FL":  4, "FP": 1, "DI": "BI", "TV": 6,             "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.TC",        "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.FL",        "FL": 20, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.LEN",       "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "IPV6.NXT",       "FL":  8, "FP": 1, "DI": "BI", "TV": 58,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "UP", "TV": 64,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "DW",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": [
+                                                                "fe80::/64",
+                                                                "2001:db8::/64",
+                                                                "2001:db8:1::/64"], "MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "IPV6.DEV_IID",   "FL": 64, "FP": 1, "DI": "BI", "TV": "::1",         "MO": "MSB",          "CDA": "LSB", "MO.VAL": 62},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "2001:db8::/64","MO": "equal",       "CDA": "not-sent"},
+      {"FID": "IPV6.APP_IID",   "FL": 64, "FP": 1, "DI": "BI", "TV": "::1",         "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "ICMPV6.TYPE",    "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "ICMPV6.CODE",    "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "ICMPV6.CKSUM",   "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "ICMPV6.IDENT",   "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "ICMPV6.SEQNO",   "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "value-sent"}
+    ]
+  },
+  {
+    "RuleID" : 5,
+    "RuleIDLength" : 8,
+    "Compression" : [
+      {"FID": "IPV6.VER",       "FL":  4, "FP": 1, "DI": "BI", "TV": 6,             "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.TC",        "FL":  8, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.FL",        "FL": 20, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "not-sent"},
+      {"FID": "IPV6.LEN",       "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "IPV6.NXT",       "FL":  8, "FP": 1, "DI": "BI", "TV": 58,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "UP", "TV": 64,            "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "IPV6.HOP_LMT",   "FL":  8, "FP": 1, "DI": "DW",                      "MO": "ignore",       "CDA": "value-sent"},
+      {"FID": "IPV6.DEV_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": [
+                                                                "fe80::/64",
+                                                                "2001:db8::/64",
+                                                                "2001:db8:1::/64"], "MO": "match-mapping","CDA": "mapping-sent"},
+      {"FID": "IPV6.DEV_IID",   "FL": 64, "FP": 1, "DI": "BI", "TV": "::1",         "MO": "MSB",          "CDA": "LSB", "MO.VAL": 62},
+      {"FID": "IPV6.APP_PREFIX","FL": 64, "FP": 1, "DI": "BI", "TV": "2001:db8::/64","MO": "equal",       "CDA": "not-sent"},
+      {"FID": "IPV6.APP_IID",   "FL": 64, "FP": 1, "DI": "BI", "TV": "::1",         "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "UDP.DEV_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 1337,          "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "UDP.APP_PORT",   "FL": 16, "FP": 1, "DI": "BI", "TV": 1337,          "MO": "equal",        "CDA": "not-sent"},
+      {"FID": "UDP.LEN",        "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"},
+      {"FID": "UDP.CKSUM",      "FL": 16, "FP": 1, "DI": "BI",                      "MO": "ignore",       "CDA": "compute-length"}
+    ]
+  }
+
+]

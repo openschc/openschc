@@ -203,7 +203,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet):
+    def _apply_compression(self, device_id, raw_packet, parsing=None):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -218,7 +218,10 @@ class SCHCProtocol:
         else:
             raise ValueError ("Unknown postion")
 
-        parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
+        if parsing != None:
+             parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
+        else: 
+             parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
         self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
@@ -277,7 +280,7 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0):
+    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None):
         """Starting to send SCHC packet after called by Application.       
         If self.position is T_POSITION_DEVICE and 
         this function is for sending from device to core.
@@ -296,7 +299,7 @@ class SCHCProtocol:
 
 
                 
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet)
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing)
         print("+++ packet_bbuf", packet_bbuf)
         print("+++ device_id", device_id)
         print("+++ position", self.position)
@@ -360,7 +363,7 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
-            print("The HEADER D:", header_d)
+            print("The HEADER D:", header_d, pkt_data)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
         elif T_NO_COMP in rule:
