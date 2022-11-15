@@ -379,7 +379,7 @@ FIELD__DEFAULT_PROPERTY = {
 #         else:
 #             return repr(t)
 
-def _adapt_value(self, FID, value): 
+def _adapt_value(FID, value): 
     """transform any value of any type in the smallest bytearray.
     FID allows to convert properly the string to IPv6 address."""
     if type(value) == int:
