@@ -655,7 +655,7 @@ class RuleManager:
 
                         print ("---------> ", key, val)
 
-                    entry[T_TV] = self._adapt_value(FID, r[T_TV], allow_dict=True)
+                    entry[T_TV] = self._adapt_value(FID, r[T_TV])
                 else:
                     entry[T_TV] = None
 
