@@ -531,6 +531,12 @@ class Compressor:
         start_byte = rule[T_MO_VAL]//8 # go to the byte to send
         last_byte  = field[1]//8
         start_bit  = 7-rule[T_MO_VAL]%8  # in that byte how many bits left
+        size = field[1] - rule[T_MO_VAL]
+        
+        if rule[T_FL] == "var":
+            assert (size%8 == 0) #var implies bytes
+
+            output.add_length(size//8)
 
         print(field)
 
