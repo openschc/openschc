@@ -532,7 +532,7 @@ class Compressor:
         last_byte  = field[1]//8
         start_bit  = 7-rule[T_MO_VAL]%8  # in that byte how many bits left
         size = field[1] - rule[T_MO_VAL]
-        
+
         if rule[T_FL] == "var":
             assert (size%8 == 0) #var implies bytes
 
@@ -658,34 +658,34 @@ class Decompressor:
             }
 
 
-    def cal_checksum(self, packet):
-        # RFC 1071
-        assert isinstance(packet, bytearray)
-        packet_size = len(packet)
-        if packet_size%2:
-            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
-            cksum += (packet[-1]<<8)&0xff00
-        else:
-            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
-        while cksum>>16:
-            cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
-        return ~cksum & 0xFFFF
+    # def cal_checksum(self, packet):
+    #     # RFC 1071
+    #     assert isinstance(packet, bytearray)
+    #     packet_size = len(packet)
+    #     if packet_size%2:
+    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
+    #         cksum += (packet[-1]<<8)&0xff00
+    #     else:
+    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
+    #     while cksum>>16:
+    #         cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
+    #     return ~cksum & 0xFFFF
 
-    def build_ipv6_pseudo_header(self):
-        assert self.src_prefix is not None
-        assert self.src_iid is not None
-        assert self.dst_prefix is not None
-        assert self.dst_iid is not None
-        assert self.ipv6_payload is not None
-        assert self.next_proto is not None
-        phdr = bytearray([0]*40)
-        phdr[ 0: 8] = self.src_prefix
-        phdr[ 8:16] = self.src_iid
-        phdr[16:24] = self.src_prefix
-        phdr[24:32] = self.src_iid
-        phdr[32:36] = struct.pack(">I",len(self.ipv6_payload))
-        phdr[39] = self.next_proto
-        return phdr
+    # def build_ipv6_pseudo_header(self):
+    #     assert self.src_prefix is not None
+    #     assert self.src_iid is not None
+    #     assert self.dst_prefix is not None
+    #     assert self.dst_iid is not None
+    #     assert self.ipv6_payload is not None
+    #     assert self.next_proto is not None
+    #     phdr = bytearray([0]*40)
+    #     phdr[ 0: 8] = self.src_prefix
+    #     phdr[ 8:16] = self.src_iid
+    #     phdr[16:24] = self.src_prefix
+    #     phdr[24:32] = self.src_iid
+    #     phdr[32:36] = struct.pack(">I",len(self.ipv6_payload))
+    #     phdr[39] = self.next_proto
+    #     return phdr
 
     # def cda_copy_field(self, out_bbuf, target_val):
     #     """ copy the appropriate target_val and return it. """
@@ -770,7 +770,7 @@ class Decompressor:
         if rule[T_FL] == "var":
             send_length = in_bbuf.get_length()
             total_size = rule[T_MO_VAL] + send_length
-        elif type(rule[T_TV]) == int:
+        elif type(rule[T_TV]) is bytes:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]
 
