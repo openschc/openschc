@@ -529,7 +529,7 @@ class Compressor:
 
         full_value = field[0]
         start_byte = rule[T_MO_VAL]//8 # go to the byte to send
-        start_bit  = 8-[T_MO_VAL]%8  # in that byte how many bits left
+        start_bit  = 8-rule[T_MO_VAL]%8  # in that byte how many bits left
 
         for i in range (start_bit, -1, -1):
             print (i, 1 << i, full_value & (1 << i))
