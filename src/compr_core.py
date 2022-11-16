@@ -532,7 +532,7 @@ class Compressor:
         start_bit  = 8-rule[T_MO_VAL]%8  # in that byte how many bits left
 
         for i in range (start_bit, -1, -1):
-            print (i, 1 << i, full_value & (1 << i))
+            print (i, 1 << i, full_value[start_byte] & (1 << i))
 
 
 
