@@ -506,26 +506,35 @@ class Compressor:
 
     def tx_cda_lsb(self, field, rule, output):
         assert rule[T_MO] == T_MO_MSB
-        size = field[1] - rule[T_MO_VAL]
+        # size = field[1] - rule[T_MO_VAL]
+        # full_value = field[0]
+        # dprint("size =", size)
+
+        # if rule[T_FL] == "var":
+        #     assert (size%8 == 0) #var implies bytes
+
+        #     output.add_length(size//8)
+
+        # if type(full_value) == int:
+        #     for i in range(size):
+        #         output.set_bit(full_value & 0x01)
+        #         full_value >>= 1
+        # elif type(full_value) == str:
+        #     dprint(rule[T_TV], field[0])
+        #     for i in range(rule[T_MO_VAL]//8, field[1]//8):
+        #         dprint(i, "===>", field[0][i] )
+        #     pass
+        # else:
+        #     raise ValueError("CA value-sent unknown type")
+
         full_value = field[0]
-        dprint("size =", size)
+        start_byte = rule[T_MO_VAL]//8 # go to the byte to send
+        start_bit  = 8-[T_MO_VAL]%8  # in that byte how many bits left
 
-        if rule[T_FL] == "var":
-            assert (size%8 == 0) #var implies bytes
+        for i in range (start_bit, -1, -1):
+            print (i, 1 << i, full_value & (1 << i))
 
-            output.add_length(size//8)
 
-        if type(full_value) == int:
-            for i in range(size):
-                output.set_bit(full_value & 0x01)
-                full_value >>= 1
-        elif type(full_value) == str:
-            dprint(rule[T_TV], field[0])
-            for i in range(rule[T_MO_VAL]//8, field[1]//8):
-                dprint(i, "===>", field[0][i] )
-            pass
-        else:
-            raise ValueError("CA value-sent unknown type")
 
     def tx_cda_notyet(self, field, rule, output):
         raise NotImplementedError
