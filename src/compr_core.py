@@ -580,7 +580,7 @@ class Compressor:
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            dprint("rule item:", r)
+            print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
@@ -594,7 +594,7 @@ class Compressor:
             else:
                 dprint("rule skipped, bad direction")
 
-            #output_bbuf.display(format="bin")
+            output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 

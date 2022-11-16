@@ -379,10 +379,13 @@ FIELD__DEFAULT_PROPERTY = {
 #         else:
 #             return repr(t)
 
-def _adapt_value(FID, value): 
+def _adapt_value(value, length=None, FID=None): 
     """transform any value of any type in the smallest bytearray.
     FID allows to convert properly the string to IPv6 address."""
-    if type(value) == int:
+    if type(value) is int:
+
+        if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX] and length != None:
+            return value.to_bytes(length//8, byteorder='big')
         
         size = 0
         v = value
@@ -394,7 +397,7 @@ def _adapt_value(FID, value):
             size=1 
 
         return value.to_bytes (size, byteorder='big')
-    if type(value) == str:
+    if type(value) is str:
         if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX]:
             # string has to be converted as IPv6 addresses
 
@@ -415,6 +418,8 @@ def _adapt_value(FID, value):
                 raise ValueError ("{} Fid not found".format(FID))   
         else: # a regular string
             return value.encode()              
+    elif type(value) is bytes:
+        return value
     else:
         raise ValueError("Unknown type", type(value))
 
@@ -655,14 +660,14 @@ class RuleManager:
 
                         print ("---------> ", key, val)
 
-                    entry[T_TV] = _adapt_value(FID, r[T_TV])
+                    entry[T_TV] = _adapt_value(r[T_TV], entry[T_FL], FID)
                 else:
                     entry[T_TV] = None
 
             elif MO == T_MO_MMAP:
                 entry[T_TV] = []
                 for e in r[T_TV]:
-                    entry[T_TV].append(_adapt_value(FID, e))
+                    entry[T_TV].append(_adapt_value(e, entry[T_FL], FID))
 
             else:
                 raise ValueError("{} MO unknown".format(MO))
@@ -1158,29 +1163,43 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg):
-        dprint ("MSB")
-        dprint (TV, FV, rlength, flength, arg)
+        print ("MSB")
+        print (TV, FV, rlength, flength, arg)
 
-        if type (TV) != type (FV):
-            return False
+        for i in range(arg//8): # compare byte per byte
+            print (TV[i], FV[i])
+            if TV[i] != FV[i]:
+                return False
+        
+        j = i+1 # if a rest then compare it bit per bit
+        for i in range(arg%8):
+            k = 7-i
+            print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
+            if TV[j] & (1<<k) != FV[j] & (1 << k):
+                return False
+        
+        return True
 
-        if type(TV) == int:
-            if type(arg) != int:
-                raise ValueError ("MO Arg should be integer")
+        # if type (TV) != type (FV):
+        #     return False
 
-            shift = rlength-arg
-            return self.MO_EQUAL(TV >> shift, FV >> shift, rlength-shift, flength-shift, 0)
+        # if type(TV) == int:
+        #     if type(arg) != int:
+        #         raise ValueError ("MO Arg should be integer")
 
-        if type(TV) == str:
-            if type (arg) != int and arg % 8 != 0:
-                raise ValueError("MO arg should be an Interget multiple of 8")
+        #     shift = rlength-arg
+        #     return self.MO_EQUAL(TV >> shift, FV >> shift, rlength-shift, flength-shift, 0)
 
-            for i in range(0, arg // 8):
-                dprint ("=", TV[i], FV[i], TV[i] == FV[i])
-                if TV[i] != FV[i]:
-                    return False
+        # if type(TV) == str:
+        #     if type (arg) != int and arg % 8 != 0:
+        #         raise ValueError("MO arg should be an Interget multiple of 8")
 
-            return True
+        #     for i in range(0, arg // 8):
+        #         dprint ("=", TV[i], FV[i], TV[i] == FV[i])
+        #         if TV[i] != FV[i]:
+        #             return False
+
+        #    return True
 
     def MO_MMAP (self, TV, FV,  rlength, flength, arg):
         for v in TV:
@@ -1223,7 +1242,8 @@ class RuleManager:
                 if "Compression" in rule:
                     matches = 0
                     for r in rule["Compression"]:
-                        dprint(r)
+                        print(r)
+                        #print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
                                 if T_MO_VAL in r:
@@ -1246,17 +1266,16 @@ class RuleManager:
                                             arg))
                                     break # field does not match, rule does not match
                             else:
-                                if r[T_FL] == "var":  #entry not found, but variable length => accept
+                                if r[T_FL] == "var":  # entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
                                     dprint("Suboptimal rule")
                                 else:
                                     dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
-                            dprint ("->", matches)
-                    dprint("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            print ("->", matches)
+                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
-        print("here")
         return None
 
     def FindNoCompressionRule(self, deviceID=None):
