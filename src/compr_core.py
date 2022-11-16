@@ -540,7 +540,7 @@ class Compressor:
 
         print (start_byte+1, last_byte)
         for i in range (start_byte+1, last_byte):
-            print (i)
+            print (i, chr(full_value[i]))
 
 
 
