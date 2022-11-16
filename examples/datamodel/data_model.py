@@ -2,31 +2,10 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
-from scapy.all import *
-import scapy.contrib.coap as scapy_coap
-
-
 import gen_rulemanager as RM
-#import compr_parser as parser
-from compr_core import *
-from protocol import SCHCProtocol
-
-from scapy_connection import *
-
-from gen_utils import dprint, sanitize_value
-
-
-import sched
-
-import protocol
 
 import pprint
 import binascii
-
-import socket
-import ipaddress
-
-import time, datetime
 
 from yangson import DataModel
 
@@ -40,7 +19,7 @@ rm    = RM.RuleManager()
 rm.Add(file="ipv6.json")
 rm.Print()
 
-rm.add_sid_file("ietf-schc@2022-07-22.sid")
+rm.add_sid_file("ietf-schc@2022-10-09.sid")
 yr = rm.to_yang()
 pprint.pprint (yr)
 

@@ -911,7 +911,7 @@ class RuleManager:
             print ("#", yang_rules)
         
         return {"ietf-schc:schc" : {"rule" : yang_rules}}
-        
+
     def add_sid_file(self, name):
         with open(name) as sid_file:
             sid_values = json.loads(sid_file.read())
@@ -1021,7 +1021,7 @@ class RuleManager:
                                         r = val[i]
 
                                     tv_array += b'\xA2' + \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/position", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
                                         struct.pack('!B', i)
 
                                     tv_array +=  \
