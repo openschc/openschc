@@ -538,7 +538,7 @@ class Compressor:
             print (i, 1 << i, full_value[start_byte] & (1 << i))
             output.set_bit(full_value[start_byte] & (1 << i))
 
-        print (start_bit, last_byte)
+        print (start_byte+1, last_byte)
         for i in range (start_byte, last_byte):
             print (i)
 
