@@ -943,12 +943,13 @@ class RuleManager:
 
  
 
-    def to_yang_coreconf (self, format="json"):
+    def to_coreconf (self, deviceID="None"):
+        """
+        Dump the rules in  CORECONF format for a specific device.
+        """
         import cbor2 as cbor
         import binascii
-        """
-        Print a context
-        """
+ 
         module_sid = self.sid_search_for(name="/ietf-schc:schc", space="data")
         print (module_sid)
         rule_sid = self.sid_search_for(name="/ietf-schc:schc/rule", space="data")

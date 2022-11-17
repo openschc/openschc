@@ -60,11 +60,8 @@ rm    = RM.RuleManager()
 rm.Add(file="ipv6.json")
 rm.Print()
 
-deep=0
 def convert_to_json(jcc, delta=0, name_ref=""):
     global deep
-
-    deep += 1
 
     if type(jcc) is dict:
         json_dict = {}
@@ -74,15 +71,12 @@ def convert_to_json(jcc, delta=0, name_ref=""):
             key = sid_description["identifier"].replace(name_ref+'/', '')
 
             json_dict[key] = value
-        deep -= 1
         return json_dict
     elif type(jcc) is list:
         json_list = []
         for e in jcc:
             value = convert_to_json(e, delta, name_ref )
             json_list.append(value)
-
-        deep -= 1
         return json_list
     elif type(jcc) is int:
         node_type = yang_type[name_ref]
@@ -103,15 +97,9 @@ def convert_to_json(jcc, delta=0, name_ref=""):
     else:
         raise ValueError ("Unknown type", type(jcc))
 
-
-    
-
-
 rm.add_sid_file("ietf-schc@2022-10-09.sid")
-# yr = rm.to_yang()
-# pprint.pprint (yr)
 
-ycbor = rm.to_yang_coreconf()
+ycbor = rm.to_coreconf()
 print (binascii.hexlify(ycbor))
 pprint.pprint(cbor.loads(ycbor))
 
