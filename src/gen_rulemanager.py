@@ -1031,8 +1031,7 @@ class RuleManager:
                                         while x != 0:
                                             r = struct.pack('!B', x & 0xFF) + r
                                             x >>= 8
-                                        tv_array +=  \
-                                            tv_array += cbor.dumps(r)
+                                        tv_array += cbor.dumps(r)
                                     elif type(val[i]) == bytes:
                                         r = val[i]
                                         tv_array += self.cbor_header(0b111_00000, 23) # TAG Identity
