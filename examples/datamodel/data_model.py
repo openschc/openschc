@@ -57,7 +57,7 @@ yang_type = {
 }
 
 rm    = RM.RuleManager()
-rm.Add(file="ipv6.json")
+rm.Add(file="comp-rule-100.json")
 rm.Print()
 
 def convert_to_json(jcc, delta=0, name_ref=""):

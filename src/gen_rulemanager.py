@@ -945,7 +945,7 @@ class RuleManager:
 
     def to_coreconf (self, deviceID="None"):
         """
-        Dump the rules in  CORECONF format for a specific device.
+        Dump the rules in CORECONF format for a specific device.
         """
         import cbor2 as cbor
         import binascii
@@ -1017,24 +1017,26 @@ class RuleManager:
                                     val = [val]
 
                                 tv_array = b''
+                                
                                 for i in range(len(val)):
+
+                                    tv_array += b'\xA2' + \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                                        cbor.dumps(i) + \
+                                        cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) 
 
                                     if type(val[i]) == int:
                                         x = val[i]
                                         r = b''
                                         while x != 0:
-                                            r = struct.pack('!B', x&0xFF) + r
+                                            r = struct.pack('!B', x & 0xFF) + r
                                             x >>= 8
+                                        tv_array +=  \
+                                            tv_array += cbor.dumps(r)
                                     elif type(val[i]) == bytes:
                                         r = val[i]
-
-                                    tv_array += b'\xA2' + \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        struct.pack('!B', i)
-
-                                    tv_array +=  \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        cbor.dumps(r)
+                                        tv_array += self.cbor_header(0b111_00000, 23) # TAG Identity
+                                        tv_array += cbor.dumps(r)
 
 
                                 tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
