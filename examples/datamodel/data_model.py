@@ -71,8 +71,8 @@ def convert_to_json(jcc, delta=0, name_ref=""):
         json_dict = {}
         for k, v in jcc.items():
             sid_description = rm.sid_search_sid(k+delta)
-            value = convert_to_json(v, k+delta, sid_description["identifier"])
-            key = sid_description["identifier"].replace(name_ref+'/', '')
+            value = convert_to_json(v, k+delta, sid_description)
+            key = sid_description.replace(name_ref+'/', '')
 
             json_dict[key] = value
         return json_dict
@@ -89,8 +89,7 @@ def convert_to_json(jcc, delta=0, name_ref=""):
             return jcc
         elif node_type == "identifier":
             sid_ref = rm.sid_search_sid(jcc)
-            assert( sid_ref["namespace"] == "identity")
-            return sid_ref["identifier"]
+            return sid_ref
         elif node_type == "union":
             return str(jcc)
         else:
@@ -101,8 +100,7 @@ def convert_to_json(jcc, delta=0, name_ref=""):
     elif type(jcc) is cbor.CBORTag: # TAG == 45, an identifier not an int.
         if jcc.tag == 45:
             sid_ref = rm.sid_search_sid(jcc.value)
-            assert( sid_ref["namespace"] == "identity")
-            return sid_ref["identifier"]
+            return sid_ref
         else:
             raise ValueError("CBOR Tag unknown:", jcc.tag)
     else:

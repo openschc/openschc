@@ -929,9 +929,15 @@ class RuleManager:
 
     def sid_search_sid(self, value):
         for s in self._sid_info:
+            name = s["module-name"]
             for e in s["items"]:
                 if e["sid"] == value:
-                    return e
+                    if e["namespace"] == "identity":
+                        return name + ":" + e["identifier"]
+                    elif e["namespace"] == "data":
+                        return e["identifier"]
+                    else:
+                        raise ValueError("not a good namespace", e["namespace"])
 
         raise ValueError("Not found", value)
         return None         
@@ -950,6 +956,35 @@ class RuleManager:
         """
         import cbor2 as cbor
         import binascii
+
+        def dictify_cbor (val, ref_id):
+            cbor_data = b''
+            if type(val) != list:
+                val = [val]
+
+            tv_array = b''
+            for i in range(len(val)):
+
+                if type(val[i]) == int:
+                    x = val[i]
+                    r = b''
+                    while x != 0:
+                        r = struct.pack('!B', x&0xFF) + r
+                        x >>= 8
+                elif type(val[i]) == bytes:
+                    r = val[i]
+
+                tv_array += b'\xA2' + \
+                    cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                    cbor.dumps(i)
+
+                tv_array +=  \
+                    cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
+                    cbor.dumps(r)
+
+
+            tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
+            return tv_array
  
         module_sid = self.sid_search_for(name="/ietf-schc:schc", space="data")
         print (module_sid)
@@ -1014,40 +1049,17 @@ class RuleManager:
                             cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_MO]][1], space="identity")) 
                         nb_elm += 1
 
+                        if T_MO_VAL in e:
+                            mo_val_cbor = dictify_cbor(e[T_MO_VAL], "/ietf-schc:schc/rule/entry/matching-operator-value")
+                            entry_cbor += \
+                                cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator-value", space="data") - entry_sid) + \
+                                mo_val_cbor
+                            nb_elm += 1
+
                         entry_cbor += \
                             cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_sid) + \
                             cbor.dumps(self.sid_search_for(name=YANG_ID[e[T_CDA]][1], space="identity")) 
                         nb_elm += 1
-
-                        def dictify_cbor (val, ref_id):
-                                cbor_data = b''
-                                if type(val) != list:
-                                    val = [val]
-
-                                tv_array = b''
-                                for i in range(len(val)):
-
-                                    if type(val[i]) == int:
-                                        x = val[i]
-                                        r = b''
-                                        while x != 0:
-                                            r = struct.pack('!B', x&0xFF) + r
-                                            x >>= 8
-                                    elif type(val[i]) == bytes:
-                                        r = val[i]
-
-                                    tv_array += b'\xA2' + \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/index", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        cbor.dumps(i)
-
-                                    tv_array +=  \
-                                        cbor.dumps(self.sid_search_for(name=ref_id+"/value", space="data") - self.sid_search_for(name=ref_id, space="data")) + \
-                                        cbor.dumps(r)
-
-
-                                tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
-                                return tv_array
-
 
                         if T_TV in e and e[T_TV] != None:
                             tv_cbor = dictify_cbor(e[T_TV], "/ietf-schc:schc/rule/entry/target-value")
