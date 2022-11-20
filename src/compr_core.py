@@ -404,6 +404,13 @@ YANG_ID = {
     "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
     "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
     "TBD": [SID+125, "/ietf-schc:schc/rule/window-size"],
+    # from OAM 
+    T_ICMPV6_CODE: [None, "fid-icmpv6-code"],
+    T_ICMPV6_TYPE: [None, "fid-icmpv6-type"],
+    T_ICMPV6_IDENT: [None, "fid-icmpv6-identifier"],
+    T_ICMPV6_SEQNO: [None, "fid-icmpv6-sequence"],
+    T_ICMPV6_CKSUM: [None, "fid-icmpv6-checksum"],
+
 }
 
 # from gen_rulemanager import *
