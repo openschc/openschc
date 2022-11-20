@@ -114,7 +114,6 @@ print (binascii.hexlify(ycbor))
 pprint.pprint(cbor.loads(ycbor))
 
 yr = convert_to_json (cbor.loads(ycbor))
-
 pprint.pprint(yr)
 
 
