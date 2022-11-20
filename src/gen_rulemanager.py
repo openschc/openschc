@@ -933,6 +933,7 @@ class RuleManager:
                 if e["sid"] == value:
                     return e
 
+        raise ValueError("Not found", value)
         return None         
 
     def cbor_header (self, major, value):
@@ -986,12 +987,14 @@ class RuleManager:
                                 cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
                                 cbor.dumps(l)
                         elif type(l) == str:
+                            id = self.sid_search_for(name=YANG_ID[l][1], space="identifier")
+                            print ("@"*20, id, YANG_ID[l][1])
                             entry_cbor += \
                                 cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
-                                self.cbor_header(0b111_00000, 25) + \
-                                cbor.dumps(self.sid_search_for(name=l, space="identifier")) 
+                                struct.pack("!BB", 0xD8, 45) + \
+                                cbor.dumps(self.sid_search_for(name=YANG_ID[l][1], space="identifier")) 
 
-                            raise ValueError("Field ID not defined")
+                            #raise ValueError("Field ID not defined")
                         else:
                             raise ValueError("unknown field length value")
                         nb_elm += 1

@@ -98,6 +98,7 @@ def convert_to_json(jcc, delta=0, name_ref=""):
         raise ValueError ("Unknown type", type(jcc))
 
 rm.add_sid_file("ietf-schc@2022-10-09.sid")
+rm.add_sid_file("ietf-schc-oam@2021-11-10.sid")
 
 ycbor = rm.to_coreconf()
 print (binascii.hexlify(ycbor))
