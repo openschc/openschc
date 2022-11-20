@@ -115,8 +115,8 @@ module ietf-schc-oam {
       "type used in rules";
   }
 
-/*
-  augment "/ietf-schc:schc/schc:rule/schc:nature/schc:compression" {
+
+  augment "/ietf-schc:schc/ietf-schc:rule/ietf-schc:nature/ietf-schc:compression" {
     leaf proxy-behavior {
         type schc-oam:proxy-type;
         default "schc-oam:proxy-none";
@@ -125,7 +125,8 @@ module ietf-schc-oam {
     }
     description
       "added to SCHC rules";
+  
   }
-*/
+
 
 }

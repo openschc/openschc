@@ -125,5 +125,9 @@
             "L2WordSize": 8
         }
     }
+  },{
+    "RuleID": 8,
+    "RuleIDLength": 8,
+    "NoCompression": []
   }
 ]
