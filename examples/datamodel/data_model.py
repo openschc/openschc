@@ -1,6 +1,10 @@
-import sys
+import sys, os
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '../../src/')
+
+if os.name == 'nt':
+    sys.path.insert(1, '..\\..\\src\\')
+else:
+    sys.path.insert(1, '../../src/')
 
 import gen_rulemanager as RM
 
@@ -94,6 +98,13 @@ def convert_to_json(jcc, delta=0, name_ref=""):
 
     elif type(jcc) is bytes:
         return base64.b64encode(jcc).decode()
+    elif type(jcc) is cbor.CBORTag: # TAG == 45, an identifier not an int.
+        if jcc.tag == 45:
+            sid_ref = rm.sid_search_sid(jcc.value)
+            assert( sid_ref["namespace"] == "identity")
+            return sid_ref["identifier"]
+        else:
+            raise ValueError("CBOR Tag unknown:", jcc.tag)
     else:
         raise ValueError ("Unknown type", type(jcc))
 

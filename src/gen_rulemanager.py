@@ -987,12 +987,12 @@ class RuleManager:
                                 cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
                                 cbor.dumps(l)
                         elif type(l) == str:
-                            id = self.sid_search_for(name=YANG_ID[l][1], space="identifier")
+                            id = self.sid_search_for(name=YANG_ID[l][1], space="identity")
                             print ("@"*20, id, YANG_ID[l][1])
                             entry_cbor += \
                                 cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_sid) + \
                                 struct.pack("!BB", 0xD8, 45) + \
-                                cbor.dumps(self.sid_search_for(name=YANG_ID[l][1], space="identifier")) 
+                                cbor.dumps(self.sid_search_for(name=YANG_ID[l][1], space="identity")) 
 
                             #raise ValueError("Field ID not defined")
                         else:
