@@ -268,8 +268,7 @@ import ipaddress
 import warnings
 
 import base64
-
-import base64
+import cbor2 as cbor
 
 """
 .. module:: gen_rulemanager
@@ -486,7 +485,7 @@ class RuleManager:
             if device == d["DeviceID"]:
                 break
         else:
-            d = {"DeviceID": device, "SoR": [], "Indexes" : {}}
+            d = {"DeviceID": device, "SoR": []}
             self._ctxt.append(d)
 
         for n_rule in sor:
@@ -522,12 +521,6 @@ class RuleManager:
                 else:
                     raise ValueError ("Rule type undefined")
                 #print (n_rule)
-
-        if T_INDEXES in dev_info:
-            print ("%",dev_info[T_INDEXES])
-            for x, v in dev_info[T_INDEXES].items():
-                print (x)
-                d["Indexes"] |= {x:v}
 
     def _create_fragmentation_rule (self, nrule):
         arule = {}
@@ -597,6 +590,154 @@ class RuleManager:
             raise ValueError("No fragmentation mode")
 
         return arule
+
+    def openschc_id (self, yang_id):
+        """return an OpenSCHC ID giving a yang ID stored in .sid files"""
+        for i in YANG_ID:
+            if YANG_ID[i][1] == yang_id:
+                return i
+
+        raise ValueError(yang_id, "not known by openSCHC")
+
+    def get_values(self, values):
+        """This function transforms the YANG list indexed with the first element, to a Python list.
+        The key do not have to be sorted, unlisted positions are filled with None. Element stays as
+        byte array. 
+        """
+        value_list = []
+        for e in values:     
+            list_len = len(value_list)
+            for i in range(list_len, e[1]+1): # fill with None to the position
+                value_list.append(None)
+
+            value_list[e[1]] = e[2]
+
+        return value_list
+
+
+    def Add_coreconf(self, device=None, dev_info=None, file=None, compression=True):
+        """
+        
+
+        """
+
+        assert (dev_info is not None or file is not None)
+
+        if file != None:
+            dev_info = open(file).read() 
+
+        rule_input = cbor.loads(dev_info) # store CBOR CORECONF
+
+        SoR = []
+
+        schc_id = self.sid_search_for(name="/ietf-schc:schc", space="data")
+
+        if not schc_id in rule_input:
+            print ("This is a not a Set of Rule")
+            return None
+
+        entry = rule_input[schc_id]
+
+        sid_ref = self.sid_search_for(name="/ietf-schc:schc/rule", space="data")
+        rid_value_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - sid_ref
+        rid_length_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - sid_ref
+        rule_nature_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - sid_ref
+        for rule in entry[1]:
+            arule = {}
+            arule[T_RULEID] = rule[rid_value_sid]
+            arule[T_RULEIDLENGTH] =rule[rid_length_sid]
+            rule_nature = rule[rule_nature_sid]
+
+            nature = self.sid_search_sid (rule_nature, short=True)
+            if nature == "nature-compression":
+                entry = []
+                entry_ref = self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") 
+                entry_sid = entry_ref - sid_ref
+                fid_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-id", space="data") - entry_ref
+                fl_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_ref
+                fpos_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-position", space="data") - entry_ref
+                dir_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/direction-indicator", space="data") - entry_ref
+                mo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator", space="data") - entry_ref
+                mo_val_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator-value", space="data") - entry_ref
+                cda_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_ref
+
+                up_rules = 0
+                dw_rules = 0
+                for r in rule[entry_sid]:
+                    entry_elm = {}
+
+                    fid_value = r[fid_sid]
+                    fid_yang_name = self.sid_search_sid (fid_value, short=True)
+                    o_schc_id = self.openschc_id(fid_yang_name)
+                    entry_elm[T_FID] = o_schc_id
+
+                    fl_value = r[fl_sid]
+                    if type(fl_value) is cbor.CBORTag and fl_value.tag == 45:
+                        fl_value = self.sid_search_sid(fl_value.value, short = True)
+                        if fl_value == "fl-token-length": # use OPENSCHC ID
+                           fl_value =  T_FUNCTION_TKL 
+                        elif fl_value == "fl-variable":
+                            fl_value = T_FUNCTION_VAR
+                    entry_elm[T_FL] = fl_value
+
+                    dir_value = r[dir_sid]
+                    dir_yang_name = self.sid_search_sid (dir_value, short=True)
+                    o_schc_id = self.openschc_id(dir_yang_name)   
+                    entry_elm[T_DI] = o_schc_id
+
+                    if o_schc_id == T_DIR_BI:
+                        up_rules += 1
+                        dw_rules += 1
+                    elif o_schc_id == T_DIR_UP:
+                        up_rules += 1
+                    elif o_schc_id == T_DIR_DW:
+                        dw_rules += 1
+
+                    fpos = r[fpos_sid]
+                    entry_elm[T_FP] = fpos
+
+                    mo_value = r[mo_sid]
+                    mo_yang_name = self.sid_search_sid (mo_value, short=True)
+                    o_schc_id = self.openschc_id(mo_yang_name)
+                    entry_elm[T_MO] = o_schc_id
+
+                    if mo_val_sid in r:
+                        values = self.get_values(r[mo_val_sid])
+                        entry_elm[T_MO_VAL] = int.from_bytes(values[0], byteorder='big') # 1 arg = length
+
+                    cda_value = r[cda_sid]
+                    cda_yang_name = self.sid_search_sid (cda_value, short=True)
+                    o_schc_id = self.openschc_id(cda_yang_name)
+                    entry_elm[T_CDA] = o_schc_id
+
+                    #print (entry_elm, up_rules, dw_rules)
+
+                    entry.append(entry_elm)
+
+                arule[T_COMP] = entry
+                if not T_META in arule:
+                    arule[T_META] = {}
+                arule[T_META][T_UP_RULES] = up_rules
+                arule[T_META][T_DW_RULES] = dw_rules
+                arule[T_META][T_DEVICEID] = device
+
+
+            elif nature =="nature-fragmentation":
+                print ('fragmentation')
+
+            elif nature == "nature-no-compression":
+                arule [T_NO_COMP] = []
+            else:
+                raise ValueError ("Unknown rule nature SID", nature)
+
+            SoR.append(arule) # add to the set of rules
+
+        pprint.pprint(SoR)
+        d = {"DeviceID": device, "SoR": SoR}
+        self._ctxt.append(d)
+
+
+
 
     def _create_compression_rule (self, nrule, device_id = None):
         """
@@ -821,13 +962,17 @@ class RuleManager:
 
         return None 
 
-    def sid_search_sid(self, value):
+    def sid_search_sid(self, value, short=False):
+        """return YANG ID form a SID, if short is set to true, the module id is not concatenated."""
         for s in self._sid_info:
             name = s["module-name"]
             for e in s["items"]:
                 if e["sid"] == value:
                     if e["namespace"] == "identity":
-                        return name + ":" + e["identifier"]
+                        if short:
+                            return e["identifier"]
+                        else: 
+                            return name + ":" + e["identifier"]
                     elif e["namespace"] == "data":
                         return e["identifier"]
                     else:
@@ -848,7 +993,6 @@ class RuleManager:
         """
         Dump the rules in CORECONF format for a specific device.
         """
-        import cbor2 as cbor
         import binascii
 
         def dictify_cbor (val, ref_id):
