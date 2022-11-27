@@ -527,7 +527,7 @@ class RuleManager:
 
         arule[T_RULEID] = nrule[T_RULEID]
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
-        arule["Fragmentation"] = {}
+        arule[T_FRAG] = {}
 
         def _default_value (ar, nr, idx, default=None, failed=False):
             if failed and not idx in nr[T_FRAG][T_FRAG_PROF]:
@@ -567,6 +567,8 @@ class RuleManager:
                 elif nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ALWAYS:
                     _default_value (arule, nrule, T_FRAG_W, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
+                    _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
+                    _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
                 elif  nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ON_ERROR:
                     if not T_FRAG_FCN in nrule[T_FRAG][T_FRAG_PROF]:
                         raise ValueError ("FCN Must be specified for Ack On Error")
@@ -724,6 +726,64 @@ class RuleManager:
 
             elif nature =="nature-fragmentation":
                 print ('fragmentation')
+                arule[T_FRAG] = {}
+                arule[T_FRAG][T_FRAG_PROF] = {}
+                frag_mod_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - sid_ref
+                frag_mod_id = self.sid_search_sid(rule[frag_mod_sid], short=True)
+
+                l2_word_sid = self.sid_search_for(name="/ietf-schc:schc/rule/l2-word-size", space="data") - sid_ref
+                if l2_word_sid in rule:
+                    l2_word = rule[l2_word_sid]
+                    if l2_word != 8:
+                        raise ValueError("OpenSCHC only support 8 bit long l2 words")
+                    else:
+                        print ("L2 Word set to 8 by default")
+                        l2_word = 8
+
+                direction_sid = self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - sid_ref
+                direction = self.sid_search_sid(rule[direction_sid], short=True)
+
+                if direction == 'di-up':
+                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_UP
+                elif direction == 'di-down':
+                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_DW
+                else:
+                    raise ValueError ("Unknown fragmentation rule direction", direction)
+
+                dtag_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - sid_ref
+                if dtag_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] = rule[dtag_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] = 0
+
+                w_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/w-size", space="data") - sid_ref
+                if w_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W] = rule[w_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W] = 0
+
+                fcn_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - sid_ref
+                if fcn_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] = rule[fcn_size_sid]
+                else:
+                    raise ValueError("FCN must be specified")
+
+                rcs_algo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - sid_ref
+                if rcs_algo_sid in rule:
+                    rcs_algo = self.sid_search_sid(rule[rcs_algo_sid], short=True)
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = self.openschc_id(rcs_algo)
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = T_FRAG_RFC8724
+                   
+
+                if frag_mod_id == 'fragmentation-mode-no-ack':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_NO_ACK
+                elif frag_mod_id == 'fragmentation-mode-ack-always':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ALWAYS
+                elif frag_mod_id == 'fragmentation-mode-ack-on-error':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ON_ERROR
+                else:
+                    raise ValueError("unkwown fragmentation mode", frag_mod_id)
 
             elif nature == "nature-no-compression":
                 arule [T_NO_COMP] = []
@@ -1138,6 +1198,12 @@ class RuleManager:
                         cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
                     nb_elm += 1
 
+                    if rule[T_FRAG][T_FRAG_MODE] in [T_FRAG_ACK_ALWAYS, T_FRAG_ACK_ON_ERROR]:
+                        rule_content += \
+                            cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/w-size", space="data") - rule_sid) +\
+                            cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])
+                        nb_elm += 1
+
                     rule_content += \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN])
@@ -1197,27 +1263,6 @@ class RuleManager:
                 return False
         
         return True
-
-        # if type (TV) != type (FV):
-        #     return False
-
-        # if type(TV) == int:
-        #     if type(arg) != int:
-        #         raise ValueError ("MO Arg should be integer")
-
-        #     shift = rlength-arg
-        #     return self.MO_EQUAL(TV >> shift, FV >> shift, rlength-shift, flength-shift, 0)
-
-        # if type(TV) == str:
-        #     if type (arg) != int and arg % 8 != 0:
-        #         raise ValueError("MO arg should be an Interget multiple of 8")
-
-        #     for i in range(0, arg // 8):
-        #         dprint ("=", TV[i], FV[i], TV[i] == FV[i])
-        #         if TV[i] != FV[i]:
-        #             return False
-
-        #    return True
 
     def MO_MMAP (self, TV, FV,  rlength, flength, arg):
         for v in TV:
@@ -1356,193 +1401,4 @@ class RuleManager:
                             return r
         return None
 
-    # def _checkRuleValue(self, rule_id, rule_id_length):
-    #     """this function looks if bits specified in ruleID are not outside of
-    #     rule_id_length"""
-
-    #     if rule_id_length > 32:
-    #         raise ValueError("Rule length should be less than 32")
-
-    #     r1 = rule_id
-
-    #     for k in range (32, rule_id_length, -1):
-    #         if (0x01 << k) & r1 !=0:
-    #             raise ValueError("rule ID too long")
-
-    # def _ruleIncluded(self, r1ID, r1l, r2ID, r2l):
-    #     """check if a conflict exists between to ruleID (i.e. same first bits equals) """
-    #     r1 = r1ID << (32-r1l)
-    #     r2 = r2ID << (32-r2l)
-    #     l  = min(r1l, r2l)
-
-    #     for k in range (32-l, 32):
-    #         if ((r1 & (0x01 << k)) != (r2 & (0x01 << k))):
-    #             return False
-
-    #     return True
-
-    # def _nameRule (self, r):
-    #     return "Rule {}/{}:".format(r[T_RULEID], r[T_RULEIDLENGTH])
-
-    # def find_rule_bypacket(self, context, packet_bbuf):
-    #     """ returns a compression rule or an fragmentation rule
-    #     in the context matching with the field value of rule id in the packet.
-    #     """
-    #     for k in ["fragSender", "fragReceiver", "comp"]:
-    #         r = context.get(k)
-    #         if r is not None:
-    #             rule_id = packet_bbuf.get_bits(r[T_RULEIDLENGTH], position=0)
-    #             if r[T_RULEID] == rule_id:
-    #                 return k, r
-    #     return None, None
-
-    # def find_context_bydstiid(self, dst_iid):
-    #     """ find a context with dst_iid, which can be a wild card. """
-    #     # XXX needs to implement wildcard search or something like that.
-    #     for c in self._db:
-    #         if c["dstIID"] == dst_iid:
-    #             return c
-    #         if c["dstIID"] == "*":
-    #             return c
-    #     return None
-
-    # def find_context_exact(self, dev_L2addr, dst_iid):
-    #     """ find a context by both devL2Addr and dstIID.
-    #     This is mainly for internal use. """
-    #     for c in self._db:
-    #         if c["devL2Addr"] == dev_L2addr and c["dstIID"] == dst_iid:
-    #             return c
-    #     return None
-
-    # def add_context(self, context, comp=None, fragSender=None, fragReceiver=None):
-    #     """ add context into the db. """
-    #     if self.find_context_exact(context["devL2Addr"],
-    #                                context["dstIID"]) is not None:
-    #         raise ValueError("the context {}/{} exist.".format(
-    #             context["devL2Addr"], context["dstIID"]))
-    #     # add context
-    #     c = deepcopy(context)
-    #     self._db.append(c)
-    #     self.add_rules(c, comp, fragSender, fragReceiver)
-
-    # def add_rules(self, context, comp=None, fragSender=None, fragReceiver=None):
-    #     """ add rules into the context specified. """
-    #     if comp is not None:
-    #         self.add_rule(context, "comp", comp)
-    #     if fragSender is not None:
-    #         self.add_rule(context, "fragSender", fragSender)
-    #     if fragReceiver is not None:
-    #         self.add_rule(context, "fragReceiver", fragReceiver)
-
-    # def add_rule(self, context, key, rule):
-    #     """ Check rule integrity and uniqueless and add it to the db """
-
-    #     if not T_RULEID in rule:
-    #        raise ValueError ("Rule ID not defined in {}.".format(self._nameRule(rule)))
-
-    #     if not T_RULEIDLENGTH in rule:
-    #         if rule[T_RULEID] < 255:
-    #             rule[T_RULEIDLENGTH] = 8
-    #         else:
-    #             raise ValueError ("RuleID too large for default size on a byte")
-
-    #     # proceed to compression check (TBD)
-    #     if key == "comp":
-    #         self.check_rule_compression(rule)
-    #     elif key in ["fragSender", "fragReceiver", "comp"]:
-    #         self.check_rule_fragmentation(rule)
-    #     else:
-    #         raise ValueError ("key must be either comp, fragSender, fragReceiver")
-
-    #     rule_id = rule[T_RULEID]
-    #     rule_id_length = rule[T_RULEIDLENGTH]
-
-    #     self._checkRuleValue(rule_id, rule_id_length)
-
-    #     for k in ["fragSender", "fragReceiver", "comp"]:
-    #         r = context.get(k)
-    #         if r is not None:
-    #             if rule_id_length == r.RuleIDLength and rule_id == r.RuleID:
-    #                 raise ValueError ("Rule {}/{} exists".format(
-    #                         rule_id, rule_id_length))
-
-    #     context[key] = DictToAttrDeep(**rule)
-
-    # def check_rule_compression(self, rule):
-    #     """ compression rule check """
-    #     # XXX need more work.
-    #     if (not "Compression" in rule or "Fragmentation" in rule):
-    #         raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
-
-    #     canon_rule_set = []
-    #     #if "rule_set" not in rule["compression"]:
-    #     #    raise ValueError ("compression must have a rule_set.")
-    #     for r in rule["Compression"]:
-    #         canon_r = {}
-    #         for k,v in r.items():
-    #             if isinstance(v, str):
-    #                 canon_r[k.upper()] = v.upper()
-    #             else:
-    #                 canon_r[k.upper()] = v
-    #         canon_rule_set.append(canon_r)
-    #     rule["Compression"] = canon_rule_set
-
-    # def check_rule_fragmentation(self, rule):
-    #     """ fragmentation rule check """
-    #     if (not "Fragmentation" in rule or "Compression" in rule):
-    #         raise ValueError ("{} Invalid rule".format(self._nameRule(rule)))
-
-    #     if "Fragmentation" in rule:
-    #         fragRule = rule["Fragmentation"]
-
-    #         if not "FRMode" in fragRule:
-    #             raise ValueError ("{} Fragmentation mode must be specified".format(self._nameRule(rule)))
-
-    #         mode = fragRule["FRMode"]
-
-    #         if not mode in (T_FRAG_NO_ACK, T_FRAG_ACK_ALWAYS, T_FRAG_ACK_ON_ERROR):
-    #             raise ValueError ("{} Unknown fragmentation mode".format(self._nameRule(rule)))
-
-    #         if not "FRModeProfile" in fragRule:
-    #             fragRule["FRModeProfile"] = {}
-
-    #         profile = fragRule["FRModeProfile"]
-
-    #         if not "dtagSize" in profile:
-    #             profile["dtagSize"] = 0
-
-    #         if not "WSize" in profile:
-    #             if  mode == T_FRAG_NO_ACK:
-    #                 profile["WSize"] = 0
-    #             elif  mode == T_FRAG_ACK_ALWAYS:
-    #                 profile["WSize"] = 1
-    #             elif mode == T_FRAG_ACK_ON_ERROR:
-    #                 profile["WSize"] = 5
-
-    #         if not "FCNSize" in profile:
-    #             if mode == T_FRAG_NO_ACK:
-    #                 profile["FCNSize"] = 1
-    #             elif mode == T_FRAG_ACK_ALWAYS:
-    #                 profile["FCNSize"] = 3
-    #             elif mode == T_FRAG_ACK_ON_ERROR:
-    #                 profile["FCNSize"] = 3
-
-    #         if "windowSize" in profile:
-    #             if profile["windowSize"] > (0x01 << profile["FCNSize"]) - 1 or\
-    #                profile["windowSize"] < 0:
-    #                 raise ValueError ("{} illegal windowSize".format(self._nameRule(rule)))
-    #         else:
-    #             profile["windowSize"] = (0x01 << profile["FCNSize"]) - 1
-
-    #         if mode == T_FRAG_ACK_ON_ERROR:
-    #             if not "ackBehavior" in profile:
-    #                 raise ValueError ("Ack on error behavior must be specified (afterAll1 or afterAll0)")
-    #             if not "tileSize" in profile:
-    #                 profile["tileSize"] = 64
-
-    # def get_init_info(self):
-    #     result = {
-    #         "context": self._ctxt.copy(),
-    #         "database": self._db.copy()
-    #     }
-    #     return result
+ 

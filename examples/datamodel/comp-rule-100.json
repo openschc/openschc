@@ -84,7 +84,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "AckOnError",
-        "FRDirection" : "DW",
+        "FRDirection" : "UP",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,
@@ -116,13 +116,23 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "NoAck",
-        "FRDirection" : "DW",
+        "FRDirection" : "UP",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3
+        }
+    }
+  },{
+    "RuleID": 7,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRMode": "AckAlways",
+        "FRDirection" : "UP",
         "FRModeProfile": {
             "dtagSize": 2,
             "FCNSize": 3,
-            "MICAlgorithm": "RCS_RFC8724",
-            "MICWordSize": 8,
-            "L2WordSize": 8
+            "WSize" : 1,
+            "maxRetry" : 4
         }
     }
   },{
