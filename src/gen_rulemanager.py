@@ -775,6 +775,26 @@ class RuleManager:
                 else:
                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = T_FRAG_RFC8724
 
+                max_pkt_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/maximum-packet-size", space="data") - sid_ref
+                if max_pkt_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = rule[max_pkt_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = 1280
+
+                window_size = self.sid_search_for(name="/ietf-schc:schc/rule/window-size", space="data") - sid_ref
+                if window_size  in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] =  rule[window_size]
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_W] - 2
+                   if arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] < 1:  #case if W is 0 or 1
+                        arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 1
+ 
+                max_inter_frame_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-interleaved-frames", space="data") - sid_ref
+                if max_inter_frame_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] =  rule[max_inter_frame_sid]
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] = 1
+
                 inac_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - sid_ref
                 if inac_timer_sid in rule:
                     inac_timer = rule[inac_timer_sid]
@@ -793,28 +813,6 @@ class RuleManager:
                 else:
                     inactivity_timer = 12 * 60 * 60 # default timer in seconds
 
-
-                max_pkt_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/maximum-packet-size", space="data") - sid_ref
-                if max_pkt_size_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] =  rule[max_pkt_size_sid]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = 1280
-
-                window_size = self.sid_search_for(name="/ietf-schc:schc/rule/window-size", space="data") - sid_ref
-                if window_size  in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] =  rule[window_size]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_W] - 2
-                   if arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] < 1:  #case if W is 0 or 1
-                        arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 1
- 
-                max_inter_frame_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-interleaved-frames", space="data") - sid_ref
-                if max_inter_frame_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] =  rule[max_inter_frame_sid]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] = 1
-
-                
 
                 if frag_mod_id == 'fragmentation-mode-no-ack':
                     arule[T_FRAG][T_FRAG_MODE] = T_FRAG_NO_ACK
