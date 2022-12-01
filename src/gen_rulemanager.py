@@ -775,6 +775,24 @@ class RuleManager:
                 else:
                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = T_FRAG_RFC8724
                    
+                inac_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - sid_ref
+                if inac_timer_sid in rule:
+                    inac_timer = rule[inac_timer_sid]
+                    tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - inac_timer_sid
+                    tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - inac_timer_sid
+
+                    if tick_duration_sid in inac_timer:
+                        tick_duration = inac_timer[tick_duration_sid]
+                    else:
+                        tick_duration = 20
+
+                    if tick_number_sid in inac_timer:
+                        tick_number = inac_timer[tick_number_sid]
+                    else:
+                        tick_number = 600 # to be checked
+                else:
+                    inactivity_timer = 12 * 60 * 60 # default timer in seconds
+
 
                 if frag_mod_id == 'fragmentation-mode-no-ack':
                     arule[T_FRAG][T_FRAG_MODE] = T_FRAG_NO_ACK
