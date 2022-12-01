@@ -785,7 +785,7 @@ class RuleManager:
                 if window_size  in rule:
                     arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] =  rule[window_size]
                 else:
-                   arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_W] - 2
+                   arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] - 1
                    if arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] < 1:  #case if W is 0 or 1
                         arule[T_FRAG][T_FRAG_PROF][T_WINDOW_SIZE] = 1
  
