@@ -169,12 +169,12 @@ class ReassemblerNoAck(ReassembleBase):
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
             dprint("receiver frag received:", schc_frag.__dict__)
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
                 w_dtag = '-'
             else:
                 w_dtag = schc_frag.dtag
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
                 w_w = '-'
             else:
                 w_w = schc_frag.win

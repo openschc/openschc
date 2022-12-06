@@ -266,12 +266,12 @@ class FragmentNoAck(FragmentBase):
         args = (schc_frag.packet.get_content(), dest)
         dprint ("dbug: frag_send.py: Fragment args", args)
         dprint("frag sent:", schc_frag.__dict__)
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
+        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
             w_dtag = '-'
         else:
             w_dtag = schc_frag.dtag
 
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
+        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
             w_w = '-'
         else:
             w_w = schc_frag.win
@@ -312,7 +312,7 @@ class FragmentNoAck(FragmentBase):
         schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf)     
         # in No-Ack mode, only Receiver Abort message can be acceptable.
         print("sender frag received:", schc_frag.__dict__)
-        if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W] == 0 or
+        if ((self.rule[T_FRAG][T_FRAG_PROF ][T_FRAG_W_SIZE] == 0 or
              schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
             dprint("Receiver Abort rid={} dtag={}".format(
@@ -352,7 +352,7 @@ class FragmentAckOnError(FragmentBase):
         print("----------------------- Fragmentation process -----------------------")
         self.bit_list = make_bit_list(self.all_tiles.get_all_tiles(),
                                       self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
-                                      self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W])
+                                      self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE])
         #dprint("bit_list:", self.bit_list)
         #for tile in self.all_tiles.get_all_tiles():
             #dprint("w: {}, t: {}, sent: {}".format(tile['w-num'],tile['t-num'],tile['sent']))
@@ -668,7 +668,7 @@ class FragmentAckOnError(FragmentBase):
         schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf)
         dprint("-----------------------  Sender Frag Received -----------------------")
         dprint("fragment received -> {}".format(schc_frag.__dict__))
-        if ((self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] is None or
+        if ((self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] is None or
             schc_frag.win == frag_msg.get_win_all_1(self.rule)) and
             schc_frag.cbit == 1 and schc_frag.remaining.allones() == True):
             dprint("-----------------------  Receiver Abort rid={} dtag={} -----------------------".format(
