@@ -608,6 +608,7 @@ class RuleManager:
                 mo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator", space="data") - entry_ref
                 mo_val_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator-value", space="data") - entry_ref
                 cda_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_ref
+                tv_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value", space="data") - entry_ref
 
                 up_rules = 0
                 dw_rules = 0
@@ -657,6 +658,15 @@ class RuleManager:
                     cda_yang_name = self.sid_search_sid (cda_value, short=True)
                     o_schc_id = self.openschc_id(cda_yang_name)
                     entry_elm[T_CDA] = o_schc_id
+
+                    if tv_sid in  r:
+                        values = self.get_values(r[tv_sid])
+                        print (values)
+                        if len (values) == 1:
+                            entry_elm[T_TV] = values[0]
+                        else:
+                            entry_elm[T_TV] = values
+
 
                     #print (entry_elm, up_rules, dw_rules)
 
