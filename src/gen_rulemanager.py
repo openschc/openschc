@@ -520,7 +520,7 @@ class RuleManager:
                         raise ValueError ("FCN Must be specified for Ack On Error")
 
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 1)
-                    _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, "afterAll1")
+                    _default_value (arule, nrule, T_FRAG_ACK_BEHAVIOR, T_FRAG_AFTER_ALL1)
                     _default_value (arule, nrule, T_FRAG_TILE, None, True)
                     _default_value (arule, nrule, T_FRAG_MAX_RETRY, 4)
                     _default_value (arule, nrule, T_FRAG_TIMEOUT, 600)
@@ -763,7 +763,6 @@ class RuleManager:
 
                 retrans_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer", space="data") - sid_ref
                 if retrans_timer_sid in rule:
-                    retrans_timer = rule[retrans_timer_sid]
                     tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-duration", space="data") - retrans_timer_sid
                     tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-numbers", space="data") - retrans_timer_sid
                 
@@ -781,6 +780,7 @@ class RuleManager:
 
                 else:
                     retransmission_timer = 1 * 60 * 60 # default timer in seconds
+                arule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT] = retransmission_timer
 
                 max_ack_req_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-ack-requests", space="data") - sid_ref
                 if max_ack_req_sid  in rule:
@@ -817,16 +817,18 @@ class RuleManager:
                     if ack_behavior_sid in rule:
                         ack_behavior = self.sid_search_sid(rule[max_ack_req_sid], short=True)
 
-                        if tile_behavior == "ack-behavior-after-all-0":
-                            pass
-                        elif tile_behavior == "ack-behavior-after-all-1":
-                            pass                        
-                        elif tile_behavior == "ack-behavior-by-layer2":
-                            pass
+                        if ack_behavior == "ack-behavior-after-all-0":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL0
+                            print ("Warning not implemented")
+                        elif ack_behavior == "ack-behavior-after-all-1":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1
+                        elif ack_behavior == "ack-behavior-by-layer2":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ANY
+                            print ("Warning not implemented")
                         else:
-                            raise ValueError ()
+                            raise ValueError ("Unknwon Ack Behavior")
                     else:
-                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE] = 10 # openSCHC default value
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1 # openSCHC default value
                     
                 else:
                     raise ValueError("unkwown fragmentation mode", frag_mod_id)
