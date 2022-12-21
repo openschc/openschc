@@ -954,7 +954,7 @@ class RuleManager:
         self._log = log
         self._db = []
         self._sid_info = []
-
+        self.sid_key_mapping = {}
 
     def _smart_print(self, v):
         if type(v) is str:
@@ -1065,9 +1065,189 @@ class RuleManager:
                     print (x,"-->", y)
 
 
+# Find rules 
+
+    def MO_IGNORE (self, TV, FV, rlength, flength, arg):
+        return True
+
+    def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
+        if type(TV) != type(FV):
+            return False
+
+        if TV != FV: return False
+        return True
+
+    def MO_MSB (self, TV, FV, rlength, flength, arg):
+        print ("MSB")
+        print (TV, FV, rlength, flength, arg)
+
+        for i in range(arg//8): # compare byte per byte
+            print (TV[i], FV[i])
+            if TV[i] != FV[i]:
+                return False
+        
+        j = i+1 # if a rest then compare it bit per bit
+        for i in range(arg%8):
+            k = 7-i
+            print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
+            if TV[j] & (1<<k) != FV[j] & (1 << k):
+                return False
+        
+        return True
+
+    def MO_MMAP (self, TV, FV,  rlength, flength, arg):
+        for v in TV:
+            if self.MO_EQUAL (v, FV, rlength, flength, arg): return True
+        return False
+
+    MO_function = {
+        T_MO_IGNORE : MO_IGNORE,
+        T_MO_EQUAL  : MO_EQUAL,
+        T_MO_MSB    : MO_MSB,
+        T_MO_MMAP   : MO_MMAP,
+    }
+
+    def FindRuleFromSCHCpacket (self, schc, device=None):
+        """ returns the rule corresponding to the id stored at the
+        beginning of the SCHC packet.
+        """
+
+        for d in self._ctxt:
+            dprint (d["DeviceID"])
+            if d["DeviceID"] == device: #look for a specific device
+                for r in d["SoR"]:
+                    ruleID = r[T_RULEID]
+                    ruleLength = r[T_RULEIDLENGTH]
+
+                    tested_rule = schc.get_bits(ruleLength, position=0)
+
+                    dprint (tested_rule, ruleID)
+                    if tested_rule == ruleID:
+                        return r
+
+        return None
+
+
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
+        """ Takes a parsed packet and returns the matching rule.
+        """
+        for dev in self._ctxt:
+            for rule in dev["SoR"]:
+                if "Compression" in rule:
+                    matches = 0
+                    for r in rule["Compression"]:
+                        print(r)
+                        #print (pkt[(r[T_FID], r[T_FP])][0])
+                        if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
+                            if (r[T_FID], r[T_FP]) in pkt:
+                                if T_MO_VAL in r:
+                                    arg = r[T_MO_VAL]
+                                else:
+                                    arg = None
+
+                                if self.MO_function[r[T_MO]](self,
+                                    r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
+                                    r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
+                                    arg):
+                                        matches += 1
+                                else:
+                                    if failed_field:
+                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
+                                            r[T_FID],
+                                            r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
+                                            r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
+                                            arg))
+                                    break # field does not match, rule does not match
+                            else:
+                                if r[T_FL] == "var":  # entry not found, but variable length => accept
+                                    matches += 1      # residue size set to 0
+                                    dprint("Suboptimal rule")
+                                else:
+                                    dprint("field from rule not found in pkt")
+                                    break # field from rule not found in pkt, go to next
+                            print ("->", matches)
+                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
+                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
+        return None
+
+    def FindNoCompressionRule(self, deviceID=None):
+        for d in self._ctxt:
+            if d["DeviceID"] == deviceID:
+                for r in d["SoR"]:
+                    if T_NO_COMP in r:
+                        return r
+
+        return None        
+
+    def FindFragmentationRule(self, deviceID=None, originalSize=None,
+                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
+                              packet=None):
+        """Lookup a fragmentation rule.
+
+        Find a fragmentation rule regarding parameters:
+        * original SCHC packet size
+        * reliability NoAck, AckOnError, AckAlways
+        * direction (UP or DOWN)
+        NOTE: Not yet implemented, returns the first fragmentation rule.  
+
+        XXX please check whether the following strategy is okey.
+        - if direction is specified, and deviceID is None, it is assumed that
+          the request is for a device. Return the 1st rule matched with the
+          direction regardless of the deviceID.  A deviceID for a device is
+          not configured typically.
+        - if raw_packet is not None, it compares the rule_id with the packet.
+        - if the direction and the deviceID is matched.
+        """
+        dprint("FindFragmentationRule", deviceID, direction)
+
+        if direction is not None and deviceID is not None:
+            for d in self._ctxt:
+                if d["DeviceID"] == deviceID:
+                    for r in d["SoR"]:
+                        if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
+                            return r
+
+        elif direction is not None and deviceID is None:
+            for d in self._ctxt:
+                for r in d["SoR"]:
+                    if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
+                        # return the 1st one.
+                        return r
+        elif packet is not None:
+            print("packet dev-id", deviceID)
+            for d in self._ctxt:
+                for r in d["SoR"]:
+                    print("rule dev-id", d["DeviceID"])
+                    if T_FRAG in r:
+                        rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
+                        if r[T_RULEID] == rule_id:
+                            return r
+        else:
+            for d in self._ctxt:
+                if d["DeviceID"] == deviceID:
+                    for r in d["SoR"]:
+                        if T_FRAG in r:
+                            return r
+        return None
+
+# CORECONF 
+
     def add_sid_file(self, name):
         with open(name) as sid_file:
             sid_values = json.loads(sid_file.read())
+
+        if 'key-mapping' not in sid_values:
+            print ("""This sid files has not been genreated with the --sid-extention options.\n\
+Some conversion capabilities may not works. see http://github.com/ltn22/pyang""") 
+        else:
+            for k, v in sid_values['key-mapping'].items():
+                if k in self.sid_key_mapping:
+                    print ("key sid", k, "already present, ignoring...")
+                else: 
+                    self.sid_key_mapping[k] = v
+            del(sid_values["key-mapping"])
 
         self._sid_info.append(sid_values)
 
@@ -1077,7 +1257,6 @@ class RuleManager:
             for e in s["items"]:
                 if e["identifier"] == name and e["namespace"]==space:
                     return e["sid"]
-
         return None 
 
     def sid_search_sid(self, value, short=False):
@@ -1099,6 +1278,31 @@ class RuleManager:
         raise ValueError("Not found", value)
         return None         
 
+    def get_yang_type (self, yangid):
+        for s in self._sid_info:
+            module_name = s['module-name']
+            for e in s['items']:
+                if e['identifier'] == yangid:
+                    if "type" in e:
+                        if type(e['type']) is str:
+                            if e["type"] in  ["int8", "int16", "int32", "uint8", "uint16", "uint32"]:
+                                return "int"
+                            elif e["type"] in ["string", 'binary']:
+                                return e['type']
+                            else:
+                                return 'identifier'
+                        elif type(e['type']) is list: # union, should be extended
+                            """In theorie, this function is called when a cbor data for an int is found. 
+                            regarding the CORECONF coding, other alternative
+                            identifier or enum are tagged, and will be processed directly by other
+                            function, so whenan union is found, it should be the array. The only test
+                            is to check that int in the array or generate an error. """
+                            return 'union'
+                    else: 
+                        return "node" # this is not a leaf
+        return None #yandid not found
+
+
     def cbor_header (self, major, value):
         if value < 23:
             return struct.pack ('!B', (major | value))
@@ -1109,7 +1313,7 @@ class RuleManager:
 
     def to_coreconf (self, deviceID="None"):
         """
-        Dump the rules in CORECONF format for a specific device.
+        Dump the rules in CORECONF format the rules inside the rule manager for a specific device.
         """
         import binascii
 
@@ -1294,169 +1498,6 @@ class RuleManager:
         return coreconf
         # end of CORECONF
 
-    def MO_IGNORE (self, TV, FV, rlength, flength, arg):
-        return True
-
-    def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
-        if type(TV) != type(FV):
-            return False
-
-        if TV != FV: return False
-        return True
-
-    def MO_MSB (self, TV, FV, rlength, flength, arg):
-        print ("MSB")
-        print (TV, FV, rlength, flength, arg)
-
-        for i in range(arg//8): # compare byte per byte
-            print (TV[i], FV[i])
-            if TV[i] != FV[i]:
-                return False
-        
-        j = i+1 # if a rest then compare it bit per bit
-        for i in range(arg%8):
-            k = 7-i
-            print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
-            if TV[j] & (1<<k) != FV[j] & (1 << k):
-                return False
-        
-        return True
-
-    def MO_MMAP (self, TV, FV,  rlength, flength, arg):
-        for v in TV:
-            if self.MO_EQUAL (v, FV, rlength, flength, arg): return True
-        return False
-
-    MO_function = {
-        T_MO_IGNORE : MO_IGNORE,
-        T_MO_EQUAL  : MO_EQUAL,
-        T_MO_MSB    : MO_MSB,
-        T_MO_MMAP   : MO_MMAP,
-    }
-
-    def FindRuleFromSCHCpacket (self, schc, device=None):
-        """ returns the rule corresponding to the id stored at the
-        beginning of the SCHC packet.
-        """
-
-        for d in self._ctxt:
-            dprint (d["DeviceID"])
-            if d["DeviceID"] == device: #look for a specific device
-                for r in d["SoR"]:
-                    ruleID = r[T_RULEID]
-                    ruleLength = r[T_RULEIDLENGTH]
-
-                    tested_rule = schc.get_bits(ruleLength, position=0)
-
-                    dprint (tested_rule, ruleID)
-                    if tested_rule == ruleID:
-                        return r
-
-        return None
-
-
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
-        """ Takes a parsed packet and returns the matching rule.
-        """
-        for dev in self._ctxt:
-            for rule in dev["SoR"]:
-                if "Compression" in rule:
-                    matches = 0
-                    for r in rule["Compression"]:
-                        print(r)
-                        #print (pkt[(r[T_FID], r[T_FP])][0])
-                        if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
-                            if (r[T_FID], r[T_FP]) in pkt:
-                                if T_MO_VAL in r:
-                                    arg = r[T_MO_VAL]
-                                else:
-                                    arg = None
-
-                                if self.MO_function[r[T_MO]](self,
-                                    r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
-                                    r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                    arg):
-                                        matches += 1
-                                else:
-                                    if failed_field:
-                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
-                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
-                                            r[T_FID],
-                                            r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
-                                            r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                            arg))
-                                    break # field does not match, rule does not match
-                            else:
-                                if r[T_FL] == "var":  # entry not found, but variable length => accept
-                                    matches += 1      # residue size set to 0
-                                    dprint("Suboptimal rule")
-                                else:
-                                    dprint("field from rule not found in pkt")
-                                    break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
-                    if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
-                    if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
-        return None
-
-    def FindNoCompressionRule(self, deviceID=None):
-        for d in self._ctxt:
-            if d["DeviceID"] == deviceID:
-                for r in d["SoR"]:
-                    if T_NO_COMP in r:
-                        return r
-
-        return None        
-
-    def FindFragmentationRule(self, deviceID=None, originalSize=None,
-                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
-                              packet=None):
-        """Lookup a fragmentation rule.
-
-        Find a fragmentation rule regarding parameters:
-        * original SCHC packet size
-        * reliability NoAck, AckOnError, AckAlways
-        * direction (UP or DOWN)
-        NOTE: Not yet implemented, returns the first fragmentation rule.  
-
-        XXX please check whether the following strategy is okey.
-        - if direction is specified, and deviceID is None, it is assumed that
-          the request is for a device. Return the 1st rule matched with the
-          direction regardless of the deviceID.  A deviceID for a device is
-          not configured typically.
-        - if raw_packet is not None, it compares the rule_id with the packet.
-        - if the direction and the deviceID is matched.
-        """
-        dprint("FindFragmentationRule", deviceID, direction)
-
-        if direction is not None and deviceID is not None:
-            for d in self._ctxt:
-                if d["DeviceID"] == deviceID:
-                    for r in d["SoR"]:
-                        if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
-                            return r
-
-        elif direction is not None and deviceID is None:
-            for d in self._ctxt:
-                for r in d["SoR"]:
-                    if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
-                        # return the 1st one.
-                        return r
-        elif packet is not None:
-            print("packet dev-id", deviceID)
-            for d in self._ctxt:
-                for r in d["SoR"]:
-                    print("rule dev-id", d["DeviceID"])
-                    if T_FRAG in r:
-                        rule_id = packet.get_bits(r[T_RULEIDLENGTH], position=0)
-                        if r[T_RULEID] == rule_id:
-                            return r
-        else:
-            for d in self._ctxt:
-                if d["DeviceID"] == deviceID:
-                    for r in d["SoR"]:
-                        if T_FRAG in r:
-                            return r
-        return None
-
- 
+    def manipulate_coreconf(self, sid, device=None, keys=None):
+        cconf = self.to_coreconf(device)
+        print(cconf)

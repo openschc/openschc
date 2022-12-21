@@ -16,52 +16,8 @@ import cbor2 as cbor
 
 from yangson import DataModel
 
-yang_type = {
-       "/ietf-schc:schc": "node",
-       "/ietf-schc:schc/rule": "node",
-       "/ietf-schc:schc/rule/ack-behavior": "identifier",
-       "/ietf-schc:schc/rule/direction": "identifier",
-       "/ietf-schc:schc/rule/dtag-size": "int",
-       "/ietf-schc:schc/rule/entry": "node",
-       "/ietf-schc:schc/rule/entry/comp-decomp-action": "identifier",
-       "/ietf-schc:schc/rule/entry/comp-decomp-action-value": "node",
-       "/ietf-schc:schc/rule/entry/comp-decomp-action-value/index": "int",
-       "/ietf-schc:schc/rule/entry/comp-decomp-action-value/value": "str",
-       "/ietf-schc:schc/rule/entry/direction-indicator": "identifier",
-       "/ietf-schc:schc/rule/entry/field-id": "identifier",
-       "/ietf-schc:schc/rule/entry/field-length": "int",
-       "/ietf-schc:schc/rule/entry/field-position": "int",
-       "/ietf-schc:schc/rule/entry/matching-operator": "identifier",
-       "/ietf-schc:schc/rule/entry/matching-operator-value": "node",
-       "/ietf-schc:schc/rule/entry/matching-operator-value/index": "int",
-       "/ietf-schc:schc/rule/entry/matching-operator-value/value": "str",
-       "/ietf-schc:schc/rule/entry/target-value": "node",
-       "/ietf-schc:schc/rule/entry/target-value/index": "int",
-       "/ietf-schc:schc/rule/entry/target-value/value": "str",
-       "/ietf-schc:schc/rule/fcn-size": "int",
-       "/ietf-schc:schc/rule/fragmentation-mode": "identifier",
-       "/ietf-schc:schc/rule/inactivity-timer": "node",
-       "/ietf-schc:schc/rule/inactivity-timer/ticks-duration": "int",
-       "/ietf-schc:schc/rule/inactivity-timer/ticks-numbers": "int",
-       "/ietf-schc:schc/rule/l2-word-size": "int",
-       "/ietf-schc:schc/rule/max-ack-requests": "int",
-       "/ietf-schc:schc/rule/max-interleaved-frames": "int",
-       "/ietf-schc:schc/rule/maximum-packet-size": "int",
-       "/ietf-schc:schc/rule/rcs-algorithm": "identifier",
-       "/ietf-schc:schc/rule/retransmission-timer": "node",
-       "/ietf-schc:schc/rule/retransmission-timer/ticks-duration": "int",
-       "/ietf-schc:schc/rule/retransmission-timer/ticks-numbers": "int",
-       "/ietf-schc:schc/rule/rule-id-length": "int",
-       "/ietf-schc:schc/rule/rule-id-value": "int",
-       "/ietf-schc:schc/rule/rule-nature": "identifier",
-       "/ietf-schc:schc/rule/tile-in-all-1": "identifier",
-       "/ietf-schc:schc/rule/tile-size": "int",
-       "/ietf-schc:schc/rule/w-size": "int",
-       "/ietf-schc:schc/rule/window-size": "int"
-}
-
 rm    = RM.RuleManager()
-rm.Add(file="comp-rule-100.json")
+rm.Add(file="comp-rule-100.json", device="test:device1")
 rm.Print()
 
 def convert_to_json(jcc, delta=0, name_ref=""):
@@ -83,17 +39,15 @@ def convert_to_json(jcc, delta=0, name_ref=""):
             json_list.append(value)
         return json_list
     elif type(jcc) is int:
-        node_type = yang_type[name_ref]
+        node_type = rm.get_yang_type(name_ref)
 
-        if node_type == "int":
+        if node_type in ["int", "union"]: #/!\ to be improved, suppose that union contains an int
             return jcc
         elif node_type == "identifier":
             sid_ref = rm.sid_search_sid(jcc)
             return sid_ref
-        elif node_type == "union":
-            return str(jcc)
         else:
-            raise ValueError(name_ref, "not a leaf")
+            raise ValueError(name_ref, node_type, "not a leaf")
 
     elif type(jcc) is bytes:
         return base64.b64encode(jcc).decode()
@@ -106,7 +60,7 @@ def convert_to_json(jcc, delta=0, name_ref=""):
     else:
         raise ValueError ("Unknown type", type(jcc))
 
-rm.add_sid_file("ietf-schc@2022-10-09.sid")
+rm.add_sid_file("ietf-schc@2022-12-19.sid")
 rm.add_sid_file("ietf-schc-oam@2021-11-10.sid")
 
 ycbor = rm.to_coreconf()
@@ -124,3 +78,6 @@ print (dm.ascii_tree())
 inst = dm.from_raw(yr)
 print ("validation", inst.validate())
 print(dm.ascii_tree(no_types=True, val_count=True), end='')
+
+
+sor=rm.manipulate_coreconf(device="test:device1", sid=1000094) # get full conf
