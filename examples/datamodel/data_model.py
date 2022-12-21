@@ -29,7 +29,7 @@ yang_type = {
        "/ietf-schc:schc/rule/entry/comp-decomp-action-value/value": "str",
        "/ietf-schc:schc/rule/entry/direction-indicator": "identifier",
        "/ietf-schc:schc/rule/entry/field-id": "identifier",
-       "/ietf-schc:schc/rule/entry/field-length": "union",
+       "/ietf-schc:schc/rule/entry/field-length": "int",
        "/ietf-schc:schc/rule/entry/field-position": "int",
        "/ietf-schc:schc/rule/entry/matching-operator": "identifier",
        "/ietf-schc:schc/rule/entry/matching-operator-value": "node",

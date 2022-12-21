@@ -331,7 +331,7 @@
      }
 
      identity fid-coap-option-if-match {
-       base fid-coap-option
+       base fid-coap-option;
        description
          "CoAP option If-Match.";
        reference
@@ -348,6 +348,7 @@
 
      identity fid-coap-option-etag {
        base fid-coap-option;
+        description
          "CoAP option Etag.";
        reference
          "RFC 7252 The Constrained Application Protocol (CoAP)";

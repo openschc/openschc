@@ -5,7 +5,7 @@
 	    "name": "ietf-schc",
 		"feature" : ["compression", "fragmentation"],
 	    "namespace": "urn:ietf:params:xml:ns:yang:ietf-schc",
-	    "revision": "2022-10-09",
+	    "revision": "2022-12-19",
 	    "conformance-type": "implement"
 	},
 	{
