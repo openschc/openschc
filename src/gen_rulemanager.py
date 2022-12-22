@@ -539,14 +539,6 @@ class RuleManager:
 
         return arule
 
-    def openschc_id (self, yang_id):
-        """return an OpenSCHC ID giving a yang ID stored in .sid files"""
-        for i in YANG_ID:
-            if YANG_ID[i][1] == yang_id:
-                return i
-
-        raise ValueError(yang_id, "not known by openSCHC")
-
     def get_values(self, values):
         """This function transforms the YANG list indexed with the first element, to a Python list.
         The key do not have to be sorted, unlisted positions are filled with None. Element stays as
@@ -561,301 +553,6 @@ class RuleManager:
             value_list[e[1]] = e[2]
 
         return value_list
-
-
-    def Add_coreconf(self, device=None, dev_info=None, file=None, compression=True):
-        """
-        
-
-        """
-
-        assert (dev_info is not None or file is not None)
-
-        if file != None:
-            dev_info = open(file).read() 
-
-        rule_input = cbor.loads(dev_info) # store CBOR CORECONF
-
-        SoR = []
-
-        schc_id = self.sid_search_for(name="/ietf-schc:schc", space="data")
-
-        if not schc_id in rule_input:
-            print ("This is a not a Set of Rule")
-            return None
-
-        entry = rule_input[schc_id]
-
-        sid_ref = self.sid_search_for(name="/ietf-schc:schc/rule", space="data")
-        rid_value_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - sid_ref
-        rid_length_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - sid_ref
-        rule_nature_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - sid_ref
-        for rule in entry[1]:
-            arule = {}
-            arule[T_RULEID] = rule[rid_value_sid]
-            arule[T_RULEIDLENGTH] =rule[rid_length_sid]
-            rule_nature = rule[rule_nature_sid]
-
-            nature = self.sid_search_sid (rule_nature, short=True)
-            if nature == "nature-compression":
-                entry = []
-                entry_ref = self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") 
-                entry_sid = entry_ref - sid_ref
-                fid_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-id", space="data") - entry_ref
-                fl_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_ref
-                fpos_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-position", space="data") - entry_ref
-                dir_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/direction-indicator", space="data") - entry_ref
-                mo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator", space="data") - entry_ref
-                mo_val_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator-value", space="data") - entry_ref
-                cda_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_ref
-                tv_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value", space="data") - entry_ref
-
-                up_rules = 0
-                dw_rules = 0
-                for r in rule[entry_sid]:
-                    entry_elm = {}
-
-                    fid_value = r[fid_sid]
-                    fid_yang_name = self.sid_search_sid (fid_value, short=True)
-                    o_schc_id = self.openschc_id(fid_yang_name)
-                    entry_elm[T_FID] = o_schc_id
-
-                    fl_value = r[fl_sid]
-                    if type(fl_value) is cbor.CBORTag and fl_value.tag == 45:
-                        fl_value = self.sid_search_sid(fl_value.value, short = True)
-                        if fl_value == "fl-token-length": # use OPENSCHC ID
-                           fl_value =  T_FUNCTION_TKL 
-                        elif fl_value == "fl-variable":
-                            fl_value = T_FUNCTION_VAR
-                    entry_elm[T_FL] = fl_value
-
-                    dir_value = r[dir_sid]
-                    dir_yang_name = self.sid_search_sid (dir_value, short=True)
-                    o_schc_id = self.openschc_id(dir_yang_name)   
-                    entry_elm[T_DI] = o_schc_id
-
-                    if o_schc_id == T_DIR_BI:
-                        up_rules += 1
-                        dw_rules += 1
-                    elif o_schc_id == T_DIR_UP:
-                        up_rules += 1
-                    elif o_schc_id == T_DIR_DW:
-                        dw_rules += 1
-
-                    fpos = r[fpos_sid]
-                    entry_elm[T_FP] = fpos
-
-                    mo_value = r[mo_sid]
-                    mo_yang_name = self.sid_search_sid (mo_value, short=True)
-                    o_schc_id = self.openschc_id(mo_yang_name)
-                    entry_elm[T_MO] = o_schc_id
-
-                    if mo_val_sid in r:
-                        values = self.get_values(r[mo_val_sid])
-                        entry_elm[T_MO_VAL] = int.from_bytes(values[0], byteorder='big') # 1 arg = length
-
-                    cda_value = r[cda_sid]
-                    cda_yang_name = self.sid_search_sid (cda_value, short=True)
-                    o_schc_id = self.openschc_id(cda_yang_name)
-                    entry_elm[T_CDA] = o_schc_id
-
-                    if tv_sid in  r:
-                        values = self.get_values(r[tv_sid])
-                        print (values)
-                        if len (values) == 1:
-                            entry_elm[T_TV] = values[0]
-                        else:
-                            entry_elm[T_TV] = values
-
-
-                    #print (entry_elm, up_rules, dw_rules)
-
-                    entry.append(entry_elm)
-
-                arule[T_COMP] = entry
-                if not T_META in arule:
-                    arule[T_META] = {}
-                arule[T_META][T_UP_RULES] = up_rules
-                arule[T_META][T_DW_RULES] = dw_rules
-                arule[T_META][T_DEVICEID] = device
-
-
-            elif nature =="nature-fragmentation":
-                print ('fragmentation')
-                arule[T_FRAG] = {}
-                arule[T_FRAG][T_FRAG_PROF] = {}
-                frag_mod_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - sid_ref
-                frag_mod_id = self.sid_search_sid(rule[frag_mod_sid], short=True)
-
-                l2_word_sid = self.sid_search_for(name="/ietf-schc:schc/rule/l2-word-size", space="data") - sid_ref
-                if l2_word_sid in rule:
-                    l2_word = rule[l2_word_sid]
-                    if l2_word != 8:
-                        raise ValueError("OpenSCHC only support 8 bit long l2 words")
-                    else:
-                        print ("L2 Word set to 8 by default")
-                        l2_word = 8
-
-                direction_sid = self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - sid_ref
-                direction = self.sid_search_sid(rule[direction_sid], short=True)
-
-                if direction == 'di-up':
-                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_UP
-                elif direction == 'di-down':
-                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_DW
-                else:
-                    raise ValueError ("Unknown fragmentation rule direction", direction)
-
-                dtag_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - sid_ref
-                if dtag_size_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] = rule[dtag_size_sid]
-                else:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] = 0
-
-                w_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/w-size", space="data") - sid_ref
-                if w_size_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] = rule[w_size_sid]
-                else:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] = 0
-
-                fcn_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - sid_ref
-                if fcn_size_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] = rule[fcn_size_sid]
-                else:
-                    raise ValueError("FCN must be specified")
-
-                rcs_algo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - sid_ref
-                if rcs_algo_sid in rule:
-                    rcs_algo = self.sid_search_sid(rule[rcs_algo_sid], short=True)
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = self.openschc_id(rcs_algo)
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = T_FRAG_RFC8724
-
-                max_pkt_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/maximum-packet-size", space="data") - sid_ref
-                if max_pkt_size_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = rule[max_pkt_size_sid]
-                else:
-                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = 1280
-
-                window_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/window-size", space="data") - sid_ref
-                if window_size_sid  in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] =  rule[window_size_sid]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] - 1
-                   if arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] < 1:  #case if W is 0 or 1
-                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] = 1
- 
-                max_inter_frame_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-interleaved-frames", space="data") - sid_ref
-                if max_inter_frame_sid in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] =  rule[max_inter_frame_sid]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] = 1
-
-                inac_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer", space="data") - sid_ref
-                if inac_timer_sid in rule:
-                    inac_timer = rule[inac_timer_sid]
-                    tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer/ticks-duration", space="data") - inac_timer_sid
-                    tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer/ticks-numbers", space="data") - inac_timer_sid
-                
-                    if tick_duration_sid in inac_timer:
-                        tick_duration = inac_timer[tick_duration_sid]
-                    else:
-                        tick_duration = 20
-
-                    if tick_number_sid in inac_timer:
-                        tick_number = inac_timer[tick_number_sid]
-                    else:
-                        tick_number = 600 # Value to be checked
-
-                    inactivity_timer = int(tick_number * (2**tick_duration / 10**6))
-                else:
-                    inactivity_timer = 12 * 60 * 60 # default timer in seconds
-
-                retrans_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer", space="data") - sid_ref
-                if retrans_timer_sid in rule:
-                    tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-duration", space="data") - retrans_timer_sid
-                    tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-numbers", space="data") - retrans_timer_sid
-                
-                    if tick_duration_sid in inac_timer:
-                        tick_duration = inac_timer[tick_duration_sid]
-                    else:
-                        tick_duration = 20
-
-                    if tick_number_sid in inac_timer:
-                        tick_number = inac_timer[tick_number_sid]
-                    else:
-                        tick_number = 60 # Value to be checked
-
-                    retransmission_timer = int(tick_number * (2**tick_duration / 10**6))
-
-                else:
-                    retransmission_timer = 1 * 60 * 60 # default timer in seconds
-                arule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT] = retransmission_timer
-
-                max_ack_req_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-ack-requests", space="data") - sid_ref
-                if max_ack_req_sid  in rule:
-                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY] =  rule[max_ack_req_sid]
-                else:
-                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY] = 4 # openSCHC default value
-
-                if frag_mod_id == 'fragmentation-mode-no-ack':
-                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_NO_ACK
-                elif frag_mod_id == 'fragmentation-mode-ack-always':
-                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ALWAYS
-                elif frag_mod_id == 'fragmentation-mode-ack-on-error':
-                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ON_ERROR
-
-                    tile_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-size", space="data") - sid_ref
-                    if tile_size_sid  in rule:
-                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE] =  rule[max_ack_req_sid]
-                    else:
-                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE] = 10 # openSCHC default value
-
-                    tile_in_all1_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-in-all-1", space="data") - sid_ref
-                    if tile_in_all1_sid in rule:
-                        tile_in = self.sid_search_sid(rule[max_ack_req_sid], short=True)
-                        if tile_in == "all-1-data-no":
-                            pass
-                        if tile_in == "all-1-data-yes":
-                            pass
-                        if tile_in == "all-1-data-sender-choice":
-                            pass
-                    else:
-                       pass # openSCHC default value
-
-                    ack_behavior_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-in-all-1", space="data") - sid_ref
-                    if ack_behavior_sid in rule:
-                        ack_behavior = self.sid_search_sid(rule[max_ack_req_sid], short=True)
-
-                        if ack_behavior == "ack-behavior-after-all-0":
-                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL0
-                            print ("Warning not implemented")
-                        elif ack_behavior == "ack-behavior-after-all-1":
-                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1
-                        elif ack_behavior == "ack-behavior-by-layer2":
-                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ANY
-                            print ("Warning not implemented")
-                        else:
-                            raise ValueError ("Unknwon Ack Behavior")
-                    else:
-                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1 # openSCHC default value
-                    
-                else:
-                    raise ValueError("unkwown fragmentation mode", frag_mod_id)
-
-            elif nature == "nature-no-compression":
-                arule [T_NO_COMP] = []
-            else:
-                raise ValueError ("Unknown rule nature SID", nature)
-
-            SoR.append(arule) # add to the set of rules
-
-        pprint.pprint(SoR)
-        d = {"DeviceID": device, "SoR": SoR}
-        self._ctxt.append(d)
-
-
-
 
     def _create_compression_rule (self, nrule, device_id = None):
         """
@@ -1278,6 +975,14 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         raise ValueError("Not found", value)
         return None         
 
+    def openschc_id (self, yang_id):
+        """return an OpenSCHC ID giving a yang ID stored in .sid files"""
+        for i in YANG_ID:
+            if YANG_ID[i][1] == yang_id:
+                return i
+
+        raise ValueError(yang_id, "not known by openSCHC")
+
     def get_yang_type (self, yangid):
         for s in self._sid_info:
             module_name = s['module-name']
@@ -1309,7 +1014,300 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         elif value < 255:
             return struct.pack ('!BB', (major | 24),  value)
 
+    def from_coreconf(self, device=None, dev_info=None, file=None, compression=True):
+        """
+        Take a coreconf representation and store it in the rule manager.
+        """
+
+        assert (dev_info is not None or file is not None)
+
+        if file != None:
+            dev_info = open(file).read() 
+
+        if type(dev_info) is bytes:
+            rule_input = cbor.loads(dev_info) # store CBOR CORECONF
+        elif type(dev_info) is dict:
+            rule_input = dev_info # coreconf already in python
+        else:
+            raise ValueError("Unknown rule format")
+
+        SoR = []
+
+        schc_id = self.sid_search_for(name="/ietf-schc:schc", space="data")
+
+        if not schc_id in rule_input:
+            print ("This is a not a Set of Rule")
+            return None
+
+        entry = rule_input[schc_id]
+
+        sid_ref = self.sid_search_for(name="/ietf-schc:schc/rule", space="data")
+        rid_value_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - sid_ref
+        rid_length_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - sid_ref
+        rule_nature_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rule-nature", space="data") - sid_ref
+        for rule in entry[1]:
+            arule = {}
+            arule[T_RULEID] = rule[rid_value_sid]
+            arule[T_RULEIDLENGTH] =rule[rid_length_sid]
+            rule_nature = rule[rule_nature_sid]
+
+            nature = self.sid_search_sid (rule_nature, short=True)
+            if nature == "nature-compression":
+                entry = []
+                entry_ref = self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") 
+                entry_sid = entry_ref - sid_ref
+                fid_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-id", space="data") - entry_ref
+                fl_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-length", space="data") - entry_ref
+                fpos_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/field-position", space="data") - entry_ref
+                dir_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/direction-indicator", space="data") - entry_ref
+                mo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator", space="data") - entry_ref
+                mo_val_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/matching-operator-value", space="data") - entry_ref
+                cda_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/comp-decomp-action", space="data") - entry_ref
+                tv_sid = self.sid_search_for(name="/ietf-schc:schc/rule/entry/target-value", space="data") - entry_ref
+
+                up_rules = 0
+                dw_rules = 0
+                for r in rule[entry_sid]:
+                    entry_elm = {}
+
+                    fid_value = r[fid_sid]
+                    fid_yang_name = self.sid_search_sid (fid_value, short=True)
+                    o_schc_id = self.openschc_id(fid_yang_name)
+                    entry_elm[T_FID] = o_schc_id
+
+                    fl_value = r[fl_sid]
+                    if type(fl_value) is cbor.CBORTag and fl_value.tag == 45:
+                        fl_value = self.sid_search_sid(fl_value.value, short = True)
+                        if fl_value == "fl-token-length": # use OPENSCHC ID
+                           fl_value =  T_FUNCTION_TKL 
+                        elif fl_value == "fl-variable":
+                            fl_value = T_FUNCTION_VAR
+                    entry_elm[T_FL] = fl_value
+
+                    dir_value = r[dir_sid]
+                    dir_yang_name = self.sid_search_sid (dir_value, short=True)
+                    o_schc_id = self.openschc_id(dir_yang_name)   
+                    entry_elm[T_DI] = o_schc_id
+
+                    if o_schc_id == T_DIR_BI:
+                        up_rules += 1
+                        dw_rules += 1
+                    elif o_schc_id == T_DIR_UP:
+                        up_rules += 1
+                    elif o_schc_id == T_DIR_DW:
+                        dw_rules += 1
+
+                    fpos = r[fpos_sid]
+                    entry_elm[T_FP] = fpos
+
+                    mo_value = r[mo_sid]
+                    mo_yang_name = self.sid_search_sid (mo_value, short=True)
+                    o_schc_id = self.openschc_id(mo_yang_name)
+                    entry_elm[T_MO] = o_schc_id
+
+                    if mo_val_sid in r:
+                        values = self.get_values(r[mo_val_sid])
+                        entry_elm[T_MO_VAL] = int.from_bytes(values[0], byteorder='big') # 1 arg = length
+
+                    cda_value = r[cda_sid]
+                    cda_yang_name = self.sid_search_sid (cda_value, short=True)
+                    o_schc_id = self.openschc_id(cda_yang_name)
+                    entry_elm[T_CDA] = o_schc_id
+
+                    if tv_sid in  r:
+                        values = self.get_values(r[tv_sid])
+                        #print (values)
+                        if len (values) == 1:
+                            entry_elm[T_TV] = values[0]
+                        else:
+                            entry_elm[T_TV] = values
+
+                    #print (entry_elm, up_rules, dw_rules)
+
+                    entry.append(entry_elm)
+
+                arule[T_COMP] = entry
+                if not T_META in arule:
+                    arule[T_META] = {}
+                arule[T_META][T_UP_RULES] = up_rules
+                arule[T_META][T_DW_RULES] = dw_rules
+                arule[T_META][T_DEVICEID] = device
+
+
+            elif nature =="nature-fragmentation":
+                #print ('fragmentation')
+                arule[T_FRAG] = {}
+                arule[T_FRAG][T_FRAG_PROF] = {}
+                frag_mod_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fragmentation-mode", space="data") - sid_ref
+                frag_mod_id = self.sid_search_sid(rule[frag_mod_sid], short=True)
+
+                l2_word_sid = self.sid_search_for(name="/ietf-schc:schc/rule/l2-word-size", space="data") - sid_ref
+                if l2_word_sid in rule:
+                    l2_word = rule[l2_word_sid]
+                    if l2_word != 8:
+                        raise ValueError("OpenSCHC only support 8 bit long l2 words")
+                    else:
+                        #print ("L2 Word set to 8 by default")
+                        l2_word = 8
+
+                direction_sid = self.sid_search_for(name="/ietf-schc:schc/rule/direction", space="data") - sid_ref
+                direction = self.sid_search_sid(rule[direction_sid], short=True)
+
+                if direction == 'di-up':
+                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_UP
+                elif direction == 'di-down':
+                    arule[T_FRAG][T_FRAG_DIRECTION] = T_DIR_DW
+                else:
+                    raise ValueError ("Unknown fragmentation rule direction", direction)
+
+                dtag_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/dtag-size", space="data") - sid_ref
+                if dtag_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] = rule[dtag_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] = 0
+
+                w_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/w-size", space="data") - sid_ref
+                if w_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] = rule[w_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] = 0
+
+                fcn_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/fcn-size", space="data") - sid_ref
+                if fcn_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] = rule[fcn_size_sid]
+                else:
+                    raise ValueError("FCN must be specified")
+
+                rcs_algo_sid = self.sid_search_for(name="/ietf-schc:schc/rule/rcs-algorithm", space="data") - sid_ref
+                if rcs_algo_sid in rule:
+                    rcs_algo = self.sid_search_sid(rule[rcs_algo_sid], short=True)
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = self.openschc_id(rcs_algo)
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC] = T_FRAG_RFC8724
+
+                max_pkt_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/maximum-packet-size", space="data") - sid_ref
+                if max_pkt_size_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = rule[max_pkt_size_sid]
+                else:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_PACKET_SIZE] = 1280
+
+                window_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/window-size", space="data") - sid_ref
+                if window_size_sid  in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] =  rule[window_size_sid]
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] = 2**arule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN] - 1
+                   if arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] < 1:  #case if W is 0 or 1
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_WINDOW_SIZE] = 1
  
+                max_inter_frame_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-interleaved-frames", space="data") - sid_ref
+                if max_inter_frame_sid in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] =  rule[max_inter_frame_sid]
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_MAX_INTER_FRAME] = 1
+
+                inac_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer", space="data") - sid_ref
+                if inac_timer_sid in rule:
+                    inac_timer = rule[inac_timer_sid]
+                    tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer/ticks-duration", space="data") - inac_timer_sid
+                    tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/inactivity-timer/ticks-numbers", space="data") - inac_timer_sid
+                
+                    if tick_duration_sid in inac_timer:
+                        tick_duration = inac_timer[tick_duration_sid]
+                    else:
+                        tick_duration = 20
+
+                    if tick_number_sid in inac_timer:
+                        tick_number = inac_timer[tick_number_sid]
+                    else:
+                        tick_number = 600 # Value to be checked
+
+                    inactivity_timer = int(tick_number * (2**tick_duration / 10**6))
+                else:
+                    inactivity_timer = 12 * 60 * 60 # default timer in seconds
+
+                retrans_timer_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer", space="data") - sid_ref
+                if retrans_timer_sid in rule:
+                    tick_duration_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-duration", space="data") - retrans_timer_sid
+                    tick_number_sid = self.sid_search_for(name="/ietf-schc:schc/rule/retransmission-timer/ticks-numbers", space="data") - retrans_timer_sid
+                
+                    if tick_duration_sid in inac_timer:
+                        tick_duration = inac_timer[tick_duration_sid]
+                    else:
+                        tick_duration = 20
+
+                    if tick_number_sid in inac_timer:
+                        tick_number = inac_timer[tick_number_sid]
+                    else:
+                        tick_number = 60 # Value to be checked
+
+                    retransmission_timer = int(tick_number * (2**tick_duration / 10**6))
+
+                else:
+                    retransmission_timer = 1 * 60 * 60 # default timer in seconds
+                arule[T_FRAG][T_FRAG_PROF][T_FRAG_TIMEOUT] = retransmission_timer
+
+                max_ack_req_sid = self.sid_search_for(name="/ietf-schc:schc/rule/max-ack-requests", space="data") - sid_ref
+                if max_ack_req_sid  in rule:
+                    arule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY] =  rule[max_ack_req_sid]
+                else:
+                   arule[T_FRAG][T_FRAG_PROF][T_FRAG_MAX_RETRY] = 4 # openSCHC default value
+
+                if frag_mod_id == 'fragmentation-mode-no-ack':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_NO_ACK
+                elif frag_mod_id == 'fragmentation-mode-ack-always':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ALWAYS
+                elif frag_mod_id == 'fragmentation-mode-ack-on-error':
+                    arule[T_FRAG][T_FRAG_MODE] = T_FRAG_ACK_ON_ERROR
+
+                    tile_size_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-size", space="data") - sid_ref
+                    if tile_size_sid  in rule:
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE] =  rule[max_ack_req_sid]
+                    else:
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_TILE] = 10 # openSCHC default value
+
+                    tile_in_all1_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-in-all-1", space="data") - sid_ref
+                    if tile_in_all1_sid in rule:
+                        tile_in = self.sid_search_sid(rule[max_ack_req_sid], short=True)
+                        if tile_in == "all-1-data-no":
+                            pass
+                        if tile_in == "all-1-data-yes":
+                            pass
+                        if tile_in == "all-1-data-sender-choice":
+                            pass
+                    else:
+                       pass # openSCHC default value
+
+                    ack_behavior_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-in-all-1", space="data") - sid_ref
+                    if ack_behavior_sid in rule:
+                        ack_behavior = self.sid_search_sid(rule[max_ack_req_sid], short=True)
+
+                        if ack_behavior == "ack-behavior-after-all-0":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL0
+                            print ("Warning not implemented")
+                        elif ack_behavior == "ack-behavior-after-all-1":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1
+                        elif ack_behavior == "ack-behavior-by-layer2":
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ANY
+                            print ("Warning not implemented")
+                        else:
+                            raise ValueError ("Unknwon Ack Behavior")
+                    else:
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR] = T_FRAG_AFTER_ALL1 # openSCHC default value
+                    
+                else:
+                    raise ValueError("unkwown fragmentation mode", frag_mod_id)
+
+            elif nature == "nature-no-compression":
+                arule [T_NO_COMP] = []
+            else:
+                raise ValueError ("Unknown rule nature SID", nature)
+
+            SoR.append(arule) # add to the set of rules
+
+        #pprint.pprint(SoR)
+        d = {"DeviceID": device, "SoR": SoR}
+        self._ctxt.append(d)
+
 
     def to_coreconf (self, deviceID="None"):
         """
@@ -1498,6 +1496,44 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         return coreconf
         # end of CORECONF
 
+    def convert_to_json(self, jcc, delta=0, name_ref=""):
+        if type(jcc) is dict:
+            json_dict = {}
+            for k, v in jcc.items():
+                sid_description = self.sid_search_sid(k+delta)
+                value = self.convert_to_json(v, k+delta, sid_description)
+                key = sid_description.replace(name_ref+'/', '')
+
+                json_dict[key] = value
+            return json_dict
+        elif type(jcc) is list:
+            json_list = []
+            for e in jcc:
+                value = self.convert_to_json(e, delta, name_ref )
+                json_list.append(value)
+            return json_list
+        elif type(jcc) is int:
+            node_type = self.get_yang_type(name_ref)
+
+            if node_type in ["int", "union"]: #/!\ to be improved, suppose that union contains an int
+                return jcc
+            elif node_type == "identifier":
+                sid_ref = self.sid_search_sid(jcc)
+                return sid_ref
+            else:
+                raise ValueError(name_ref, node_type, "not a leaf")
+
+        elif type(jcc) is bytes:
+            return base64.b64encode(jcc).decode()
+        elif type(jcc) is cbor.CBORTag: # TAG == 45, an identifier not an int.
+            if jcc.tag == 45:
+                sid_ref = self.sid_search_sid(jcc.value)
+                return sid_ref
+            else:
+                raise ValueError("CBOR Tag unknown:", jcc.tag)
+        else:
+            raise ValueError ("Unknown type", type(jcc)) 
+
     def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
         #print ("-"*ident, sid, keys)
         if type(sor) is dict:
@@ -1533,7 +1569,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
             print ("unknown type", type(sor), sor)
 
 
-    def manipulate_coreconf(self, sid, device=None, keys=None):
+    def manipulate_coreconf(self, sid, device=None, keys=None, value=None, validate=None):
         cconf = self.to_coreconf(device)
 
         if type(sid) is str:
@@ -1548,6 +1584,28 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                         e = k_sid
                 keys_sid.append(e)
 
-        result = self.get_cc(sor=cbor.loads(cconf), sid=sid, keys=keys_sid)
+        if type(value) is str:
+            value_sid =  self.sid_search_for(value, space="identity")
+            if value_sid:
+                value = value_sid
 
+        json_cconf = cbor.loads(cconf)
+        result = self.get_cc(sor=json_cconf, sid=sid, keys=keys_sid, value=value)
+
+        if value != None and result == True:
+            if validate:
+                inst = validate.from_raw(self.convert_to_json(json_cconf))
+                print ("validation", inst.validate())
+                print(dm.ascii_tree(no_types=True, val_count=True), end='')
+
+            # remove current rule
+
+            for i in range(len(self._ctxt)):
+                dev = self._ctxt[i]
+                print ("Device:", dev["DeviceID"])
+                if dev['DeviceID'] == device:
+                    self._ctxt.pop(i)
+                    break
+
+            self.from_coreconf(device=device, dev_info=json_cconf)
         return result
