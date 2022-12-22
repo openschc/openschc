@@ -1246,7 +1246,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                 if k in self.sid_key_mapping:
                     print ("key sid", k, "already present, ignoring...")
                 else: 
-                    self.sid_key_mapping[k] = v
+                    self.sid_key_mapping[int(k)] = v
             del(sid_values["key-mapping"])
 
         self._sid_info.append(sid_values)
@@ -1351,8 +1351,8 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
 
         for dev in self._ctxt:
-            print ("*"*40)
-            print ("Device:", dev["DeviceID"])
+            #print ("*"*40)
+            #print ("Device:", dev["DeviceID"])
 
             rule_count = 0
             full_rules = b''
@@ -1498,6 +1498,56 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         return coreconf
         # end of CORECONF
 
+    def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
+        #print ("-"*ident, sid, keys)
+        if type(sor) is dict:
+            for e in sor:
+                if e+delta == sid:
+                    if value == None: # read
+                        return {e+delta: sor[e]} 
+                    else:
+                        sor[e] = value # write
+                        return True
+
+                if type(sor[e]) is list: # we have a yang list, looks for keys
+                    if e+delta in self.sid_key_mapping:
+                        key_search = {}
+                        for k in self.sid_key_mapping[e+delta]:
+                            key_search[k-(e+delta)] = keys.pop(0)
+                        
+                        found_st = None
+                        #print ("?"*ident, key_search.items())
+                        for l in sor[e]:
+                            #print ("+"*ident, l.items())
+                            if key_search.items() <= l.items(): # searched items included in leaf
+                                found_st = l
+                                break
+                        if found_st:
+                            return self.get_cc(l, delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
+                        # else:
+                        #     raise ValueError ("not found mapping")
+
+                if type(sor[e]) is dict:
+                    return self.get_cc(sor[e], delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
+        else:
+            print ("unknown type", type(sor), sor)
+
+
     def manipulate_coreconf(self, sid, device=None, keys=None):
         cconf = self.to_coreconf(device)
-        print(cconf)
+
+        if type(sid) is str:
+            sid = self.sid_search_for (sid, space='data')
+
+        keys_sid = []
+        if keys:
+            for e in keys:
+                if type(e) is str: # if string is YANG ID then change to SID value
+                    k_sid = self.sid_search_for(e, space="identity")
+                    if k_sid != None:
+                        e = k_sid
+                keys_sid.append(e)
+
+        result = self.get_cc(sor=cbor.loads(cconf), sid=sid, keys=keys_sid)
+
+        return result

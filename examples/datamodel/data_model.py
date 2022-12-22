@@ -80,4 +80,36 @@ print ("validation", inst.validate())
 print(dm.ascii_tree(no_types=True, val_count=True), end='')
 
 
-sor=rm.manipulate_coreconf(device="test:device1", sid=1000094) # get full conf
+print ("FULL SET OF RULES")
+sor=rm.manipulate_coreconf(device="test:device1", sid=1000095) # get full conf
+pprint.pprint (sor)
+
+print ("RULE 5/3")
+rule_5_3 = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule", keys= [5, 3]) # get full conf
+pprint.pprint (rule_5_3)
+
+print ("IPv6 VERSION TV")
+ipv6_version_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
+                                        keys= [5, 3, 1000068, 1, 1000018]) 
+pprint.pprint (ipv6_version_tv)
+
+
+print ("IPv6 VERSION VALUE")
+ipv6_version_value = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value/value", 
+                                        keys= [5, 3, 1000068, 1, 1000018, 0]) 
+pprint.pprint (ipv6_version_value)
+
+print ("APP PREFIX TV")
+app_prefix_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
+                                        keys= [5, 3, 1000057, 1, 1000018,]) 
+pprint.pprint (app_prefix_tv)
+
+print ("APP PREFIX TV")
+app_prefix_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
+                                        keys= [5, 3, 1000057, 1, 1000018,]) 
+pprint.pprint (app_prefix_tv)
+
+print ("URI QUERY MSB VAL")
+mo_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/matching-operator-value/value", 
+                                        keys= [5, 3, 'fid-coap-option-uri-query', 1, 'di-up', 0]) 
+pprint.pprint (mo_tv)
