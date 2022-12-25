@@ -1534,58 +1534,134 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         else:
             raise ValueError ("Unknown type", type(jcc)) 
 
-    def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
+    # def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
+    #     #print ("-"*ident, sid, keys)
+
+    #     if keys == [] and value:
+    #         #print ("finish exploring the keys, look is a sid", sid, "exists in :")
+    #         #pprint.pprint (sor)
+    #         #print ("to insert ", value)
+    #         if type(sor) is dict:
+    #             found_sid= False
+    #             for e in sor:
+    #                 if e+delta == sid:
+    #                     found_sid = True
+    #                     break
+    #             if not found_sid:
+    #                 sor[sid-delta] = value
+    #                 return True
+
+    #     if type(sor) is dict:
+    #         for e in sor:
+    #             if e+delta == sid and keys==[]:
+    #                 if value == None: # read
+    #                     return {e+delta: sor[e]} 
+    #                 else:
+    #                     sor[e] = value # write
+    #                     return True
+
+    #             if type(sor[e]) is list: # we have a yang list, looks for keys
+    #                 if e+delta in self.sid_key_mapping:
+    #                     key_search = {}
+    #                     for k in self.sid_key_mapping[e+delta]:
+    #                         key_search[k-(e+delta)] = keys.pop(0)
+                        
+    #                     found_st = None
+    #                     #print ("?"*ident, key_search.items())
+    #                     for l in sor[e]:
+    #                         #print ("+"*ident, l.items())
+    #                         if key_search.items() <= l.items(): # searched items included in leaf
+    #                             found_st = l
+    #                             break
+    #                     if found_st:
+    #                         return self.get_cc(l, delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
+    #                     else:
+    #                         print ("no object with key")
+    #                     # else:
+    #                     #     raise ValueError ("not found mapping")
+
+    #             if type(sor[e]) is dict:
+    #                 return self.get_cc(sor[e], delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
+    #     else:
+    #         print ("unknown type", type(sor), sor)
+
+    def get_cc (self, sor, sid=None, keys = [], delta=0, ident=1, value=None):
         #print ("-"*ident, sid, keys)
 
-        if keys == [] and value:
-            #print ("finish exploring the keys, look is a sid", sid, "exists in :")
-            #pprint.pprint (sor)
-            #print ("to insert ", value)
-            if type(sor) is dict:
-                found_sid= False
-                for e in sor:
-                    if e+delta == sid:
-                        found_sid = True
-                        break
-                if not found_sid:
+        if sid == delta:
+            if value == None:
+                return sor
+            else:
+                sor = value
+                return True
+
+        if type(sor) is dict:
+            result = None
+
+            if len(keys) == 0 and sid-delta in sor:
+                if value == None:
+                    return {sid: sor[sid-delta]}
+                else: # change the value
                     sor[sid-delta] = value
                     return True
 
-        if type(sor) is dict:
-            for e in sor:
-                if e+delta == sid:
-                    if value == None: # read
-                        return {e+delta: sor[e]} 
+            if len(keys) == 0 and value: # element is not in the object 
+                #print ("add the element")
+                sor[sid-delta] = value
+                return True
+
+            for s, v in sor.items():
+                #print ('.'*ident, s, v)
+
+                # if s+delta == sid:
+                #     return {s: v}
+
+                if s+delta in self.sid_key_mapping: # A list we have keys, look for specific entry
+                    if len(self.sid_key_mapping[s+delta]) > len(keys):
+                        raise ValueError ("Not enough keys values to locate the SID")
+
+                    key_search = {}
+                    for k in self.sid_key_mapping[s+delta]:
+                        key_search[k-(s+delta)] = keys.pop(0)
+
+                    #print ("!"*ident, key_search)
+
+                    found_st = None
+                    found_index = 0
+                    for l in sor[s]:
+                        #print ("+"*ident, l)
+                        if key_search.items() <= l.items(): # searched items included in leaf
+                            found_st = l
+                            break
+                        found_index += 1
+                    if found_st:
+                        if sid == s+delta:
+                            if value == None:
+                                return found_st
+                            else:
+                                sor[s][found_index] = value
+                                return True
+                        return self.get_cc(found_st, delta=s+delta, ident=ident+1, sid=sid, keys=keys, value=value)
                     else:
-                        sor[e] = value # write
-                        return True
+                        if value != None:
+                            #print ("add it", key_search)
+                            new_struct = key_search.copy()
+                            for new_key, new_value in value.items():
+                                if new_key in new_struct:
+                                    print ("key leaf ", new_key+delta, "already set to key value")
+                                else: 
+                                    new_struct[new_key] = new_value
 
-                if type(sor[e]) is list: # we have a yang list, looks for keys
-                    if e+delta in self.sid_key_mapping:
-                        key_search = {}
-                        for k in self.sid_key_mapping[e+delta]:
-                            key_search[k-(e+delta)] = keys.pop(0)
-                        
-                        found_st = None
-                        #print ("?"*ident, key_search.items())
-                        for l in sor[e]:
-                            #print ("+"*ident, l.items())
-                            if key_search.items() <= l.items(): # searched items included in leaf
-                                found_st = l
-                                break
-                        if found_st:
-                            return self.get_cc(l, delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
-                        else:
-                            print ("no object with key")
-                        # else:
-                        #     raise ValueError ("not found mapping")
+                            sor[s].append(new_struct)
+                            return True
+                
+                else: # A set of container, take all elements
+                    if result == None:
+                        result = self.get_cc (v, sid, keys, delta+s, ident+1, value)
 
-                if type(sor[e]) is dict:
-                    return self.get_cc(sor[e], delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
-        else:
-            print ("unknown type", type(sor), sor)
-
-
+            if result != None:
+                return result
+        
     def manipulate_coreconf(self, sid, device=None, keys=None, value=None, validate=None):
         cconf = self.to_coreconf(device)
 
@@ -1612,16 +1688,15 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         if value != None and result == True:
             if validate:
                 inst = validate.from_raw(self.convert_to_json(json_cconf))
-                #print ("validation", inst.validate())
-                #print(validate.ascii_tree(no_types=True, val_count=True), end='')
+                inst.validate() # if wrong raise an error
 
             # remove current rule
             for i in range(len(self._ctxt)):
                 dev = self._ctxt[i]
-                print ("Device:", dev["DeviceID"])
+                #print ("Device:", dev["DeviceID"])
                 if dev['DeviceID'] == device:
                     self._ctxt.pop(i)
                     break
-
+            # add the modified one
             self.from_coreconf(device=device, dev_info=json_cconf)
         return result
