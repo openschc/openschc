@@ -1536,6 +1536,21 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
     def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
         #print ("-"*ident, sid, keys)
+
+        if keys == [] and value:
+            #print ("finish exploring the keys, look is a sid", sid, "exists in :")
+            #pprint.pprint (sor)
+            #print ("to insert ", value)
+            if type(sor) is dict:
+                found_sid= False
+                for e in sor:
+                    if e+delta == sid:
+                        found_sid = True
+                        break
+                if not found_sid:
+                    sor[sid-delta] = value
+                    return True
+
         if type(sor) is dict:
             for e in sor:
                 if e+delta == sid:
@@ -1560,6 +1575,8 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                                 break
                         if found_st:
                             return self.get_cc(l, delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
+                        else:
+                            print ("no object with key")
                         # else:
                         #     raise ValueError ("not found mapping")
 
@@ -1595,11 +1612,10 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         if value != None and result == True:
             if validate:
                 inst = validate.from_raw(self.convert_to_json(json_cconf))
-                print ("validation", inst.validate())
-                print(dm.ascii_tree(no_types=True, val_count=True), end='')
+                #print ("validation", inst.validate())
+                #print(validate.ascii_tree(no_types=True, val_count=True), end='')
 
             # remove current rule
-
             for i in range(len(self._ctxt)):
                 dev = self._ctxt[i]
                 print ("Device:", dev["DeviceID"])

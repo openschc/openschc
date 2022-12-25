@@ -83,6 +83,7 @@ pprint.pprint (hop_limit_value)
 hop_limit = int.from_bytes(list(hop_limit_value.values())[0], "big")
 hop_limit -= 1
 hop_limit_value = hop_limit.to_bytes(1, "big")
+print ("decrement value")
 
 hop_limit_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value/value", 
                                         keys= [5, 3, 'fid-ipv6-hoplimit', 1, 'di-bidirectional', 0], value=hop_limit_value) 
@@ -109,7 +110,17 @@ print ("make it conform")
 intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/comp-decomp-action", 
                                         keys= [5, 3, 'fid-coap-type', 1, 'di-bidirectional'], value='cda-not-sent')
 
-intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value/value", 
-                                        keys= [5, 3, 'fid-coap-type', 1, 'di-bidirectional', 0], value=b'03', validate=dm)
+print ("CDA set")
+intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
+                                        keys= [5, 3, 'fid-coap-type', 1, 'di-bidirectional'], 
+                                        value=[{1: 0, 2: b'\x03'}],
+                                        validate=dm)
 
+rm.Print()
+
+print ("ADD A NEW RULE")
+
+intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule", 
+                                        keys=[6, 3],
+                                        value=[{33: 3, 34: 6, 35: 1000090}])
 rm.Print()
