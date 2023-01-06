@@ -936,8 +936,8 @@ class RuleManager:
             sid_values = json.loads(sid_file.read())
 
         if 'key-mapping' not in sid_values:
-            print ("""This sid files has not been genreated with the --sid-extention options.\n\
-Some conversion capabilities may not works. see http://github.com/ltn22/pyang""") 
+            print ("""{} sid files has not been genreated with the --sid-extention options.\n\
+Some conversion capabilities may not works. see http://github.com/ltn22/pyang""".format(name)) 
         else:
             for k, v in sid_values['key-mapping'].items():
                 if k in self.sid_key_mapping:
@@ -1024,6 +1024,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         if file != None:
             dev_info = open(file).read() 
 
+        # allows CBOR or Python structure, if CBOR convert it in Python. 
         if type(dev_info) is bytes:
             rule_input = cbor.loads(dev_info) # store CBOR CORECONF
         elif type(dev_info) is dict:
@@ -1269,13 +1270,13 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                     if tile_in_all1_sid in rule:
                         tile_in = self.sid_search_sid(rule[max_ack_req_sid], short=True)
                         if tile_in == "all-1-data-no":
-                            pass
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] = False
                         if tile_in == "all-1-data-yes":
-                            pass
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] = True
                         if tile_in == "all-1-data-sender-choice":
-                            pass
+                            arule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] = None
                     else:
-                       pass # openSCHC default value
+                        arule[T_FRAG][T_FRAG_PROF][T_FRAG_LAST_TILE_IN_ALL1] = False
 
                     ack_behavior_sid = self.sid_search_for(name="/ietf-schc:schc/rule/tile-in-all-1", space="data") - sid_ref
                     if ack_behavior_sid in rule:
@@ -1304,9 +1305,10 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
             SoR.append(arule) # add to the set of rules
 
+
         #pprint.pprint(SoR)
-        d = {"DeviceID": device, "SoR": SoR}
-        self._ctxt.append(d)
+        
+        self.Add(device=device, dev_info=SoR)
 
 
     def to_coreconf (self, deviceID="None"):
@@ -1534,57 +1536,6 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
         else:
             raise ValueError ("Unknown type", type(jcc)) 
 
-    # def get_cc (self, sor, sid=None, keys = [], delta=0, ident=0, value=None):
-    #     #print ("-"*ident, sid, keys)
-
-    #     if keys == [] and value:
-    #         #print ("finish exploring the keys, look is a sid", sid, "exists in :")
-    #         #pprint.pprint (sor)
-    #         #print ("to insert ", value)
-    #         if type(sor) is dict:
-    #             found_sid= False
-    #             for e in sor:
-    #                 if e+delta == sid:
-    #                     found_sid = True
-    #                     break
-    #             if not found_sid:
-    #                 sor[sid-delta] = value
-    #                 return True
-
-    #     if type(sor) is dict:
-    #         for e in sor:
-    #             if e+delta == sid and keys==[]:
-    #                 if value == None: # read
-    #                     return {e+delta: sor[e]} 
-    #                 else:
-    #                     sor[e] = value # write
-    #                     return True
-
-    #             if type(sor[e]) is list: # we have a yang list, looks for keys
-    #                 if e+delta in self.sid_key_mapping:
-    #                     key_search = {}
-    #                     for k in self.sid_key_mapping[e+delta]:
-    #                         key_search[k-(e+delta)] = keys.pop(0)
-                        
-    #                     found_st = None
-    #                     #print ("?"*ident, key_search.items())
-    #                     for l in sor[e]:
-    #                         #print ("+"*ident, l.items())
-    #                         if key_search.items() <= l.items(): # searched items included in leaf
-    #                             found_st = l
-    #                             break
-    #                     if found_st:
-    #                         return self.get_cc(l, delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
-    #                     else:
-    #                         print ("no object with key")
-    #                     # else:
-    #                     #     raise ValueError ("not found mapping")
-
-    #             if type(sor[e]) is dict:
-    #                 return self.get_cc(sor[e], delta=e+delta, ident=ident+1, sid=sid, keys=keys, value=value)
-    #     else:
-    #         print ("unknown type", type(sor), sor)
-
     def get_cc (self, sor, sid=None, keys = [], delta=0, ident=1, value=None):
         #print ("-"*ident, sid, keys)
 
@@ -1637,14 +1588,18 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                     if found_st:
                         if sid == s+delta:
                             if value == None:
-                                return found_st
+                                # keys must be adapted to take into account of the delta coding
+                                st_delta_adjusted = {}
+                                for k, v in found_st.items():
+                                    st_delta_adjusted[k+delta] = v
+                                return st_delta_adjusted
                             else:
                                 sor[s][found_index] = value
                                 return True
                         return self.get_cc(found_st, delta=s+delta, ident=ident+1, sid=sid, keys=keys, value=value)
                     else:
                         if value != None:
-                            #print ("add it", key_search)
+                            print ("add it", key_search)
                             new_struct = key_search.copy()
                             for new_key, new_value in value.items():
                                 if new_key in new_struct:

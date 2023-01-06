@@ -136,10 +136,6 @@
         }
     }
   },{
-    "RuleID": 8,
-    "RuleIDLength": 8,
-    "NoCompression": []
-  },{
     "RuleID": 100,
     "RuleIDLength": 8,
     "Description": "for CORECONF Traffic, FETCH/iPATCH query from core to device: Query and Answer",
