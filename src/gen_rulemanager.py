@@ -686,7 +686,19 @@ class RuleManager:
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
                     for e in rule[T_COMP]:
-                        print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                        msg2 = None
+                        if len(e[T_FID]) < 16:
+                            print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                        else:
+                            msg = e[T_FID]
+                            if "-" in msg:
+                                msg1, msg2 = msg.split('-')
+                                msg1 += '-'
+                            else:
+                                msg1 = msg[:15]
+                                msg2 = msg[15:]
+                            print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(msg1, e[T_FL], e[T_FP], e[T_DI]), end="")
+
                         if 'TV' in e:
                             if type(e[T_TV]) is list:
                                 self._smart_print(e[T_TV][0])
@@ -709,6 +721,8 @@ class RuleManager:
                                 self._smart_print(e[T_TV][i])
                                 print (":{:^13}:{:^16}:".format(".", "."))
 
+                        if msg2 != None:
+                            print ("|{:<15s}|{:>3}|{:2}|{:2}|{:30}|{:13}|{:16}|".format(msg2, "", "", "", "", "", "" ), )
 
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
                 elif T_FRAG in rule:
@@ -719,7 +733,7 @@ class RuleManager:
                         dir_c = "v"
 
                     print ("!" + "="*25 + "+" + "="*61 +"\\")
-                    print ("!{} Fragmentation mode : {:<8} header dtag{:2} Window {:2} FCN {:2} {:20}{:2} {}!"
+                    print ("!{} Fragmentation mode : {:<15} header dtag{:2} Window {:2} FCN {:2} {:13}{:2} {}!"
                         .format(
                             dir_c,
                             rule[T_FRAG][T_FRAG_MODE],
@@ -741,7 +755,7 @@ class RuleManager:
                     print ("!{} RCS Algorithm: {:<69}{}!".format(dir_c,rule[T_FRAG][T_FRAG_PROF][T_FRAG_MIC], dir_c))
 
                     if rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
-                        print ("!{0}" + "-"*85 +"{0}!".format(dir_c))
+                        print ("!{0}" + "-"*83 +"{0}!".format(dir_c))
                         if  rule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ON_ERROR:
                             txt = "Ack behavior: "+ rule[T_FRAG][T_FRAG_PROF][T_FRAG_ACK_BEHAVIOR]
                             print ("!{} {:<84}{}!".format(dir_c, txt, dir_c))
@@ -755,7 +769,10 @@ class RuleManager:
 
                     print ("\\" + "="*87 +"/")
                 elif T_NO_COMP in rule:
-                    print ("NO COMPRESSION RULE")
+                    print ("+"+ "~"*25 + "+")
+                    print ("|     NO COMPRESSION      |")
+                    print ("\\"+ "~"*25 + "/")
+
             if T_INDEXES in dev and len(dev[T_INDEXES]) > 0:
                 print ("INDEXES:")
                 for x, y in dev[T_INDEXES].items():
