@@ -36,7 +36,7 @@ def get_sender_header_size(rule):
     """Changement à corriger
     return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG_SIZE] + rule.get(T_FRAG_W_SIZE , 0) + rule[T_FRAG_FCN]
     """
-    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]
+    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]
 
 def get_receiver_header_size(rule):
     """Changement à corriger
