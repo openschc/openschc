@@ -123,22 +123,28 @@ T_COMP = "Compression"
 T_NO_COMP = "NoCompression"
 T_FRAG = "Fragmentation"
 T_FRAG_MODE = "FRMode"
-T_FRAG_NO_ACK = "NoAck"
+T_FRAG_NO_ACK = "NoAck"              #YANG  no-ack
 T_FRAG_ACK_ALWAYS = "AckAlways"
 T_FRAG_ACK_ON_ERROR = "AckOnError"
-T_FRAG_DIRECTION = "FRDirection"
+T_FRAG_DIRECTION = "FRDirection"     #YANG direction
 T_FRAG_PROF = "FRModeProfile"
-T_FRAG_DTAG                  = "dtagSize" # FIXME should be T_FRAG_DTAG_SIZE
-T_FRAG_W                     = "WSize" # FIXME should be T_FRAG_W_SIZE
-T_FRAG_FCN = "FCNSize"
-T_FRAG_WINDOW_SIZE = "windowSize"
-T_FRAG_ACK_BEHAVIOR = "ackBehavior"
-T_FRAG_TILE = "tileSize"
-T_FRAG_MIC = "MICALgorithm"
-T_FRAG_MAX_RETRY = "maxRetry"
-T_FRAG_TIMEOUT  = "timeout"
-T_FRAG_L2WORDSIZE = "L2WordSize"
-T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1"
+T_FRAG_DTAG_SIZE = "dtagSize"        #YANG dtag-size
+T_FRAG_W_SIZE = "WSize"              #YANG w-size
+T_FRAG_FCN = "FCNSize"               #YANG fcn-size
+T_FRAG_WINDOW_SIZE = "windowSize"    #YANG window-size
+T_MAX_INTER_FRAME = "MaxInterFrame"  #YANG max-interleaved-frames
+T_FRAG_ACK_BEHAVIOR = "ackBehavior"  #YANG ack-behavior
+T_FRAG_AFTER_ALL1 = "afterAll1"
+T_FRAG_AFTER_ALL0 = "afterAll0"
+T_FRAG_AFTER_ANY = "afterAny"
+T_FRAG_TILE = "tileSize"             #YANG tile-size
+T_FRAG_MIC = "MICALgorithm"          #YANG rcs-algorithm
+T_MAX_PACKET_SIZE = "MaxPcktSize"    #YANG maximum-packet-size
+T_MAX_INTER_FRAME = "MaxInterFrame"  #YANG max-interleaved-frames
+T_FRAG_MAX_RETRY = "maxRetry"        #YANG max-ack-requests
+T_FRAG_TIMEOUT  = "timeout"          #YANG retransmission-timer
+T_FRAG_L2WORDSIZE = "L2WordSize"     #YANG l2-word-size
+T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1" #YANG tile-in-all-1
 T_FRAG_RFC8724 = "RCS_CRC32"
 
 T_POSITION_CORE = "core"
@@ -404,6 +410,13 @@ YANG_ID = {
     "TBD" : [SID+123, "/ietf-schc:schc/rule/tile-size"],
     "TBD" : [SID+124, "/ietf-schc:schc/rule/w-size"],
     "TBD": [SID+125, "/ietf-schc:schc/rule/window-size"],
+    # from OAM 
+    T_ICMPV6_CODE: [None, "fid-icmpv6-code"],
+    T_ICMPV6_TYPE: [None, "fid-icmpv6-type"],
+    T_ICMPV6_IDENT: [None, "fid-icmpv6-identifier"],
+    T_ICMPV6_SEQNO: [None, "fid-icmpv6-sequence"],
+    T_ICMPV6_CKSUM: [None, "fid-icmpv6-checksum"],
+
 }
 
 # from gen_rulemanager import *
@@ -506,26 +519,52 @@ class Compressor:
 
     def tx_cda_lsb(self, field, rule, output):
         assert rule[T_MO] == T_MO_MSB
-        size = field[1] - rule[T_MO_VAL]
+        # size = field[1] - rule[T_MO_VAL]
+        # full_value = field[0]
+        # dprint("size =", size)
+
+        # if rule[T_FL] == "var":
+        #     assert (size%8 == 0) #var implies bytes
+
+        #     output.add_length(size//8)
+
+        # if type(full_value) == int:
+        #     for i in range(size):
+        #         output.set_bit(full_value & 0x01)
+        #         full_value >>= 1
+        # elif type(full_value) == str:
+        #     dprint(rule[T_TV], field[0])
+        #     for i in range(rule[T_MO_VAL]//8, field[1]//8):
+        #         dprint(i, "===>", field[0][i] )
+        #     pass
+        # else:
+        #     raise ValueError("CA value-sent unknown type")
+
         full_value = field[0]
-        dprint("size =", size)
+        start_byte = rule[T_MO_VAL]//8 # go to the byte to send
+        last_byte  = field[1]//8
+        start_bit  = 7-rule[T_MO_VAL]%8  # in that byte how many bits left
+        size = field[1] - rule[T_MO_VAL]
 
         if rule[T_FL] == "var":
             assert (size%8 == 0) #var implies bytes
 
             output.add_length(size//8)
 
-        if type(full_value) == int:
-            for i in range(size):
-                output.set_bit(full_value & 0x01)
-                full_value >>= 1
-        elif type(full_value) == str:
-            dprint(rule[T_TV], field[0])
-            for i in range(rule[T_MO_VAL]//8, field[1]//8):
-                dprint(i, "===>", field[0][i] )
-            pass
-        else:
-            raise ValueError("CA value-sent unknown type")
+        print(field)
+
+        for i in range (start_bit, -1, -1):
+            print (i, 1 << i, full_value[start_byte] & (1 << i))
+            output.set_bit(full_value[start_byte] & (1 << i))
+
+        print (start_byte+1, last_byte)
+        for i in range (start_byte+1, last_byte):
+            print (i, chr(full_value[i]))
+            output.add_bits(full_value[i], 8)
+
+
+
+
 
     def tx_cda_notyet(self, field, rule, output):
         raise NotImplementedError
@@ -580,7 +619,7 @@ class Compressor:
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            dprint("rule item:", r)
+            print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
@@ -594,7 +633,7 @@ class Compressor:
             else:
                 dprint("rule skipped, bad direction")
 
-            #output_bbuf.display(format="bin")
+            output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -632,34 +671,34 @@ class Decompressor:
             }
 
 
-    def cal_checksum(self, packet):
-        # RFC 1071
-        assert isinstance(packet, bytearray)
-        packet_size = len(packet)
-        if packet_size%2:
-            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
-            cksum += (packet[-1]<<8)&0xff00
-        else:
-            cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
-        while cksum>>16:
-            cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
-        return ~cksum & 0xFFFF
+    # def cal_checksum(self, packet):
+    #     # RFC 1071
+    #     assert isinstance(packet, bytearray)
+    #     packet_size = len(packet)
+    #     if packet_size%2:
+    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
+    #         cksum += (packet[-1]<<8)&0xff00
+    #     else:
+    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
+    #     while cksum>>16:
+    #         cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
+    #     return ~cksum & 0xFFFF
 
-    def build_ipv6_pseudo_header(self):
-        assert self.src_prefix is not None
-        assert self.src_iid is not None
-        assert self.dst_prefix is not None
-        assert self.dst_iid is not None
-        assert self.ipv6_payload is not None
-        assert self.next_proto is not None
-        phdr = bytearray([0]*40)
-        phdr[ 0: 8] = self.src_prefix
-        phdr[ 8:16] = self.src_iid
-        phdr[16:24] = self.src_prefix
-        phdr[24:32] = self.src_iid
-        phdr[32:36] = struct.pack(">I",len(self.ipv6_payload))
-        phdr[39] = self.next_proto
-        return phdr
+    # def build_ipv6_pseudo_header(self):
+    #     assert self.src_prefix is not None
+    #     assert self.src_iid is not None
+    #     assert self.dst_prefix is not None
+    #     assert self.dst_iid is not None
+    #     assert self.ipv6_payload is not None
+    #     assert self.next_proto is not None
+    #     phdr = bytearray([0]*40)
+    #     phdr[ 0: 8] = self.src_prefix
+    #     phdr[ 8:16] = self.src_iid
+    #     phdr[16:24] = self.src_prefix
+    #     phdr[24:32] = self.src_iid
+    #     phdr[32:36] = struct.pack(">I",len(self.ipv6_payload))
+    #     phdr[39] = self.next_proto
+    #     return phdr
 
     # def cda_copy_field(self, out_bbuf, target_val):
     #     """ copy the appropriate target_val and return it. """
@@ -744,7 +783,7 @@ class Decompressor:
         if rule[T_FL] == "var":
             send_length = in_bbuf.get_length()
             total_size = rule[T_MO_VAL] + send_length
-        elif type(rule[T_TV]) == int:
+        elif type(rule[T_TV]) is bytes:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]
 

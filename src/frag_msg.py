@@ -22,7 +22,7 @@ def get_fcn_all_0(rule):
 
 def get_win_all_1(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
-    return (1<<rule[T_FRAG_W])-1
+    return (1<<rule[T_FRAG_W_SIZE])-1
 
 def get_max_fcn(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
@@ -30,19 +30,19 @@ def get_max_fcn(rule):
 
 def get_max_dtag(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
-    return (1<<rule[T_FRAG_DTAG])-1
+    return (1<<rule[T_FRAG_DTAG_SIZE])-1
 
 def get_sender_header_size(rule):
     """Changement à corriger
-    return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG] + rule.get(T_FRAG_W , 0) + rule[T_FRAG_FCN]
+    return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG_SIZE] + rule.get(T_FRAG_W_SIZE , 0) + rule[T_FRAG_FCN]
     """
-    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]
+    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]
 
 def get_receiver_header_size(rule):
     """Changement à corriger
-    return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG] + rule.get(T_FRAG_W , 0) + 1
+    return rule[T_RULEIDLENGTH] + rule[T_FRAG_DTAG_SIZE] + rule.get(T_FRAG_W_SIZE , 0) + 1
     """
-    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] + 1
+    return rule[T_RULEIDLENGTH] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] + rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] + 1
 
 def get_mic_size(rule):
     rule = rule[T_FRAG][T_FRAG_PROF] #ajoute
@@ -117,11 +117,11 @@ class frag_tx(frag_base):
         #dprint("Make_frag Rule", self.rule)
         if self.rule[T_RULEID] is not None and self.rule[T_RULEIDLENGTH] is not None:
             buffer.add_bits(self.rule[T_RULEID], self.rule[T_RULEIDLENGTH])
-        if dtag is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] is not None:
-            assert self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] != None # CA: sanity check
-            buffer.add_bits(dtag, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
-        if win is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ] is not None:
-            buffer.add_bits(win, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ])
+        if dtag is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] is not None:
+            assert self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] != None # CA: sanity check
+            buffer.add_bits(dtag, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE])
+        if win is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE ] is not None:
+            buffer.add_bits(win, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE ])
         #dprint("buffer before {},{},{}".format(buffer.count_added_bits(), 
         #buffer.count_padding_bits(),buffer.count_padding_bits()))
         if abort == True:
@@ -165,13 +165,13 @@ class frag_receiver_tx(frag_base):
         if (self.rule[T_RULEID] is not None and
             self.rule[T_RULEIDLENGTH] is not None):
             buffer.add_bits(self.rule[T_RULEID], self.rule[T_RULEIDLENGTH])
-        if dtag is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] is not None:
-            assert self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] != None # CA: sanity check
-            buffer.add_bits(dtag, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG])
+        if dtag is not None and self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] is not None:
+            assert self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] != None # CA: sanity check
+            buffer.add_bits(dtag, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE])
         if abort == True:
-            if self.rule.get(T_FRAG_W ) is not None:
+            if self.rule.get(T_FRAG_W_SIZE ) is not None:
                 win = get_win_all_1(self.rule)
-                buffer.add_bits(win, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ])
+                buffer.add_bits(win, self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE ])
             # c-bit
             buffer.set_bit(1)
             padding_size = (self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_L2WORDSIZE] -
@@ -273,7 +273,7 @@ class frag_rx(frag_base):
         if dtagSize in the rule is zero, default dtag is adopted.
         XXX need to be considered.
         """
-        dtag_size = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
+        dtag_size = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         if dtag_size != 0:
             dtag = self.packet_bbuf.get_bits(dtag_size)
         else:
@@ -287,7 +287,7 @@ class frag_rx(frag_base):
         """ get the value of the window field and set it into self.win.
         if WSize in the rule is zero, self.win is not set (None).
         """
-        win_size = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W ]
+        win_size = self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE ]
         if win_size != 0:
             self.win = self.packet_bbuf.get_bits(win_size)
         return win_size

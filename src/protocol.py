@@ -111,7 +111,7 @@ class SessionManager:
 
         rule_id = rule[T_RULEID]
         rule_id_length = rule[T_RULEIDLENGTH]
-        dtag_length = rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
+        dtag_length = rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         dtag_limit = 2**dtag_length
 
         for dtag in range(0, dtag_limit):
@@ -391,7 +391,7 @@ class SCHCProtocol:
 
         dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
-        dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG]
+        dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         if dtag_length > 0:
             dtag = packet_bbuf.get_bits(dtag_length, position=frag_rule[T_RULEIDLENGTH])
         else:

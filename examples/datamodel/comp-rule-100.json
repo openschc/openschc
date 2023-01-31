@@ -11,12 +11,12 @@
       {"FID": "IPV6.DEV_PREFIX","TV": ["2001:db8::/64",
                                        "fe80::/64",
                                        "2001:0420:c0dc:1002::/64" ],
-                                         "MO": "match-mapping","CDA": "mapping-sent","SB": 1},
+                                         "MO": "match-mapping","CDA": "mapping-sent"},
       {"FID": "IPV6.DEV_IID", "TV": "::1","MO": "equal","CDA": "DEVIID"},
       {"FID": "IPV6.APP_PREFIX","TV": [ "2001:db8:1::/64",
                                         "fe80::/64",
                                         "2404:6800:4004:818::/64" ],
-                                         "MO": "match-mapping","CDA": "mapping-sent", "SB": 2},
+                                         "MO": "match-mapping","CDA": "mapping-sent"},
       {"FID": "IPV6.APP_IID", "TV": 2,"MO": "equal","CDA": "not-sent"},
       {"FID": "UDP.DEV_PORT",  "TV": 5680,"MO": "MSB", "MO.VAL": 12, "CDA": "LSB"},
       {"FID": "UDP.APP_PORT",  "TV": 5680,"MO": "MSB", "MO.VAL": 12, "CDA" : "LSB"},
@@ -48,12 +48,12 @@
       {"FID": "IPV6.DEV_PREFIX","TV": ["2001:db8::/64",
                                        "fe80::/64",
                                        "2001:0420:c0dc:1002::/64" ],
-                                         "MO": "match-mapping","CDA": "mapping-sent","SB": 1},
+                                         "MO": "match-mapping","CDA": "mapping-sent"},
       {"FID": "IPV6.DEV_IID", "TV": "::79","MO": "equal","CDA": "DEVIID"},
       {"FID": "IPV6.APP_PREFIX","TV": [ "2001:db8:1::/64",
                                         "fe80::/64",
                                         "2404:6800:4004:818::/64" ],
-                                         "MO": "match-mapping","CDA": "mapping-sent", "SB": 2},
+                                         "MO": "match-mapping","CDA": "mapping-sent"},
       {"FID": "IPV6.APP_IID", "TV": 2004,"MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.TYPE",  "TV": 128,"MO": "equal","CDA": "not-sent"},
       {"FID": "ICMPV6.CODE",  "TV": 0,  "MO": "equal","CDA": "not-sent"},
@@ -84,7 +84,7 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "AckOnError",
-        "FRDirection" : "DW",
+        "FRDirection" : "UP",
         "FRModeProfile": {
             "dtagSize": 2,
             "WSize": 7,
@@ -116,18 +116,53 @@
     "RuleIDLength": 3,
     "Fragmentation": {
         "FRMode": "NoAck",
-        "FRDirection" : "DW",
+        "FRDirection" : "UP",
         "FRModeProfile": {
             "dtagSize": 2,
-            "FCNSize": 3,
-            "MICAlgorithm": "RCS_RFC8724",
-            "MICWordSize": 8,
-            "L2WordSize": 8
+            "FCNSize": 3
         }
     }
   },{
-    "RuleID": 8,
+    "RuleID": 7,
+    "RuleIDLength": 3,
+    "Fragmentation": {
+        "FRMode": "AckAlways",
+        "FRDirection" : "UP",
+        "FRModeProfile": {
+            "dtagSize": 2,
+            "FCNSize": 3,
+            "WSize" : 1,
+            "maxRetry" : 4
+        }
+    }
+  },{
+    "RuleID": 100,
     "RuleIDLength": 8,
-    "NoCompression": []
+    "Description": "for CORECONF Traffic, FETCH/iPATCH query from core to device: Query and Answer",
+    "Compression": [
+        {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.TC",  "TV": 1, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.FL",  "TV": 144470, "MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.LEN",          "MO": "ignore", "CDA": "compute-length"},
+        {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_PREFIX","TV": "fe80::/64", "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.DEV_IID", "TV": "::2","MO": "equal","CDA": "not-sent"},
+        {"FID": "IPV6.APP_PREFIX", "TV": "fe80::/64", "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.APP_IID", "TV": "::1","MO": "equal","CDA": "not-sent"},
+        {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal", "CDA": "not-sent"},
+        {"FID": "UDP.APP_PORT",  "TV": 105683,"MO": "equal", "CDA": "not-sent"},
+        {"FID": "UDP.LEN",                 "MO": "ignore","CDA": "compute-length"},
+        {"FID": "UDP.CKSUM",               "MO": "ignore","CDA": "compute-checksum"},
+        {"FID": "COAP.VER", "TV": 1,    "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.TYPE", "DI": "DW", "TV": 0,    "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.TYPE", "DI": "UP", "TV": 69,    "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.TKL",  "TV" : 0,     "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.CODE", "DI": "UP", "TV": [5, 7],    "MO": "match-mapping","CDA": "mapping-sent"},
+        {"FID": "COAP.CODE", "DI": "DW", "TV": [68, 69], "MO": "match-mapping","CDA": "mapping-sent"},
+        {"FID": "COAP.MID",  "TV": 0,                    "MO": "MSB", "MO.VAL": 9, "CDA": "LSB"},
+        {"FID": "COAP.Uri-Path", "FL": 8, "FP": 1, "DI": "DW", "TV": "c","MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.Content-Format",  "DI": "BI", "TV": 140, "MO": "equal", "CDA": "not-sent"}
+      ]          
   }
 ]
