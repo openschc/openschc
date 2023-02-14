@@ -1,0 +1,102 @@
+module ietf-schc-indirect-values {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:ietf-schc-compound-ack";
+  prefix schc-indirect-values;
+
+  import ietf-schc {
+      prefix schc;
+  }
+
+  organization
+    "IETF IPv6 over Low Power Wide-Area Networks (lpwan) working group";
+  contact
+    "WG Web:   <https://datatracker.ietf.org/wg/lpwan/about/>
+     WG List:  <mailto:lp-wan@ietf.org>
+     Editor:   Juan-Carlos Zuniga
+       <mailto:juancarlos.zuniga@sigfox.com>";
+  description
+     "
+     Copyright (c) 2021 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Simplified BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (https://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX
+     (https://www.rfc-editor.org/info/rfcXXXX); see the RFC itself
+     for full legal notices.
+
+     The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+     NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'NOT RECOMMENDED',
+     'MAY', and 'OPTIONAL' in this document are to be interpreted as
+     described in BCP 14 (RFC 2119) (RFC 8174) when, and only when,
+     they appear in all capitals, as shown here.
+
+     *************************************************************************
+
+     This module extends the ietf-schc module to include the compound-ack 
+     behavior for Ack On Error as defined in RFC YYYY. 
+     It introduces a new leaf for Ack on Error defining the format of the
+     SCHC Ack and add the possibility to send several bitmaps in a single 
+     answer.";
+
+  revision 2022-08-24 {
+    description
+      "Initial version for RFC YYYY ";
+    reference
+      "RFC YYYY: Compound Ack";
+  }
+
+  identity value-base-type {
+    description
+      "....";
+  }
+
+  identity value-indirect {
+    base value-base-type;
+    description
+      "....";
+  }
+
+
+  typedef value-type {
+    type identityref {
+      base value-base-type;
+    }
+    description
+      "...";
+  }
+
+
+  augment "/schc:schc/schc:rule/schc:nature/schc:compression/schc:entry/schc:target-value" {
+    leaf operator {
+          type value-type;
+        }
+    leaf operator-index {
+          type binary;
+          description
+            "Index gives the position in the matching-list. If only one
+            element is present, index is 0. Otherwise, index is the
+            the order in the matching list, starting at 0.";
+        }
+        description
+          "added to SCHC rules";
+  }
+
+  container indirection{
+    list indirect-values {
+      key "position-index";
+      leaf position-index {
+        type binary;
+      }
+      leaf indirect-value {
+        type binary;
+      }
+    }
+  }
+
+}

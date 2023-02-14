@@ -11,6 +11,7 @@ Antoine Bernard (AFNIC, France)
 Daniel Orlando Ducuara Beltran (IMT Atlantique, France)
 Olivier Gimenez (Semtech, France)
 Arunprabhu Kandasamy (Acklio, France)
+Ivan Martinez (IMT Atlantique, France)
 Laurent Toutain (IMT Atlantique, France)
 Shoichi Sakane (Cisco, Japan)
 

@@ -1,0 +1,67 @@
+{
+  "assignment-ranges": [
+    {
+      "entry-point": 2000000,
+      "size": 300
+    }
+  ],
+  "module-name": "ietf-schc-oam",
+  "module-revision": "2021-11-10",
+  "items": [
+    {
+      "namespace": "module",
+      "identifier": "ietf-schc-oam",
+      "sid": 2000000
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-base-type",
+      "sid": 2000001
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-checksum",
+      "sid": 2000002
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-code",
+      "sid": 2000003
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-identifier",
+      "sid": 2000004
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-sequence",
+      "sid": 2000005
+    },
+    {
+      "namespace": "identity",
+      "identifier": "fid-icmpv6-type",
+      "sid": 2000006
+    },
+    {
+      "namespace": "identity",
+      "identifier": "proxy-none",
+      "sid": 2000007
+    },
+    {
+      "namespace": "identity",
+      "identifier": "proxy-pingv6",
+      "sid": 2000008
+    },
+    {
+      "namespace": "identity",
+      "identifier": "proxy-schc-message",
+      "sid": 2000009
+    },
+    {
+      "namespace": "data",
+      "identifier": "/ietf-schc:schc/rule/ietf-schc-oam:proxy-behavior",
+      "sid": 2000010
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+ {
+    "DeviceID" : "udp:90.27.174.128:8888",
+    "SoR" : [
+	 {
+	    "RuleID": 6,
+	    "RuleIDLength": 3,
+	    "Compression": [
+		{"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+		{"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
+		{"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+		{"FID": "IPV6.DEV_PREFIX","TV": "2001:470:1F21:1D2::/64",
+                                               "MO": "equal","CDA": "not-sent"},
+		{"FID": "IPV6.DEV_IID", "TV": "::1","MO": "equal","CDA": "not-sent"},
+		{"FID": "IPV6.APP_PREFIX",         "MO": "ignore","CDA": "value-sent"},
+		{"FID": "IPV6.APP_IID",         "MO": "ignore","CDA": "value-sent"}
+	    ]
+	 },{
+		"RuleID" : 12,
+		"RuleIDLength" : 11,
+		"Fragmentation" : {
+			"FRMode": "NoAck",
+			"FRDirection": "UP"
+		}
+	} ,
+	{
+	    "RuleID": 100,
+	    "RuleIDLength": 8,
+	    "NoCompression": []		
+	}
+    ]
+  }
+

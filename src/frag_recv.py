@@ -30,9 +30,8 @@ class ReassembleBase:
 
     """
 
-    def __init__(self, protocol, context, rule, dtag, sender_L2addr):
+    def __init__(self, protocol=None, context=None, rule=None, dtag=None, core_id=None, device_id=None):
         """
-
         Args :
             protocol : protocol
             context : context
@@ -40,9 +39,14 @@ class ReassembleBase:
             dtag : ?
             sender_L2addr : None or 'int' containing the sender's address
 
-
         """
         self.protocol = protocol
+
+        if protocol.role == T_POSITION_CORE:
+            sender_L2addr = device_id
+        else: 
+            sender_L2addr = core_id
+
         self.context = context
         self.rule = rule
         self.dtag = dtag
@@ -60,9 +64,7 @@ class ReassembleBase:
         self.schc_ack = None
         self.all1_received = False
         self.mic_missmatched = False
-
         self.fragment_received = False
-
         self._last_receive_info = None # for logs
 
     def get_mic(self, mic_target, extra_bits=0):
@@ -91,10 +93,16 @@ class ReassembleBase:
         if self.state == "DONE":
             return
 
-        # sending sender abort.
+        if self.protocol.position == T_POSITION_CORE:
+            dest = self._session_id[1]
+        else:
+            dest = self._session_id[0]
+
+        # sending receiver abort.
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        args = (schc_frag.packet.get_content(), self._session_id[0])
-        dprint("Sent Receiver-Abort.", schc_frag.__dict__)
+        args = (schc_frag.packet.get_content(), dest)
+        dprint("Sent Receiver-Abort.", schc_frag.__dict__, "Position:", self.protocol.position)
+        dprint("Sent Receiver-Abort to: ", dest)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
         if enable_statsct:
@@ -104,6 +112,7 @@ class ReassembleBase:
         self.protocol.scheduler.add_event(0,
                                     self.protocol.layer2.send_packet, args)
         # XXX needs to release all resources.
+        self.protocol.session_manager.delete_session(self._session_id)
         return
 
     def cancel_inactive_timer(self):
@@ -112,8 +121,10 @@ class ReassembleBase:
         // TODO : Redaction (here is frag_recv.py)
 
         """
+        print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
         if self.event_id_inactive_timer is None:
             return
+
         self.protocol.scheduler.cancel_event(self.event_id_inactive_timer)
         self.event_id_inactive_timer = None
 
@@ -131,91 +142,117 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+        """
+        return 
+        - None if fragmentation is not finished
+        - False if the MIC is wrong
+        - bytearray if fragmentation succeed 
+        - False if abort is received
+        
+        """
         dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
+        assert (T_FRAG in self.rule)
 
-        schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-        dprint("receiver frag received:", schc_frag.__dict__)
-
-        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG] == 0:
-            w_dtag = '-'
+        if (protocol.position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
+            (protocol.position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
+            schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
+            if schc_abort.abort:
+                print ("aborting, removing state")
+                protocol.session_manager.delete_session(self._session_id)
+                print(protocol.session_manager.session_table)
+            return False
         else:
-            w_dtag = schc_frag.dtag
+            print ("frag data")
+        
+            schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
+            dprint("receiver frag received:", schc_frag.__dict__)
 
-        if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W] == 0:
-            w_w = '-'
-        else:
-            w_w = schc_frag.win
-
-        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-        if schc_frag.fcn == all1:
-            w_fcn = "All-1"
-        elif schc_frag.fcn == 0:
-            w_fcn = "All-0"
-        else:
-            w_fcn = schc_frag.fcn
-
-        dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            schc_frag.rule[T_RULEID],
-            schc_frag.rule[T_RULEIDLENGTH],
-            w_dtag,
-            w_w,
-            w_fcn
-            ))
-
-        # XXX how to authenticate the message from the peer. without
-        # authentication, any nodes can cancel the invactive timer.
-        self.cancel_inactive_timer()
-        dprint(schc_frag.__class__.__name__)
-        #
-        if schc_frag.abort == True:
-            dprint("----------------------- Sender-Abort ---------------------------")
-            # XXX needs to release all resources.
-            return
-        self.tile_list.append(schc_frag.payload)
-        #
-        if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
-            dprint("----------------------- Final Reassembly -----------------------")
-            dprint("ALL1 received")
-            # MIC calculation
-            dprint("tile_list")
-            for _ in self.tile_list:
-                dprint(_)
-            schc_packet = BitBuffer()
-            for i in self.tile_list:
-                schc_packet += i
-            dtrace (binascii.hexlify(schc_packet.get_content()))
-
-            mic_calced = self.get_mic(schc_packet.get_content())
-            if schc_frag.mic != mic_calced:
-                dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
-                        b2hex(schc_frag.mic), b2hex(mic_calced)))
-                self.state = 'ERROR_MIC_NO_ACK'
-                self.protocol.session_manager.delete_session(self._session_id)
-                return
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
+                w_dtag = '-'
             else:
-                dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
-                    schc_frag.mic, mic_calced))
-            # decompression
-            # dprint("----------------------- Decompression -----------------------")
-            if not self.protocol.config.get("debug-fragment"):
-                # XXX
-                # XXX in hack105, we have separate databases for C/D and F/R.
-                # XXX need to merge them into one.  Then, here searching database will
-                # XXX be moved into somewhere.
-                # XXX
-                #rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet)
-                #dprint("debug: no-ack FindRuleFromSCHCpacket", rule)
-                self.protocol.process_decompress(schc_packet, self.sender_L2addr, "UP")
-            self.state = 'DONE_NO_ACK'
-            self.protocol.session_manager.delete_session(self._session_id)
-            #dprint(self.state)
-            return
-        # set inactive timer.
-        self.event_id_inactive_timer = self.protocol.scheduler.add_event(
-                self.inactive_timer, self.event_inactive, tuple())
-        dprint("---", schc_frag.fcn)
+                w_dtag = schc_frag.dtag
+
+            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
+                w_w = '-'
+            else:
+                w_w = schc_frag.win
+
+            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+            if schc_frag.fcn == all1:
+                w_fcn = "All-1"
+            elif schc_frag.fcn == 0:
+                w_fcn = "All-0"
+            else:
+                w_fcn = schc_frag.fcn
+
+            dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                schc_frag.rule[T_RULEID],
+                schc_frag.rule[T_RULEIDLENGTH],
+                w_dtag,
+                w_w,
+                w_fcn
+                ))
+
+            # XXX how to authenticate the message from the peer. without
+            # authentication, any nodes can cancel the invactive timer.
+            self.cancel_inactive_timer()
+            dprint(schc_frag.__class__.__name__)
+            #
+            if schc_frag.abort == True:
+                dprint("----------------------- Sender-Abort ---------------------------")
+                # XXX needs to release all resources.
+                return False
+            self.tile_list.append(schc_frag.payload)
+            print (self.tile_list)
+            #
+            if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
+                dprint("----------------------- Final Reassembly -----------------------")
+                dprint("ALL1 received")
+                # MIC calculation
+                dprint("tile_list")
+                for _ in self.tile_list:
+                    dprint(_)
+                schc_packet = BitBuffer()
+                for i in self.tile_list:
+                    schc_packet += i
+                dtrace (binascii.hexlify(schc_packet.get_content()))
+
+                mic_calced = self.get_mic(schc_packet.get_content())
+                if schc_frag.mic != mic_calced:
+                    dtrace("ERROR: MIC mismatched. packet {} != result {}".format(
+                            b2hex(schc_frag.mic), b2hex(mic_calced)))
+                    self.state = 'ERROR_MIC_NO_ACK'
+                    self.protocol.session_manager.delete_session(self._session_id)
+                    return False
+                else:
+                    dtrace("SUCCESS: MIC matched. packet {} == result {}".format(
+                        schc_frag.mic, mic_calced))
+                    #return schc_packet.get_content()
+                # decompression
+                print("----------------------- Decompression -----------------------")
+
+                args = False 
+                if not self.protocol.config.get("debug-fragment"):
+                    # XXX
+                    # XXX in hack105, we have separate databases for C/D and F/R.
+                    # XXX need to merge them into one.  Then, here searching database will
+                    # XXX be moved into somewhere.
+                    # XXX
+                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
+                    dprint("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
+                    args = self.protocol.decompress_only(schc_packet, rule, device_id)
+                print("Packet decompressed at receive_frag: ", args)
+                self.state = 'DONE_NO_ACK'
+                self.protocol.session_manager.delete_session(self._session_id)
+                dprint(self.state)
+                return args  # all-1 return the packet reassembled and fragmented or False
+            # set inactive timer.
+            #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
+            #        self.inactive_timer, self.event_inactive, tuple())
+            dprint("---", schc_frag.fcn)
+            return None
 
 
     def get_state_info(self, **kw):
@@ -225,33 +262,51 @@ class ReassemblerNoAck(ReassembleBase):
         }
         return result
 
-
 #---------------------------------------------------------------------------
 
 class ReassemblerAckOnError(ReassembleBase):
     """ ReassemblerAckOnError class
-
-    Todo : Redaction
-
-    """
     # In ACK-on-Error, a fragment contains tiles belonging to different window.
     # A type of data structure holding tiles in each window is not suitable.
     # So, here just appends a fragment into the tile_list like No-ACK.
+    """
 
-    def receive_frag(self, bbuf, dtag):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+        """
+        return 
+        - None if fragmentation is not finished
+        - False if the MIC is wrong
+        - True if ACK Success received
+        - bytearray if fragmentation succeed 
+        """
         self._last_receive_info = []
-        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
+        print('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
+                                                                     
+        assert (T_FRAG in self.rule)
+        rule = self.rule
 
+        if protocol.position == T_POSITION_CORE: 
+            if rule[T_FRAG][T_FRAG_DIRECTION] == 'DW' : # ACK or Abort
+                print('frag_recv.py ACK Received CORE')
+                schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf) 
+        
+        if protocol.position == T_POSITION_DEVICE:
+            if rule[T_FRAG][T_FRAG_DIRECTION] == 'UP' : # ACK or Abort
+                print('frag_recv.py ACK Received DEVICE')
+                schc_frag = frag_msg.frag_sender_rx(self.rule, bbuf) 
+
+        # Regular Fragment        
         schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-        dprint("receiver frag received:", schc_frag.__dict__)
+        
+        print("receiver frag received:", schc_frag.__dict__)
         # XXX how to authenticate the message from the peer. without
-        # authentication, any nodes can cancel the invactive timer.
+        # authentication, any node can cancel the invactive timer.
         self.cancel_inactive_timer()
         if self.state == "ABORT":
             self._last_receive_info = [("state-abort",)]
             self.send_receiver_abort()
-            return
+            return None # TODO
         #
         # input("")
         if schc_frag.abort == True:
@@ -259,10 +314,10 @@ class ReassemblerAckOnError(ReassembleBase):
             # Statsct.set_msg_type("SCHC_SENDER_ABORT")
             # XXX needs to release all resources.
             self._last_receive_info = [("abort",)]
-            return
-
+            return None  # TODO
+        
         if schc_frag.ack_request == True:
-            dprint("Received ACK-REQ")
+            print("Received ACK-REQ")
             self._last_receive_info = [("ack-req",)]            
             # if self.state != "DONE":
             #     #this can happen when the ALL-1 is not received, so the state is
@@ -284,7 +339,7 @@ class ReassemblerAckOnError(ReassembleBase):
             self.state = 'ACK_REQ'
             # input('')
             self.resend_ack(schc_frag)
-            return
+            return None
 
         info = self._last_receive_info
         self.fragment_received = True
@@ -395,10 +450,12 @@ class ReassemblerAckOnError(ReassembleBase):
         should_send_ack = False
         if self.mic_received is not None:
             schc_packet, mic_calced = self.get_mic_from_tiles_received()
+            print('MIC calced?')
             if self.mic_received == mic_calced:
                 info.append("mic-ok")
-                self.finish(schc_packet, schc_frag)
-                return
+                args = self.finish(schc_packet, schc_frag, rule, core_id, device_id, self.protocol.role)
+                print('MIC OK', args)
+                return args
             else:
                 # XXX waiting for the fragments requested by ACK.
                 # during MAX_ACK_REQUESTS
@@ -420,8 +477,9 @@ class ReassemblerAckOnError(ReassembleBase):
                     schc_frag.mic, mic_calced))
                 info.append("mic-ok")
                 self.mic_missmatched = False
-                self.finish(schc_packet, schc_frag)
-                return
+                args = self.finish(schc_packet, schc_frag, rule, core_id, device_id, self.protocol.role)
+                print("frag_recv.py: AckOnError args: ", args)
+                return args
             else:
                 self.mic_missmatched = True
                 self.state = 'ERROR_MIC'
@@ -431,7 +489,7 @@ class ReassemblerAckOnError(ReassembleBase):
                     b2hex(schc_frag.mic), b2hex(mic_calced)))
                 should_send_ack = True
 
-        if should_send_ack:
+        if should_send_ack: #TODO, change session_id[0] to the corresponding core or device id
                 bit_list = find_missing_tiles(self.tile_list,
                                               self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN],
                                               frag_msg.get_fcn_all_1(self.rule))
@@ -521,12 +579,28 @@ class ReassemblerAckOnError(ReassembleBase):
         args = (schc_ack.packet.get_content(), self._session_id[0])
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
-    def finish(self, schc_packet, schc_frag):
+
+    def finish(self, schc_packet, schc_frag, rule, core_id, device_id, role):
         self.state = "DONE"
         dprint('state DONE -> {}'.format(self.state))
+
+        # Define the other end for ACK send:
+
+        if self.protocol.position == T_POSITION_CORE:
+            other_end = device_id
+        else :
+            other_end = core_id
+
         #input('DONE')
         # decompression
-        self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
+        #self.protocol.process_decompress(schc_packet, self.sender_L2addr, direction="UP")
+
+        comp_rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
+        #dprint("debug, frag_recv.py: AckOnError - finc comp_rule: ", comp_rule)
+        dprint("debug, frag_recv.py: AckOnError device_id", device_id)
+        dprint("debug, frag_recv.py: AckOnError schc_packet", schc_packet)
+        argsfn = self.protocol.decompress_only(schc_packet, comp_rule, device_id)
+        print ("frag_recv.py, device_id and decompressed packet: ", argsfn)
 
         # ACK message
         schc_ack = frag_msg.frag_receiver_tx_all1_ack(
@@ -534,11 +608,15 @@ class ReassemblerAckOnError(ReassembleBase):
                 schc_frag.dtag,
                 schc_frag.win,
                 cbit=1)
+
         dprint("ACK success sent:", schc_ack.__dict__)
         if enable_statsct:
             Statsct.set_msg_type("SCHC_ACK_OK")
+
         dprint("----------------------- SCHC ACK OK SEND  -----------------------")
-        args = (schc_ack.packet.get_content(), self._session_id[0])
+        args = (schc_ack.packet.get_content(), other_end)
+        dprint ("++ dbug: frag_recv.py: ACK args", args)
+        #time.sleep(1)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet, args)
         # XXX need to keep the ack message for the ack request.
         #the ack is build everytime
@@ -547,6 +625,10 @@ class ReassemblerAckOnError(ReassembleBase):
         #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
         #        self.inactive_timer, self.event_inactive, tuple())
         #dprint("DONE, but in case of ACK REQ MUST WAIT ", schc_frag.fcn)
+
+        print ("frag_recv.py, finish (MIC OK), core_id, device_id, : ", core_id, device_id)
+        print ("frag_recv.py, finish (MIC OK), args: ", argsfn)
+        return argsfn
 
     def get_mic_from_tiles_received(self):
         # MIC calculation.
@@ -592,10 +674,18 @@ class ReassemblerAckOnError(ReassembleBase):
         return schc_packet, mic_calced
 
     def send_receiver_abort(self):
+
+        # Define destination based on possition
+
+        if self.protocol.position == T_POSITION_DEVICE:
+            dest = self._session_id[0] # core address
+        else:
+            dest = self._session_id[1] # device address
+
         # sending Receiver abort.
         self.state = "ABORT"
         schc_frag = frag_msg.frag_receiver_tx_abort(self.rule, self.dtag)
-        args = (schc_frag.packet.get_content(), self._session_id[0])
+        args = (schc_frag.packet.get_content(), dest)
         dprint("Sent Receiver-Abort.", schc_frag.__dict__)
         dprint("----------------------- SCHC RECEIVER ABORT SEND  -----------------------")
 
