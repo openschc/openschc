@@ -721,7 +721,7 @@ class RuleManager:
                                 self._smart_print(e[T_TV][i])
                                 print (":{:^13}:{:^16}:".format(".", "."))
 
-                        if msg2 != None:
+                        if msg2 != None: # FID is too large, wrote it on 2 lignes, this is the second line
                             print ("|{:<15s}|{:>3}|{:2}|{:2}|{:30}|{:13}|{:16}|".format(msg2, "", "", "", "", "", "" ), )
 
                     print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
