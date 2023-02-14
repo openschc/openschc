@@ -10,6 +10,7 @@ from stats.statsct import Statsct
 from compr_core import *
 from compr_parser import *
 from gen_utils import dprint, dpprint, set_debug_output
+import cbor2 as cbor
 
 set_debug_output(False)
 

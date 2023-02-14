@@ -16,6 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pytest
+        pip install cbor2
     - name: Test with pytest
       run: |
         cd src
