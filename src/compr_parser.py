@@ -282,11 +282,11 @@ class Unparser:
                 IPv6Src = AppStr                
 
             IPv6Header = IPv6 (
-                version= header_d[(T_IPV6_VER, 1)][0],
-                tc     = header_d[(T_IPV6_TC, 1)][0],
-                fl     = header_d[(T_IPV6_FL, 1)][0],
-                nh     = header_d[(T_IPV6_NXT, 1)][0],
-                hlim   = header_d[(T_IPV6_HOP_LMT, 1)][0],
+                version= int.from_bytes(header_d[(T_IPV6_VER, 1)][0], byteorder="big" ),
+                tc     = int.from_bytes(header_d[(T_IPV6_TC, 1)][0], byteorder="big" ),
+                fl     = int.from_bytes(header_d[(T_IPV6_FL, 1)][0], byteorder="big" ),
+                nh     = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" ),
+                hlim   = int.from_bytes(header_d[(T_IPV6_HOP_LMT, 1)][0], byteorder="big" ),
                 src    = IPv6Src.compressed, 
                 dst    = IPv6Dst.compressed
             ) 
