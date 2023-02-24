@@ -293,26 +293,28 @@ class Unparser:
 
             L3header = IPv6Header  
 
+            ipv6_next = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" )
 
-            if header_d[(T_IPV6_NXT, 1)][0] == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
+            if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
                 for i in icmpv6_types:
-                    if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                    icmp_type = int.from_bytes(header_d[(ICMPV6.TYPE, 1)][0], byteorder="big" )
+                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
                         IPv6Dst = AppStr
                         ICMPv6Header = ICMPv6EchoReply(
-                            id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                            seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
                             data = data)
-                    if header_d[('ICMPV6.TYPE', 1)][0] == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
                         IPv6Src = AppStr
                         IPv6Dst = DevStr 
                         ICMPv6Header = ICMPv6EchoRequest(
-                            id = header_d[(T_ICMPV6_IDENT, 1)][0],
-                            seq =  header_d[(T_ICMPV6_SEQNO, 1)][0],
+                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
                             data = data)
                     L4header = ICMPv6Header
 
-            elif header_d[(T_IPV6_NXT, 1)][0] == 17: # UDP
+            elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
                 app_port = header_d[(T_UDP_APP_PORT, 1)][0]                    
 
@@ -383,12 +385,7 @@ class Unparser:
                     print (binascii.hexlify(coap_h))
 
                     for i in range (0, opt_len):
-                        print (i)
-                        if type(opt_val) == bytes:
-                            coap_h += struct.pack("!B", opt_val[i])
-                        elif type(opt_val) == int:
-                            v = (opt_val & (0xFF << (opt_len - i - 1))) >> (opt_len - i - 1)
-                            coap_h += struct.pack("!B", v)
+                        coap_h += struct.pack("!B", opt_val[i])
 
                 if len(data) > 0:
                     coap_h += b'\xff'
