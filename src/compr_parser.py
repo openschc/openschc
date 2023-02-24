@@ -384,8 +384,8 @@ class Unparser:
 
                     for i in range (0, opt_len):
                         print (i)
-                        if type(opt_val) == str:
-                            coap_h += struct.pack("!B", ord(opt_val[i]))
+                        if type(opt_val) == bytes:
+                            coap_h += struct.pack("!B", opt_val[i])
                         elif type(opt_val) == int:
                             v = (opt_val & (0xFF << (opt_len - i - 1))) >> (opt_len - i - 1)
                             coap_h += struct.pack("!B", v)
