@@ -615,8 +615,9 @@ class RuleManager:
 
 
                         print ("---------> ", key, val)
-
-                    entry[T_TV] = _adapt_value(r[T_TV], entry[T_FL], FID)
+                        entry[T_TV_IND] = _adapt_value(key,entry[T_FL], FID)
+                    else:
+                        entry[T_TV] = _adapt_value(r[T_TV], entry[T_FL], FID)
                 else:
                     entry[T_TV] = None
 
