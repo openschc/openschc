@@ -339,7 +339,7 @@ class Unparser:
                 b1 = (coap_ver << 6)|(coap_type<<4)|(coap_tlk)
                 coap_h = struct.pack("!BBH", b1, coap_code ,coap_mid )
 
-                tkl = header_d[(T_COAP_TKL, 1)][0]
+                tkl = int.from_bytes(header_d[(T_COAP_TKL, 1)][0], byteorder="big" )
                 if tkl != 0:
                     token = header_d[(T_COAP_TOKEN, 1)][0]
                     for i in range(tkl-1, -1, -1):
