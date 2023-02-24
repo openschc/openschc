@@ -333,12 +333,11 @@ class Unparser:
                 coap_ver  = int.from_bytes(header_d[(T_COAP_VERSION, 1)][0], byteorder="big" )
                 coap_type = int.from_bytes(header_d[(T_COAP_TYPE, 1)][0], byteorder="big" )
                 coap_tlk  = int.from_bytes(header_d[(T_COAP_TKL, 1)][0], byteorder="big" )
-
+                coap_code = int.from_bytes(header_d[(T_COAP_CODE, 1)][0], byteorder="big" )
+                coap_mid  = int.from_bytes(header_d[(T_COAP_MID, 1)][0], byteorder="big" )
+                
                 b1 = (coap_ver << 6)|(coap_type<<4)|(coap_tlk)
-                c_mid = header_d[(T_COAP_MID, 1)][0]
-                if type(c_mid) == bytes:
-                    c_mid = int.from_bytes(c_mid,"big") 
-                coap_h = struct.pack("!BBH", b1, header_d[(T_COAP_CODE, 1)][0],c_mid )
+                coap_h = struct.pack("!BBH", b1, coap_code ,coap_mid )
 
                 tkl = header_d[(T_COAP_TKL, 1)][0]
                 if tkl != 0:
