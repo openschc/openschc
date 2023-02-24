@@ -330,7 +330,11 @@ class Unparser:
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 print ("CoAP Inside")
 
-                b1 = (header_d[(T_COAP_VERSION, 1)][0] << 6)|(header_d[(T_COAP_TYPE, 1)][0]<<4)|(header_d[(T_COAP_TKL, 1)][0])
+                coap_ver  = int.from_bytes(header_d[(T_COAP_VERSION, 1)][0], byteorder="big" )
+                coap_type = int.from_bytes(header_d[(T_COAP_TYPE, 1)][0], byteorder="big" )
+                coap_tlk  = int.from_bytes(header_d[(T_COAP_TKL, 1)][0], byteorder="big" )
+
+                b1 = (coap_ver << 6)|(coap_type<<4)|(coap_tlk)
                 c_mid = header_d[(T_COAP_MID, 1)][0]
                 if type(c_mid) == bytes:
                     c_mid = int.from_bytes(c_mid,"big") 
