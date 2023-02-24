@@ -714,7 +714,7 @@ class Decompressor:
 
     def rx_cda_not_sent(self, rule, in_bbuf):
         if rule[T_FL] == "var":
-            if type(rule[T_TV]) == str:
+            if type(rule[T_TV]) == bytes:
                 size = len(rule[T_TV]) * 8
             elif type(rule[T_TV]) == int: # return the minimal size, used in CoAP
                 size = 0
