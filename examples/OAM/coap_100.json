@@ -18,11 +18,11 @@
         {"FID": "UDP.APP_PORT",  "TV": 5683,"MO": "equal","CDA": "not-sent"},
         {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore","CDA": "compute-length"},
         {"FID": "UDP.CKSUM",     "TV": 0,  "MO": "ignore","CDA": "compute-checksum"},
-        {"FID": "COAP.VER",  "TV": 1,    "MO": "equal","CDA": "not-sent"},
-        {"FID": "COAP.TYPE", "TV": 2,   "MO": "equal","CDA": "not-sent"},
-        {"FID": "COAP.TKL",  "TV": 0,   "MO": "equal","CDA": "not-sent"},
-        {"FID": "COAP.CODE",  "TV": 2,    "MO": "equal","CDA": "not-sent"},
-        {"FID": "COAP.MID",  "TV": 0,               "MO": "MSB", "MO.VAL": 8, "CDA": "LSB"},
+        {"FID": "COAP.VER",  "DI": "UP", "TV": 1,    "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.TYPE", "DI": "UP", "TV": 2,   "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.TKL",  "DI": "UP", "TV": 0,   "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.CODE", "DI": "UP", "TV": 2,    "MO": "equal","CDA": "not-sent"},
+        {"FID": "COAP.MID",  "DI": "UP", "TV": 0,               "MO": "MSB", "MO.VAL": 8, "CDA": "LSB"},
         {"FID": "COAP.Uri-Path", "FL": "var", "FP": 1, "DI": "UP", "TV": "foo","MO": "equal","CDA": "not-sent"},
         {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"}
         ]
