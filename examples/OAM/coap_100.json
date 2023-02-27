@@ -31,7 +31,7 @@
         "RuleIDLength": 8,
         "Compression": [
         {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-        {"FID": "IPV6.TC",  "TV": 1, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.TC",  "TV": 1, "MO": "ignore", "CDA": "not-sent"},
         {"FID": "IPV6.FL",  "TV": 144470, "MO": "ignore","CDA": "not-sent"},
         {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
         {"FID": "IPV6.NXT", "TV": 17, "MO": "ignore", "CDA": "not-sent"},
