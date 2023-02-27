@@ -32,7 +32,7 @@ def processPkt(pkt):
     """
     scheduler.run(session=schc_machine)
 
-    print (pkt)
+#    print (pkt)
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
