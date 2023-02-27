@@ -26,6 +26,27 @@
         {"FID": "COAP.Uri-Path", "FL": "var", "FP": 1, "DI": "UP", "TV": "foo","MO": "equal","CDA": "not-sent"},
         {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"}
         ]
+    },
+    "DeviceID" : "udp:192.44.77.246:8888",
+    "SoR" :[{
+        "RuleID": 101,
+        "RuleIDLength": 8,
+        "Compression": [
+        {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.TC",  "TV": 1, "MO": "equal", "CDA": "not-sent"},
+        {"FID": "IPV6.FL",  "TV": 144470, "MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+        {"FID": "IPV6.NXT", "TV": 17, "MO": "ignore", "CDA": "not-sent"},
+        {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_PREFIX","TV":"2001:470:1f20:1d2::/64" ,  "MO": "equal","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_IID", "TV": "::3a86","MO": "equal","CDA": "not-sent"},
+        {"FID": "IPV6.APP_PREFIX","TV": "2001:41d0:302:2200::/64","MO": "equal","CDA": "not-sent"},
+        {"FID": "IPV6.APP_IID", "TV": "::13b3","MO": "equal","CDA": "not-sent"},
+        {"FID": "ICMPV6.TYPE", "DI": "DW", "TV": 1, "MO": "equal","CDA": "not-sent"},
+        {"FID": "ICMPV6.CODE", "DI": "DW", "TV": 4, "MO": "equal","CDA": "not-sent"},
+        {"FID": "ICMPV6.CHECKSUM", "DI": "DW",  "MO": "ignore", "CDA": "compute-checksum"},
+    
+        ]
     }
     ]
 }
