@@ -22,7 +22,7 @@ while True:
     else:
         MID += 1
 
-    tunnel.sendto(SCHCmsg, ("xlapak-u.local.", 0x5C4C))
+    tunnel.sendto(SCHCmsg, ("51.91.121.182", 0x5C4C))
     print ("send ", binascii.hexlify(SCHCmsg))
 
     time.sleep(30)
