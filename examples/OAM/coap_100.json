@@ -10,7 +10,7 @@
         {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
         {"FID": "IPV6.NXT", "TV": 17, "MO": "ignore", "CDA": "not-sent"},
         {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-        {"FID": "IPV6.DEV_PREFIX","TV":"2001:41d0:404:200::/64" ,  "MO": "equal","CDA": "not-sent"},
+        {"FID": "IPV6.DEV_PREFIX","TV":"2001:470:1f20:1d2::/64" ,  "MO": "equal","CDA": "not-sent"},
         {"FID": "IPV6.DEV_IID", "TV": "::3a86","MO": "equal","CDA": "not-sent"},
         {"FID": "IPV6.APP_PREFIX","TV": "2404:6800:4004:818::/64","MO": "equal","CDA": "not-sent"},
         {"FID": "IPV6.APP_IID", "TV": 2,"MO": "equal","CDA": "not-sent"},

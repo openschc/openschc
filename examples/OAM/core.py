@@ -17,7 +17,7 @@ import binascii
 import socket
 import ipaddress
 
-INTERFACE = "ens3"
+INTERFACE = "he-ipv6"
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
@@ -71,5 +71,5 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface=[INTERFACE]) # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface=[INTERFACE, "ens3"]) # scappy cannot read multiple interfaces
 
