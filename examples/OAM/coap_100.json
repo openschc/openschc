@@ -26,9 +26,7 @@
         {"FID": "COAP.Uri-Path", "FL": "var", "FP": 1, "DI": "UP", "TV": "foo","MO": "equal","CDA": "not-sent"},
         {"FID": "COAP.Content-Format",                  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"}
         ]
-    },
-    "DeviceID" : "udp:192.44.77.246:8888",
-    "SoR" :[{
+    },{
         "RuleID": 101,
         "RuleIDLength": 8,
         "Compression": [
@@ -44,7 +42,7 @@
         {"FID": "IPV6.APP_IID", "TV": "::13b3","MO": "equal","CDA": "not-sent"},
         {"FID": "ICMPV6.TYPE", "DI": "DW", "TV": 1, "MO": "equal","CDA": "not-sent"},
         {"FID": "ICMPV6.CODE", "DI": "DW", "TV": 4, "MO": "equal","CDA": "not-sent"},
-        {"FID": "ICMPV6.CHECKSUM", "DI": "DW",  "MO": "ignore", "CDA": "compute-checksum"},
+        {"FID": "ICMPV6.CHECKSUM", "DI": "DW",  "MO": "ignore", "CDA": "compute-checksum"}
     
         ]
     }
