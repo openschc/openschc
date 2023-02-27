@@ -1,5 +1,5 @@
 {
-    "DeviceID" : "udp:10.211.55.2:8888",
+    "DeviceID" : "udp:192.44.77.246:8888",
     "SoR" :[{
         "RuleID": 100,
         "RuleIDLength": 8,
