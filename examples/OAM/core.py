@@ -37,7 +37,7 @@ def processPkt(pkt):
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x0800:
-            print(pkt.getlayer(IP))
+#            print(pkt.getlayer(IP))
 
             ip_proto = pkt.getlayer(IP).proto
             if ip_proto == 17:
