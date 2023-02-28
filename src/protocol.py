@@ -29,7 +29,7 @@ class ConnectivityManager:
     """
 
     def __init__(self):
-        self.mtu = 500
+        self.mtu = 5000
 
     def get_mtu (self, device):
         """
@@ -180,7 +180,7 @@ class SCHCProtocol:
 
     def _log(self, message):
         if self.verbose:
-            print("rotocol", message)
+            print("Protocol", message)
 
     def log(self, name, message):
         if self.verbose:
@@ -216,7 +216,7 @@ class SCHCProtocol:
         elif self.position == T_POSITION_DEVICE:
             t_dir = T_DIR_UP
         else:
-            raise ValueError ("Unknown postion")
+            raise ValueError ("Unknown position")
 
         if parsing != None:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
