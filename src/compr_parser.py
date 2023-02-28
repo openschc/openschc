@@ -172,7 +172,7 @@ class Parser:
                 self.header_fields[T_ICMPV6_SEQNO, 1]        = [_adapt_value(echoHeader[1]), 16]
                 pos += 4
             elif icmpBytes[0] == 1: # Destination Unreachable
-                unused = unpack('!Q', pkt[pos:pos_4])
+                unused = unpack('!Q', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [_adapt_value(echoHeader[0]), 32]
                 pos += 4
                 
