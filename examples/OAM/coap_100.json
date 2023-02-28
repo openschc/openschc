@@ -43,7 +43,7 @@
         {"FID": "ICMPV6.TYPE", "DI": "DW", "TV": 1, "MO": "equal","CDA": "not-sent"},
         {"FID": "ICMPV6.CODE", "DI": "DW", "TV": 4, "MO": "equal","CDA": "not-sent"},
         {"FID": "ICMPV6.CKSUM", "DI": "DW", "MO": "ignore", "CDA": "compute-checksum"},
-        {"FID": "ICMPV6.UNUSED", "DI": "DW",  "TV" : 0,  "MO": "ignore", "CDA": "not§sent"}
+        {"FID": "ICMPV6.UNUSED", "DI": "DW",  "TV" : 0,  "MO": "ignore", "CDA": "not-sent"}
     
     
         ]
