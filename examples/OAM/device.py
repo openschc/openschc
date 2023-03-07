@@ -20,8 +20,9 @@ while True:
 
     print(rs)
     if rs[0]:
-        data, addr = socket.readfrom (rs[0])
+        data, addr = rs[0][0].recvfrom (2000)
         print (binascii.hexlify(data), addr)
+        continue
 
     SCHCmsg = struct.pack("!BB", ruleID, MID) + b'\x00'
 
@@ -33,4 +34,5 @@ while True:
 
     tunnel.sendto(SCHCmsg, ("51.91.121.182", 0x5C4C))
     print ("send ", binascii.hexlify(SCHCmsg))
+
 

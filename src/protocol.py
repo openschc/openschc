@@ -203,7 +203,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet, parsing=None):
+    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -217,6 +217,12 @@ class SCHCProtocol:
             t_dir = T_DIR_UP
         else:
             raise ValueError ("Unknown position")
+        
+        if reverse_direction:
+            if t_dir == T_DIR_DW:
+                t_dir = T_DIR_UP
+            else:
+                t_dir = T_DIR_DW 
 
         if parsing != None:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
@@ -248,7 +254,7 @@ class SCHCProtocol:
 
         device_id = rule[T_META][T_DEVICEID]
         
-        schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir)
+        schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         dprint(schc_packet)
         #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
