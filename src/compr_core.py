@@ -54,7 +54,7 @@ class Compressor:
             T_CDA_COMP_CKSUM: self.tx_cda_not_sent,
             T_CDA_DEVIID : self.tx_cda_not_sent,
             T_CDA_APPIID : self.tx_cda_notyet,
-            T_CDA_COMPRESS: self.tx_cda_compress
+            T_CDA_REV_COMPRESS: self.tx_cda_compress
             }
 
     def init(self):
