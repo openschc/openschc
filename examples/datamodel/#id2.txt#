@@ -1,0 +1,34 @@
+>pyang --sid-generate-file=1000000:300 --sid-list ietf-schc@2022-12-19.yang
+
+SID        Assigned to
+---------  --------------------------------------------------
+1000000    module ietf-schc
+1000001    identity ack-behavior-after-all-0
+1000002    identity ack-behavior-after-all-1
+1000003    identity ack-behavior-base-type
+...
+1000057    identity fid-ipv6-appprefix
+1000058    identity fid-ipv6-base-type
+1000059    identity fid-ipv6-deviid
+1000060    identity fid-ipv6-devprefix
+1000061    identity fid-ipv6-flowlabel
+1000062    identity fid-ipv6-hoplimit
+...
+1000092    identity rcs-crc32
+1000093    feature compression
+1000094    feature fragmentation
+1000095    data /ietf-schc:schc
+1000096    data /ietf-schc:schc/rule
+1000097    data /ietf-schc:schc/rule/ack-behavior
+1000098    data /ietf-schc:schc/rule/direction
+1000099    data /ietf-schc:schc/rule/dtag-size
+1000100    data /ietf-schc:schc/rule/entry
+1000101    data /ietf-schc:schc/rule/entry/comp-decomp-action
+1000102    data /ietf-schc:schc/rule/entry/comp-decomp-action-value
+1000103    data /ietf-schc:schc/rule/entry/comp-decomp-action-value/index
+
+...
+
+File ietf-schc@2022-12-19.sid created
+Number of SIDs available : 300
+Number of SIDs used : 136

@@ -19,7 +19,7 @@ rm.Print()
 
 
 
-rm.add_sid_file("ietf-schc@2022-12-19.sid")
+rm.add_sid_file("ietf-schc@2023-01-28.sid")
 rm.add_sid_file("ietf-schc-oam@2021-11-10.sid")
 
 ycbor = rm.to_coreconf()

@@ -1,0 +1,116 @@
+>pyang -f identifiers ietf-schc@2022-12-19.yang
+nodes:
+  ack-always
+  ack-behavior
+  ...
+typedefs:
+  ack-behavior-type
+  all-1-data-type
+
+groupings:
+  compression-content
+  compression-rule-entry
+  fragmentation-content
+  rule-id-type
+  tv-struct
+identities:
+  ack-behavior-after-all-0
+  ack-behavior-after-all-1
+  ack-behavior-base-type
+  ack-behavior-by-layer2
+  all-1-data-base-type
+  all-1-data-no
+  all-1-data-sender-choice
+  all-1-data-yes
+  cda-appiid
+  cda-base-type
+  cda-compute
+  cda-deviid
+  cda-lsb
+  cda-mapping-sent
+  cda-not-sent
+  cda-value-sent
+  di-base-type
+  di-bidirectional
+  di-down
+  di-up
+  fid-base-type
+  fid-coap-base-type
+  fid-coap-code
+  fid-coap-code-class
+  fid-coap-code-detail
+  fid-coap-mid
+  fid-coap-option
+  fid-coap-option-accept
+  fid-coap-option-block1
+  fid-coap-option-block2
+  fid-coap-option-content-format
+  fid-coap-option-etag
+  fid-coap-option-if-match
+  fid-coap-option-if-none-match
+  fid-coap-option-location-path
+  fid-coap-option-location-query
+  fid-coap-option-max-age
+  fid-coap-option-no-response
+  fid-coap-option-observe
+  fid-coap-option-oscore-flags
+  fid-coap-option-oscore-kid
+  fid-coap-option-oscore-kidctx
+  fid-coap-option-oscore-piv
+  fid-coap-option-proxy-scheme
+  fid-coap-option-proxy-uri
+  fid-coap-option-size1
+  fid-coap-option-size2
+  fid-coap-option-uri-host
+  fid-coap-option-uri-path
+  fid-coap-option-uri-port
+  fid-coap-option-uri-query
+  fid-coap-tkl
+  fid-coap-token
+  fid-coap-type
+  fid-coap-version
+  fid-ipv6-appiid
+  fid-ipv6-appprefix
+  fid-ipv6-base-type
+  fid-ipv6-deviid
+  fid-ipv6-devprefix
+  fid-ipv6-flowlabel
+  fid-ipv6-hoplimit
+  fid-ipv6-nextheader
+  fid-ipv6-payload-length
+  fid-ipv6-trafficclass
+  fid-ipv6-trafficclass-ds
+  fid-ipv6-trafficclass-ecn
+  fid-ipv6-version
+  fid-oscore-base-type
+  fid-udp-app-port
+  fid-udp-base-type
+  fid-udp-checksum
+  fid-udp-dev-port
+  fid-udp-length
+  fl-base-type
+  fl-token-length
+  fl-variable
+  fragmentation-mode-ack-always
+  fragmentation-mode-ack-on-error
+  fragmentation-mode-base-type
+  fragmentation-mode-no-ack
+  mo-base-type
+  mo-equal
+  mo-ignore
+  mo-match-mapping
+  mo-msb
+  nature-base-type
+  nature-compression
+  nature-fragmentation
+  nature-no-compression
+  rcs-algorithm-base-type
+  rcs-crc32
+features:
+  compression
+  fragmentation
+
+A
+A
+A
+

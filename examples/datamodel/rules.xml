@@ -1,0 +1,850 @@
+<schc xmlns="urn:ietf:params:xml:ns:yang:ietf-schc">
+  <rule>
+    <rule-id-value>5</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-compression</rule-nature>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-version</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>4</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Bg==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-trafficclass</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-flowlabel</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>20</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AjRW</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-payload-length</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-nextheader</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>EQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-hoplimit</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>/w==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-devprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>IAENuAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>2</index>
+        <value>IAEEIMDcEAI=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-deviid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAAAE=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-deviid</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>IAENuAABAAA=</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>2</index>
+        <value>JARoAEAECBg=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appiid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAAAI=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-dev-port</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>FjA=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-msb</matching-operator>
+      <matching-operator-value>
+        <index>0</index>
+        <value>DA==</value>
+      </matching-operator-value>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-lsb</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-app-port</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>FjA=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-msb</matching-operator>
+      <matching-operator-value>
+        <index>0</index>
+        <value>DA==</value>
+      </matching-operator-value>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-lsb</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-length</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-checksum</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-version</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>2</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-type</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>2</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-tkl</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>4</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-code</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-mid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-token</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-token-length</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-path</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Zm9v</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-path</field-id>
+      <field-position>2</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <target-value>
+        <index>0</index>
+        <value>YmFy</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>dG90bw==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-path</field-id>
+      <field-position>3</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-path</field-id>
+      <field-position>4</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-query</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <target-value>
+        <index>0</index>
+        <value>az0=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-msb</matching-operator>
+      <matching-operator-value>
+        <index>0</index>
+        <value>EA==</value>
+      </matching-operator-value>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-lsb</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-content-format</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Hg==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+  </rule>
+  <rule>
+    <rule-id-value>6</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-compression</rule-nature>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-version</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>4</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Bg==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-trafficclass</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-flowlabel</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>20</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-payload-length</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-nextheader</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Og==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-hoplimit</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>/w==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-devprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>IAENuAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>2</index>
+        <value>IAEEIMDcEAI=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-deviid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAAHk=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-deviid</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>IAENuAABAAA=</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <target-value>
+        <index>2</index>
+        <value>JARoAEAECBg=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appiid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAB9Q=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc-oam="urn:ietf:params:xml:ns:yang:ietf-schc-oam">schc-oam:fid-icmpv6-type</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>gA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc-oam="urn:ietf:params:xml:ns:yang:ietf-schc-oam">schc-oam:fid-icmpv6-code</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc-oam="urn:ietf:params:xml:ns:yang:ietf-schc-oam">schc-oam:fid-icmpv6-checksum</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc-oam="urn:ietf:params:xml:ns:yang:ietf-schc-oam">schc-oam:fid-icmpv6-identifier</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc-oam="urn:ietf:params:xml:ns:yang:ietf-schc-oam">schc-oam:fid-icmpv6-sequence</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-value-sent</comp-decomp-action>
+    </entry>
+  </rule>
+  <rule>
+    <rule-id-value>1</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-fragmentation</rule-nature>
+    <fragmentation-mode xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fragmentation-mode-ack-on-error</fragmentation-mode>
+    <direction xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction>
+    <dtag-size>2</dtag-size>
+    <w-size>7</w-size>
+    <fcn-size>3</fcn-size>
+    <rcs-algorithm xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:rcs-crc32</rcs-algorithm>
+  </rule>
+  <rule>
+    <rule-id-value>2</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-fragmentation</rule-nature>
+    <fragmentation-mode xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fragmentation-mode-ack-on-error</fragmentation-mode>
+    <direction xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction>
+    <dtag-size>2</dtag-size>
+    <w-size>7</w-size>
+    <fcn-size>3</fcn-size>
+    <rcs-algorithm xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:rcs-crc32</rcs-algorithm>
+  </rule>
+  <rule>
+    <rule-id-value>3</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-fragmentation</rule-nature>
+    <fragmentation-mode xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fragmentation-mode-no-ack</fragmentation-mode>
+    <direction xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction>
+    <dtag-size>2</dtag-size>
+    <fcn-size>3</fcn-size>
+    <rcs-algorithm xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:rcs-crc32</rcs-algorithm>
+  </rule>
+  <rule>
+    <rule-id-value>4</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-fragmentation</rule-nature>
+    <fragmentation-mode xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fragmentation-mode-no-ack</fragmentation-mode>
+    <direction xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction>
+    <dtag-size>2</dtag-size>
+    <fcn-size>3</fcn-size>
+    <rcs-algorithm xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:rcs-crc32</rcs-algorithm>
+  </rule>
+  <rule>
+    <rule-id-value>7</rule-id-value>
+    <rule-id-length>3</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-fragmentation</rule-nature>
+    <fragmentation-mode xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fragmentation-mode-ack-always</fragmentation-mode>
+    <direction xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction>
+    <dtag-size>2</dtag-size>
+    <w-size>1</w-size>
+    <fcn-size>3</fcn-size>
+    <rcs-algorithm xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:rcs-crc32</rcs-algorithm>
+  </rule>
+  <rule>
+    <rule-id-value>100</rule-id-value>
+    <rule-id-length>8</rule-id-length>
+    <rule-nature xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:nature-compression</rule-nature>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-version</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>4</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Bg==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-trafficclass</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-flowlabel</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>20</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AjRW</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-payload-length</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-nextheader</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>EQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-hoplimit</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>/w==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-devprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-deviid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAAAI=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appprefix</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>/oAAAAAAAAA=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-ipv6-appiid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>64</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AAAAAAAAAAE=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-dev-port</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>FjM=</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-app-port</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AZzT</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-length</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-udp-checksum</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-ignore</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-compute</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-version</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>2</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-type</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction-indicator>
+      <field-length>2</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-type</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length>2</field-length>
+      <target-value>
+        <index>0</index>
+        <value>RQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-tkl</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>4</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-code</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-up</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>BQ==</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>Bw==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-code</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>RA==</value>
+      </target-value>
+      <target-value>
+        <index>1</index>
+        <value>RQ==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-match-mapping</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-mapping-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-mid</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length>16</field-length>
+      <target-value>
+        <index>0</index>
+        <value>AA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-msb</matching-operator>
+      <matching-operator-value>
+        <index>0</index>
+        <value>CQ==</value>
+      </matching-operator-value>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-lsb</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-uri-path</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-down</direction-indicator>
+      <field-length>8</field-length>
+      <target-value>
+        <index>0</index>
+        <value>Yw==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+    <entry>
+      <field-id xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fid-coap-option-content-format</field-id>
+      <field-position>1</field-position>
+      <direction-indicator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:di-bidirectional</direction-indicator>
+      <field-length xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:fl-variable</field-length>
+      <target-value>
+        <index>0</index>
+        <value>jA==</value>
+      </target-value>
+      <matching-operator xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:mo-equal</matching-operator>
+      <comp-decomp-action xmlns:schc="urn:ietf:params:xml:ns:yang:ietf-schc">schc:cda-not-sent</comp-decomp-action>
+    </entry>
+  </rule>
+</schc>

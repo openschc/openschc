@@ -1,0 +1,28 @@
+>pyang -f identifiers ietf-schc@2022-12-19.yang
+nodes:
+  ack-always
+  ack-behavior
+  ...
+typedefs:
+  ack-behavior-type
+  all-1-data-type
+  ...
+groupings:
+  compression-content
+  ...
+identities:
+  ack-behavior-after-all-0
+  ...
+  fid-ipv6-appiid
+  fid-ipv6-appprefix
+  fid-ipv6-base-type
+  fid-ipv6-deviid
+  ...
+  fragmentation-mode-ack-always
+  fragmentation-mode-ack-on-error
+  ...
+features:
+  compression
+  fragmentation
+
+

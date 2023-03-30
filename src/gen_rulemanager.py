@@ -263,7 +263,9 @@ Given the first bits received from the LPWAN, returns either a fragmentation or 
 from operator import mod
 from gen_base_import import *
 from copy import deepcopy
+from gen_parameters import *
 from compr_core import *
+from compr_parser import *
 import ipaddress
 import warnings
 
@@ -311,6 +313,8 @@ FIELD__DEFAULT_PROPERTY = {
     T_ICMPV6_CKSUM         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
     T_ICMPV6_IDENT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
     T_ICMPV6_SEQNO         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_UNUSED        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"  },
+    T_ICMPV6_PAYLOAD       : {"FL": "var", "TYPE": bytes, "ALGO": "DIRECT"  },
     T_COAP_VERSION         : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_TYPE            : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_TKL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"  },
@@ -324,49 +328,6 @@ FIELD__DEFAULT_PROPERTY = {
 }
 
 
-def _adapt_value(value, length=None, FID=None): 
-    """transform any value of any type in the smallest bytearray.
-    FID allows to convert properly the string to IPv6 address."""
-    if type(value) is int:
-
-        if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX] and length != None:
-            return value.to_bytes(length//8, byteorder='big')
-        
-        size = 0
-        v = value
-        while v != 0:
-            v = v >> 8
-            size += 1
-
-        if size == 0: # when value == 0 store 0
-            size=1 
-
-        return value.to_bytes (size, byteorder='big')
-    if type(value) is str:
-        if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX]:
-            # string has to be converted as IPv6 addresses
-
-            slash_pos = value.find("/") 
-            if slash_pos != -1:
-                # a prefix is given, remove / to be compatible with ip_address
-                value = value[:slash_pos]
-
-            addr = ipaddress.ip_address(value)
-            if addr.version != 6: # expect an IPv6 address
-                raise ValueError ("only IPv6 is supported, can not support {}".format(addr.version))
-
-            if FID in [T_IPV6_DEV_PREFIX, T_IPV6_APP_PREFIX]: #prefix top 8
-                return addr.packed[:8]
-            elif FID in [T_IPV6_DEV_IID, T_IPV6_APP_IID]: #IID bottom 8
-                return addr.packed[8:]
-            else:
-                raise ValueError ("{} Fid not found".format(FID))   
-        else: # a regular string
-            return value.encode()              
-    elif type(value) is bytes:
-        return value
-    else:
-        raise ValueError("Unknown type", type(value))
 
 class RuleManager:
     """
@@ -594,7 +555,7 @@ class RuleManager:
             if entry[T_DI] in [T_DIR_BI, T_DIR_DW]: dw_rules += 1
 
             MO = r[T_MO].upper()
-            if MO in [T_MO_EQUAL, T_MO_MSB, T_MO_IGNORE]:
+            if MO in [T_MO_EQUAL, T_MO_MSB, T_MO_IGNORE, T_MO_MATCH_REV_RULE]:
                 if MO == T_MO_MSB:
                     if T_MO_VAL in r:
                         entry[T_MO_VAL] = r[T_MO_VAL]
@@ -615,22 +576,24 @@ class RuleManager:
 
 
                         print ("---------> ", key, val)
-
-                    entry[T_TV] = _adapt_value(r[T_TV], entry[T_FL], FID)
+                        entry[T_TV_IND] = adapt_value(key,entry[T_FL], FID)
+                    else:
+                        entry[T_TV] = adapt_value(r[T_TV], entry[T_FL], FID)
                 else:
                     entry[T_TV] = None
 
             elif MO == T_MO_MMAP:
                 entry[T_TV] = []
                 for e in r[T_TV]:
-                    entry[T_TV].append(_adapt_value(e, entry[T_FL], FID))
+                    entry[T_TV].append(adapt_value(e, entry[T_FL], FID))
 
             else:
                 raise ValueError("{} MO unknown".format(MO))
             entry[T_MO] = MO
 
             CDA = r[T_CDA].upper()
-            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, T_CDA_COMP_CKSUM, T_CDA_DEVIID, T_CDA_APPIID]:
+            if not CDA in [T_CDA_NOT_SENT, T_CDA_VAL_SENT, T_CDA_MAP_SENT, T_CDA_LSB, T_CDA_COMP_LEN, 
+                           T_CDA_COMP_CKSUM, T_CDA_DEVIID, T_CDA_APPIID, T_CDA_REV_COMPRESS]:
                 raise ValueError("{} CDA not found".format(CDA))
             entry[T_CDA] = CDA
 
@@ -781,44 +744,109 @@ class RuleManager:
 
 # Find rules 
 
-    def MO_IGNORE (self, TV, FV, rlength, flength, arg):
+    def MO_IGNORE (self, TV, FV, rlength, flength, arg, direction=None):
         return True
 
-    def MO_EQUAL (self, TV, FV,  rlength, flength, arg):
+    def MO_EQUAL (self, TV, FV,  rlength, flength, arg, direction=None):
         if type(TV) != type(FV):
             return False
 
         if TV != FV: return False
         return True
 
-    def MO_MSB (self, TV, FV, rlength, flength, arg):
+    def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
         print ("MSB")
         print (TV, FV, rlength, flength, arg)
 
-        for i in range(arg//8): # compare byte per byte
-            print (TV[i], FV[i])
-            if TV[i] != FV[i]:
-                return False
+        ignore_bit = rlength - arg
+
+        for b in range(rlength):
+            pos = b%8
+
+            if pos == 0:
+                if len(TV) == 0:
+                    right_byte_tv = 0
+                else:
+                    right_byte_tv = TV[-1]
+                    TV = TV[:-1]
+                if len(FV) == 0:
+                    right_byte_fv = 0
+                else:
+                    right_byte_fv = FV[-1]
+                    FV = FV[:-1]
+
+            bit_tv = right_byte_tv & (1 << pos)
+            bit_fv = right_byte_fv & (1 << pos)
+
+            print (pos, ignore_bit, TV, FV, right_byte_tv, right_byte_fv,bit_tv, bit_fv)
+
+            if b < ignore_bit:
+                print ('ignore')
+            else:
+                if bit_tv != bit_fv:
+                    print ("comparison failed")
+                    return False
+                
+        print ("comparison succeeded")
+        return True
+
+
+
+        # ignore_bit = rlength - arg
+        # bit_pos = rlength
+
+        # while bit_pos < 0:
+        #     if bit_pos < ignore_bit:
+        #         elm_byte            
+
+        # #skip what is not to be compared
+        # for s in range(arg//8):
+        #     TV = 
+        #     FV =>> 1
         
-        j = i+1 # if a rest then compare it bit per bit
-        for i in range(arg%8):
-            k = 7-i
-            print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
-            if TV[j] & (1<<k) != FV[j] & (1 << k):
-                return False
+
+        # for i in range(arg//8): # compare byte per byte
+        #     print (TV[i], FV[i])
+        #     if TV[i] != FV[i]:
+        #         return False
+        
+        # j = i+1 # if a rest then compare it bit per bit
+        # for i in range(arg%8):
+        #     k = 7-i
+        #     print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
+        #     if TV[j] & (1<<k) != FV[j] & (1 << k):
+        #         return False
         
         return True
 
-    def MO_MMAP (self, TV, FV,  rlength, flength, arg):
+    def MO_MMAP (self, TV, FV,  rlength, flength, arg, direction=None):
         for v in TV:
             if self.MO_EQUAL (v, FV, rlength, flength, arg): return True
         return False
+    
+    def MO_MATCH_REV_RULE (self, TV, FV,  rlength, flength, arg, direction=None):
+
+        if direction == T_DIR_UP:
+            direction = T_DIR_DW
+        elif direction == T_DIR_DW:
+            direction = T_DIR_UP
+
+        P = Parser(None)
+
+        header_d, payload, error = P.parse(FV, direction=direction)
+        rule = self.FindRuleFromPacket(header_d, direction=direction)
+
+        if rule == None:
+            return False
+        
+        return True    
 
     MO_function = {
         T_MO_IGNORE : MO_IGNORE,
         T_MO_EQUAL  : MO_EQUAL,
         T_MO_MSB    : MO_MSB,
         T_MO_MMAP   : MO_MMAP,
+        T_MO_MATCH_REV_RULE: MO_MATCH_REV_RULE,
     }
 
     def FindRuleFromSCHCpacket (self, schc, device=None):
@@ -862,7 +890,7 @@ class RuleManager:
                                 if self.MO_function[r[T_MO]](self,
                                     r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
                                     r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                    arg):
+                                    arg, direction=direction):
                                         matches += 1
                                 else:
                                     if failed_field:
