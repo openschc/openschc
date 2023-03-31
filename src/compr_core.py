@@ -111,49 +111,7 @@ class Compressor:
 
     def tx_cda_lsb(self, field, rule, output, device_id=None):
         assert rule[T_MO] == T_MO_MSB
-        # size = field[1] - rule[T_MO_VAL]
-        # full_value = field[0]
-        # dprint("size =", size)
-
-        # if rule[T_FL] == "var":
-        #     assert (size%8 == 0) #var implies bytes
-
-        #     output.add_length(size//8)start
-
-        # if type(full_value) == int:
-        #     for i in range(size):
-        #         output.set_bit(full_value & 0x01)
-        #         full_value >>= 1
-        # elif type(full_value) == str:
-        #     dprint(rule[T_TV], field[0])
-        #     for i in range(rule[T_MO_VAL]//8, field[1]//8):
-        #         dprint(i, "===>", field[0][i] )
-        #     pass
-        # else:
-        #     raise ValueError("CA value-sent unknown type")
-
-        # full_value = field[0]
-        # start_byte = (rule[T_MO_VAL]-1)//8 # go to the byte to send
-        # last_byte  = field[1]//8
-        # start_bit  = 7-rule[T_MO_VAL]%8  # in that byte how many bits left
-        # size = field[1] - rule[T_MO_VAL]
-
-        # if rule[T_FL] == "var":
-        #     assert (size%8 == 0) #var implies bytes
-
-        #     output.add_length(size//8)
-
-        # print(field)
-
-        # for i in range (start_bit, -1, -1):
-        #     print (i, 1 << i, full_value[start_byte] & (1 << i))
-        #     output.set_bit(full_value[start_byte] & (1 << i))
-
-        # print (start_byte+1, last_byte)
-        # for i in range (start_byte+1, last_byte):
-        #     print (i, chr(full_value[i]))
-        #     output.add_bits(full_value[i], 8)
-
+ 
         lsb_size = field[1] - rule[T_MO_VAL]
 
         value = field[0]
@@ -161,10 +119,10 @@ class Compressor:
         while len(value) < field[1]//8: #zeros on the right may be removed
             value = b'\x00' + value
 
-        if rule[T_FL] == "var":
-            assert (size%8 == 0) #var implies bytes
+        if rule[T_FL] == T_FUNCTION_VAR:
+            assert (lsb_size%8 == 0) #var implies bytes
 
-            output.add_length(size//8)
+            output.add_length(lsb_size//8)
 
         bit_position = rule[T_MO_VAL]
 

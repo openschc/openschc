@@ -758,6 +758,9 @@ class RuleManager:
         print ("MSB")
         print (TV, FV, rlength, flength, arg)
 
+        if rlength == T_FUNCTION_VAR:
+            rlength = flength
+
         ignore_bit = rlength - arg
 
         for b in range(rlength):
