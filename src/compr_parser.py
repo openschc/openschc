@@ -72,7 +72,7 @@ class Parser:
     Parser takes a bytearray and transforms it into a dictionary indexed by field id.
     """
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
         self.header_fields = {}
 
@@ -153,8 +153,6 @@ class Parser:
             self.header_fields[T_UDP_CKSUM, 1]          = [adapt_value(udpBytes[3]), 16]
 
             pos += 8
-
-            print (self.header_fields)
 
             next_layer = "COAP"
 
