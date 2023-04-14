@@ -1,5 +1,5 @@
 import pytest
-from scapy.all import rdpcap
+from scapy.all import rdpcap, hexdump
 
 #============================ defines =========================================
 
@@ -14,7 +14,7 @@ EXPECTED_RESULTS_IPv6_UDP = ({('IPV6.VER', 1): [b'\x06', 4], ('IPV6.TC', 1): [b'
     ('UDP.DEV_PORT', 1): [b'\xaf\xb5', 16], ('UDP.APP_PORT', 1): [b'\x163', 16], 
     ('UDP.LEN', 1): [b' ', 16], ('UDP.CKSUM', 1): [b'\xed\\', 16], 
     ('COAP.VER', 1): [b'\x01', 2], ('COAP.TYPE', 1): [b'\x00', 2], ('COAP.TKL', 1): [b'\x02', 4], 
-    ('COAP.CODE', 1): [b'\x01', 8], ('COAP.MID', 1): [b'\x81B', 16], ('COAP.TOKEN', 1): [b'\xdd<', 16], 
+    ('COAP.CODE', 1): [b'\x01', 8], ('COAP.MID', 1): [b'\x81B', 16], ('COAP.TOKEN', 1): [b'\xdd\xad', 16], 
     ('COAP.Uri-Host', 1): [b'user.ackl.io', 96, 'variable'], ('COAP.Uri-Path', 1): [b'time', 32, 'variable']},
     b'', None)
 
@@ -39,7 +39,7 @@ def test_import():
 def test_parse():
     import compr_parser
     
-    parser = compr_parser.Parser()
+    parser = compr_parser.Parser(None)
     
     packets = []
     pcapngScanner = rdpcap("tests/coap_icmp.pcap")
@@ -74,4 +74,15 @@ def test_parse():
 
         assert (parsed_ICMP[0][fd]) == expected_fields
     assert (parsed_ICMP[1] == EXPECTED_RESULTS_IPv6_UDP[1]) # check data part
+
+
+    unparser = compr_parser.Unparser()
+
+    udp_ip_coap = unparser.unparse(parsed_IP_UDP_COAP[0], parsed_IP_UDP_COAP[1], 'UP', None )
+
+    print(bytes(udp_ip_coap))
+    print(bytes(pcapngScanner[0])[14:] )
+
+    assert(bytes(udp_ip_coap) == bytes(pcapngScanner[0])[14:] )
+
 
