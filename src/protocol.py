@@ -253,9 +253,11 @@ class SCHCProtocol:
             return schc_packet, device_id
 
         device_id = rule[T_META][T_DEVICEID]
+        self.rule_manager.timestamp_device(device_id)
+        self.rule_manager.Print()
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
-        dprint(schc_packet)
+        #dprint(schc_packet)
         #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
