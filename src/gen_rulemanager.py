@@ -1673,3 +1673,11 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
             # add the modified one
             self.from_coreconf(device=device, dev_info=json_cconf)
         return result
+    
+
+# TIMESTAMPING
+
+    def timestamp_device(self, device_id):
+        for d in self._ctxt:
+            if d["DeviceID"] == deviceID: 
+                d[T_META][T_LAST_USED] =  datetime.datetime.now().isoformat()Ò    
