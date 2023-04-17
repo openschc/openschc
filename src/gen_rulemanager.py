@@ -645,11 +645,11 @@ class RuleManager:
         """
         for dev in self._ctxt:
             print ("*"*40)
-            print ("Device:", dev["DeviceID"], end="")
+            print ("Device:", dev["DeviceID"], end=" ")
             if dev[T_META][T_LAST_USED]:
-                print(Fore.BLUE+"last used: "+ dev[T_META][T_LAST_USED])
+                print(Fore.BLUE+"last used: "+ dev[T_META][T_LAST_USED]+Fore.BLACK)
             else:
-                print(Fore.LIGHTMAGENTA_EX+"Never Used")
+                print(Fore.LIGHTMAGENTA_EX+"Never Used"+Fore.BLACK)
 
             for rule in dev["SoR"]:
                 print ("/" + "-"*25 + "\\")
