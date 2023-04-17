@@ -660,7 +660,14 @@ class RuleManager:
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
                     if rule[T_META][T_LAST_USED]:
-                        print (rule[T_META][T_LAST_USED], end="")
+                        timestamp = rule[T_META][T_LAST_USED]
+                        l_dash = 30-len(timestamp)//2
+                        r_dash = ldash
+                        if l_dash*2 + len(timestamp) < 30:
+                            l_dash +=1
+
+
+                        print ('-'*l_dash+timestamp+'-'*r_dash+"+", end="")
                     else:
                         print( "-"*30 + "+", end="")
                     
