@@ -662,12 +662,12 @@ class RuleManager:
                     if rule[T_META][T_LAST_USED]:
                         timestamp = rule[T_META][T_LAST_USED]
                         l_dash = 30-len(timestamp)//2
-                        r_dash = ldash
+                        r_dash = l_dash
                         if l_dash*2 + len(timestamp) < 30:
                             l_dash +=1
 
 
-                        print ('-'*l_dash+timestamp+'-'*r_dash+"+", end="")
+                        print ('-'*l_dash + timestamp + '-'*r_dash + "+", end="")
                     else:
                         print( "-"*30 + "+", end="")
                     
