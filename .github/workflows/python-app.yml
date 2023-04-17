@@ -17,6 +17,7 @@ jobs:
       run: |
         pip install pytest
         pip install cbor2
+        pip install colorama
     - name: Test with pytest
       run: |
         cd src
