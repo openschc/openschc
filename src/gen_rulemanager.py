@@ -660,7 +660,7 @@ class RuleManager:
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
                     if rule[T_META][T_LAST_USED]:
-                        print ([T_META][T_LAST_USED], end="")
+                        print (rule[T_META][T_LAST_USED], end="")
                     else:
                         print( "-"*30 + "+", end="")
                     
