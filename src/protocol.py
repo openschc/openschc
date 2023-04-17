@@ -253,8 +253,6 @@ class SCHCProtocol:
             return schc_packet, device_id
 
         device_id = rule[T_META][T_DEVICEID]
-        self.rule_manager.timestamp_device(device_id, rule)
-        self.rule_manager.Print()
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
@@ -344,15 +342,17 @@ class SCHCProtocol:
         return frag_session
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None):
-        dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
+        #dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
 
-        print("schc_packet at schc_recv", schc_packet)
+        #print("schc_packet at schc_recv", schc_packet)
         packet_bbuf = BitBuffer(schc_packet)
-        dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
+        #dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
-
+        self.rule_manager.timestamp_device(device_id, rule)
+        self.rule_manager.Print()
+        
         if rule == None:
             print ("No rule found")
             return None
