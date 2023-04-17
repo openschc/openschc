@@ -72,7 +72,7 @@ class Parser:
     Parser takes a bytearray and transforms it into a dictionary indexed by field id.
     """
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
         self.header_fields = {}
 
@@ -154,8 +154,6 @@ class Parser:
 
             pos += 8
 
-            print (self.header_fields)
-
             next_layer = "COAP"
 
         if "ICMP" in layers and next_layer == "ICMP":
@@ -178,8 +176,6 @@ class Parser:
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
                 
-
-
         if "COAP" in layers and next_layer == "COAP":
             field_position = {}
             coapBytes = unpack('!BBH', pkt[pos:pos+4])
@@ -192,14 +188,14 @@ class Parser:
 
             pos += 4
 
-            token = int(0)
+            token = b''
             tkl   = int.from_bytes(self.header_fields[T_COAP_TKL, 1][0], "big")
             for i in range(0, tkl):
-                token <<= 8
-                token += int(pkt[pos+i])
+                token += pkt[pos].to_bytes(1, 'big')
                 pos += 1
 
-            self.header_fields[T_COAP_TOKEN, 1] = [adapt_value(token), tkl*8]
+            if token != b'':
+                self.header_fields[T_COAP_TOKEN, 1] = [adapt_value(token), tkl*8]
 
             option_number = 0
             while (pos < len(pkt)):
@@ -257,7 +253,7 @@ class Unparser:
     def _init(self):
         pass
 
-    def unparse (self, header_d, data, direction, d_rule, iface=None):
+    def unparse (self, header_d, data, direction, d_rule=None, iface=None):
         #dprint ("unparse: ", header_d, data, direction)
 
         L2header = None
@@ -337,7 +333,7 @@ class Unparser:
 #                raise ValueError("TBD")
 
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
-                print ("CoAP Inside")
+                #print ("CoAP Inside")
 
                 coap_ver  = int.from_bytes(header_d[(T_COAP_VERSION, 1)][0], byteorder="big" )
                 coap_type = int.from_bytes(header_d[(T_COAP_TYPE, 1)][0], byteorder="big" )
@@ -351,12 +347,11 @@ class Unparser:
                 tkl = int.from_bytes(header_d[(T_COAP_TKL, 1)][0], byteorder="big" )
                 if tkl != 0:
                     token = header_d[(T_COAP_TOKEN, 1)][0]
-                    for i in range(tkl-1, -1, -1):
-                        bt = (token & (0xFF << 8*i)) >> 8*i
-                        coap_h += struct.pack("!B", bt)
+                    for i in range(len(token)):
+                        coap_h += struct.pack("!B", token[i])
 
                 cumul_t = 0
-
+                # /!\ should sort the options before recontructing them
                 for opt in header_d.items():
                     if not ("COAP" in opt[0][0]) or (opt[0][0] in [T_COAP_VERSION, T_COAP_TYPE, T_COAP_TKL, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
                         continue
@@ -367,14 +362,14 @@ class Unparser:
                     
                     delta_t = coap_options[opt_name] - cumul_t
                     cumul_t = coap_options[opt_name]
-                    print (opt_name, coap_options[opt_name], delta_t)
+                    #print (opt_name, coap_options[opt_name], delta_t)
                     
                     if delta_t < 13:
                         dt = delta_t
                     else:
                         dt = 13
                         
-                    print (opt_len, opt_val)
+                    #print (opt_len, opt_val)
 
                     if opt_len < 13:
                         ol = opt_len
@@ -389,17 +384,17 @@ class Unparser:
                     if ol == 13:
                         coap_h += struct.pack("!B", opt_len - 13)
 
-                    print (binascii.hexlify(coap_h))
+                    #print (binascii.hexlify(coap_h))
 
                     for i in range (0, opt_len):
                         coap_h += struct.pack("!B", opt_val[i])
+
 
                 if len(data) > 0:
                     coap_h += b'\xff'
                     coap_h += data
                         
-                print (binascii.hexlify(coap_h))
-
+                #print (binascii.hexlify(coap_h))
 
 
 
@@ -410,5 +405,5 @@ class Unparser:
         else:
             full_packet = L3header / Raw(load=data)
 
-        hexdump(full_packet)
+        #hexdump(full_packet)
         return full_packet
