@@ -1680,4 +1680,4 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
     def timestamp_device(self, device_id):
         for d in self._ctxt:
             if d["DeviceID"] == deviceID: 
-                d[T_META][T_LAST_USED] =  datetime.datetime.now().isoformat()Ò    
+                d[T_META][T_LAST_USED] =  datetime.datetime.now().isoformat()
