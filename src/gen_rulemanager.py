@@ -1678,14 +1678,14 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
 # TIMESTAMPING
 
-    def timestamp_device(self, device_id, rule_id_value, rule_id_length):
+    def timestamp_device(self, device_id, rule):
         for d in self._ctxt:
             if d["DeviceID"] == device_id: 
                 timestamp = datetime.datetime.now().isoformat()
                 d[T_META][T_LAST_USED] =  timestamp
                 for r in d["SoR"]:
-                    if r[T_RULEID] == rule_id_value and r[T_RULEIDLENGTH]== rule_id_length:
-                        r[T_META][T_LAST_USED] == timestamp
+                    if r[T_RULEID] == rule[T_RULEID] and r[T_RULEIDLENGTH]==rule[T_RULEIDLENGTH]:
+                        r[T_META][T_LAST_USED] = timestamp
 
                         return True
         return False
