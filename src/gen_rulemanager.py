@@ -658,7 +658,13 @@ class RuleManager:
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_COMP in rule:
-                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
+                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
+                    if rule[T_META][T_LAST_USED]:
+                        print ([T_META][T_LAST_USED], end="")
+                    else:
+                        print( "-"*30 + "+", end="")
+                    
+                    print("-"*13 + "+" + "-"*16 +"\\")
                     for e in rule[T_COMP]:
                         msg2 = None
                         if len(e[T_FID]) < 16:
