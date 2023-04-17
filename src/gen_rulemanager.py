@@ -395,6 +395,9 @@ class RuleManager:
             d = {"DeviceID": device, "SoR": []}
             self._ctxt.append(d)
 
+        d[T_META] = {T_LAST_USED: None}
+        print ("@@@@@", d)
+
         for n_rule in sor:
             n_ruleID = n_rule[T_RULEID]
             n_ruleLength = n_rule[T_RULEIDLENGTH]
@@ -529,6 +532,7 @@ class RuleManager:
              arule[T_ACTION] = nrule[T_ACTION]
 
 
+
         arule[T_COMP] = []
 
         up_rules = 0
@@ -604,6 +608,7 @@ class RuleManager:
         arule[T_META][T_UP_RULES] = up_rules
         arule[T_META][T_DW_RULES] = dw_rules
         arule[T_META][T_DEVICEID] = device_id
+        arule[T_META][T_LAST_USED] = None
 
         return arule
 
@@ -926,8 +931,8 @@ class RuleManager:
 
         return None        
 
-    def FindFragmentationRule(self, deviceID=None, originalSize=None,
-                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
+    def FindFragmentationRule(self, deviceID=None, originalSize=None, 
+                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP, 
                               packet=None):
         """Lookup a fragmentation rule.
 
