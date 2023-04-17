@@ -266,8 +266,9 @@ from copy import deepcopy
 from gen_parameters import *
 from compr_core import *
 from compr_parser import *
-import ipaddress
 import warnings
+import colorama
+from colorama import Fore, Style
 
 import base64
 import cbor2 as cbor
@@ -644,7 +645,11 @@ class RuleManager:
         """
         for dev in self._ctxt:
             print ("*"*40)
-            print ("Device:", dev["DeviceID"])
+            print ("Device:", dev["DeviceID"], end="")
+            if dev[T_META][T_LAST_USED]:
+                print(Fore.BLUE+"last used: "+ dev[T_META][T_LAST_USED])
+            else:
+                print(Fore.LIGHTMAGENTA_EX+"Never Used")
 
             for rule in dev["SoR"]:
                 print ("/" + "-"*25 + "\\")
