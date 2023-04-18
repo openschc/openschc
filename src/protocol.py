@@ -210,7 +210,7 @@ class SCHCProtocol:
         else:
             raise ValueError("Main interface is a string")
 
-    def set_other_interface(self, interfaces):
+    def set_other_interfaces(self, interfaces):
         if type (interfaces) == list:
             self.other_interfaces = interfaces
         else:
