@@ -203,8 +203,6 @@ class SCHCProtocol:
         return self.system
 
     def action_proxy_ping(self, rule, ppacket, direction, verbose):
-        print (ppacket)
-
         if direction == T_DIR_UP:
             rev_dir = T_DIR_DW
         elif direction == T_DIR_DW:
@@ -219,7 +217,7 @@ class SCHCProtocol:
 
             unparser = Unparser()
             x = unparser.unparse(ppacket, data=None, direction=rev_dir)
-            print(x)
+            print('result: ', x)
 
             return True
         
