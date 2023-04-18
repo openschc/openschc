@@ -204,6 +204,11 @@ class SCHCProtocol:
 
     def action_proxy_ping(self, rule, ppacket, direction):
         print (ppacket)
+
+        if ppacket[(T_ICMPV6_TYPE, 1)][0] == 128: # echo request
+            ppacket[(T_ICMPV6_TYPE, 1)][0] == 129
+
+        print (ppacket)
         pass
 
 
