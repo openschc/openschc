@@ -660,7 +660,7 @@ class RuleManager:
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_ACTION in rule:
-                    print ("|" + "-"*25  + "+" + "-"*29 + "\\")
+                    print ("|" + "-"*25  + "+" + "-"*30 + "\\")
 
                     msg =  "ACTION : {}".format(rule[T_ACTION])
                     if rule[T_ACTION] in [T_ACTION_PPING]: # parameter as a int
