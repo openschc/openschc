@@ -664,7 +664,7 @@ class RuleManager:
 
                     msg =  "ACTION : {}".format(rule[T_ACTION])
                     if rule[T_ACTION] in [T_ACTION_PPING]: # parameter as a int
-                        msg += " ({})".format(int.from_bytes(rule[T_ACTION_VAL]), 'big')
+                        msg += " ({})".format(int.from_bytes(rule[T_ACTION_VAL], 'big'))
 
                     print ("{:30} |".format(msg))
 
