@@ -171,6 +171,8 @@ class SCHCProtocol:
         self.session_manager = SessionManager(self, unique_peer)
         self.verbose = verbose
         self.sender_delay = 0
+        self.main_interface = None
+        self.other_interfaces = None
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -201,6 +203,24 @@ class SCHCProtocol:
 
     def get_system(self):
         return self.system
+    
+    def set_main_interface(self, interface):
+        if type(interface) == str:
+            self.main_interface = interface
+        else:
+            raise ValueError("Main interface is a string")
+
+    def set_other_interface(self, interfaces):
+        if type (interfaces) == list:
+            self.other_interfaces = interfaces
+        else:
+            raise ValueError("Other interfaces is a list of strings")
+
+    def get_main_interface(self):
+        return self.main_interface
+
+    def get_interfaces(self):
+        return [self.main_interface] + self.other_interfaces
 
     def action_proxy_ping(self, rule, ppacket, direction, verbose):
         if direction == T_DIR_UP:

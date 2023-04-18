@@ -50,7 +50,7 @@ def processPkt(pkt):
                     uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)                       
                     if uncomp_pkt != None:
                         #uncomp_pkt[1].show()
-                        send(uncomp_pkt[1], iface=INTERFACE) 
+                        send(uncomp_pkt[1], iface=schc_machine.get_main_interface()) 
             elif ip_proto == 41: # IPv6 on tunnel
                 schc_machine.schc_send(bytes(pkt)[34:], verbose=True)
         elif e_type == 0x86dd: # IPv6 on regular interface
@@ -72,6 +72,8 @@ schc_machine = SCHCProtocol(
     role=POSITION,           # DEVICE or CORE
     verbose = False)         
 schc_machine.set_rulemanager(rm)
+schc_machine.set_main_interface(INTERFACE) # listen and send on this interface
+schc_machine.set_other_interfaces(["ens3"])# listen on theses interfaces
 
-sniff(prn=processPkt, iface=[INTERFACE, "ens3"]) # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface=schc_machine.get_interfaces()) # scappy cannot read multiple interfaces
 
