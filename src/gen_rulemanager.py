@@ -797,13 +797,13 @@ class RuleManager:
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
 
-            print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
+            #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
             if bit_tv != bit_fv:
-                print ("comparison failed")
+                #print ("comparison failed")
                 return False
                 
-        print ("comparison succeeded")
+        #print ("comparison succeeded")
         return True
 
 
