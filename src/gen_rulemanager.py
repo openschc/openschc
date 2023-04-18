@@ -863,10 +863,11 @@ class RuleManager:
         """
         for dev in self._ctxt:
             for rule in dev["SoR"]:
+                print (rule)
                 if "Compression" in rule:
                     matches = 0
                     for r in rule["Compression"]:
-                        print(r)
+                        #print(r)
                         #print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
