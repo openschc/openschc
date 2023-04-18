@@ -202,7 +202,8 @@ class SCHCProtocol:
     def get_system(self):
         return self.system
 
-    def action_proxy_ping(self, rule, packet):
+    def action_proxy_ping(self, rule, ppacket, direction):
+        print (ppacket)
         pass
 
 
@@ -269,7 +270,7 @@ class SCHCProtocol:
                 print ("schc_send: Apply action", rule[T_ACTION])
 
                 if rule[T_ACTION] == T_ACTION_PPING: 
-                    print ("proxy ping")
+                    self.action_proxy_ping(rule, parsed_packet, direction)
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
