@@ -398,7 +398,6 @@ class RuleManager:
             self._ctxt.append(d)
 
         d[T_META] = {T_LAST_USED: None}
-        print ("@@@@@", d)
 
         for n_rule in sor:
             n_ruleID = n_rule[T_RULEID]
@@ -530,11 +529,14 @@ class RuleManager:
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
         if T_ACTION in nrule:
-             print ("Warning: using experimental Action")
-             arule[T_ACTION] = nrule[T_ACTION]
-
-
-
+            print ("Warning: using experimental Action")
+            if nrule[T_ACTION] in [T_ACTION_PPING]:
+                arule[T_ACTION] = nrule[T_ACTION]
+                if T_ACTION_VAL in nrule:
+                    arule[T_ACTION_VAL] =  adapt_value([T_ACTION_VAL])
+                else:
+                    arule[T_ACTION_VAL] = None
+            
         arule[T_COMP] = []
 
         up_rules = 0
@@ -581,7 +583,7 @@ class RuleManager:
                         val = list(dic.values())[0]
 
 
-                        print ("---------> ", key, val)
+                        #print ("---------> ", key, val)
                         entry[T_TV_IND] = adapt_value(key,entry[T_FL], FID)
                     else:
                         entry[T_TV] = adapt_value(r[T_TV], entry[T_FL], FID)
@@ -656,6 +658,10 @@ class RuleManager:
                 print ("/" + "-"*25 + "\\")
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
+
+                if T_ACTION in rule:
+                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+"  "-"*30 +"-"*13 + "+" + "-"*16 +"\\")
+                    print ("| ACTION : {} ({})".format(rule[T_ACTION], rule[T_ACTION_VAL]))
 
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
