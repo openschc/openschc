@@ -352,7 +352,7 @@ class SCHCProtocol:
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
         self.rule_manager.timestamp_device(device_id, rule)
         self.rule_manager.Print()
-        
+
         if rule == None:
             print ("No rule found")
             return None
@@ -371,7 +371,6 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
-            print("The HEADER D:", header_d, pkt_data)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
         elif T_NO_COMP in rule:
