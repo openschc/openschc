@@ -50,7 +50,7 @@
         "RuleID": 102,
         "RuleIDLength": 8,
         "Action" : "proxy-ping",
-        "Action.val" : 60,
+        "Action.val" : 10,
         "Compression": [
         {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
         {"FID": "IPV6.TC",  "TV": 1, "MO": "ignore", "CDA": "not-sent"},
