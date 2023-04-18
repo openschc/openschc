@@ -52,6 +52,7 @@ def processPkt(pkt):
                         #uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface=INTERFACE) 
             elif ip_proto == 41: # IPv6 on tunnel
+                print ("ci")
                 schc_machine.schc_send(bytes(pkt)[34:])
         elif e_type == 0x86dd: # IPv6 on regular interface
             schc_machine.schc_send(bytes(pkt)[14:])
