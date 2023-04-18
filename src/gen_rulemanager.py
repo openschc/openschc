@@ -858,7 +858,7 @@ class RuleManager:
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failing_field=False):
         """ Takes a parsed packet and returns the matching rule.
         """
         for dev in self._ctxt:
