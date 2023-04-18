@@ -229,6 +229,10 @@ class SCHCProtocol:
             rev_dir = T_DIR_UP
         else:
             raise ValueError("Direction incorrect")
+        
+        device_id = rule[T_META][T_DEVICEID]
+        last_used = self.rule_manager.get_timestamp(device_id)
+        print ("device TS", last_used)
 
         if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'\x80': # echo request
             if verbose:

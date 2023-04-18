@@ -1713,3 +1713,14 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
                         return True
         return False
+
+    def get_timestamp(self, device_id, rule=None):
+        for d in self._ctxt:
+            if d["DeviceID"] == device_id: 
+                if rule==None:
+                    return d[T_META][T_LAST_USED] 
+                for r in d["SoR"]:
+                    if r[T_RULEID] == rule[T_RULEID] and r[T_RULEIDLENGTH]==rule[T_RULEIDLENGTH]:
+                        return r[T_META][T_LAST_USED]
+
+        return None
