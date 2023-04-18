@@ -232,6 +232,10 @@ class SCHCProtocol:
         
         device_id = rule[T_META][T_DEVICEID]
         last_used = self.rule_manager.get_timestamp(device_id)
+
+        if last_used == None: # no time recorded, so device is dead
+            return False
+
         last_used_iso = datetime.fromisoformat(last_used)
         delta = datetime.now() - last_used_iso
 
