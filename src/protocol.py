@@ -202,15 +202,28 @@ class SCHCProtocol:
     def get_system(self):
         return self.system
 
-    def action_proxy_ping(self, rule, ppacket, direction):
+    def action_proxy_ping(self, rule, ppacket, direction, verbose):
         print (ppacket)
+
+        if direction == T_DIR_UP:
+            rev_dir = T_DIR_DW
+        elif direction == T_DIR_DW:
+            rev_dir = T_DIR_UP
+        else:
+            raise ValueError("Direction incorrect")
 
         if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'\x80': # echo request
-
+            if verbose:
+                print("schc_send: generating echo reply")
             ppacket[(T_ICMPV6_TYPE, 1)][0] = b'\x81'
 
-        print (ppacket)
-        pass
+            unparser = Unparser()
+            x = unparser.unparse(ppacket, data=b'',direction=rev_dir)
+            print(x)
+
+            return True
+        
+        return False
 
 
     #CLEANUP remove dst_l3_address
@@ -276,7 +289,7 @@ class SCHCProtocol:
                 print ("schc_send: Apply action", rule[T_ACTION])
 
                 if rule[T_ACTION] == T_ACTION_PPING: 
-                    self.action_proxy_ping(rule, parsed_packet, t_dir)
+                    self.action_proxy_ping(rule, parsed_packet, t_dir, verbose)
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
