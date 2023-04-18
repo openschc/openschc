@@ -666,7 +666,7 @@ class RuleManager:
                     if rule[T_ACTION] in [T_ACTION_PPING]: # parameter as a int
                         msg += " ({})".format(int.from_bytes(rule[T_ACTION_VAL], 'big'))
 
-                    print ("| {:40} |".format(msg))
+                    print ("| {:45} |".format(msg))
 
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
