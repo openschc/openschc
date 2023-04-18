@@ -47,10 +47,11 @@ def processPkt(pkt):
                     schc_pkt, addr = tunnel.recvfrom(2000)
                     other_end = "udp:"+addr[0]+":"+str(addr[1])
                     print("other end =", other_end)
-                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt)                       
+                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, 
+                                                        schc_packet=schc_pkt)                       
                     if uncomp_pkt != None:
-                        #uncomp_pkt[1].show()
-                        send(uncomp_pkt[1], iface=schc_machine.get_main_interface()) 
+                        uncomp_pkt[1].show()
+                        pass
             elif ip_proto == 41: # IPv6 on tunnel
                 schc_machine.schc_send(bytes(pkt)[34:], verbose=True)
         elif e_type == 0x86dd: # IPv6 on regular interface
