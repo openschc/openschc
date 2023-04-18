@@ -51,8 +51,8 @@ def processPkt(pkt):
                     if uncomp_pkt != None:
                         #uncomp_pkt[1].show()
                         send(uncomp_pkt[1], iface=INTERFACE) 
-            elif ip_proto==41:
-                schc_machine.schc_send(bytes(pkt)[34:])
+        elif e_type == 0x86dd:
+            schc_machine.schc_send(bytes(pkt)[34:])
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
