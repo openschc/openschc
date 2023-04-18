@@ -228,16 +228,20 @@ class SCHCProtocol:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
         else: 
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
-        self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
+        #self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
+            if verbose:
+                print("schc_send: no parsing")
             return BitBuffer(raw_packet), None
 
         # Apply compression rule
 
         rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
-        #print("compr rule", rule)
-        self._log("compression rule {}".format(rule))
+
+        if verbose:
+            print("schc_send: compr rule", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
             #print("No Compress rule:", rule)
