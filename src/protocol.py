@@ -306,9 +306,9 @@ class SCHCProtocol:
 
                 
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing)
-        print("+++ packet_bbuf", packet_bbuf)
-        print("+++ device_id", device_id)
-        print("+++ position", self.position)
+        #print("+++ packet_bbuf", packet_bbuf)
+        #print("+++ device_id", device_id)
+        #print("+++ position", self.position)
 
 
         if self.position == T_POSITION_DEVICE:
@@ -318,7 +318,7 @@ class SCHCProtocol:
             direction = T_DIR_DW
             destination = device_id
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
+        #print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
 
         if packet_bbuf == None: # No compression rule found
             return 
@@ -329,9 +329,9 @@ class SCHCProtocol:
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), destination)
-            print("protocol.py destination", destination)
+            #print("protocol.py destination", destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
-            print("AAAAA protocol.py", args)
+            #print("AAAAA protocol.py", args)
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
