@@ -270,7 +270,7 @@ class SCHCProtocol:
                 print ("schc_send: Apply action", rule[T_ACTION])
 
                 if rule[T_ACTION] == T_ACTION_PPING: 
-                    self.action_proxy_ping(rule, parsed_packet, direction)
+                    self.action_proxy_ping(rule, parsed_packet, t_dir)
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
