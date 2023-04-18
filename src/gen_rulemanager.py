@@ -533,7 +533,7 @@ class RuleManager:
             if nrule[T_ACTION] in [T_ACTION_PPING]:
                 arule[T_ACTION] = nrule[T_ACTION]
                 if T_ACTION_VAL in nrule:
-                    arule[T_ACTION_VAL] =  adapt_value([T_ACTION_VAL])
+                    arule[T_ACTION_VAL] =  adapt_value(arule[T_ACTION_VAL])
                 else:
                     arule[T_ACTION_VAL] = None
             
