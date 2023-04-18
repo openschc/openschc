@@ -779,8 +779,8 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        print ("MSB")
-        print (TV, FV, rlength, flength, arg)
+        #print ("MSB")
+        #print (TV, FV, rlength, flength, arg)
 
         if rlength == T_FUNCTION_VAR:
             rlength = flength
