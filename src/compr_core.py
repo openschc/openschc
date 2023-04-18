@@ -132,14 +132,14 @@ class Compressor:
 
             bit_value = value[pos_byte] & (1 << pos_bit)
 
-            print (bit_position, pos_byte, pos_bit, bit_value)
+            #print (bit_position, pos_byte, pos_bit, bit_value)
             output.set_bit(bit_value)
 
             bit_position += 1
 
     def tx_cda_compress(self, field, rule, output, device_id=None):
         x, d_is = self.protocol._apply_compression(device_id, field[0], reverse_direction=True)
-        print (x)
+        #print (x)
         if rule[T_FL] == "var":
             output.add_length(len(x._content))
 
@@ -147,48 +147,13 @@ class Compressor:
 
         for i in range (0, len(compr_payload)):
             output.add_bits(compr_payload[i], 8)
-            output.display()
+            #output.display()
 
 
     def tx_cda_notyet(self, field, rule, output, device_id=None):
         raise NotImplementedError
 
-    # def compress(self, context, packet_bbuf, di=T_DIR_UP):
-    #     """ compress the data in the packet_bbuf according to the rule_set.
-    #     check if the all of the rules in the rule set are matched with the packet.
-    #     return the compressed data to be sent if matched.
-    #     or return None if not.
-    #     regarding to the di, the address comparion is like below:
-    #         di     source address      destination address
-    #         T_DIR_DW  APP_PREFIX/APP_IID  DEV_PREFIX/DEV_IID
-    #         T_DIR_UP  DEV_PREFIX/DEV_IID  APP_PREFIX/APP_IID
-    #     """
-    #     assert isinstance(packet_bbuf, BitBuffer)
-    #     assert di in [T_DIR_UP, T_DIR_DW]
-    #     input_bbuf = packet_bbuf.copy()
-    #     output_bbuf = BitBuffer()
-    #     rule = context["comp"]
-    #     # set ruleID first.
-    #     if rule["ruleID"] is not None and rule["ruleLength"] is not None:
-    #         output_bbuf.add_bits(rule["ruleID"], rule["ruleLength"])
-    #     for r in rule["compression"]["rule_set"]:
-    #         # compare each rule with input_bbuf.
-    #         # XXX need to handle "DI"
-    #         dprint("rule item:", r)
-    #         result, val = self.__func_tx_mo[r[T_MO]](r, input_bbuf)
-    #         dprint("result", result, val)
-    #         if result == False:
-    #             # if any of MO functions is failed, return None.
-    #             # this rule should not be applied.
-    #             return None
-    #         # if match the rule, call CDA.
-    #         self.__func_tx_cda[r[T_CDA]](r, val, output_bbuf)
-    #     if input_bbuf.count_remaining_bits() > 0:
-    #         output_bbuf += input_bbuf
-    #     # if all process have been succeeded, return the data.
-    #     self.protocol._log("compress: {}=>{}".format(
-    #         packet_bbuf, output_bbuf))
-    #     return output_bbuf
+
 
     def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None):
         """
@@ -237,7 +202,7 @@ class Compressor:
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            #dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
             output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
@@ -260,44 +225,7 @@ class Decompressor:
             }
 
 
-    # def cal_checksum(self, packet):
-    #     # RFC 1071
-    #     assert isinstance(packet, bytearray)
-    #     packet_size = len(packet)
-    #     if packet_size%2:
-    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet[:-1]))
-    #         cksum += (packet[-1]<<8)&0xff00
-    #     else:
-    #         cksum = sum(struct.unpack(">{}H".format(packet_size//2), packet))
-    #     while cksum>>16:
-    #         cksum = (cksum & 0xFFFF) + (cksum >> 16 & 0xFFFF)
-    #     return ~cksum & 0xFFFF
 
-    # def build_ipv6_pseudo_header(self):
-    #     assert self.src_prefix is not None
-    #     assert self.src_iid is not None
-    #     assert self.dst_prefix is not None
-    #     assert self.dst_iid is not None
-    #     assert self.ipv6_payload is not None
-    #     assert self.next_proto is not None
-    #     phdr = bytearray([0]*40)
-    #     phdr[ 0: 8] = self.src_prefix
-    #     phdr[ 8:16] = self.src_iid
-    #     phdr[16:24] = self.src_prefix
-    #     phdr[24:32] = self.src_iid
-    #     phdr[32:36] = struct.pack(">I",len(self.ipv6_payload))
-    #     phdr[39] = self.next_proto
-    #     return phdr
-
-    # def cda_copy_field(self, out_bbuf, target_val):
-    #     """ copy the appropriate target_val and return it. """
-    #     if type(target_val) == bytes:
-    #         pass
-    #     else:
-    #         tv = target_val
-    #         out_bbuf.add_bits(tv, rule[T_FL])
-    #     self.protocol._log("MO {}: copy {}".format(rule[T_MO], tv))
-    #     return tv
 
 
     def rx_cda_not_sent(self, rule, in_bbuf):
