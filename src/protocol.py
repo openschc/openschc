@@ -239,24 +239,26 @@ class SCHCProtocol:
 
         rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
 
-        if verbose:
-            print("schc_send: compr rule", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
-
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
-            #print("No Compress rule:", rule)
-            self._log("no-compression rule {}".format(rule))
+
+            #self._log("no-compression rule {}".format(rule))
 
             if rule is None:
                 # XXX: not putting any SCHC compression header? - need fix
-                self._log("rule for compression/no-compression not found")
+                print("schc-send: rule for compression/no-compression not found")
                 return None, device_id
-                
+            
+            if verbose:
+                print("schc-send: No Compress rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+
             schc_packet = self.compressor.no_compress(rule, raw_packet)
-            #print("raw_packet", raw_packet)
             return schc_packet, device_id
 
+        if verbose:
+            print("schc_send: compr rule", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
         device_id = rule[T_META][T_DEVICEID]
+
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
