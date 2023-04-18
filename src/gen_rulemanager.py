@@ -881,7 +881,7 @@ class RuleManager:
                                     arg, direction=direction):
                                         matches += 1
                                 else:
-                                    if failed_field:
+                                    if failing_field:
                                         print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
                                             rule[T_RULEID], rule[T_RULEIDLENGTH],
                                             r[T_FID],
