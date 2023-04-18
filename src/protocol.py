@@ -256,7 +256,7 @@ class SCHCProtocol:
             return schc_packet, device_id
 
         if verbose:
-            print("schc_send: compr rule", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+            print("schc_send: compr rule", str(rule[T_RULEID])+'/'+str(rule[T_RULEIDLENGTH]))
         device_id = rule[T_META][T_DEVICEID]
 
         
