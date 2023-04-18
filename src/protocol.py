@@ -206,7 +206,7 @@ class SCHCProtocol:
         print (ppacket)
 
         if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'80': # echo request
-            ppacket[(T_ICMPV6_TYPE, 1)][0] == b'81'
+            ppacket[(T_ICMPV6_TYPE, 1)][0] = b'81'
 
         print (ppacket)
         pass
