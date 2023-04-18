@@ -115,6 +115,8 @@ T_DW_RULES = "DW_RULES"
 T_LAST_USED = "LAST_USED"
 
 T_ACTION = "Action"
+T_ACTION_VAL = "Action.val"
+T_ACTION_PPING = "proxy-ping"
 
 T_COMP = "Compression"
 T_NO_COMP = "NoCompression"
