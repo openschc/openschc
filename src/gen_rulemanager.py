@@ -660,7 +660,7 @@ class RuleManager:
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_ACTION in rule:
-                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+"  "-"*30 +"-"*13 + "+" + "-"*16 +"\\")
+                    print ("|" + "-"*25  +"\\")
                     print ("| ACTION : {} ({})".format(rule[T_ACTION], rule[T_ACTION_VAL]))
 
                 if T_COMP in rule:
