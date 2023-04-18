@@ -232,7 +232,12 @@ class SCHCProtocol:
         
         device_id = rule[T_META][T_DEVICEID]
         last_used = self.rule_manager.get_timestamp(device_id)
-        print ("device TS", last_used)
+        last_used_iso = datetime.fromisoformat(last_used)
+        delta = datetime.now() - last_used_iso
+
+        print ("delta", delta.seconds)
+
+        current_time = datetime.datetime.now()
 
         if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'\x80': # echo request
             if verbose:
