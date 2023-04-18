@@ -17,6 +17,7 @@ from scapy.all import *
 import binascii
 
 
+
 option_names = {
     1: T_COAP_OPT_IF_MATCH,
     3: T_COAP_OPT_URI_HOST,
@@ -65,6 +66,7 @@ coap_options = {'If-Match':1,
             'Proxy-Scheme':39,
             'Size1':60,
             'No-Response': 258}
+
 
 
 class Parser:

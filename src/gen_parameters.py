@@ -291,57 +291,6 @@ YANG_ID = {
 
 }
 
-
-option_names = {
-    1: T_COAP_OPT_IF_MATCH,
-    3: T_COAP_OPT_URI_HOST,
-    4: T_COAP_OPT_ETAG,
-    5: T_COAP_OPT_IF_NONE_MATCH,
-    6: T_COAP_OPT_OBS,
-    7: T_COAP_OPT_URI_PORT,
-    8: T_COAP_OPT_URI_PATH,
-    11: T_COAP_OPT_URI_PATH,
-    12: T_COAP_OPT_CONT_FORMAT,
-    14: T_COAP_OPT_MAX_AGE,
-    15: T_COAP_OPT_URI_QUERY,
-    17: T_COAP_OPT_ACCEPT,
-    20: T_COAP_OPT_LOC_QUERY,
-    23: T_COAP_OPT_BLOCK2,
-    27: T_COAP_OPT_BLOCK1,
-    28: T_COAP_OPT_SIZE2,
-    35: T_COAP_OPT_PROXY_URI,
-    39: T_COAP_OPT_PROXY_SCHEME,
-    60: T_COAP_OPT_SIZE1,
-    258: T_COAP_OPT_NO_RESP
-}
-
-icmpv6_types = {
-    T_ICMPV6_TYPE_ECHO_REQUEST: 128,
-    T_ICMPV6_TYPE_ECHO_REPLY: 129
-}
-
-coap_options = {'If-Match':1,
-            'Uri-Host':3,
-            'ETag':4,
-            'If-None-Match':5,
-            'Observe':6,
-            'Uri-Port':7,
-            'Location-Path':8,
-            'Uri-Path':11,
-            'Content-Format':12,
-            'Max-Age':14,
-            'Uri-Query':15,
-            'Accept':17,
-            'Location-Query':20,
-            'Block2':23,
-            'Block1':27,
-            'Size2':28,
-            'Proxy-Uri':35,
-            'Proxy-Scheme':39,
-            'Size1':60,
-            'No-Response': 258}
-
-
 import ipaddress
 
 def adapt_value(value, length=None, FID=None): 
