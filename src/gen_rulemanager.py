@@ -660,13 +660,13 @@ class RuleManager:
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_ACTION in rule:
-                    print ("|" + "-"*25  + "+" + "-"*25 + "\\")
+                    print ("|" + "-"*25  + "+" + "-"*29 + "\\")
 
                     msg =  "ACTION : {}".format(rule[T_ACTION])
                     if rule[T_ACTION] in [T_ACTION_PPING]: # parameter as a int
                         msg += " ({})".format(int.from_bytes(rule[T_ACTION_VAL], 'big'))
 
-                    print ("| {:55} |".format(msg))
+                    print ("| {:54} |".format(msg))
 
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
