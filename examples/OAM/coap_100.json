@@ -67,7 +67,7 @@
         {"FID": "ICMPV6.CKSUM", "DI": "DW", "MO": "ignore", "CDA": "not-sent"},
         {"FID": "ICMPV6.IDENT", "DI": "DW",  "MO": "ignore", "CDA": "not-sent"},
         {"FID": "ICMPV6.SEQNO", "DI": "DW",  "MO": "ignore", "CDA": "not-sent"},
-        {"FID": "ICMPV6.PAYLOAD", "DI": "DW", "MO": "rev-rule-match", "CDA": "not-sent"}
+        {"FID": "ICMPV6.PAYLOAD", "DI": "DW", "MO": "ignore", "CDA": "not-sent"}
         ]
     }
     ]
