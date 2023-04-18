@@ -410,4 +410,8 @@ class Unparser:
             full_packet = L3header / Raw(load=data)
 
         #hexdump(full_packet)
+        if iface != None:
+            print ("sending to ", iface)
+            send(full_packet, iface=iface)
+        
         return full_packet

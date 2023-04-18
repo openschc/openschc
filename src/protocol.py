@@ -236,7 +236,7 @@ class SCHCProtocol:
             ppacket[(T_ICMPV6_TYPE, 1)][0] = b'\x81'
 
             unparser = Unparser()
-            x = unparser.unparse(ppacket, data=None, direction=rev_dir)
+            x = unparser.unparse(ppacket, data=None, direction=rev_dir, iface=self.get_main_interface())
             print('result: ', binascii.hexlify(bytes(x)))
 
             return True
