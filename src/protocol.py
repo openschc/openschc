@@ -202,6 +202,10 @@ class SCHCProtocol:
     def get_system(self):
         return self.system
 
+    def action_proxy_ping(self, rule, packet):
+        pass
+
+
     #CLEANUP remove dst_l3_address
     def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose=False):
         """Apply matching compression rule if one exists.
@@ -263,6 +267,9 @@ class SCHCProtocol:
         if T_ACTION in rule:
             if verbose:
                 print ("schc_send: Apply action", rule[T_ACTION])
+
+                if rule[T_ACTION] == T_ACTION_PPING: 
+                    print ("proxy ping")
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
