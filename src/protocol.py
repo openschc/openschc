@@ -306,6 +306,7 @@ class SCHCProtocol:
             if verbose:
                 print ("schc_send: Apply action", rule[T_ACTION])
 
+                hexdump(raw_packet)
                 if rule[T_ACTION] == T_ACTION_PPING: 
                     self.action_proxy_ping(rule, parsed_packet, t_dir, verbose)
         
