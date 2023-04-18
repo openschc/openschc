@@ -217,7 +217,7 @@ class SCHCProtocol:
 
             unparser = Unparser()
             x = unparser.unparse(ppacket, data=None, direction=rev_dir)
-            print('result: ', x)
+            print('result: ', binascii.hexlify(bytes(x)))
 
             return True
         
