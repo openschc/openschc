@@ -173,7 +173,7 @@ class Parser:
             elif icmpBytes[0] == 1: # Destination Unreachable
                 unused = unpack('!L', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [adapt_value(unused[0]), 32]
-                pos += 4
+            pos += 4
 
             self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
             pos = len(pkt)
