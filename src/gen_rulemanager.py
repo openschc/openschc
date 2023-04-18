@@ -655,7 +655,7 @@ class RuleManager:
                 print(Fore.LIGHTMAGENTA_EX+"Never Used"+Fore.BLACK)
 
             for rule in dev["SoR"]:
-                print ("/" + "-"*25 + "+" +"\\")
+                print ("/" + "-"*25 +"\\")
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
