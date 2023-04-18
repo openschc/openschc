@@ -236,11 +236,11 @@ class SCHCProtocol:
         # Apply compression rule
 
         rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
-        print("compr rule", rule)
+        #print("compr rule", rule)
         self._log("compression rule {}".format(rule))
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
-            print("No Compress rule:", rule)
+            #print("No Compress rule:", rule)
             self._log("no-compression rule {}".format(rule))
 
             if rule is None:
@@ -249,7 +249,7 @@ class SCHCProtocol:
                 return None, device_id
                 
             schc_packet = self.compressor.no_compress(rule, raw_packet)
-            print("raw_packet", raw_packet)
+            #print("raw_packet", raw_packet)
             return schc_packet, device_id
 
         device_id = rule[T_META][T_DEVICEID]
