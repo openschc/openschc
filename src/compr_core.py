@@ -172,7 +172,7 @@ class Compressor:
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            print("rule item:", r)
+            #print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
@@ -318,74 +318,6 @@ class Decompressor:
         # will update the length field later.
         return ("CC"*(rule[T_FL]//8), rule[T_FL] )
 
-    # def decompress(self, context, packet_bbuf, di=T_DIR_DW):
-    #     """ decompress the data in the packet_bbuf according to the rule_set.
-    #     return the decompressed data.
-    #     or return None if any error happens.
-    #     Note that it saves the content of packet_bbuf.
-
-    #     XXX how to consider the IPv6 extension headers.
-    #     """
-    #     assert isinstance(packet_bbuf, BitBuffer)
-    #     assert di in [T_DIR_UP, T_DIR_DW]
-    #     input_bbuf = packet_bbuf.copy()
-    #     output_bbuf = BitBuffer()
-    #     rule = context["comp"]
-    #     # skip ruleID if needed.
-    #     if rule["ruleID"] is not None and rule["ruleLength"] is not None:
-    #         rule_id = input_bbuf.get_bits(rule["ruleLength"])
-    #         if rule_id != rule["ruleID"]:
-    #             self.protocol._log("rule_id doesn't match. {} != {}".format(
-    #                     rule_id, rule["ruleID"]))
-    #             return None
-    #     for r in rule["compression"]["rule_set"]:
-    #         # XXX need to handle "DI"
-    #         self.protocol._log("rule item: {}".format(r))
-    #         # if match the rule, call CDA.
-    #         val = self.__func_rx_cda[r[T_CDA]](r, input_bbuf, output_bbuf)
-    #         # update info to build the IPv6 pseudo header.
-    #         if r[T_FID] == T_IPV6_NXT:
-    #             self.next_proto = val
-    #         elif r[T_FID] == T_IPV6_DEV_PREFIX:
-    #             if di == T_DIR_UP:
-    #                 self.src_prefix = val
-    #             else:
-    #                 self.dst_prefix = val
-    #         elif r[T_FID] == T_IPV6_DEV_IID:
-    #             if di == T_DIR_UP:
-    #                 self.src_iid = val
-    #             else:
-    #                 self.dst_iid = val
-    #         elif r[T_FID] == T_IPV6_APP_PREFIX:
-    #             if di == T_DIR_UP:
-    #                 self.dst_prefix = val
-    #             else:
-    #                 self.src_prefix = val
-    #         elif r[T_FID] == T_IPV6_APP_IID:
-    #             if di == T_DIR_UP:
-    #                 self.dst_iid = val
-    #             else:
-    #                 self.src_iid = val
-    #         elif r[T_FID].startswith(T_PROTO_ICMPV6):
-    #             self.cksum_field_offset = 42
-    #         elif r[T_FID].startswith(T_PROTO_UDP):
-    #             self.cksum_field_offset = 46
-    #         #
-    #     if input_bbuf.count_remaining_bits() > 0:
-    #         output_bbuf += input_bbuf
-    #     # update the ipv6 payload.
-    #     self.ipv6_payload = output_bbuf.get_content()[40:]
-    #     # update the field of IPv6 length.
-    #     output_bbuf.add_bits(len(self.ipv6_payload), 16, position=32)
-    #     # update the checksum field of the upper layer.
-    #     if self.cksum_field_offset:
-    #         assert self.ipv6_payload is not None
-    #         cksum = self.cal_checksum(self.build_ipv6_pseudo_header() + self.ipv6_payload)
-    #         output_bbuf.add_bits(cksum, 16, position=self.cksum_field_offset)
-    #     # if all process have been succeeded, return the data.
-    #     self.protocol._log("decompress: {}=>{}".format(
-    #         packet_bbuf, output_bbuf))
-    #     return output_bbuf
 
     def decompress(self, schc, rule, direction):
         assert ("Compression" in rule)
