@@ -246,19 +246,23 @@ class SCHCProtocol:
 
             if rule is None:
                 # XXX: not putting any SCHC compression header? - need fix
-                print("schc-send: rule for compression/no-compression not found")
+                print("schc-send: rule for compression/no-compression not found, abort")
                 return None, device_id
             
             if verbose:
-                print("schc-send: No Compress rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+                print("schc-send: No Compression rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
 
             schc_packet = self.compressor.no_compress(rule, raw_packet)
             return schc_packet, device_id
 
         if verbose:
-            print("schc_send: compr rule", str(rule[T_RULEID])+'/'+str(rule[T_RULEIDLENGTH]))
+            print("schc_send: compression rule", str(rule[T_RULEID])+'/'+str(rule[T_RULEIDLENGTH]))
+
         device_id = rule[T_META][T_DEVICEID]
 
+        if T_ACTION in rule:
+            if verbose:
+                print ("schc_send: Apply action", rule[T_ACTION])
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
         #dprint(schc_packet)
