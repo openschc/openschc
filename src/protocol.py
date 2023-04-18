@@ -203,7 +203,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False):
+    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False verbose=False):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -286,15 +286,20 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None):
-        """Starting to send SCHC packet after called by Application.       
-        If self.position is T_POSITION_DEVICE and 
-        this function is for sending from device to core.
-        TODO: If only compress retun True If Compres and Frag, return context
+    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None, verbose=False):
         """
-        self._log("schc_send {} {}".format(core_id, device_id))
+        Take an uncompressed packet and send it into 1 or several SCHC packets.
+        paramters:
+        - raw_packet: packet to compress and fragment if needed
+        - core_id: optional parameter used by a device to specify to which core the SCHC pkt is sent
+        - device_id: optional parameter to indicate where the care has to send the SCHC packet. usually, this
+        information is found from the rule.
+        - parsing: if not specified, parsing starts from IPv6. parsing allows to select another protocil, for example CoAP.
+        - verbose : if True, gives details on compression and fragmentation.
+        """
+        #self._log("schc_send {} {}".format(core_id, device_id))
 
-	#, raw_packet))
+	    #, raw_packet))
 
         #To perform fragmentation, we get the device_id from the rule:
         #Ex: "DeviceID" : "udp:54.37.158.10:8888",
@@ -302,14 +307,8 @@ class SCHCProtocol:
         #Add sender delay if specified by upper layer
 
         self.sender_delay = sender_delay
-
-
                 
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing)
-        #print("+++ packet_bbuf", packet_bbuf)
-        #print("+++ device_id", device_id)
-        #print("+++ position", self.position)
-
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing=parsing, verbose=verbose)
 
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
