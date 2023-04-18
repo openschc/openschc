@@ -88,7 +88,7 @@ class Parser:
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        dprint("direction in parser:", direction)
+        #dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -168,13 +168,13 @@ class Parser:
                 echoHeader = unpack('!HH', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_IDENT, 1]       = [adapt_value(echoHeader[0]), 16]
                 self.header_fields[T_ICMPV6_SEQNO, 1]       = [adapt_value(echoHeader[1]), 16]
-                pos += 4
             elif icmpBytes[0] == 1: # Destination Unreachable
                 unused = unpack('!L', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [adapt_value(unused[0]), 32]
                 pos += 4
-                self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
-                pos = len(pkt)
+
+            self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
+            pos = len(pkt)
                 
         if "COAP" in layers and next_layer == "COAP":
             field_position = {}
