@@ -843,7 +843,7 @@ class RuleManager:
         """
 
         for d in self._ctxt:
-            dprint (d["DeviceID"])
+            #dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
@@ -851,7 +851,7 @@ class RuleManager:
 
                     tested_rule = schc.get_bits(ruleLength, position=0)
 
-                    dprint (tested_rule, ruleID)
+                    #dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
 
@@ -892,12 +892,12 @@ class RuleManager:
                             else:
                                 if r[T_FL] == "var":  # entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
-                                    dprint("Suboptimal rule")
+                                    #dprint("Suboptimal rule")
                                 else:
-                                    dprint("field from rule not found in pkt")
+                                    #dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            #print ("->", matches)
+                    #print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
