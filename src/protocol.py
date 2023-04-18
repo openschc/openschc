@@ -241,7 +241,7 @@ class SCHCProtocol:
 
         print ("delta", delta.seconds)
 
-        if delta.second > int.from_bytes(rule[T_ACTION_VAL], 'big'):
+        if delta.seconds > int.from_bytes(rule[T_ACTION_VAL], 'big'):
             return False # after the delay, device dead
 
         if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'\x80': # echo request
