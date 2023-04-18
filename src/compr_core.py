@@ -176,20 +176,21 @@ class Compressor:
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
-                    dprint("in packet")
+                    #dprint("in packet")
                     self.__func_tx_cda[r[T_CDA]](field=parsed_packet[(r[T_FID], r[T_FP])],
                                                 rule = r,
                                                 output= output_bbuf,
                                                 device_id=device_id)
                 else: # not find in packet, but is variable length can be coded as 0
-                    dprint("send variable length")
+                    #dprint("send variable length")
                     self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
             else:
-                dprint("rule skipped, bad direction")
+                #dprint("rule skipped, bad direction")
+                pass
 
-            output_bbuf.display(format="bin")
+            #output_bbuf.display(format="bin")
 
-        output_bbuf.add_bytes(data)
+        #output_bbuf.add_bytes(data)
 
         return output_bbuf
 
