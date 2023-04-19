@@ -315,7 +315,7 @@ class SCHCProtocol:
                     app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
                     destAddr = ipaddress.IPv6Address(app_addr)
                     icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
-                    hexdump(icmp_error)
+                    hexdump(icmp_packet)
 
                 return None, device_id
             
