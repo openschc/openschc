@@ -75,6 +75,7 @@ schc_machine = SCHCProtocol(
 schc_machine.set_rulemanager(rm)
 schc_machine.set_main_interface(INTERFACE) # listen and send on this interface
 schc_machine.set_other_interfaces(["ens3"])# listen on theses interfaces
+schc_machine.set_icmp_error_msg(True) # allows to send ICMP error message when no rule is found
 
 sniff(prn=processPkt, iface=schc_machine.get_interfaces()) # scappy cannot read multiple interfaces
 

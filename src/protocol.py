@@ -173,6 +173,7 @@ class SCHCProtocol:
         self.sender_delay = 0
         self.main_interface = None
         self.other_interfaces = None
+        self.icmp_error_msg = False
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -215,6 +216,10 @@ class SCHCProtocol:
             self.other_interfaces = interfaces
         else:
             raise ValueError("Other interfaces is a list of strings")
+        
+    def set_icmp_error_msg(self, value):
+        if type(value) is bool:
+            self.icmp_error_msg = value
 
     def get_main_interface(self):
         return self.main_interface
@@ -417,12 +422,13 @@ class SCHCProtocol:
         #dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
-        self.rule_manager.timestamp_device(device_id, rule)
-        self.rule_manager.Print()
 
         if rule == None:
             print ("No rule found")
             return None
+        
+        self.rule_manager.timestamp_device(device_id, rule)
+        self.rule_manager.Print()
 
         if T_COMP in rule:
             if self.position == T_POSITION_DEVICE:
