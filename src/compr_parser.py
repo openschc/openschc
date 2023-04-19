@@ -416,3 +416,6 @@ class Unparser:
             send(full_packet, iface=iface)
         
         return full_packet
+
+def send_icmp_error (destination, error_code):
+    print ("send ICMP error {} to {}".format(error_code, binascii.hexlify(destination)))

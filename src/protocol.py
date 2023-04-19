@@ -311,10 +311,12 @@ class SCHCProtocol:
 
                 if self.icmp_error_msg:
                     print("send an ICMP error message")
+                    send_icmp_error("AAAA", 3)
+
                 return None, device_id
             
             if verbose:
-                print("schc-send: No Compression rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+                print("schc-send: No-Compression rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
 
             schc_packet = self.compressor.no_compress(rule, raw_packet)
             return schc_packet, device_id
