@@ -309,15 +309,18 @@ class SCHCProtocol:
                 # XXX: not putting any SCHC compression header? - need fix
                 print("schc-send: rule for compression/no-compression not found, abort")
 
-                if self.icmp_error_msg and not (T_ICMPV6_TYPE, 1) in parsed_packet: 
-                    print("send an ICMP error message")
+                if self.icmp_error_msg: 
+                    if  (T_ICMPV6_TYPE, 1) in parsed_packet and parsed_packet[(T_ICMPV6_TYPE, 1)]<128: 
+                        print ("don't ICMP error ICMP error")
+                    else:
+                        print("send an ICMP error message")
 
-                    app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
-                    destAddr = ipaddress.IPv6Address(app_addr)
-                    print (destAddr)
-                    icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
-                    hexdump(icmp_packet)
-                    send(icmp_packet)
+                        app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
+                        destAddr = ipaddress.IPv6Address(app_addr)
+                        print (destAddr)
+                        icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
+                        hexdump(icmp_packet)
+                        send(icmp_packet)
 
                 return None, device_id
             
