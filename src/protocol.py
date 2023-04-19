@@ -308,6 +308,9 @@ class SCHCProtocol:
             if rule is None:
                 # XXX: not putting any SCHC compression header? - need fix
                 print("schc-send: rule for compression/no-compression not found, abort")
+
+                if self.icmp_error_msg:
+                    print("send an ICMP error message")
                 return None, device_id
             
             if verbose:
