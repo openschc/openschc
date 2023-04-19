@@ -395,6 +395,9 @@ class RuleManager:
             d = {"DeviceID": device, "SoR": []}
             self._ctxt.append(d)
 
+        d[T_META] = {T_LAST_USED: None}
+        print ("@@@@@", d)
+
         for n_rule in sor:
             n_ruleID = n_rule[T_RULEID]
             n_ruleLength = n_rule[T_RULEIDLENGTH]
@@ -529,6 +532,7 @@ class RuleManager:
              arule[T_ACTION] = nrule[T_ACTION]
 
 
+
         arule[T_COMP] = []
 
         up_rules = 0
@@ -604,6 +608,7 @@ class RuleManager:
         arule[T_META][T_UP_RULES] = up_rules
         arule[T_META][T_DW_RULES] = dw_rules
         arule[T_META][T_DEVICEID] = device_id
+        arule[T_META][T_LAST_USED] = None
 
         return arule
 
@@ -763,64 +768,25 @@ class RuleManager:
 
         ignore_bit = rlength - arg
 
-        for b in range(rlength):
+        for b in range(arg):
             pos = b%8
+            byte_pos = b//8
 
-            if pos == 0:
-                if len(TV) == 0:
-                    right_byte_tv = 0
-                else:
-                    right_byte_tv = TV[-1]
-                    TV = TV[:-1]
-                if len(FV) == 0:
-                    right_byte_fv = 0
-                else:
-                    right_byte_fv = FV[-1]
-                    FV = FV[:-1]
+            right_byte_tv = TV[byte_pos]
+            right_byte_fv = FV[byte_pos]
 
-            bit_tv = right_byte_tv & (1 << pos)
-            bit_fv = right_byte_fv & (1 << pos)
+            bit_tv = right_byte_tv & (1 << (7 -pos))
+            bit_fv = right_byte_fv & (1 << (7 -pos))
 
-            print (pos, ignore_bit, TV, FV, right_byte_tv, right_byte_fv,bit_tv, bit_fv)
+            print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
-            if b < ignore_bit:
-                print ('ignore')
-            else:
-                if bit_tv != bit_fv:
-                    print ("comparison failed")
-                    return False
+            if bit_tv != bit_fv:
+                print ("comparison failed")
+                return False
                 
         print ("comparison succeeded")
         return True
 
-
-
-        # ignore_bit = rlength - arg
-        # bit_pos = rlength
-
-        # while bit_pos < 0:
-        #     if bit_pos < ignore_bit:
-        #         elm_byte            
-
-        # #skip what is not to be compared
-        # for s in range(arg//8):
-        #     TV = 
-        #     FV =>> 1
-        
-
-        # for i in range(arg//8): # compare byte per byte
-        #     print (TV[i], FV[i])
-        #     if TV[i] != FV[i]:
-        #         return False
-        
-        # j = i+1 # if a rest then compare it bit per bit
-        # for i in range(arg%8):
-        #     k = 7-i
-        #     print (k, bin (1<<k), TV[j] & (1<<k), FV[j] & (1 << k))
-        #     if TV[j] & (1<<k) != FV[j] & (1 << k):
-        #         return False
-        
-        return True
 
     def MO_MMAP (self, TV, FV,  rlength, flength, arg, direction=None):
         for v in TV:
@@ -926,8 +892,8 @@ class RuleManager:
 
         return None        
 
-    def FindFragmentationRule(self, deviceID=None, originalSize=None,
-                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP,
+    def FindFragmentationRule(self, deviceID=None, originalSize=None, 
+                              reliability=T_FRAG_NO_ACK, direction=T_DIR_UP, 
                               packet=None):
         """Lookup a fragmentation rule.
 
@@ -936,7 +902,6 @@ class RuleManager:
         * reliability NoAck, AckOnError, AckAlways
         * direction (UP or DOWN)
         NOTE: Not yet implemented, returns the first fragmentation rule.  
-
         XXX please check whether the following strategy is okey.
         - if direction is specified, and deviceID is None, it is assumed that
           the request is for a device. Return the 1st rule matched with the
