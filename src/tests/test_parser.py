@@ -72,9 +72,8 @@ def test_parse():
     for fd in parsed_ICMP[0]: # check Field Description
         expected_fields = EXPECTED_RESULTS_ICMP[0][fd]
 
-        assert (parsed_ICMP[0][fd]) == expected_fields
-    assert (parsed_ICMP[1] == EXPECTED_RESULTS_IPv6_UDP[1]) # check data part
-
+        assert (parsed_ICMP[0][fd] == expected_fields)
+    assert (parsed_ICMP[1] == EXPECTED_RESULTS_ICMP[1]) # check data part
 
     unparser = compr_parser.Unparser()
 
