@@ -975,6 +975,7 @@ class RuleManager:
     def find_device (self, pref, iid):
         for d in self._ctxt:
             for r in d["SoR"]:
+                print ( r[(T_IPV6_DEV_PREFIX, 1)][0],r[(T_IPV6_DEV_IID, 1)][0], pref, iid )
                 if (T_IPV6_DEV_PREFIX, 1) in r and r[(T_IPV6_DEV_PREFIX, 1)][0] == pref and\
                     (T_IPV6_DEV_IID, 1) in r and r[(T_IPV6_DEV_IID, 1)][0] == iid:
                         return d
