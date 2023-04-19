@@ -417,8 +417,10 @@ class Unparser:
         
         return full_packet
 
-def send_icmp_error (destination, error_code):
+def create_icmp_error (destination, error_code):
     print ("send ICMP error {} to {}".format(error_code, destination))
 
     destAddr = ipaddress.IPv6Address(destination)
-    print (destAddr)
+    icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
+
+    return bytes(icmp_packet)

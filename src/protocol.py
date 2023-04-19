@@ -313,7 +313,7 @@ class SCHCProtocol:
                     print("send an ICMP error message")
 
                     app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
-                    send_icmp_error(app_addr, 3)
+                    icmp_error = create_icmp_error(app_addr, 3)
 
                 return None, device_id
             
