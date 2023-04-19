@@ -314,6 +314,9 @@ class SCHCProtocol:
                         icmp_type = int.from_bytes(parsed_packet[(T_ICMPV6_TYPE, 1)][0], 'big')
                         print(icmp_type)
                         if icmp_type > 127:
+                            dev_found = self.rule_manager.find_device(parsed_packet[(T_IPV6_DEV_PREFIX, 1)][0], 
+                                                                      parsed_packet[(T_IPV6_DEV_IID, 1)][0])
+                            print(dev_found)
                             
                             app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
                             destAddr = ipaddress.IPv6Address(app_addr)
