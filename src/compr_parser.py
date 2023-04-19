@@ -419,3 +419,6 @@ class Unparser:
 
 def send_icmp_error (destination, error_code):
     print ("send ICMP error {} to {}".format(error_code, destination))
+
+    destAddr = ipaddress.IPv6Address(destination)
+    print (destAddr)
