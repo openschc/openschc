@@ -312,6 +312,7 @@ class SCHCProtocol:
                 if self.icmp_error_msg: 
                     if  (T_ICMPV6_TYPE, 1) in parsed_packet: 
                         icmp_type = int.from_bytes(parsed_packet[(T_ICMPV6_TYPE, 1)][0], 'big')
+                        print(icmp_type)
                         if icmp_type > 127:
                             
                             app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
