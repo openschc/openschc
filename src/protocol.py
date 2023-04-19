@@ -309,7 +309,7 @@ class SCHCProtocol:
                 # XXX: not putting any SCHC compression header? - need fix
                 print("schc-send: rule for compression/no-compression not found, abort")
 
-                if self.icmp_error_msg:
+                if self.icmp_error_msg and not (T_ICMPV6_TYPE, 1) in parsed_packet: 
                     print("send an ICMP error message")
 
                     app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
