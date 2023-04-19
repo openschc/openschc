@@ -980,9 +980,9 @@ class RuleManager:
                     pref_found = False
                     iid_found = False
                     for e in c:
-                        if c[T_FID] == T_IPV6_DEV_PREFIX and c[T_TV] == pref:
+                        if e[T_FID] == T_IPV6_DEV_PREFIX and e[T_TV] == pref:
                             pref_found = True
-                        if c[T_FID] == T_IPV6_DEV_IID and c[T_TV] == iid:
+                        if e[T_FID] == T_IPV6_DEV_IID and e[T_TV] == iid:
                             iid_found = True
 
                         if pref_found and iid_found:
