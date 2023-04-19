@@ -312,18 +312,18 @@ class SCHCProtocol:
                 if self.icmp_error_msg: 
                     if  (T_ICMPV6_TYPE, 1) in parsed_packet: 
                         icmp_type = int.from_bytes(parsed_packet[(T_ICMPV6_TYPE, 1)][0], 'big')
-                        print(icmp_type)
                         if icmp_type > 127:
                             dev_found = self.rule_manager.find_device(parsed_packet[(T_IPV6_DEV_PREFIX, 1)][0], 
                                                                       parsed_packet[(T_IPV6_DEV_IID, 1)][0])
-                            print(dev_found)
+                            if dev_found != None:
+                                icmp_code = 4 # port not found
+                            else:
+                                icmp_code = 3 # host not found
                             
                             app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
                             destAddr = ipaddress.IPv6Address(app_addr)
-                            print ("schc-send: sending ICMP error message to ", destAddr)
-                            print (destAddr)
+                            print ("schc-send: sending ICMP Dest Unreach message to ", destAddr, "with code", icmp_code)
                             icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
-                            hexdump(icmp_packet)
                             send(icmp_packet)
 
                 return None, device_id
