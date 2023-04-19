@@ -316,6 +316,7 @@ class SCHCProtocol:
                     destAddr = ipaddress.IPv6Address(app_addr)
                     icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
                     hexdump(icmp_packet)
+                    send(icmp_packet)
 
                 return None, device_id
             
