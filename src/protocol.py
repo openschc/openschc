@@ -311,6 +311,8 @@ class SCHCProtocol:
 
                 if self.icmp_error_msg:
                     print("send an ICMP error message")
+
+                    print(parsed_packet[(T_IPV6_APP_PREFIX, 1)],parsed_packet[(T_IPV6_APP_IID, 1)] )
                     send_icmp_error("AAAA", 3)
 
                 return None, device_id
