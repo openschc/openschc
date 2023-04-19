@@ -310,17 +310,17 @@ class SCHCProtocol:
                 print("schc-send: rule for compression/no-compression not found, abort")
 
                 if self.icmp_error_msg: 
-                    if  (T_ICMPV6_TYPE, 1) in parsed_packet and parsed_packet[(T_ICMPV6_TYPE, 1)]<128: 
-                        print ("don't ICMP error ICMP error")
-                    else:
-                        print("send an ICMP error message")
-
-                        app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
-                        destAddr = ipaddress.IPv6Address(app_addr)
-                        print (destAddr)
-                        icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
-                        hexdump(icmp_packet)
-                        send(icmp_packet)
+                    if  (T_ICMPV6_TYPE, 1) in parsed_packet: 
+                        icmp_type = int.from_bytes(parsed_packet[(T_ICMPV6_TYPE, 1)][0])
+                        if icmp_type > 127:
+                            
+                            app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
+                            destAddr = ipaddress.IPv6Address(app_addr)
+                            print ("schc-send: sending ICMP error message to ", destAddr)
+                            print (destAddr)
+                            icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
+                            hexdump(icmp_packet)
+                            send(icmp_packet)
 
                 return None, device_id
             
