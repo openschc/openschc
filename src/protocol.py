@@ -294,7 +294,7 @@ class SCHCProtocol:
         if parsed_packet is None:
             if verbose:
                 print("schc_send: no parsing")
-            return BitBuffer(raw_packet), None
+            return None, None
 
         # Apply compression rule
 
