@@ -1,4 +1,5 @@
 T_RULEID = "RuleID"
+T_RULEIDVALUE = "RuleIDValue"
 T_RULEIDLENGTH = "RuleIDLength"
 T_DEVICEID = "DeviceID"
 
