@@ -1,3 +1,4 @@
+#!python3
 from scapy.all import *
 
 import sys
@@ -17,14 +18,15 @@ parser = Parser()
 
 # Let's iterate through every packet
 for packet in packets:
-    packet.show()
+    hexdump(packet[IPv6])
+    packet[IPv6].show()
 
     if packet[Ether].src == "fa:16:3e:1e:cc:2c":
         direction = T_DIR_UP
     else:
         direction = T_DIR_DW
 
-    print (binascii.hexlify(bytes(packet[IPv6])))
+
     parsed = parser.parse (bytes(packet[IPv6]), direction, layers=["IPv6", "UDP"])
     pprint.pprint (parsed)
 
