@@ -399,7 +399,12 @@ class RuleManager:
         print ("@@@@@", d)
 
         for n_rule in sor:
-            n_ruleID = n_rule[T_RULEID]
+            if T_RULEID in n_rule:
+                n_ruleID = n_rule[T_RULEID]
+            elif T_RULEIDVALUE in n_rule:
+                n_ruleID = n_rule[T_RULEIDVALUE]
+            else:
+                raise ValueError("Rule ID Value is missing")
             n_ruleLength = n_rule[T_RULEIDLENGTH]
             left_aligned_n_ruleID = n_ruleID << (32 - n_ruleLength)
 
@@ -422,7 +427,7 @@ class RuleManager:
                     already_exists = self.FindNoCompressionRule(deviceID=device)
                     if already_exists == None:
                         arule = {}
-                        arule[T_RULEID] = n_rule[T_RULEID]
+                        arule[T_RULEID] = n_ruleID
                         arule[T_RULEIDLENGTH] = n_rule[T_RULEIDLENGTH]
                         arule[T_NO_COMP] = []
                         d["SoR"].append(arule)
@@ -434,8 +439,12 @@ class RuleManager:
 
     def _create_fragmentation_rule (self, nrule):
         arule = {}
-
-        arule[T_RULEID] = nrule[T_RULEID]
+        if T_RULEID in nrule:
+            arule[T_RULEID] = nrule[T_RULEID]
+        elif T_RULEIDVALUE in nrule:
+            arule[T_RULEID] = nrule[T_RULEIDVALUE]
+        else:
+            raise ValueError("Rule ID missing.")
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
         arule[T_FRAG] = {}
 
@@ -523,8 +532,12 @@ class RuleManager:
         parse a rule to verify values and fill defaults
         """
         arule = {}
-
-        arule[T_RULEID] = nrule[T_RULEID]
+        if T_RULEID in nrule: # transition for RuleID to RuleIDValue
+            arule[T_RULEID] = nrule[T_RULEID]
+        elif T_RULEIDVALUE in nrule:
+            arule[T_RULEID] = nrule[T_RULEIDVALUE]
+        else:
+            raise ValueError("RuleID Value is missing")
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
         if T_ACTION in nrule:
