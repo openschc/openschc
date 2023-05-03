@@ -396,7 +396,7 @@ class RuleManager:
             self._ctxt.append(d)
 
         d[T_META] = {T_LAST_USED: None}
-        print ("@@@@@", d)
+        #print ("@@@@@", d)
 
         for n_rule in sor:
             if T_RULEID in n_rule:
@@ -890,8 +890,8 @@ class RuleManager:
                                 else:
                                     dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            #print ("->", matches)
+                    #print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
