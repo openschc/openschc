@@ -21,9 +21,13 @@ for packet in packets:
     packet[IPv6].show()
 
     if packet[Ether].src == "fa:16:3e:1e:cc:2c":
-        direction = T_DIR_UP
-    else:
         direction = T_DIR_DW
+    elif packet[Ether].dst == "fa:16:3e:1e:cc:2c":
+        direction = T_DIR_UP
+    else: # skipping
+        break
+
+    print ("Packet direction ", direction)
 
     parsed = parser.parse (bytes(packet[IPv6]), 
                            direction, 

@@ -773,8 +773,8 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        print ("MSB")
-        print (TV, FV, rlength, flength, arg)
+        #print ("MSB")
+        #print (TV, FV, rlength, flength, arg)
 
         if rlength == T_FUNCTION_VAR:
             rlength = flength
@@ -791,13 +791,13 @@ class RuleManager:
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
 
-            print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
+            #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
             if bit_tv != bit_fv:
-                print ("comparison failed")
+                #print ("comparison failed")
                 return False
                 
-        print ("comparison succeeded")
+        #print ("comparison succeeded")
         return True
 
 
@@ -860,7 +860,8 @@ class RuleManager:
                 if "Compression" in rule:
                     matches = 0
                     for r in rule["Compression"]:
-                        print(r)
+                        if failed_field:
+                            print(r)
                         #print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
@@ -876,12 +877,21 @@ class RuleManager:
                                         matches += 1
                                 else:
                                     if failed_field:
-                                        print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
-                                            rule[T_RULEID], rule[T_RULEIDLENGTH],
-                                            r[T_FID],
-                                            r[T_TV], pkt[(r[T_FID], r[T_FP])][0],
-                                            r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
-                                            arg))
+                                        if type(r[T_TV]) is bytes:
+                                            print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
+                                                rule[T_RULEID], rule[T_RULEIDLENGTH],
+                                                r[T_FID],
+                                                binascii.hexlify(r[T_TV]), 
+                                                binascii.hexlify(pkt[(r[T_FID], r[T_FP])][0]),
+                                                r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
+                                                arg))
+                                        elif type(r[T_TV]) is list:
+                                            print("rule {}/{}: field {}  FV={} not in matching list rlen={} flen={} arg={}".format(
+                                                rule[T_RULEID], rule[T_RULEIDLENGTH],
+                                                r[T_FID],
+                                                binascii.hexlify(pkt[(r[T_FID], r[T_FP])][0]),
+                                                r[T_FL], pkt[(r[T_FID], r[T_FP])][1],
+                                                arg))                                           
                                     break # field does not match, rule does not match
                             else:
                                 if r[T_FL] == "var":  # entry not found, but variable length => accept
