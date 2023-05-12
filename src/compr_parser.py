@@ -87,8 +87,8 @@ class Parser:
         to stop before CoAP layers = ["IPv6, "UDP"]
         """
 
-        assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        dprint("direction in parser:", direction)
+        assert direction in [T_DIR_UP, T_DIR_DW]  # rigth value
+        #dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}

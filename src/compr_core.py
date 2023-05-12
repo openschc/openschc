@@ -331,8 +331,9 @@ class Decompressor:
             raise ValueError("cannot read field length")
         #in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
+        val_ba = adapt_value(val)
 
-        return [val, size]
+        return [val_ba, size]
 
 
     def rx_cda_map_sent(self, rule, in_bbuf):
@@ -372,10 +373,20 @@ class Decompressor:
         elif type(rule[T_TV]) is bytes:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]
+        print (rule)
+        tmp_bbuf.display(format="bin")
 
-        tmp_bbuf.add_value(rule[T_TV], rule[T_MO_VAL])
+        value = int.from_bytes(rule[T_TV], "big")
+        #tmp_bbuf.add_value(rule[T_TV], rule[T_MO_VAL], total_size)
+        for i in range(total_size, send_length, -1):
+            bit = value & (0x01 << (i-1))
+            print (bin(bit))
+            tmp_bbuf.set_bit(bit)
+            tmp_bbuf.display(format="bin")
+
         val = in_bbuf.get_bits(send_length)
         tmp_bbuf.add_value(val, send_length)
+        tmp_bbuf.display(format="bin")
 
         return [bytes(tmp_bbuf.get_content()), total_size]
 
@@ -466,10 +477,10 @@ class Decompressor:
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:
-            dprint(r)
+            #dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-                dprint("<<<", full_field)
+                #dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
                 #pprint.pprint (self.parsed_packet)
 
