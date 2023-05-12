@@ -42,7 +42,7 @@ import pprint
 
 class Compressor:
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
 
         self.__func_tx_cda = {
@@ -132,7 +132,7 @@ class Compressor:
 
             bit_value = value[pos_byte] & (1 << pos_bit)
 
-            print (bit_position, pos_byte, pos_bit, bit_value)
+            #print (bit_position, pos_byte, pos_bit, bit_value)
             output.set_bit(bit_value)
 
             bit_position += 1
@@ -190,7 +190,7 @@ class Compressor:
     #         packet_bbuf, output_bbuf))
     #     return output_bbuf
 
-    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None):
+    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None, verbose=False):
         """
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
@@ -199,26 +199,27 @@ class Compressor:
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            #dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            print("rule item:", r)
+            #print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
-                    dprint("in packet")
+                    #dprint("in packet")
                     self.__func_tx_cda[r[T_CDA]](field=parsed_packet[(r[T_FID], r[T_FP])],
                                                 rule = r,
                                                 output= output_bbuf,
                                                 device_id=device_id)
                 else: # not find in packet, but is variable length can be coded as 0
-                    dprint("send variable length")
+                    #dprint("send variable length")
                     self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
             else:
-                dprint("rule skipped, bad direction")
-
-            output_bbuf.display(format="bin")
+                #dprint("rule skipped, bad direction")
+                pass
+            if verbose:
+                output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
