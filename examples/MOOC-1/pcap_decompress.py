@@ -57,10 +57,9 @@ def calculate_checksum(data):
         checksum += word
         print (hex(word), hex(checksum))
 
-    while checksum > 0xFFFF:
-        checksum = (checksum >> 16) + (checksum & 0xffff)
-        #checksum += checksum >> 16
-        print (hex(checksum))
+    checksum = (checksum >> 16) + (checksum & 0xffff)
+    checksum += checksum >> 16
+    print (hex(checksum))
 
     checksum = ~checksum & 0xffff
 
