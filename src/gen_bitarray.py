@@ -119,6 +119,7 @@ class BitBuffer:
         if position == None:
             for i in range(nb_bits, 0, -1):
                 self.set_bit(bits_as_long & (0x01 << (i-1)))
+
         else:
             for i in range(0, nb_bits):
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
@@ -152,10 +153,10 @@ class BitBuffer:
 
         """
         if size < 0xF:
-            print ("size =======>", size)
+            #print ("size =======>", size)
             self.add_bits(size, 4)
         elif size < 0xFF:
-            print ("size =================>", size)
+            #print ("size =================>", size)
             self.add_bits(0x0F, 4)
             self.add_bits(size, 8)
         elif size < 0xFFFF:
@@ -231,58 +232,58 @@ class BitBuffer:
 
         while self._wpos - self._rpos >= 8:
             x = self.get_bits(nb_bits=8)
-            print (hex(x))
+            #print (hex(x))
             res.append(x)
 
         return res
 
 #to be optimized
-    def get_bits_as_buffer(self, nb_bits=None):
-        """ _rpos does change.
-        If nb_bits is None, return all remaining bits.
-        """
-        result = BitBuffer()
-        if nb_bits is None:
-            nb_bits = self.count_remaining_bits()
-        result.add_bits(self.get_bits(nb_bits), nb_bits)
-        return result
+    # def get_bits_as_buffer(self, nb_bits=None):
+    #     """ _rpos does change.
+    #     If nb_bits is None, return all remaining bits.
+    #     """
+    #     result = BitBuffer()
+    #     if nb_bits is None:
+    #         nb_bits = self.count_remaining_bits()
+    #     result.add_bits(self.get_bits(nb_bits), nb_bits)
+    #     return result
 
-    def ensure_padding(self):
-        count = self.count_padding_bits()
-        self.add_bits(0, count)
-        return count
+    # def ensure_padding(self):
+    #     count = self.count_padding_bits()
+    #     self.add_bits(0, count)
+    #     return count
 
-    def get_content(self):
-        """ return a bytearray containing the remaining bits in _content aligned
-        to the byte boundary.
-        Note that the number of remaining bits will be lost.
-        """
-        assert self._rpos % BITS_PER_BYTE == 0
-        #nb_bits = self.count_remaining_bits()
-        #assert nb_bits % BITS_PER_BYTE == 0
-        return self._content[self._rpos // BITS_PER_BYTE:]
+    # def get_content(self):
+    #     """ return a bytearray containing the remaining bits in _content aligned
+    #     to the byte boundary.
+    #     Note that the number of remaining bits will be lost.
+    #     """
+    #     assert self._rpos % BITS_PER_BYTE == 0
+    #     #nb_bits = self.count_remaining_bits()
+    #     #assert nb_bits % BITS_PER_BYTE == 0
+    #     return self._content[self._rpos // BITS_PER_BYTE:]
 
-    def count_remaining_bits(self):
-        """return the number of the remaining bits from
-        the position of self._rpos to _wpos. """
-        #return len(self._content)*BITS_PER_BYTE - self._rpos
-        return self._wpos - self._rpos
+    # def count_remaining_bits(self):
+    #     """return the number of the remaining bits from
+    #     the position of self._rpos to _wpos. """
+    #     #return len(self._content)*BITS_PER_BYTE - self._rpos
+    #     return self._wpos - self._rpos
 
-    def count_padding_bits(self):
-        return (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
+    # def count_padding_bits(self):
+    #     return (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
 
-    def count_added_bits(self):
-        """return the number of significant bits from the most left bit."""
-        return self._wpos
+    # def count_added_bits(self):
+    #     """return the number of significant bits from the most left bit."""
+    #     return self._wpos
 
-    def to_bit_list(self, position=None):
-        """ return the content in a list of bits. """
-        bit_list = []
-        if position is None:
-            position = self._rpos
-        for i in range(position, self._wpos):
-            bit_list.append(self.get_bits(1, i))
-        return bit_list
+    # def to_bit_list(self, position=None):
+    #     """ return the content in a list of bits. """
+    #     bit_list = []
+    #     if position is None:
+    #         position = self._rpos
+    #     for i in range(position, self._wpos):
+    #         bit_list.append(self.get_bits(1, i))
+    #     return bit_list
 
     def display(self, format=None, file=sys.stdout):
         """ Display the content, if format is set to "bin" the 

@@ -29,41 +29,22 @@ decompress = Decompressor()
 def show_diff(s1, s2):
     from termcolor import colored
 
-    print(s1.decode())
-    print(s2.decode())
-
     if len(s1) != len(s2):
         print("size is different")
         return
     
+    differ = False
     for o, c in zip(s1, s2):
         #print(o, c)
         if o == c:
             print(colored(chr(o), "green"), end="")
         else:
-            print(colored(chr(o), "red"), end="")   
+            print(colored(chr(o), "red"), end="")  
+            differ = True 
     print()         
+    if differ:
+        print (s2.decode()) 
 
-def calculate_checksum(data):
-    # Ensure the data length is even
-    if len(data) % 2 != 0:
-        data += b'\x00'
-
-    # Calculate the checksum
-    checksum = 0
-    
-    for i in range(0, len(data), 2):
-        word = (data[i] << 8) + data[i + 1]
-        checksum += word
-        print (hex(word), hex(checksum))
-
-    checksum = (checksum >> 16) + (checksum & 0xffff)
-    checksum += checksum >> 16
-    print (hex(checksum))
-
-    checksum = ~checksum & 0xffff
-
-    return checksum
 
 # Let's iterate through every packet
 for packet in packets:
@@ -113,14 +94,8 @@ for packet in packets:
 
             pkt = Unparser.unparse(header_d=field_description, data=data, direction=direction)
 
-            show_diff(binascii.hexlify(bytes(packet)[14:]), # remote Ethernet header
+            show_diff(binascii.hexlify(bytes(packet)[14:]), # remove Ethernet header
                       binascii.hexlify(bytes(pkt)))
                       
-            hexdump(pkt)
-            print (hex(calculate_checksum(bytes(pkt))))
-
-            hexdump(bytes(packet)[14:])
-            print (hex(calculate_checksum(bytes(packet)[14:])))
-
  
 

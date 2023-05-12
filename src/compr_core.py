@@ -373,22 +373,17 @@ class Decompressor:
         elif type(rule[T_TV]) is bytes:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]
-        print (rule)
-        tmp_bbuf.display(format="bin")
 
         value = int.from_bytes(rule[T_TV], "big")
-        #tmp_bbuf.add_value(rule[T_TV], rule[T_MO_VAL], total_size)
+
         for i in range(total_size, send_length, -1):
             bit = value & (0x01 << (i-1))
-            print (bin(bit))
             tmp_bbuf.set_bit(bit)
-            tmp_bbuf.display(format="bin")
 
         val = in_bbuf.get_bits(send_length)
         tmp_bbuf.add_value(val, send_length)
-        tmp_bbuf.display(format="bin")
 
-        return [bytes(tmp_bbuf.get_content()), total_size]
+        return [bytes(tmp_bbuf.get_remaining_content()), total_size]
 
     def rx_cda_comp_len(self, rule, in_bbuf):
         # will update the length field later.
