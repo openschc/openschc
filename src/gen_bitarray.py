@@ -272,9 +272,9 @@ class BitBuffer:
     # def count_padding_bits(self):
     #     return (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
 
-    # def count_added_bits(self):
-    #     """return the number of significant bits from the most left bit."""
-    #     return self._wpos
+    def count_added_bits(self):
+        """return the number of significant bits from the most left bit."""
+        return self._wpos
 
     # def to_bit_list(self, position=None):
     #     """ return the content in a list of bits. """
