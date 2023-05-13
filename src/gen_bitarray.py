@@ -253,15 +253,15 @@ class BitBuffer:
     #     self.add_bits(0, count)
     #     return count
 
-    # def get_content(self):
-    #     """ return a bytearray containing the remaining bits in _content aligned
-    #     to the byte boundary.
-    #     Note that the number of remaining bits will be lost.
-    #     """
-    #     assert self._rpos % BITS_PER_BYTE == 0
-    #     #nb_bits = self.count_remaining_bits()
-    #     #assert nb_bits % BITS_PER_BYTE == 0
-    #     return self._content[self._rpos // BITS_PER_BYTE:]
+    def get_content(self):
+        """ return a bytearray containing the remaining bits in _content aligned
+        to the byte boundary.
+        Note that the number of remaining bits will be lost.
+        """
+        assert self._rpos % BITS_PER_BYTE == 0
+        #nb_bits = self.count_remaining_bits()
+        #assert nb_bits % BITS_PER_BYTE == 0
+        return self._content[self._rpos // BITS_PER_BYTE:]
 
     def count_remaining_bits(self):
         """return the number of the remaining bits from
