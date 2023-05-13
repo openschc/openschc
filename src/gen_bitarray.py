@@ -263,11 +263,11 @@ class BitBuffer:
     #     #assert nb_bits % BITS_PER_BYTE == 0
     #     return self._content[self._rpos // BITS_PER_BYTE:]
 
-    # def count_remaining_bits(self):
-    #     """return the number of the remaining bits from
-    #     the position of self._rpos to _wpos. """
-    #     #return len(self._content)*BITS_PER_BYTE - self._rpos
-    #     return self._wpos - self._rpos
+    def count_remaining_bits(self):
+        """return the number of the remaining bits from
+        the position of self._rpos to _wpos. """
+        #return len(self._content)*BITS_PER_BYTE - self._rpos
+        return self._wpos - self._rpos
 
     # def count_padding_bits(self):
     #     return (BITS_PER_BYTE-self._wpos) % BITS_PER_BYTE
