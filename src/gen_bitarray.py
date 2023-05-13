@@ -276,14 +276,14 @@ class BitBuffer:
         """return the number of significant bits from the most left bit."""
         return self._wpos
 
-    # def to_bit_list(self, position=None):
-    #     """ return the content in a list of bits. """
-    #     bit_list = []
-    #     if position is None:
-    #         position = self._rpos
-    #     for i in range(position, self._wpos):
-    #         bit_list.append(self.get_bits(1, i))
-    #     return bit_list
+    def to_bit_list(self, position=None):
+        """ return the content in a list of bits. """
+        bit_list = []
+        if position is None:
+            position = self._rpos
+        for i in range(position, self._wpos):
+            bit_list.append(self.get_bits(1, i))
+        return bit_list
 
     def display(self, format=None, file=sys.stdout):
         """ Display the content, if format is set to "bin" the 
