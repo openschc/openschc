@@ -238,15 +238,15 @@ class BitBuffer:
         return res
 
 #to be optimized
-    # def get_bits_as_buffer(self, nb_bits=None):
-    #     """ _rpos does change.
-    #     If nb_bits is None, return all remaining bits.
-    #     """
-    #     result = BitBuffer()
-    #     if nb_bits is None:
-    #         nb_bits = self.count_remaining_bits()
-    #     result.add_bits(self.get_bits(nb_bits), nb_bits)
-    #     return result
+    def get_bits_as_buffer(self, nb_bits=None):
+        """ _rpos does change.
+        If nb_bits is None, return all remaining bits.
+        """
+        result = BitBuffer()
+        if nb_bits is None:
+            nb_bits = self.count_remaining_bits()
+        result.add_bits(self.get_bits(nb_bits), nb_bits)
+        return result
 
     # def ensure_padding(self):
     #     count = self.count_padding_bits()
