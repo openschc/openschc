@@ -237,7 +237,7 @@ class BitBuffer:
 
         return res
 
-#to be optimized
+# Used by test procedures
     def get_bits_as_buffer(self, nb_bits=None):
         """ _rpos does change.
         If nb_bits is None, return all remaining bits.
@@ -248,10 +248,10 @@ class BitBuffer:
         result.add_bits(self.get_bits(nb_bits), nb_bits)
         return result
 
-    # def ensure_padding(self):
-    #     count = self.count_padding_bits()
-    #     self.add_bits(0, count)
-    #     return count
+    def ensure_padding(self):
+        count = self.count_padding_bits()
+        self.add_bits(0, count)
+        return count
 
     def get_content(self):
         """ return a bytearray containing the remaining bits in _content aligned
@@ -284,6 +284,8 @@ class BitBuffer:
         for i in range(position, self._wpos):
             bit_list.append(self.get_bits(1, i))
         return bit_list
+
+# 
 
     def display(self, format=None, file=sys.stdout):
         """ Display the content, if format is set to "bin" the 
