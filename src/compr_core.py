@@ -323,8 +323,9 @@ class Decompressor:
             if size == 0:
                 return (None, 0)
         elif rule[T_FL] == "tkl":
-            size = self.parsed_packet[(T_COAP_TKL, 1)][0]*8
-            dprint("token size", size)
+            size_byte = self.parsed_packet[(T_COAP_TKL, 1)][0]
+            size = int.from_bytes(size_byte, "big")*8
+            print("token size", size)
         elif type (rule[T_FL]) == int:
             size = rule[T_FL]
         else:
