@@ -76,7 +76,9 @@ class Parser:
         self.protocol = protocol
         self.header_fields = {}
 
-    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "COAP"], start="IPv6"):
+    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "CoAP"], 
+              coap_port = 5683,
+              start="IPv6"):
         """
         Parsing a byte array:
         - pkt is the bytearray to be parsed
@@ -154,7 +156,8 @@ class Parser:
 
             pos += 8
 
-            next_layer = "COAP"
+            if udpBytes[0] == coap_port or udpBytes[1] == coap_port:
+                next_layer = "CoAP"
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
@@ -176,7 +179,7 @@ class Parser:
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
                 
-        if "COAP" in layers and next_layer == "COAP":
+        if "CoAP" in layers and next_layer == "CoAP":
             field_position = {}
             coapBytes = unpack('!BBH', pkt[pos:pos+4])
 

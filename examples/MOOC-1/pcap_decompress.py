@@ -20,7 +20,7 @@ parser = Parser()
 Unparser = Unparser()
 
 RM = RuleManager()
-RM.Add(file="ipv6-sol.json")
+RM.Add(file="ipv6-sol-bi-fl.json")
 RM.Print()
 
 compress = Compressor()
@@ -86,15 +86,19 @@ for packet in packets:
             print("SCHC packet in binary")
             SCHC_pkt.display(format="bin")
 
-            field_description = decompress.decompress(rule=rule, schc=SCHC_pkt, direction=direction)
+            field_description = decompress.decompress(rule=rule, 
+                                                  schc=SCHC_pkt, 
+                                                direction=direction)
             print(field_description)
             SCHC_pkt.display(format="bin")
             data = SCHC_pkt.get_remaining_content()
             print ("payload:", binascii.hexlify(data))
 
-            pkt = Unparser.unparse(header_d=field_description, data=data, direction=direction)
+            pkt = Unparser.unparse(header_d=field_description, 
+                                   data=data, 
+                                   direction=direction)
 
-            show_diff(binascii.hexlify(bytes(packet)[14:]), # remove Ethernet header
+            show_diff(binascii.hexlify(bytes(packet)[14:]), 
                       binascii.hexlify(bytes(pkt)))
                       
  
