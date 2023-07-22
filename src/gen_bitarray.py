@@ -119,6 +119,7 @@ class BitBuffer:
         if position == None:
             for i in range(nb_bits, 0, -1):
                 self.set_bit(bits_as_long & (0x01 << (i-1)))
+
         else:
             for i in range(0, nb_bits):
                 self.set_bit(bits_as_long & (0x01 << (nb_bits-i -1)), position=position+i)
@@ -152,10 +153,10 @@ class BitBuffer:
 
         """
         if size < 0xF:
-            print ("size =======>", size)
+            #print ("size =======>", size)
             self.add_bits(size, 4)
         elif size < 0xFF:
-            print ("size =================>", size)
+            #print ("size =================>", size)
             self.add_bits(0x0F, 4)
             self.add_bits(size, 8)
         elif size < 0xFFFF:
@@ -231,12 +232,12 @@ class BitBuffer:
 
         while self._wpos - self._rpos >= 8:
             x = self.get_bits(nb_bits=8)
-            print (hex(x))
+            #print (hex(x))
             res.append(x)
 
         return res
 
-#to be optimized
+# Used by test procedures
     def get_bits_as_buffer(self, nb_bits=None):
         """ _rpos does change.
         If nb_bits is None, return all remaining bits.
@@ -283,6 +284,8 @@ class BitBuffer:
         for i in range(position, self._wpos):
             bit_list.append(self.get_bits(1, i))
         return bit_list
+
+# 
 
     def display(self, format=None, file=sys.stdout):
         """ Display the content, if format is set to "bin" the 

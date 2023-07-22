@@ -42,7 +42,7 @@ import pprint
 
 class Compressor:
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None):
         self.protocol = protocol
 
         self.__func_tx_cda = {
@@ -132,7 +132,7 @@ class Compressor:
 
             bit_value = value[pos_byte] & (1 << pos_bit)
 
-            print (bit_position, pos_byte, pos_bit, bit_value)
+            #print (bit_position, pos_byte, pos_bit, bit_value)
             output.set_bit(bit_value)
 
             bit_position += 1
@@ -190,7 +190,7 @@ class Compressor:
     #         packet_bbuf, output_bbuf))
     #     return output_bbuf
 
-    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None):
+    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None, verbose=False):
         """
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
@@ -199,26 +199,27 @@ class Compressor:
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            #dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            print("rule item:", r)
+            #print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
-                    dprint("in packet")
+                    #dprint("in packet")
                     self.__func_tx_cda[r[T_CDA]](field=parsed_packet[(r[T_FID], r[T_FP])],
                                                 rule = r,
                                                 output= output_bbuf,
                                                 device_id=device_id)
                 else: # not find in packet, but is variable length can be coded as 0
-                    dprint("send variable length")
+                    #dprint("send variable length")
                     self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
             else:
-                dprint("rule skipped, bad direction")
-
-            output_bbuf.display(format="bin")
+                #dprint("rule skipped, bad direction")
+                pass
+            if verbose:
+                output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -322,16 +323,18 @@ class Decompressor:
             if size == 0:
                 return (None, 0)
         elif rule[T_FL] == "tkl":
-            size = self.parsed_packet[(T_COAP_TKL, 1)][0]*8
-            dprint("token size", size)
+            size_byte = self.parsed_packet[(T_COAP_TKL, 1)][0]
+            size = int.from_bytes(size_byte, "big")*8
+            #print("token size", size)
         elif type (rule[T_FL]) == int:
             size = rule[T_FL]
         else:
             raise ValueError("cannot read field length")
         #in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
+        val_ba = adapt_value(val)
 
-        return [val, size]
+        return [val_ba, size]
 
 
     def rx_cda_map_sent(self, rule, in_bbuf):
@@ -372,11 +375,16 @@ class Decompressor:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]
 
-        tmp_bbuf.add_value(rule[T_TV], rule[T_MO_VAL])
+        value = int.from_bytes(rule[T_TV], "big")
+
+        for i in range(total_size, send_length, -1):
+            bit = value & (0x01 << (i-1))
+            tmp_bbuf.set_bit(bit)
+
         val = in_bbuf.get_bits(send_length)
         tmp_bbuf.add_value(val, send_length)
 
-        return [bytes(tmp_bbuf.get_content()), total_size]
+        return [bytes(tmp_bbuf.get_remaining_content()), total_size]
 
     def rx_cda_comp_len(self, rule, in_bbuf):
         # will update the length field later.
@@ -465,10 +473,10 @@ class Decompressor:
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:
-            dprint(r)
+            #dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
-                dprint("<<<", full_field)
+                #dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
                 #pprint.pprint (self.parsed_packet)
 

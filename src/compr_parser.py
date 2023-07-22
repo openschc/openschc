@@ -40,32 +40,12 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+coap_options = {value: key for key, value in option_names.items()}
+
 icmpv6_types = {
     T_ICMPV6_TYPE_ECHO_REQUEST: 128,
     T_ICMPV6_TYPE_ECHO_REPLY: 129
 }
-
-coap_options = {'If-Match':1,
-            'Uri-Host':3,
-            'ETag':4,
-            'If-None-Match':5,
-            'Observe':6,
-            'Uri-Port':7,
-            'Location-Path':8,
-            'Uri-Path':11,
-            'Content-Format':12,
-            'Max-Age':14,
-            'Uri-Query':15,
-            'Accept':17,
-            'Location-Query':20,
-            'Block2':23,
-            'Block1':27,
-            'Size2':28,
-            'Proxy-Uri':35,
-            'Proxy-Scheme':39,
-            'Size1':60,
-            'No-Response': 258}
-
 
 class Parser:
     """
@@ -76,7 +56,9 @@ class Parser:
         self.protocol = protocol
         self.header_fields = {}
 
-    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "COAP"], start="IPv6"):
+    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "CoAP"], 
+              coap_port = 5683,
+              start="IPv6"):
         """
         Parsing a byte array:
         - pkt is the bytearray to be parsed
@@ -87,8 +69,8 @@ class Parser:
         to stop before CoAP layers = ["IPv6, "UDP"]
         """
 
-        assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        dprint("direction in parser:", direction)
+        assert direction in [T_DIR_UP, T_DIR_DW]  # rigth value
+        #dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -154,7 +136,8 @@ class Parser:
 
             pos += 8
 
-            next_layer = "COAP"
+            if udpBytes[0] == coap_port or udpBytes[1] == coap_port:
+                next_layer = "CoAP"
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
@@ -176,7 +159,7 @@ class Parser:
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
                 
-        if "COAP" in layers and next_layer == "COAP":
+        if "CoAP" in layers and next_layer == "CoAP":
             field_position = {}
             coapBytes = unpack('!BBH', pkt[pos:pos+4])
 
@@ -360,8 +343,8 @@ class Unparser:
                     opt_val  = opt[1][0]
                     opt_len  = opt[1][1]//8
                     
-                    delta_t = coap_options[opt_name] - cumul_t
-                    cumul_t = coap_options[opt_name]
+                    delta_t = coap_options["COAP."+opt_name] - cumul_t
+                    cumul_t = coap_options["COAP."+opt_name]
                     #print (opt_name, coap_options[opt_name], delta_t)
                     
                     if delta_t < 13:
