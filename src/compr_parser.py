@@ -40,32 +40,12 @@ option_names = {
     258: T_COAP_OPT_NO_RESP
 }
 
+coap_options = {value: key for key, value in option_names.items()}
+
 icmpv6_types = {
     T_ICMPV6_TYPE_ECHO_REQUEST: 128,
     T_ICMPV6_TYPE_ECHO_REPLY: 129
 }
-
-coap_options = {'If-Match':1,
-            'Uri-Host':3,
-            'ETag':4,
-            'If-None-Match':5,
-            'Observe':6,
-            'Uri-Port':7,
-            'Location-Path':8,
-            'Uri-Path':11,
-            'Content-Format':12,
-            'Max-Age':14,
-            'Uri-Query':15,
-            'Accept':17,
-            'Location-Query':20,
-            'Block2':23,
-            'Block1':27,
-            'Size2':28,
-            'Proxy-Uri':35,
-            'Proxy-Scheme':39,
-            'Size1':60,
-            'No-Response': 258}
-
 
 class Parser:
     """
@@ -363,8 +343,8 @@ class Unparser:
                     opt_val  = opt[1][0]
                     opt_len  = opt[1][1]//8
                     
-                    delta_t = coap_options[opt_name] - cumul_t
-                    cumul_t = coap_options[opt_name]
+                    delta_t = coap_options["COAP."+opt_name] - cumul_t
+                    cumul_t = coap_options["COAP."+opt_name]
                     #print (opt_name, coap_options[opt_name], delta_t)
                     
                     if delta_t < 13:
