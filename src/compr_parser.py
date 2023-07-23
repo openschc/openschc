@@ -75,9 +75,9 @@ class Parser:
         pos = 0
         self.header_fields = {}
 
-        next_header = start
+        next_layer = start
 
-        if  next_header == "IPv6" :
+        if  next_layer == "IPv6" :
             version = unpack ("!B", pkt[:1])
             #assert version[0]>>4 == 6                 # only IPv6
             if version[0]>>4 == 6 != 6:
@@ -114,9 +114,8 @@ class Parser:
                 self.header_fields[T_IPV6_DEV_PREFIX, 1]     = [adapt_value(firstBytes[8].to_bytes(8, "big"), 64, T_IPV6_DEV_PREFIX), 64]
                 self.header_fields[T_IPV6_DEV_IID, 1]        = [adapt_value(firstBytes[9].to_bytes(8, "big"), 64, T_IPV6_DEV_IID), 64]
 
-
-            if not (self.header_fields[T_IPV6_NXT, 1][0] == b'\x11' or self.header_fields[T_IPV6_NXT, 1][0] == b'\x3a'):
-                return None, None, "packet neither UDP nor ICMP"
+#            if not (self.header_fields[T_IPV6_NXT, 1][0] == b'\x11' or self.header_fields[T_IPV6_NXT, 1][0] == b'\x3a'):
+#                return None, None, "packet neither UDP nor ICMP"
 
             if self.header_fields[T_IPV6_NXT, 1][0] == b'\x11': next_layer = "UDP"
             if self.header_fields[T_IPV6_NXT, 1][0] == b'\x3a': next_layer = "ICMP"
