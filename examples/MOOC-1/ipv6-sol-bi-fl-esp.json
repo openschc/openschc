@@ -54,9 +54,6 @@
   {
     "RuleIDValue" : 2,
     "RuleIDLength": 8,
-    "Meta": {
-        "IPv6.NH" : 17
-    },
     "Compression": [
        {"FID": "UDP.DEV_PORT",         
        "MO": "ignore", 
@@ -74,5 +71,23 @@
        "TV": 0, "MO": "ignore", 
        "CDA": "compute-checksum"}
       ]          
+  },{
+    "RuleIDValue" : 0,
+    "RuleIDLength": 0,    
+    "schc_header": [
+       {"FID": "SCHC.NXT",  
+       "TV": 17,       
+       "MO": "equal", 
+       "CDA": "not-sent"}
+      ]          
+  },{
+    "RuleIDValue" : 0,
+    "RuleIDLength": 0,    
+    "schc_header": [
+       {"FID": "SCHC.NXT",  
+       "TV": 17,       
+       "MO": "equal", 
+       "CDA": "not-sent"}
+      ]          
   }
-]
+]          

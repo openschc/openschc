@@ -113,6 +113,8 @@ for packet in packets:
                                      direction=direction, 
                                      failed_field=True)
         
+        SCHC_header = {('SCHC.NEXT', 1): [b'\x11', 8]}
+        
         print ("Rule for packet")
         pprint.pprint(rule)
 

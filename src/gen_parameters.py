@@ -145,6 +145,9 @@ T_FRAG_L2WORDSIZE = "L2WordSize"     #YANG l2-word-size
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1" #YANG tile-in-all-1
 T_FRAG_RFC8724 = "RCS_CRC32"
 
+T_SCHC_HEADER = "schc_header"
+T_SCHC_NXT    = "SCHC.NXT"
+
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
 
