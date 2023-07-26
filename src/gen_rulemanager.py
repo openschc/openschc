@@ -266,8 +266,10 @@ from copy import deepcopy
 from gen_parameters import *
 from compr_core import *
 from compr_parser import *
-import ipaddress
 import warnings
+import colorama
+from colorama import Fore, Style
+import datetime
 
 import base64
 import cbor2 as cbor
@@ -396,7 +398,6 @@ class RuleManager:
             self._ctxt.append(d)
 
         d[T_META] = {T_LAST_USED: None}
-        print ("@@@@@", d)
 
         for n_rule in sor:
             if T_RULEID in n_rule:
@@ -541,11 +542,14 @@ class RuleManager:
         arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
 
         if T_ACTION in nrule:
-             print ("Warning: using experimental Action")
-             arule[T_ACTION] = nrule[T_ACTION]
-
-
-
+            print ("Warning: using experimental Action")
+            if nrule[T_ACTION] in [T_ACTION_PPING]:
+                arule[T_ACTION] = nrule[T_ACTION]
+                if T_ACTION_VAL in nrule:
+                    arule[T_ACTION_VAL] =  adapt_value(nrule[T_ACTION_VAL])
+                else:
+                    arule[T_ACTION_VAL] = None
+            
         arule[T_COMP] = []
 
         up_rules = 0
@@ -592,7 +596,7 @@ class RuleManager:
                         val = list(dic.values())[0]
 
 
-                        print ("---------> ", key, val)
+                        #print ("---------> ", key, val)
                         entry[T_TV_IND] = adapt_value(key,entry[T_FL], FID)
                     else:
                         entry[T_TV] = adapt_value(r[T_TV], entry[T_FL], FID)
@@ -657,15 +661,41 @@ class RuleManager:
         """
         for dev in self._ctxt:
             print ("*"*40)
-            print ("Device:", dev["DeviceID"])
+            print ("Device:", dev["DeviceID"], end=" ")
+            if dev[T_META][T_LAST_USED]:
+                print(Fore.BLUE+"last used: "+ dev[T_META][T_LAST_USED]+Fore.BLACK)
+            else:
+                print(Fore.LIGHTMAGENTA_EX+"Never Used"+Fore.BLACK)
 
             for rule in dev["SoR"]:
-                print ("/" + "-"*25 + "\\")
+                print ("/" + "-"*25 +"\\")
                 txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
                 print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
+                if T_ACTION in rule:
+                    print ("|" + "-"*25  + "+" + "-"*30 + "\\")
+
+                    msg =  "ACTION : {}".format(rule[T_ACTION])
+                    if rule[T_ACTION] in [T_ACTION_PPING]: # parameter as a int
+                        msg += " ({})".format(int.from_bytes(rule[T_ACTION_VAL], 'big'))
+
+                    print ("| {:54} |".format(msg))
+
                 if T_COMP in rule:
-                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
+                    print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+", end="")
+                    if rule[T_META][T_LAST_USED]:
+                        timestamp = rule[T_META][T_LAST_USED]
+                        l_dash = (30-len(timestamp))//2
+                        r_dash = l_dash
+                        if l_dash*2 + len(timestamp) < 30:
+                            r_dash +=1
+
+
+                        print ('-'*l_dash + timestamp + '-'*r_dash + "+", end="")
+                    else:
+                        print( "-"*30 + "+", end="")
+                    
+                    print("-"*13 + "+" + "-"*16 +"\\")
                     for e in rule[T_COMP]:
                         msg2 = None
                         if len(e[T_FID]) < 16:
@@ -773,8 +803,8 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        print ("MSB")
-        print (TV, FV, rlength, flength, arg)
+        #print ("MSB")
+        #print (TV, FV, rlength, flength, arg)
 
         if rlength == T_FUNCTION_VAR:
             rlength = flength
@@ -791,13 +821,13 @@ class RuleManager:
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
 
-            print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
+            #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
             if bit_tv != bit_fv:
-                print ("comparison failed")
+                #print ("comparison failed")
                 return False
                 
-        print ("comparison succeeded")
+        #print ("comparison succeeded")
         return True
 
 
@@ -837,7 +867,7 @@ class RuleManager:
         """
 
         for d in self._ctxt:
-            dprint (d["DeviceID"])
+            #dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
@@ -845,14 +875,14 @@ class RuleManager:
 
                     tested_rule = schc.get_bits(ruleLength, position=0)
 
-                    dprint (tested_rule, ruleID)
+                    #dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
 
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failing_field=False):
         """ Takes a parsed packet and returns the matching rule.
         """
         for dev in self._ctxt:
@@ -860,7 +890,7 @@ class RuleManager:
                 if "Compression" in rule:
                     matches = 0
                     for r in rule["Compression"]:
-                        print(r)
+                        #print(r)
                         #print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
@@ -875,7 +905,7 @@ class RuleManager:
                                     arg, direction=direction):
                                         matches += 1
                                 else:
-                                    if failed_field:
+                                    if failing_field:
                                         print("rule {}/{}: field {}  does not match TV={} FV={} rlen={} flen={} arg={}".format(
                                             rule[T_RULEID], rule[T_RULEIDLENGTH],
                                             r[T_FID],
@@ -886,12 +916,12 @@ class RuleManager:
                             else:
                                 if r[T_FL] == "var":  # entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
-                                    dprint("Suboptimal rule")
+                                    #dprint("Suboptimal rule")
                                 else:
-                                    dprint("field from rule not found in pkt")
+                                    #dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            #print ("->", matches)
+                    #print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
@@ -955,6 +985,28 @@ class RuleManager:
                             return r
         return None
 
+    def find_device (self, pref, iid):
+        """Find if a IPv6 address of a device appears in the rules. If found, returns the device_id.
+        if not return None.
+        Arguments are the prefix and the IID"""
+        for d in self._ctxt:
+            for r in d["SoR"]:
+                if T_COMP in r:
+                    c = r[T_COMP]
+                    pref_found = False
+                    iid_found = False
+                    for e in c:
+                        #print (e, pref_found, iid_found)
+                        if e[T_FID] == T_IPV6_DEV_PREFIX and e[T_TV] == pref:
+                            pref_found = True
+                        if e[T_FID] == T_IPV6_DEV_IID and e[T_TV] == iid:
+                            iid_found = True
+
+                        if pref_found and iid_found:
+                            return d
+                        
+        return None
+    
 # CORECONF 
 
     def add_sid_file(self, name):
@@ -1681,3 +1733,29 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
             # add the modified one
             self.from_coreconf(device=device, dev_info=json_cconf)
         return result
+    
+
+# TIMESTAMPING
+
+    def timestamp_device(self, device_id, rule):
+        for d in self._ctxt:
+            if d["DeviceID"] == device_id: 
+                timestamp = datetime.datetime.now().isoformat()
+                d[T_META][T_LAST_USED] =  timestamp
+                for r in d["SoR"]:
+                    if r[T_RULEID] == rule[T_RULEID] and r[T_RULEIDLENGTH]==rule[T_RULEIDLENGTH]:
+                        r[T_META][T_LAST_USED] = timestamp
+
+                        return True
+        return False
+
+    def get_timestamp(self, device_id, rule=None):
+        for d in self._ctxt:
+            if d["DeviceID"] == device_id: 
+                if rule==None:
+                    return d[T_META][T_LAST_USED] 
+                for r in d["SoR"]:
+                    if r[T_RULEID] == rule[T_RULEID] and r[T_RULEIDLENGTH]==rule[T_RULEIDLENGTH]:
+                        return r[T_META][T_LAST_USED]
+
+        return None

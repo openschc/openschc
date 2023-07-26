@@ -17,6 +17,7 @@ from scapy.all import *
 import binascii
 
 
+
 option_names = {
     1: T_COAP_OPT_IF_MATCH,
     3: T_COAP_OPT_URI_HOST,
@@ -67,6 +68,7 @@ coap_options = {'If-Match':1,
             'No-Response': 258}
 
 
+
 class Parser:
     """
     Parser takes a bytearray and transforms it into a dictionary indexed by field id.
@@ -88,7 +90,7 @@ class Parser:
         """
 
         assert direction in [T_DIR_UP, T_DIR_DW, T_DIR_BI]  # rigth value
-        dprint("direction in parser:", direction)
+        #dprint("direction in parser:", direction)
 
         pos = 0
         self.header_fields = {}
@@ -168,13 +170,13 @@ class Parser:
                 echoHeader = unpack('!HH', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_IDENT, 1]       = [adapt_value(echoHeader[0]), 16]
                 self.header_fields[T_ICMPV6_SEQNO, 1]       = [adapt_value(echoHeader[1]), 16]
-                pos += 4
             elif icmpBytes[0] == 1: # Destination Unreachable
                 unused = unpack('!L', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [adapt_value(unused[0]), 32]
-                pos += 4
-                self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
-                pos = len(pkt)
+            pos += 4
+
+            self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
+            pos = len(pkt)
                 
         if "COAP" in layers and next_layer == "COAP":
             field_position = {}
@@ -299,23 +301,25 @@ class Unparser:
             ipv6_next = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" )
 
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
-                for i in icmpv6_types:
-                    icmp_type = int.from_bytes(header_d[(ICMPV6.TYPE, 1)][0], byteorder="big" )
-                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
-                        IPv6Src = DevStr
-                        IPv6Dst = AppStr
-                        ICMPv6Header = ICMPv6EchoReply(
-                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
-                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
-                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
-                        IPv6Src = AppStr
-                        IPv6Dst = DevStr 
-                        ICMPv6Header = ICMPv6EchoRequest(
-                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
-                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
-                    L4header = ICMPv6Header
+                icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
+                if data == None:
+                    data_icmp = header_d[(T_ICMPV6_PAYLOAD, 1)][0]
+                else:
+                    data_icmp = None
+                    if (T_ICMPV6_PAYLOAD, 1) in header_d:
+                        print ("Data in header description ignored")
+
+                if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                    ICMPv6Header = ICMPv6EchoReply(
+                        id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                        seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
+                        data = data_icmp)
+                if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                    ICMPv6Header = ICMPv6EchoRequest(
+                        id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                        seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
+                        data_icmp = data_icmp)
+                L4header = ICMPv6Header
 
             elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
@@ -405,5 +409,18 @@ class Unparser:
         else:
             full_packet = L3header / Raw(load=data)
 
+
         #hexdump(full_packet)
+        if iface != None:
+            print ("sending to ", iface)
+            send(full_packet, iface=iface)
+        
         return full_packet
+
+def create_icmp_error (destination, error_code):
+    print ("send ICMP error {} to {}".format(error_code, destination))
+
+    destAddr = ipaddress.IPv6Address(destination)
+    icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
+
+    return bytes(icmp_packet)

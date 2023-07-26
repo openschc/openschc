@@ -155,7 +155,7 @@ class SCHCProtocol:
 
     """
 
-    def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False, verbose=True):
+    def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False, verbose=False):
         print("role at protocol.py", role)
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
@@ -171,6 +171,9 @@ class SCHCProtocol:
         self.session_manager = SessionManager(self, unique_peer)
         self.verbose = verbose
         self.sender_delay = 0
+        self.main_interface = None
+        self.other_interfaces = None
+        self.icmp_error_msg = False
 
         self.connectivity_manager = ConnectivityManager()
 
@@ -201,9 +204,67 @@ class SCHCProtocol:
 
     def get_system(self):
         return self.system
+    
+    def set_main_interface(self, interface):
+        if type(interface) == str:
+            self.main_interface = interface
+        else:
+            raise ValueError("Main interface is a string")
+
+    def set_other_interfaces(self, interfaces):
+        if type (interfaces) == list:
+            self.other_interfaces = interfaces
+        else:
+            raise ValueError("Other interfaces is a list of strings")
+        
+    def set_icmp_error_msg(self, value):
+        if type(value) is bool:
+            self.icmp_error_msg = value
+
+    def get_main_interface(self):
+        return self.main_interface
+
+    def get_interfaces(self):
+        return [self.main_interface] + self.other_interfaces
+
+    def action_proxy_ping(self, rule, ppacket, direction, verbose):
+        if direction == T_DIR_UP:
+            rev_dir = T_DIR_DW
+        elif direction == T_DIR_DW:
+            rev_dir = T_DIR_UP
+        else:
+            raise ValueError("Direction incorrect")
+        
+        device_id = rule[T_META][T_DEVICEID]
+        last_used = self.rule_manager.get_timestamp(device_id)
+
+        if last_used == None: # no time recorded, so device is dead
+            return False
+
+        last_used_iso = datetime.fromisoformat(last_used)
+        delta = datetime.now() - last_used_iso
+
+        print ("delta", delta.seconds)
+
+        if delta.seconds > int.from_bytes(rule[T_ACTION_VAL], 'big'):
+            return False # after the delay, device dead
+
+        if ppacket[(T_ICMPV6_TYPE, 1)][0] == b'\x80': # echo request
+            if verbose:
+                print("schc_send: generating echo reply")
+            ppacket[(T_ICMPV6_TYPE, 1)][0] = b'\x81'
+
+            unparser = Unparser()
+            x = unparser.unparse(ppacket, data=None, direction=rev_dir, iface=self.get_main_interface())
+            print('result: ', binascii.hexlify(bytes(x)))
+
+            return True
+        
+        return False
+
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False):
+    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose=False):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -228,36 +289,66 @@ class SCHCProtocol:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
         else: 
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
-        self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
+        #self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
-            return BitBuffer(raw_packet), None
+            if verbose:
+                print("schc_send: no parsing")
+            return None, None
 
         # Apply compression rule
 
-        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
-        print("compr rule", rule)
-        self._log("compression rule {}".format(rule))
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir, failing_field=verbose)
+
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
-            print("No Compress rule:", rule)
-            self._log("no-compression rule {}".format(rule))
+
+            #self._log("no-compression rule {}".format(rule))
 
             if rule is None:
                 # XXX: not putting any SCHC compression header? - need fix
-                self._log("rule for compression/no-compression not found")
+                print("schc-send: rule for compression/no-compression not found, abort")
+
+                if self.icmp_error_msg: 
+                    if  (T_ICMPV6_TYPE, 1) in parsed_packet: 
+                        icmp_type = int.from_bytes(parsed_packet[(T_ICMPV6_TYPE, 1)][0], 'big')
+                        if icmp_type > 127:
+                            dev_found = self.rule_manager.find_device(parsed_packet[(T_IPV6_DEV_PREFIX, 1)][0], 
+                                                                      parsed_packet[(T_IPV6_DEV_IID, 1)][0])
+                            if dev_found != None:
+                                icmp_code = 4 # port not found
+                            else:
+                                icmp_code = 3 # host not found
+                            
+                            app_addr = parsed_packet[(T_IPV6_APP_PREFIX, 1)][0]+parsed_packet[(T_IPV6_APP_IID, 1)][0]
+                            destAddr = ipaddress.IPv6Address(app_addr)
+                            print ("schc-send: sending ICMP Dest Unreach message to ", destAddr, "with code", icmp_code)
+                            icmp_packet = IPv6 (dst = destAddr.compressed) / ICMPv6DestUnreach(code=3)
+                            send(icmp_packet)
+
                 return None, device_id
-                
+            
+            if verbose:
+                print("schc-send: No-Compression rule:", rule[T_RULEID]+'/'+rule[T_RULEIDLENGTH])
+
             schc_packet = self.compressor.no_compress(rule, raw_packet)
-            print("raw_packet", raw_packet)
             return schc_packet, device_id
 
+        if verbose:
+            print("schc_send: compression rule", str(rule[T_RULEID])+'/'+str(rule[T_RULEIDLENGTH]))
+
         device_id = rule[T_META][T_DEVICEID]
+
+        if T_ACTION in rule:
+            if verbose:
+                print ("schc_send: Apply action", rule[T_ACTION])
+
+            if rule[T_ACTION] == T_ACTION_PPING: 
+                self.action_proxy_ping(rule, parsed_packet, t_dir, verbose)
+
+                return None, device_id
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
-        dprint(schc_packet)
-        #schc_packet.display("bin")
-        self._log("compression result {}".format(schc_packet))
 
         return schc_packet, device_id
 
@@ -286,15 +377,20 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None):
-        """Starting to send SCHC packet after called by Application.       
-        If self.position is T_POSITION_DEVICE and 
-        this function is for sending from device to core.
-        TODO: If only compress retun True If Compres and Frag, return context
+    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None, verbose=False):
         """
-        self._log("schc_send {} {}".format(core_id, device_id))
+        Take an uncompressed packet and send it into 1 or several SCHC packets.
+        paramters:
+        - raw_packet: packet to compress and fragment if needed
+        - core_id: optional parameter used by a device to specify to which core the SCHC pkt is sent
+        - device_id: optional parameter to indicate where the care has to send the SCHC packet. usually, this
+        information is found from the rule.
+        - parsing: if not specified, parsing starts from IPv6. parsing allows to select another protocil, for example CoAP.
+        - verbose : if True, gives details on compression and fragmentation.
+        """
+        #self._log("schc_send {} {}".format(core_id, device_id))
 
-	#, raw_packet))
+	    #, raw_packet))
 
         #To perform fragmentation, we get the device_id from the rule:
         #Ex: "DeviceID" : "udp:54.37.158.10:8888",
@@ -302,14 +398,8 @@ class SCHCProtocol:
         #Add sender delay if specified by upper layer
 
         self.sender_delay = sender_delay
-
-
                 
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing)
-        print("+++ packet_bbuf", packet_bbuf)
-        print("+++ device_id", device_id)
-        print("+++ position", self.position)
-
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing=parsing, verbose=verbose)
 
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
@@ -318,7 +408,7 @@ class SCHCProtocol:
             direction = T_DIR_DW
             destination = device_id
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
+        #print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
 
         if packet_bbuf == None: # No compression rule found
             return 
@@ -329,9 +419,9 @@ class SCHCProtocol:
             self._log("fragmentation not needed size={}".format(
             packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), destination)
-            print("protocol.py destination", destination)
+            #print("protocol.py destination", destination)
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
-            print("AAAAA protocol.py", args)
+            #print("AAAAA protocol.py", args)
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
@@ -342,18 +432,21 @@ class SCHCProtocol:
         return frag_session
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None):
-        dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
+        #dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
 
-        print("schc_packet at schc_recv", schc_packet)
+        #print("schc_packet at schc_recv", schc_packet)
         packet_bbuf = BitBuffer(schc_packet)
-        dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
+        #dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
 
         if rule == None:
             print ("No rule found")
             return None
+        
+        self.rule_manager.timestamp_device(device_id, rule)
+        self.rule_manager.Print()
 
         if T_COMP in rule:
             if self.position == T_POSITION_DEVICE:
@@ -369,7 +462,6 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
-            print("The HEADER D:", header_d, pkt_data)
             pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
             return device_id, pkt
         elif T_NO_COMP in rule:
