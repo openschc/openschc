@@ -1617,8 +1617,9 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                             if value == None:
                                 # keys must be adapted to take into account of the delta coding
                                 st_delta_adjusted = {}
+                                # Adjust the keys by developing the complete SID ( completeSID = s + k + delta )
                                 for k, v in found_st.items():
-                                    st_delta_adjusted[k+delta] = v
+                                    st_delta_adjusted[s+k+delta] = v
                                 return st_delta_adjusted
                             else:
                                 sor[s][found_index] = value
