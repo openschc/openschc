@@ -1594,7 +1594,8 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                 #     return {s: v}
 
                 if s+delta in self.sid_key_mapping: # A list we have keys, look for specific entry
-                    if len(self.sid_key_mapping[s+delta]) > len(keys):
+                    # Raise an err if the number of SID keys are not the same as the number of keys in self.sid_key_mapping
+                    if len(self.sid_key_mapping[s+delta]) != len(keys):
                         raise ValueError ("Not enough keys values to locate the SID")
 
                     key_search = {}
@@ -1616,8 +1617,9 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                             if value == None:
                                 # keys must be adapted to take into account of the delta coding
                                 st_delta_adjusted = {}
+                                # Adjust the keys by developing the complete SID ( completeSID = s + k + delta )
                                 for k, v in found_st.items():
-                                    st_delta_adjusted[k+delta] = v
+                                    st_delta_adjusted[s+k+delta] = v
                                 return st_delta_adjusted
                             else:
                                 sor[s][found_index] = value
