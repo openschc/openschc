@@ -56,7 +56,7 @@ class Parser:
         self.protocol = protocol
         self.header_fields = {}
 
-    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "CoAP"], 
+    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "CoAP", "ESP"], 
               coap_port = 5683,
               start="IPv6"):
         """
@@ -119,6 +119,7 @@ class Parser:
 
             if self.header_fields[T_IPV6_NXT, 1][0] == b'\x11': next_layer = "UDP"
             if self.header_fields[T_IPV6_NXT, 1][0] == b'\x3a': next_layer = "ICMP"
+            if self.header_fields[T_IPV6_NXT, 1][0] == b'\x32': next_layer = "ESP"
 
             pos = 40 # IPv6 is fully parsed
 
@@ -137,6 +138,16 @@ class Parser:
 
             if udpBytes[0] == coap_port or udpBytes[1] == coap_port:
                 next_layer = "CoAP"
+
+        if "ESP" in layers and next_layer == "ESP":
+            espBytes = unpack('!LL', pkt[pos:pos+8])
+            self.header_fields[T_ESP_SPI, 1]   = [adapt_value(espBytes[0]), 32]
+            self.header_fields[T_ESP_SEQ, 1]   = [adapt_value(espBytes[1]), 32]
+            pos += 8
+
+            next_layer = "NONE"
+
+                
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])

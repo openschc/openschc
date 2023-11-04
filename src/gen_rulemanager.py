@@ -304,6 +304,8 @@ FIELD__DEFAULT_PROPERTY = {
     T_IPV6_DEV_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"  },
     T_IPV6_APP_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
     T_IPV6_APP_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
+    T_ESP_SPI            : {"FL": 32, "TYPE": bytes, "ALGO": "DIRECT"   },
+    T_ESP_SEQ            : {"FL": 32, "TYPE": bytes, "ALGO": "DIRECT"   },
     T_UDP_DEV_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
     T_UDP_APP_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
     T_UDP_LEN              : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
@@ -441,11 +443,6 @@ class RuleManager:
                 elif T_SCHC_HEADER in n_rule:
                     already_exists = self.FindSCHCHeaderRule(deviceID=device)
                     if already_exists is None:
-                        arule = {}
-                        print("SCHC HEADER Rule")
-                        arule[T_RULEID] = 0 # No rule ID for SCHC Header
-                        arule[T_RULEIDLENGTH] = 0
-                        arule[T_SCHC_HEADER] = []
                         r = self._create_compression_rule(n_rule, device, schc_header=True)
 
                         d["SoR"].append(r)
@@ -563,19 +560,17 @@ class RuleManager:
              print ("Warning: using experimental Action")
              arule[T_ACTION] = nrule[T_ACTION]
 
-
-
-        arule[T_COMP] = []
-
-        up_rules = 0
-        dw_rules = 0
-
         if schc_header:
             KEY = T_SCHC_HEADER
             FIELD_ALLOWED = FIELD__SCHC_HEADER
         else:
             KEY = T_COMP
             FIELD_ALLOWED = FIELD__DEFAULT_PROPERTY
+
+        arule[KEY] = []
+
+        up_rules = 0
+        dw_rules = 0
 
         for r in nrule[KEY]:
             if r["FID"] == T_COAP_OPT_END:
@@ -620,7 +615,7 @@ class RuleManager:
                         val = list(dic.values())[0]
 
 
-                        print ("---------> ", key, val)
+                        #print ("---------> ", key, val)
                         entry[T_TV_IND] = adapt_value(key,entry[T_FL], FID)
                     else:
                         entry[T_TV] = adapt_value(r[T_TV], entry[T_FL], FID)
@@ -642,7 +637,7 @@ class RuleManager:
                 raise ValueError("{} CDA not found".format(CDA))
             entry[T_CDA] = CDA
 
-            arule[T_COMP].append(entry)
+            arule[KEY].append(entry)
 
         if not T_META in arule:
             arule[T_META] = {}
@@ -688,16 +683,17 @@ class RuleManager:
             print ("Device:", dev["DeviceID"])
 
             for rule in dev["SoR"]:
-                print ("/" + "-"*25 + "\\")
-                txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
-                print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
+                if not T_SCHC_HEADER in rule:
+                    print ("/" + "-"*25 + "\\")
+                    txt = str(rule[T_RULEID])+"/"+ str(rule[T_RULEIDLENGTH])
+                    print ("|Rule {:8}  {:10}|".format(txt, self.printBin(rule[T_RULEID], rule[T_RULEIDLENGTH])))
 
                 if T_SCHC_HEADER in rule:
-                    print ("|" + "%"*15 + "%" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
-                    for e in rule[T_COMP]:
+                    print ("%" * 89)
+                    for e in rule[T_SCHC_HEADER]:
                         msg2 = None
                         if len(e[T_FID]) < 16:
-                            print ("|{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
+                            print ("%{:<15s}|{:>3}|{:2}|{:2}|".format(e[T_FID], e[T_FL], e[T_FP], e[T_DI]), end='')
                         else:
                             msg = e[T_FID]
                             if "-" in msg:
@@ -722,7 +718,7 @@ class RuleManager:
                         if T_MO_VAL in e:
                             txt = txt+ '(' + str(e[T_MO_VAL])+')'
 
-                        print ("|{:13}|{:16}|".format(txt, e[T_CDA]))
+                        print ("|{:13}|{:16}%".format(txt, e[T_CDA]))
 
                         if (T_TV in e) and (type (e[T_TV]) is list):
                             for i in range (1, len(e[T_TV])):
@@ -731,9 +727,9 @@ class RuleManager:
                                 print (":{:^13}:{:^16}:".format(".", "."))
 
                         if msg2 != None: # FID is too large, wrote it on 2 lignes, this is the second line
-                            print ("|{:<15s}|{:>3}|{:2}|{:2}|{:30}|{:13}|{:16}|".format(msg2, "", "", "", "", "", "" ), )
+                            print ("%{:<15s}|{:>3}|{:2}|{:2}|{:30}|{:13}|{:16}%".format(msg2, "", "", "", "", "", "" ), )
 
-                    print ("\\" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"/")
+                    print ("%"*89)
                 if T_COMP in rule:
                     print ("|" + "-"*15 + "+" + "-"*3 + "+" + "-"*2 + "+" + "-"*2 + "+" + "-"*30 + "+" + "-"*13 + "+" + "-"*16 +"\\")
                     for e in rule[T_COMP]:
@@ -922,14 +918,21 @@ class RuleManager:
         return None
 
 
-    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False):
+    def FindRuleFromPacket(self, pkt, direction=T_DIR_BI, failed_field=False, schc_header=False):
         """ Takes a parsed packet and returns the matching rule.
         """
+
+        if schc_header:
+            KEY = T_SCHC_HEADER
+        else:
+            KEY = T_COMP
+
         for dev in self._ctxt:
             for rule in dev["SoR"]:
-                if "Compression" in rule:
+                if KEY in rule:
                     matches = 0
-                    for r in rule["Compression"]:
+                    for r in rule[KEY]:
+                        print (r)
                         if failed_field:
                             print(r)
                         #print (pkt[(r[T_FID], r[T_FP])][0])

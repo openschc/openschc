@@ -190,19 +190,27 @@ class Compressor:
     #         packet_bbuf, output_bbuf))
     #     return output_bbuf
 
-    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None, verbose=False):
+    def compress(self, rule, parsed_packet, data, direction=T_DIR_UP, device_id = None, verbose=False, append=None):
         """
         Take a compression rule and a parsed packet and return a SCHC pkt
         """
         assert direction in [T_DIR_UP, T_DIR_DW]
-        output_bbuf = BitBuffer()
-        # set ruleID first.
-        if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
-            output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            #dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            #output_bbuf.display(format="bin")
 
-        for r in rule["Compression"]:
+        if append is None:
+            output_bbuf = BitBuffer()
+        else:
+            output_bbuf = append
+
+        # set ruleID first.
+
+        if not T_SCHC_HEADER in rule: # SCHC HEADER has no Rule ID
+            if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
+                output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
+            KEY = T_COMP
+        else:
+            KEY = T_SCHC_HEADER
+
+        for r in rule[KEY]:
             #print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
@@ -463,16 +471,20 @@ class Decompressor:
     #         packet_bbuf, output_bbuf))
     #     return output_bbuf
 
-    def decompress(self, schc, rule, direction):
-        assert ("Compression" in rule)
+    def decompress(self, schc, rule, direction, schc_header=False):
+        assert (T_COMP in rule or T_SCHC_HEADER in rule)
         schc.set_read_position(0)
 
         self.parsed_packet = {}
 
-        rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
-        assert (rule_send == rule["RuleID"])
+        if schc_header == False:
+            rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+            assert (rule_send == rule["RuleID"])
+            KEY = T_COMP
+        else:
+            KEY = T_SCHC_HEADER
 
-        for r in rule["Compression"]:
+        for r in rule[KEY]:
             #dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)

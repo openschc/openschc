@@ -2,53 +2,12 @@
     "RuleIDValue" : 1,
     "RuleIDLength": 8,
     "Compression": [
-      {"FID": "IPV6.VER", 
-       "TV": 6, "MO": "equal",     
+      {"FID": "ESP.SPI", 
+       "TV": "deadbeef", "MO": "equal",     
        "CDA": "not-sent"},
-
-      {"FID": "IPV6.TC",  
-       "TV": 0, "MO": "ignore",     
-       "CDA": "not-sent"},
-
-      {"FID": "IPV6.FL", 
-       "TV": 0, "MO": "ignore",
-       "CDA": "not-sent"},
-
-      {"FID": "IPV6.LEN",           
-       "MO": "ignore",   
-       "CDA": "compute-length"},
-
-      {"FID": "IPV6.NXT", 
-       "TV": 50, "MO": "equal",  
-       "CDA": "not-sent"},
-
-      {"FID": "IPV6.HOP_LMT", "DI":"UP",     
-       "TV": 1, "MO": "ignore",   
-       "CDA": "not-sent"},
-
-       {"FID": "IPV6.HOP_LMT", "DI":"DW",     
-       "TV": 50, "MO": "ignore",   
-       "CDA": "not-sent"},
-
-      {"FID": "IPV6.DEV_PREFIX",
-       "TV": ["FE80::/64",
-             "2001:41D0:302:2200::/64",
-             "2001:41d0:0404:0200::/64"], "MO": "match-mapping",
-       "CDA": "mapping-sent"},
-
-      {"FID": "IPV6.DEV_IID", 
-       "TV": "::3a86", "MO": "equal",
-       "CDA": "not-sent"},
-
-      {"FID": "IPV6.APP_PREFIX",
-       "TV": ["2001:41d0:404:200::/64",
-              "2001:41d0:0302:2200::/64",
-              "FE80::/64"], "MO": "match-mapping",
-       "CDA": "mapping-sent"},
-
-      {"FID": "IPV6.APP_IID", 
-       "TV": "::13b3","MO": "equal",  
-       "CDA": "not-sent"}
+       {"FID": "ESP.SEQ", 
+       "TV": 0, "MO": "MSB", "MO.VAL" : 16,    
+       "CDA": "LSB"}
       ]          
   },
   {
@@ -76,18 +35,9 @@
     "RuleIDLength": 0,    
     "schc_header": [
        {"FID": "SCHC.NXT",  
-       "TV": 17,       
-       "MO": "equal", 
-       "CDA": "not-sent"}
-      ]          
-  },{
-    "RuleIDValue" : 0,
-    "RuleIDLength": 0,    
-    "schc_header": [
-       {"FID": "SCHC.NXT",  
-       "TV": 17,       
-       "MO": "equal", 
-       "CDA": "not-sent"}
+       "TV": [17, 50],       
+       "MO": "match-mapping", 
+       "CDA": "mapping-sent"}
       ]          
   }
 ]          

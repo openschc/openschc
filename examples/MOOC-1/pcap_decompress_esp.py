@@ -23,31 +23,13 @@ packets = rdpcap('trace_coap.pcap')
 parser = Parser()
 Unparser = Unparser()
 
+# Load the rules containing the compression and the schc_header
 RM = RuleManager()
 RM.Add(file="ipv6-sol-bi-fl-esp.json")
 RM.Print()
 
 compress = Compressor()
 decompress = Decompressor()
-
-def show_diff(s1, s2):
-    from termcolor import colored
-
-    if len(s1) != len(s2):
-        print("size is different")
-        return
-    
-    differ = False
-    for o, c in zip(s1, s2):
-        #print(o, c)
-        if o == c:
-            print(colored(chr(o), "green"), end="")
-        else:
-            print(colored(chr(o), "red"), end="")  
-            differ = True 
-    print()         
-    if differ:
-        print (s2.decode()) 
 
 
 # Let's iterate through every packet
@@ -66,6 +48,7 @@ for packet in packets:
 
     # do ESP
 
+    # take UDP abd parse it
     ulp = packet[UDP]
     ulp.show()
 
@@ -77,31 +60,152 @@ for packet in packets:
     print (ulp_parsed)
 
     if ulp_parsed[0] is not None:
+        # packet parsed, find a matching rule.
         rule_ulp = RM.FindRuleFromPacket(pkt=ulp_parsed[0], 
                                      direction=direction, 
                                      failed_field=True)
+        print ("Compression rule for UDP")
         print (rule_ulp)
 
         if rule_ulp:
+            # matching rule found
+
+            # form the SCHC pseudo header and compress it 
+
+            pseudo_SCHC_header = {
+                ("SCHC.NXT", 1): [b"\x11", 8] # [FieldID, Field Pos] : [value, size]
+            }
+
+            print("Looking for SCHC Header rule...")
+            SCHC_header_rule = RM.FindRuleFromPacket(
+                                    pkt=pseudo_SCHC_header,
+                                    direction=direction,
+                                    failed_field=True,
+                                    schc_header=True
+            )
+
+            print("SCHC Header rule")
+            print (SCHC_header_rule)
+
+            print("Compress SCHC Header")
+            SCHC_header = compress.compress(rule=SCHC_header_rule,
+                                         parsed_packet=pseudo_SCHC_header,
+                                         data=b'',
+                                         direction=direction,
+                                         verbose=True)    
+
             SCHC_pkt = compress.compress(rule=rule_ulp,
                                          parsed_packet=ulp_parsed[0],
                                          data= ulp_parsed[1],
                                          direction=direction,
-                                         verbose=True)
+                                         verbose=True,
+                                         append=SCHC_header) # append add to the buffer
             
+            print("Full compressed SCHC message:")
             SCHC_pkt.display(format="bin")
             SCHC_pkt.display()
+
+
+            # Create IPv6 packet with SCHC protocol IPv6|SCHC
 
             packet[IPv6].nh = 0x5C # SCHC TBD
             packet[IPv6].payload = Raw(SCHC_pkt.get_content())
 
+            print ("IPv6 containing SCHC")
             packet.show()
 
-    e = sa.encrypt(packet[IPv6])
+            # DO IPSEC
+            e = sa.encrypt(packet[IPv6])
+            print ("IPsec packet")
+            e.show()
 
-    e.show()
+            # Find rule for outer ESP header
+            esp_parsed =  parser.parse (bytes(e[ESP]), 
+                        direction, 
+                        layers=["ESP"],
+                        start="ESP")
+            print("Parsed ESP Header")
+            print(esp_parsed)
 
+            pseudo_SCHC_header = {
+                ("SCHC.NXT", 1): [b"\x32", 8] # [FieldID, Field Pos] : [value, size]
+            }    
 
+            print("Looking for outer SCHC Header rule...")
+            SCHC_header_rule = RM.FindRuleFromPacket(
+                                    pkt=pseudo_SCHC_header,
+                                    direction=direction,
+                                    failed_field=True,
+                                    schc_header=True
+            )
+
+            print("Outer SCHC Header rule")
+            print (SCHC_header_rule)
+  
+
+            print("Compress SCHC Header")
+            SCHC_header = compress.compress(rule=SCHC_header_rule,
+                                         parsed_packet=pseudo_SCHC_header,
+                                         data=b'',
+                                         direction=direction,
+                                         verbose=True)  
+            
+            print ("OUTER SCHC Header")
+            SCHC_header.display(format="bin")
+
+            compress.compress(rule=rule_ulp,
+                                         parsed_packet=esp_parsed[0],
+                                         data= esp_parsed[1],
+                                         direction=direction,
+                                         verbose=True,
+                                         append=SCHC_header) # append add to the buffer                    
+
+            print ("Compressed Outer Header")
+            SCHC_header.display()
+
+            e[IPv6].nh = 0x5C
+            e[IPv6].payload = Raw(SCHC_header.get_content())
+
+            print("Full compressed SCHC packet")
+            e.show()
+            hexdump(e)
+
+            print("*****************************")
+            print("****** DECOMPRESSION ********")
+            print("*****************************")
+
+            payload = e[Raw]
+            print ("Received SCHC packet:", binascii.hexlify(bytes(payload)))
+            
+            rec_bbuf = gen_bitarray.BitBuffer(bytes(payload))
+
+            SCHC_header_used = RM.FindSCHCHeaderRule()
+
+            if SCHC_header_rule is not None:
+                print("Sender added SCHC header")
+
+            SCHC_header = decompress.decompress(rule=SCHC_header_rule,
+                                                schc=SCHC_pkt, 
+                                                direction=direction,
+                                                schc_header=True)
+            print ("SCHC Header")
+            print (SCHC_header)
+
+            ruleID = RM.FindRuleFromSCHCpacket(SCHC_pkt)
+            print ("Outer Rule ID", ruleID)
+
+            SCHC_packet = decompress.decompress(rule=ruleID,
+                                                schc=SCHC_pkt, 
+                                                direction=direction)
+            
+            print ("SCHC Packet")
+            print(SCHC_packet)
+
+            # replace SCHC proto by the one in the SCHC Header
+            e[IPv6].nh = int.from_bytes(SCHC_header[('SCHC.NXT', 1)][0], "big")
+            e[IPv6].show()
+
+    0/0
     parsed = parser.parse (bytes(e[IPv6]), 
                            direction, 
                            layers=["IPv6"])
