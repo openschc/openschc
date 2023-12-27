@@ -233,7 +233,9 @@ class SCHCProtocol:
             t_dir = T_DIR_UP
         else:
             raise ValueError ("Unknown position")
-        
+
+        print ("=======", t_dir)
+
         if reverse_direction:
             if t_dir == T_DIR_DW:
                 t_dir = T_DIR_UP
