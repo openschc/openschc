@@ -319,6 +319,9 @@ class SCHCProtocol:
 
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing, verbose=verbose)
 
+        if packet_bbuf is None: # No compression rule found
+            return
+
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
             destination = core_id
