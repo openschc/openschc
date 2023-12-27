@@ -176,7 +176,7 @@ class SCHCProtocol:
             tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             tunnel.bind(("0.0.0.0", 0x5C4C))
 
-            self.layer2 = basic_connection.ScapyLowerLayer(position=ROLE, socket=tunnel, other_end=None)
+            self.layer2 = basic_connection.ScapyLowerLayer(position=role, socket=tunnel, other_end=None)
             self.system = basic_connection.ScapySystem()
 
         self.scheduler = system.get_scheduler()
