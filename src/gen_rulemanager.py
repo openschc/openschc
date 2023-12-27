@@ -782,7 +782,7 @@ class RuleManager:
 
         ignore_bit = rlength - arg
 
-        for b in range(arg, rlength):
+        for b in range(ignore_bit, rlength):
             pos = b%8
             byte_pos = b//8
 
@@ -791,11 +791,13 @@ class RuleManager:
             if byte_pos < len(TV):
                 right_byte_tv = TV[byte_pos]
             else:
+                print ("=0")
                 right_byte_tv = 0
 
             if byte_pos < len (FV):
                 right_byte_fv = FV[byte_pos]
             else:
+                print ("= 0")
                 right_byte_fv = 0
 
             bit_tv = right_byte_tv & (1 << (7 -pos))
