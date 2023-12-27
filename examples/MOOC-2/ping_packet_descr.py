@@ -21,7 +21,7 @@ def processPkt(pkt):
     """
 
     if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
-        if pkt[ICMP6].type = 128: #Echo Request
+        if pkt[ICMP6].type == 128: #Echo Request
             pkt.show()
     # if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
     #     e_type = pkt.getlayer(Ether).type
