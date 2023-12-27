@@ -33,7 +33,7 @@ class ScapyLowerLayer:
             destination = (dest.split(":")[1], int(dest.split(":")[2]))
 
             res = self.sock.sendto(packet, destination)
-            print ("send status", res)
+            print ("send status", res, "bytes to", destination )
 
         elif dest != None and dest.find("lorawan") == 0:
             destination = ("127.0.0.1", 12345)
