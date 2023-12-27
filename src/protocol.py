@@ -241,6 +241,8 @@ class SCHCProtocol:
                 t_dir = T_DIR_UP
             else:
                 t_dir = T_DIR_DW 
+                
+        print ("=======", t_dir)
 
         if parsing != None:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
