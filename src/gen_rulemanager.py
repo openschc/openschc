@@ -782,7 +782,7 @@ class RuleManager:
 
         ignore_bit = rlength - arg
 
-        for b in range(arg):
+        for b in range(arg, rlength):
             pos = b%8
             byte_pos = b//8
 
