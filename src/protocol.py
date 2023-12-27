@@ -275,9 +275,6 @@ class SCHCProtocol:
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
 
-        #schc_packet.display("bin")
-        self._log("compression result {}".format(schc_packet))
-
         return schc_packet, device_id
 
     def _make_frag_session(self, core_id, device_id, direction):
@@ -311,7 +308,7 @@ class SCHCProtocol:
         this function is for sending from device to core.
         TODO: If only compress retun True If Compres and Frag, return context
         """
-        self._log("schc_send {} {}".format(core_id, device_id))
+        #self._log("schc_send {} {}".format(core_id, device_id))
 
 	#, raw_packet))
 
@@ -322,8 +319,6 @@ class SCHCProtocol:
 
         self.sender_delay = sender_delay
 
-
-                
         packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing, verbose=verbose)
 
         if self.position == T_POSITION_DEVICE:
