@@ -791,12 +791,12 @@ class RuleManager:
             if byte_pos < len(TV):
                 right_byte_tv = TV[byte_pos]
             else:
-                right_byte_tv = b'\x00'
+                right_byte_tv = 0
 
             if byte_pos < len (FV):
                 right_byte_fv = FV[byte_pos]
             else:
-                right_byte_fv = b'\x00'
+                right_byte_fv = 0
 
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
