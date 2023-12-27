@@ -25,7 +25,7 @@ def processPkt(pkt):
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
-            schc_machine.schc_send(bytes(pkt)[34:])
+            schc_machine.schc_send(bytes(pkt)[14:])
 
 
 # Start SCHC Machine
