@@ -220,7 +220,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose):
+    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose=False):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
