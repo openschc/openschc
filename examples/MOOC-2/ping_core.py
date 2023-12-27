@@ -6,10 +6,6 @@ from scapy.all import *
 
 import gen_rulemanager as RM
 from protocol import SCHCProtocol
-from scapy_connection import *
-
-
-import socket
 
 # Create a Rule Manager and upload the rules.
 
