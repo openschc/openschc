@@ -19,7 +19,7 @@ def processPkt(pkt):
     schc protocol must be specified as a global variable.
     """
 
-    scheduler.run(session=schc_machine, display_period=10)
+    scheduler.run(session=schc_machine)
 
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
