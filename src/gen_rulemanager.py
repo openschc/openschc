@@ -786,9 +786,17 @@ class RuleManager:
             pos = b%8
             byte_pos = b//8
 
-            print ("=>", b, byte_pos)
-            right_byte_tv = TV[byte_pos]
-            right_byte_fv = FV[byte_pos]
+            print ("=>", b, byte_pos, len(TV), len(FV))
+
+            if byte_pos < len(TV):
+                right_byte_tv = TV[byte_pos]
+            else
+                right_byte_tv = b'\x00'
+
+            if byte_pos < len (FV):
+                right_byte_fv = FV[byte_pos]
+            else:
+                right_byte_fv = b'\x00'
 
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
