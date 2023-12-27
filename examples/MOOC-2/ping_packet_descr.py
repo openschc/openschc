@@ -19,7 +19,7 @@ def processPkt(pkt):
     """
 
     if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
-        pkt_desc = P.parse(pkt=bytes(pkt), direction=T_DIR_DW)
+        pkt_desc = P.parse(pkt=bytes(pkt)[14:], direction=T_DIR_DW)
         pprint.pprint(pkt_desc)
 
 
