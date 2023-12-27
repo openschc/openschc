@@ -335,12 +335,11 @@ class SCHCProtocol:
         # Start a fragmentation session from rule database
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
-            self._log("fragmentation not needed size={}".format(
+            self._log("fragmentation not needed size={} bits".format(
             packet_bbuf.count_added_bits()))
             args = (packet_bbuf.get_content(), destination)
-            print("protocol.py destination", destination)
+
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
-            print("AAAAA protocol.py", args)
             return 
 
         frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
