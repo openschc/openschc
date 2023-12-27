@@ -34,13 +34,10 @@ def processPkt(pkt):
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
-lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
+lower_layer = ScapyLowerLayer(position=POSITION)
 system = ScapySystem()
 scheduler = system.get_scheduler()
-schc_machine = SCHCProtocol(
-    system=system,           # define the scheduler
-    layer2=lower_layer,      # how to send messages
-    role=POSITION)           # DEVICE or CORE
+schc_machine = SCHCProtocol(role=POSITION)           
 schc_machine.set_rulemanager(rm)
 
 sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
