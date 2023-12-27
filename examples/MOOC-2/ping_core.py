@@ -7,13 +7,9 @@ from scapy.all import *
 import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from scapy_connection import *
-from gen_utils import dprint, sanitize_value
 
-import pprint
-import binascii
+
 import socket
-import ipaddress
-
 
 # Create a Rule Manager and upload the rules.
 
@@ -31,31 +27,13 @@ def processPkt(pkt):
     # look for a tunneled SCHC pkt
     if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
         e_type = pkt.getlayer(Ether).type
-        if e_type == 0x0800:
-            ip_proto = pkt.getlayer(IP).proto
-            if ip_proto == 17:
-                udp_dport = pkt.getlayer(UDP).dport
-                if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
-                    print ("tunneled SCHC msg")                    
-                    schc_pkt, addr = tunnel.recvfrom(2000)
-                    other_end = "udp:"+addr[0]+":"+str(addr[1])
-                    print("other end =", other_end)
-                    r = schc_machine.schc_recv(other_end, schc_pkt)
-                    print (r)
-            elif ip_proto==41:
-                schc_machine.schc_send(bytes(pkt)[34:])
+        if e_type == 0x86dd:
+            schc_machine.schc_send(bytes(pkt)[34:])
 
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
-socket_port = 0x5C4C
-
-tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tunnel.bind(("0.0.0.0", 0x5C4C))
-
-config = {}
-upper_layer = ScapyUpperLayer()
 lower_layer = ScapyLowerLayer(position=POSITION, socket=tunnel, other_end=None)
 system = ScapySystem()
 scheduler = system.get_scheduler()
