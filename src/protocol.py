@@ -179,7 +179,7 @@ class SCHCProtocol:
             self.layer2 = basic_connection.ScapyLowerLayer(position=role, socket=tunnel, other_end=None)
             self.system = basic_connection.ScapySystem()
 
-        self.scheduler = system.get_scheduler()
+        self.scheduler = self.system.get_scheduler()
 
 
         self.layer2._set_protocol(self)
