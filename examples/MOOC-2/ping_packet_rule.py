@@ -17,6 +17,8 @@ RM.Print()
 def processPkt(pkt):
      if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
         pkt_desc = P.parse(pkt=bytes(pkt)[14:], direction=T_DIR_DW)
-        pprint.pprint(pkt_desc)
+        if pkt_desc[2] is None: # No parsing error
+            rule = RM.FindRuleFromPacket(pkt_desc[0], T_DIR_DW)
+            print (rule)
 
 sniff(prn=processPkt, iface=["eth1", "lo"]) 
