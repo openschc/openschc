@@ -20,8 +20,9 @@ def processPkt(pkt):
     schc protocol must be specified as a global variable.
     """
 
-    if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A:
-        pkt.show()
+    if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
+        if pkt[ICMP6].type = 128: #Echo Request
+            pkt.show()
     # if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
     #     e_type = pkt.getlayer(Ether).type
     #     if e_type == 0x0800:
