@@ -20,7 +20,8 @@ def processPkt(pkt):
     schc protocol must be specified as a global variable.
     """
 
-    pkt.show()
+    if pkt[Ethernet].type == 0x86dd:
+        pkt.show()
     # if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
     #     e_type = pkt.getlayer(Ether).type
     #     if e_type == 0x0800:
