@@ -12,7 +12,7 @@ import pprint
 P = Parser()
 RM = RuleManager()
 RM.Add(file="icmp.json")
-RM.Print().
+RM.Print()
 
 def processPkt(pkt):
      if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
