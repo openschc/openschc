@@ -36,7 +36,7 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 
 
-sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="eth1") # scappy cannot read multiple interfaces
 
 
 
