@@ -328,7 +328,7 @@ class SCHCProtocol:
 
 
                 
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing, verbose)
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing, verbose=verbose)
 
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
