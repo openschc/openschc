@@ -155,16 +155,33 @@ class SCHCProtocol:
 
     """
 
-    def __init__(self, layer2, system, role, config={},  layer3=None,  unique_peer=False, verbose=True):
+
+    def __init__(self, role, layer2=None, system=None, role=None, config={},  layer3=None,  unique_peer=False, verbose=True):
         print("role at protocol.py", role)
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
         self.role = role # should be remove for position
         self.position = self.role #position gives if the SCHC is for device or core to define UP and DOWN
-        self.system = system
+
+        if system:
+            self.system = system
+
+        if layer2:
+            self.layer2 = layer2
+        else: # use a L2 connectio by default
+            import basic_connection
+            import socket 
+
+            tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            tunnel.bind(("0.0.0.0", 0x5C4C))
+
+            self.layer2 = basic_connection.ScapyLowerLayer(position=ROLE, socket=tunnel, other_end=None)
+            self.system = basic_connection.ScapySystem()
+
         self.scheduler = system.get_scheduler()
-        self.layer2 = layer2
+
+
         self.layer2._set_protocol(self)
         self.compressor = Compressor(self)
         self.decompressor = Decompressor(self)
