@@ -246,7 +246,7 @@ class SCHCProtocol:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
         else: 
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir)
-        self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
+        #self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
             return BitBuffer(raw_packet), None
