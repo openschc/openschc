@@ -156,8 +156,11 @@ class Parser:
                 unused = unpack('!L', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [adapt_value(unused[0]), 32]
                 pos += 4
+
+            if True:  # current draft propose to parse even the payload for all ICMPv6 packets
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
+
                 
         if "CoAP" in layers and next_layer == "CoAP":
             field_position = {}
