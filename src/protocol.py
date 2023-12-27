@@ -225,7 +225,6 @@ class SCHCProtocol:
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
         """
-        #context = self.rule_manager.find_context_bydstiid(dst_l3_address)
         # Parse packet as IP packet and apply compression rule
         P = Parser(self)
         if self.position == T_POSITION_CORE:
@@ -252,7 +251,7 @@ class SCHCProtocol:
 
         # Apply compression rule
 
-        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir)
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir, failed_fuield=True)
         print("compr rule", rule)
         self._log("compression rule {}".format(rule))
         if rule is None:
