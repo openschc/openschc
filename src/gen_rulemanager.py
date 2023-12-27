@@ -786,6 +786,7 @@ class RuleManager:
             pos = b%8
             byte_pos = b//8
 
+            print ("=>", b, byte_pos)
             right_byte_tv = TV[byte_pos]
             right_byte_fv = FV[byte_pos]
 
