@@ -11,7 +11,7 @@ import pprint
 
 P = Parser()
 RM = RuleManager()
-RM.Add(file="icmp.json")
+RM.Add(file="icmp-single.json")
 RM.Print()
 
 def processPkt(pkt):
