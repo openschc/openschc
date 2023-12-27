@@ -234,7 +234,6 @@ class SCHCProtocol:
         else:
             raise ValueError ("Unknown position")
 
-        print ("=======", t_dir, reverse_direction)
 
         if reverse_direction:
             if t_dir == T_DIR_DW:
@@ -242,7 +241,6 @@ class SCHCProtocol:
             else:
                 t_dir = T_DIR_DW 
 
-        print ("=======", t_dir)
 
         if parsing != None:
              parsed_packet, residue, parsing_error = P.parse(raw_packet, t_dir, layers=parsing)
@@ -255,7 +253,6 @@ class SCHCProtocol:
 
         # Apply compression rule
 
-        print ("=======", t_dir)
 
         rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir, failed_field=True)
         print("compr rule", rule)
