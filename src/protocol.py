@@ -220,7 +220,7 @@ class SCHCProtocol:
         return self.system
 
     #CLEANUP remove dst_l3_address
-    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False):
+    def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose):
         """Apply matching compression rule if one exists.
         
         In any case return a SCHC packet (compressed or not) as a BitBuffer
@@ -257,7 +257,8 @@ class SCHCProtocol:
         self._log("compression rule {}".format(rule))
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
-            print("No Compress rule:", rule)
+            if verbose:
+                print("No Compress rule:", rule)
             self._log("no-compression rule {}".format(rule))
 
             if rule is None:
@@ -272,7 +273,7 @@ class SCHCProtocol:
         device_id = rule[T_META][T_DEVICEID]
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
-        dprint(schc_packet)
+
         #schc_packet.display("bin")
         self._log("compression result {}".format(schc_packet))
 
@@ -303,7 +304,7 @@ class SCHCProtocol:
         return session
 
     # CLEANUP: dst_l2 and l3 should be removed
-    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None):
+    def schc_send(self, raw_packet, core_id=None, device_id=None, sender_delay=0, parsing=None, verbose=False):
         """Starting to send SCHC packet after called by Application.       
         If self.position is T_POSITION_DEVICE and 
         this function is for sending from device to core.
@@ -322,11 +323,7 @@ class SCHCProtocol:
 
 
                 
-        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing)
-        print("+++ packet_bbuf", packet_bbuf)
-        print("+++ device_id", device_id)
-        print("+++ position", self.position)
-
+        packet_bbuf, device_id = self._apply_compression(device_id, raw_packet, parsing, verbose)
 
         if self.position == T_POSITION_DEVICE:
             direction = T_DIR_UP
@@ -335,7 +332,8 @@ class SCHCProtocol:
             direction = T_DIR_DW
             destination = device_id
 
-        print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
+        if verbose:
+            print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
 
         if packet_bbuf == None: # No compression rule found
             return 
