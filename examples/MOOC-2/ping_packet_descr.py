@@ -5,12 +5,7 @@ sys.path.insert(1, '../../src/')
 from scapy.all import *
 
 from compr_parser import Parser
-
-import pprint
-import binascii
-import socket
-import ipaddress
-
+from gen_parameters import *
 
 # Create a Rule Manager and upload the rules.
 
@@ -21,8 +16,10 @@ def processPkt(pkt):
     """
 
     if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
-        if pkt[ICMP6].type == 128: #Echo Request
+        if pkt[ICMPv6].type == 128: #Echo Request
             pkt.show()
+
+            pkt_desc = Parser.parse(pkt=bytes(pkt), direction=T_DIR_DW)
     # if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
     #     e_type = pkt.getlayer(Ether).type
     #     if e_type == 0x0800:
