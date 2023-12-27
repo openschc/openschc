@@ -800,8 +800,8 @@ class RuleManager:
                 print ("= 0")
                 right_byte_fv = 0
 
-            bit_tv = right_byte_tv & (1 << (7 -pos))
-            bit_fv = right_byte_fv & (1 << (7 -pos))
+            bit_tv = right_byte_tv & (1 << pos)
+            bit_fv = right_byte_fv & (1 << pos)
 
             print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
