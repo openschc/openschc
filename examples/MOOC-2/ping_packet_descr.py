@@ -11,6 +11,7 @@ import pprint
 
 # Create a Rule Manager and upload the rules.
 
+P = Parser()
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -18,7 +19,7 @@ def processPkt(pkt):
     """
 
     if pkt[Ether].type == 0x86dd and pkt[IPv6].nh == 0x3A: #ICMPv6
-        pkt_desc = Parser.parse(pkt=bytes(pkt), direction=T_DIR_DW)
+        pkt_desc = P.parse(pkt=bytes(pkt), direction=T_DIR_DW)
         pprint.pprint(pkt_desc)
 
 
