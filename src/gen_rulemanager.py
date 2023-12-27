@@ -790,7 +790,7 @@ class RuleManager:
 
             if byte_pos < len(TV):
                 right_byte_tv = TV[byte_pos]
-            else
+            else:
                 right_byte_tv = b'\x00'
 
             if byte_pos < len (FV):
