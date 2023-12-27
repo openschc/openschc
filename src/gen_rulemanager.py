@@ -774,8 +774,8 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        #print ("MSB")
-        #print (TV, FV, rlength, flength, arg)
+        print ("MSB")
+        print (TV, FV, rlength, flength, arg)
 
         if rlength == T_FUNCTION_VAR:
             rlength = flength
@@ -792,13 +792,13 @@ class RuleManager:
             bit_tv = right_byte_tv & (1 << (7 -pos))
             bit_fv = right_byte_fv & (1 << (7 -pos))
 
-            #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
+            print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
             if bit_tv != bit_fv:
-                #print ("comparison failed")
+                print ("comparison failed")
                 return False
                 
-        #print ("comparison succeeded")
+        print ("comparison succeeded")
         return True
 
 
