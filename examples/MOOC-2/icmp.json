@@ -20,7 +20,7 @@
 		{"FID": "ICMPV6.CODE",  "TV": 0,   "MO": "equal","CDA": "not-sent"},
 		{"FID": "ICMPV6.CKSUM", "TV": 0,   "MO": "ignore","CDA": "compute-checksum"},
 		{"FID": "ICMPV6.IDENT", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-		{"FID": "ICMPV6.SEQNO", "TV": 0,   "MO": "MSB", "MO.VAL": 8, 
+		{"FID": "ICMPV6.SEQNO", "TV": 0,   "MO": "MSB", "MO.VAL": 12, 
 		                                                        "CDA": "LSB"},
 		{"FID": "ICMPV6.PAYLOAD", "TV": 0,"MO": "ignore","CDA": "value-sent"}
 	    ]
