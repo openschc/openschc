@@ -2,7 +2,7 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 import gen_rulemanager as RM
-from gen_parameters import T_DIR_DOWN, T_DIR_UP
+from gen_parameters import T_DIR_DN, T_DIR_UP
 
 
 rm = RM.RuleManager()
@@ -18,7 +18,7 @@ tunnel.bind (("0.0.0.0", 8888)) # same port as in the DeviceID
 while True:
     SCHC_pkt, sender = tunnel.recvfrom(1000)
     print ("SCHC Packet:", binascii.hexlify(SCHC_pkt), "from", sender)
-    rm.FindRuleFromSCHCpacket(SCHC_pkt, direction=T_DIR_DOWN)
+    rm.FindRuleFromSCHCpacket(SCHC_pkt, direction=T_DIR_DN)
 
 
 
