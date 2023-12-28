@@ -11,11 +11,17 @@ rm.Print()
 
 import socket
 import binascii
+import netifaces as ni
 
-POST = 8888
+ip = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+
+PORT = 8888
+deviceID = "udp:"+addr+":"+str(PORT)
+
+print("device ID is", deviceID)
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tunnel.bind (("0.0.0.0", POST)) # same port as in the DeviceID
+tunnel.bind (("0.0.0.0", PORT)) # same port as in the DeviceID
 
 deviceID = "udp:10.0.0.20:8888"
 
