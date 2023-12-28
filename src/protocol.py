@@ -341,8 +341,7 @@ class SCHCProtocol:
         # Start a fragmentation session from rule database
         # Check if fragmentation is needed.
         if packet_bbuf.count_added_bits() < self.connectivity_manager.get_mtu(device_id):
-            self._log("fragmentation not needed size={} bits".format(
-            packet_bbuf.count_added_bits()))
+            self._log("fragmentation not needed")
             args = (packet_bbuf.get_content(), destination)
 
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
