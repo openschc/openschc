@@ -31,7 +31,10 @@ while True:
     if rule: # Echo Request Rule
         print ("Rule {}/{}".format(rule[T_RULEID],
                                    rule[T_RULEIDLENGTH]))
-        tunnel.sendto(SCHC_pkt, sender)
+        if rule[T_RULEID] == 6 and rule[T_RULELENGTH] == 3:
+            tunnel.sendto(SCHC_pkt, sender)
+        else:
+            print ("Not the Echo Request rule")
     else:
         print ("rule not found")
 
