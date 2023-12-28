@@ -265,11 +265,14 @@ class SCHCProtocol:
                 return None, device_id
 
             if verbose:
-                print ("use a no-compression rule")                
+                print ("use a no-compression rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))                
             schc_packet = self.compressor.no_compress(rule, raw_packet)
             return schc_packet, device_id
 
         device_id = rule[T_META][T_DEVICEID]
+
+        if verbose:
+            print ("Use compression rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
         
         schc_packet = self.compressor.compress(rule, parsed_packet, residue, t_dir, device_id)
 
