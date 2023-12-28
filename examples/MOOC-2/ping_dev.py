@@ -12,7 +12,7 @@ import socket
 import binascii
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tunnel.bind ("0.0.0.0", 8888) # same port as in the DeviceID
+tunnel.bind (("0.0.0.0", 8888)) # same port as in the DeviceID
 
 while True:
     SCHC_pkt, sender = tunnel.read(1000)
