@@ -391,5 +391,7 @@ class Unparser:
         else:
             full_packet = L3header / Raw(load=data)
 
+        if full_packet and iface:
+            send(full_packet, iface=iface)
         #hexdump(full_packet)
         return full_packet
