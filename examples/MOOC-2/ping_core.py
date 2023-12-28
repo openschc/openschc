@@ -15,14 +15,10 @@ rm.Add(file="icmp.json")
 rm.Print()
 
 def processPkt(pkt):
-    """ called when scapy receives a packet, since this function takes only one argument,
-    schc protocol must be specified as a global variable.
-    """
 
     scheduler.run(session=schc_machine)
 
-    # look for a tunneled SCHC pkt
-    if pkt.getlayer(Ether) != None: #HE tunnel do not have Ethernet
+    if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
             schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
@@ -36,7 +32,7 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 
 
-sniff(prn=processPkt, iface="eth1") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="eth1") 
 
 
 
