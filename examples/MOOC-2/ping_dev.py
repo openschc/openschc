@@ -12,8 +12,10 @@ rm.Print()
 import socket
 import binascii
 
+POST = 8888
+
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tunnel.bind (("0.0.0.0", 8888)) # same port as in the DeviceID
+tunnel.bind (("0.0.0.0", POST)) # same port as in the DeviceID
 
 deviceID = "udp:10.0.0.20:8888"
 
@@ -21,7 +23,7 @@ while True:
     SCHC_pkt, sender = tunnel.recvfrom(1000)
     print ("SCHC Packet:", binascii.hexlify(SCHC_pkt), "from", sender)
     rule = rm.FindRuleFromSCHCpacket(schc=SCHC_pkt, device=deviceID)
-    if rule:
+    if rule: # Echo Request Rule
         print ("Rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
         tunnel.sendto(SCHC_pkt, sender)
     else:
