@@ -156,7 +156,7 @@ class SCHCProtocol:
     """
 
 
-    def __init__(self, layer2=None, system=None, role=None, config={},  layer3=None,  unique_peer=False, verbose=True):
+    def __init__(self, layer2=None, system=None, role=None, config={}, tunnel=None, layer3=None,  unique_peer=False, verbose=True):
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
@@ -167,13 +167,16 @@ class SCHCProtocol:
             self.system = system
 
         if layer2:
-            self.layer2 = layer2
+            self.layer2 = layer2 # old stuff to be removed
         else: # use a L2 connectio by default
             import basic_connection
             import socket 
 
-            self.tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.tunnel.bind(("0.0.0.0", 0x5C4C))
+            if tunnel is None:
+                self.tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self.tunnel.bind(("0.0.0.0", 0x5C4C))
+            else:
+                self.tunnel = tunnel
 
             self.layer2 = basic_connection.ScapyLowerLayer(position=role, socket=self.tunnel, other_end=None)
             self.system = basic_connection.ScapySystem()

@@ -8,6 +8,17 @@ import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from gen_parameters import T_POSITION_DEVICE
 
+import netifaces as ni
+
+addr = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+
+PORT = 8888
+deviceID = "udp:"+addr+":"+str(PORT)
+
+print("device ID is", deviceID)
+
+tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tunnel.bind (("0.0.0.0", PORT)) # same port as in the DeviceID
 # Create a Rule Manager and upload the rules.
 
 rm = RM.RuleManager()
@@ -27,7 +38,6 @@ def processPkt(pkt):
                 # got a packet in the socket
                 SCHC_pkt, device = tunnel.recvfrom(1000)
 
-                other_end = 'udp:'+device[0]+':'+str(device[1])
 
                 origin, full_packet = schc_machine.schc_recv(
                                    schc_packet=SCHC_pkt, 
@@ -38,7 +48,7 @@ def processPkt(pkt):
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
 
-schc_machine = SCHCProtocol(role=POSITION)           
+schc_machine = SCHCProtocol(role=POSITION, tunnel=tunnel)           
 schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
