@@ -2,7 +2,7 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 import gen_rulemanager as RM
-from gen_parameters import T_DIR_DOW, T_DIR_UP
+from gen_parameters import T_DIR_DOWN, T_DIR_UP
 
 
 rm = RM.RuleManager()
