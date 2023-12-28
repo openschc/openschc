@@ -293,16 +293,15 @@ class Unparser:
                         ICMPv6Header = ICMPv6EchoReply(
                             id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
                             seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
+                            data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
                     if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
                         IPv6Src = AppStr
                         IPv6Dst = DevStr 
                         ICMPv6Header = ICMPv6EchoRequest(
                             id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
                             seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
+                            data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
                     L4header = ICMPv6Header
-                    data = header_d[(T_ICMPV6_PAYLOAD, 1)][0]
 
             elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
