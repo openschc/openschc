@@ -395,7 +395,6 @@ class Unparser:
 
         if full_packet and iface:
             if verbose:
-                print ("sending")
                 hexdump(full_packet)
             send(full_packet, iface=iface)
 
