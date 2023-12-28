@@ -157,7 +157,6 @@ class SCHCProtocol:
 
 
     def __init__(self, layer2=None, system=None, role=None, config={},  layer3=None,  unique_peer=False, verbose=True):
-        print("role at protocol.py", role)
         assert role in [T_POSITION_CORE, T_POSITION_DEVICE]
         self.config = config
         self.unique_peer = unique_peer
