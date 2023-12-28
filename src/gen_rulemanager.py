@@ -844,6 +844,9 @@ class RuleManager:
         beginning of the SCHC packet.
         """
 
+        if type(schc) is bytes:
+            schc = BitBuffer(schc)
+
         for d in self._ctxt:
             dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
