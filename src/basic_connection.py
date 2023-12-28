@@ -64,7 +64,7 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
-        print (self.protocol.sender_delay)
+        #print (self.protocol.sender_delay)
         time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
@@ -107,8 +107,6 @@ class ScapyScheduler:
         return time.time()
          
     def add_event(self, rel_time, callback, args, session_id = None): #TODO
-        #print("Add event {}".format(sanitize_value(self.queue)))
-        #print("callback set -> {}".format(callback.__name__))
         assert rel_time >= 0
         event_id = self.next_event_id
         self.next_event_id += 1
