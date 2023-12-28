@@ -13,7 +13,7 @@ import socket
 import binascii
 import netifaces as ni
 
-ip = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+addr = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
 
 PORT = 8888
 deviceID = "udp:"+addr+":"+str(PORT)
