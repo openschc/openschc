@@ -20,7 +20,7 @@ deviceID = "udp:10.0.0.20:8888"
 while True:
     SCHC_pkt, sender = tunnel.recvfrom(1000)
     print ("SCHC Packet:", binascii.hexlify(SCHC_pkt), "from", sender)
-    rule = rm.FindRuleFromSCHCpacket(SCHC_pkt, devide=deviceID)
+    rule = rm.FindRuleFromSCHCpacket(SCHC_pkt, device=deviceID)
     if rule:
         print ("Rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
     else:
