@@ -30,7 +30,7 @@ def processPkt(pkt):
                 other_end = 'udp:'+device[0]+':'+str(device[1])
                 print(other_end)
 
-                origin, full_packet = schc_machine.schc_recv(schc_packet=SCHC_pkt, device_id=other_end)
+                origin, full_packet = schc_machine.schc_recv(schc_packet=SCHC_pkt, device_id=other_end, iface='eth1')
                 print (full_packet)
                 full_packet.show()
                 hexdump(full_packet)
