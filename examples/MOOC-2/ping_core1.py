@@ -31,6 +31,7 @@ def processPkt(pkt):
                 print(other_end)
 
                 full_packet = schc_machine.schc_recv(schc_packet=SCHC_pkt, device_id=other_end)
+                print (full_packet)
                 hexdump(full_packet)
 
                 
