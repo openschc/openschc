@@ -42,7 +42,7 @@ def processPkt(pkt):
                 origin, full_packet = schc_machine.schc_recv(
                                    schc_packet=SCHC_pkt, 
                                    device_id=deviceID, 
-                                   iface='eth0',
+                                   iface='lo',
                                    verbose=True)
 
 # Start SCHC Machine
