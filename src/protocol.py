@@ -357,13 +357,11 @@ class SCHCProtocol:
         
         return frag_session
 
-    def schc_recv(self, schc_packet, core_id=None,  device_id=None, iface=None):
+    def schc_recv(self, schc_packet, core_id=None,  device_id=None, iface=None, verbose=False):
         dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
 
-        print("schc_packet at schc_recv", schc_packet)
         packet_bbuf = BitBuffer(schc_packet)
-        dprint('SCHC: recv from L2:', b2hex(packet_bbuf.get_content()))
 
         rule = self.rule_manager.FindRuleFromSCHCpacket(packet_bbuf, device=device_id)
 
@@ -385,8 +383,8 @@ class SCHCProtocol:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
 
-            print("The HEADER D:", header_d, pkt_data)
-            pkt = unparser.unparse(header_d, pkt_data,  direction, rule, iface)
+            #print("The HEADER D:", header_d, pkt_data)
+            pkt = unparser.unparse(header_d, pkt_data,  direction, rule, iface, verbose)
             return device_id, pkt
         elif T_NO_COMP in rule:
             #remove ruleID
@@ -398,14 +396,6 @@ class SCHCProtocol:
 
             return device_id, pkt_data
     
-        elif T_NO_COMP in rule:
-            #remove ruleID
-            ruleID = packet_bbuf.get_bits(nb_bits=rule[T_RULEIDLENGTH])
-            pkt_data = bytearray()
-            while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
-                octet = packet_bbuf.get_bits(nb_bits=8)
-                pkt_data.append(octet)
-            return device_id, pkt_data
 
         # fragmentation rule
 

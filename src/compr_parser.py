@@ -239,7 +239,7 @@ class Unparser:
     def _init(self):
         pass
 
-    def unparse (self, header_d, data, direction, d_rule=None, iface=None):
+    def unparse (self, header_d, data, direction, d_rule=None, iface=None, verbose=False):
         #dprint ("unparse: ", header_d, data, direction)
 
         L2header = None
@@ -394,7 +394,9 @@ class Unparser:
             full_packet = L3header / Raw(load=data)
 
         if full_packet and iface:
-            print ("sending")
+            if verbose:
+                print ("sending")
+                hexdump(full_packet)
             send(full_packet, iface=iface)
-        #hexdump(full_packet)
+
         return full_packet
