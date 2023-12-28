@@ -333,7 +333,7 @@ class SCHCProtocol:
             destination = device_id
 
         if verbose:
-            print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "sender_delay", sender_delay, "destination", destination, "position", self.position)
+            print("protocol.py, schc_send, core_id: ", core_id, "device_id: ", device_id, "length in bits", packet_bbuf.count_added_bits() )
 
         if packet_bbuf == None: # No compression rule found
             return 
