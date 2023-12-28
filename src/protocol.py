@@ -357,7 +357,7 @@ class SCHCProtocol:
         
         return frag_session
 
-    def schc_recv(self, schc_packet, core_id=None,  device_id=None):
+    def schc_recv(self, schc_packet, core_id=None,  device_id=None, iface=None):
         dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
 
@@ -386,7 +386,7 @@ class SCHCProtocol:
                 pkt_data.append(octet)
 
             print("The HEADER D:", header_d, pkt_data)
-            pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
+            pkt = unparser.unparse(header_d, pkt_data,  direction, rule, iface)
             return device_id, pkt
         elif T_NO_COMP in rule:
             #remove ruleID
