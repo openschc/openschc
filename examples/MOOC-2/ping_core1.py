@@ -26,7 +26,11 @@ def processPkt(pkt):
             if pkt[IP].proto == 17 and pkt[UDP].dport == 0x5C4C:
                 # got a packet in the socket
                 SCHC_pkt, device = tunnel.recvfrom(1000)
-                print (SCHC_pkt)
+
+                other_end = 'udp:'+device[0]+':'+str(device[1])
+                print(other_end)
+
+                
 
 
 # Start SCHC Machine
@@ -38,7 +42,7 @@ scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
 
 
-sniff(prn=processPkt, iface=["eth0", "eth1"]) 
+sniff(prn=processPkt, iface=["eth0", "eth1", "lo"]) 
 
 
 
