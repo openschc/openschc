@@ -24,6 +24,7 @@ def processPkt(pkt):
             schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
         if e_type == 0x0800:
             print ("tunnel")
+            pkt.show()
 
 
 # Start SCHC Machine
