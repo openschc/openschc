@@ -22,6 +22,8 @@ def processPkt(pkt):
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
             schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
+        if e_type == 0x0800:
+            print ("tunnel")
 
 
 # Start SCHC Machine
