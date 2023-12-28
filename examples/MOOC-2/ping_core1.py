@@ -11,7 +11,7 @@ from gen_parameters import T_POSITION_CORE
 # Create a Rule Manager and upload the rules.
 
 rm = RM.RuleManager()
-rm.Add(file="icmp.json")
+rm.Add(file="icmp-bi.json")
 rm.Print()
 
 def processPkt(pkt):
