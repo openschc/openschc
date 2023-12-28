@@ -172,10 +172,10 @@ class SCHCProtocol:
             import basic_connection
             import socket 
 
-            tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            tunnel.bind(("0.0.0.0", 0x5C4C))
+            self.tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.tunnel.bind(("0.0.0.0", 0x5C4C))
 
-            self.layer2 = basic_connection.ScapyLowerLayer(position=role, socket=tunnel, other_end=None)
+            self.layer2 = basic_connection.ScapyLowerLayer(position=role, socket=self.tunnel, other_end=None)
             self.system = basic_connection.ScapySystem()
 
         self.scheduler = self.system.get_scheduler()
@@ -217,6 +217,9 @@ class SCHCProtocol:
 
     def get_system(self):
         return self.system
+    
+    def get_tunnel(self):
+        return self.tunnel
 
     #CLEANUP remove dst_l3_address
     def _apply_compression(self, device_id, raw_packet, parsing=None, reverse_direction=False, verbose=False):
