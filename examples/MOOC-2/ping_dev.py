@@ -18,7 +18,7 @@ tunnel.bind (("0.0.0.0", 8888)) # same port as in the DeviceID
 while True:
     SCHC_pkt, sender = tunnel.recvfrom(1000)
     print ("SCHC Packet:", binascii.hexlify(SCHC_pkt), "from", sender)
-    rm.FindRuleFromSCHCpacket(SCHC_pkt, direction=T_DIR_DW)
+    rm.FindRuleFromSCHCpacket(SCHC_pkt)
 
 
 
