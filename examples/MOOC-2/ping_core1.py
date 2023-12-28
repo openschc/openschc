@@ -28,12 +28,12 @@ def processPkt(pkt):
                 SCHC_pkt, device = tunnel.recvfrom(1000)
 
                 other_end = 'udp:'+device[0]+':'+str(device[1])
-                print(other_end)
 
                 origin, full_packet = schc_machine.schc_recv(
                                    schc_packet=SCHC_pkt, 
                                    device_id=other_end, 
-                                   iface='eth1')
+                                   iface='eth1',
+                                   verbose=True)
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
