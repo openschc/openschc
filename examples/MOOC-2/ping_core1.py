@@ -23,8 +23,9 @@ def processPkt(pkt):
         if e_type == 0x86dd:
             schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
         if e_type == 0x0800:
-            print ("tunnel")
-            pkt.show()
+            if pkt[IP].proto == 17 and pkt[UDP].dport == 0x5C4C:
+                print ("tunnel")
+                pkt.show()
 
 
 # Start SCHC Machine
