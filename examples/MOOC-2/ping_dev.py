@@ -21,6 +21,8 @@ while True:
     rule = rm.FindRuleFromSCHCpacket(SCHC_pkt)
     if rule:
         print ("Rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+    else:
+        print ("rule not found")
 
 
 
