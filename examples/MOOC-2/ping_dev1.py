@@ -25,14 +25,18 @@ rm = RM.RuleManager()
 rm.Add(file="icmp-bi.json")
 rm.Print()
 
+core_id = None
+
 def processPkt(pkt):
+    global core_id
 
     scheduler.run(session=schc_machine)
 
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
-            schc_machine.schc_send(bytes(pkt)[14:])
+            if core_id:
+                schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 8888:
                 # got a packet in the socket
