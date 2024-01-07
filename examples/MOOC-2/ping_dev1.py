@@ -44,6 +44,7 @@ def processPkt(pkt):
                                    device_id=deviceID, 
                                    iface='lo',
                                    verbose=True)
+                print (origin)
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
