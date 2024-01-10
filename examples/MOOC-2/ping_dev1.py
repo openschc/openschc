@@ -34,9 +34,13 @@ def processPkt(pkt):
 
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
-        if e_type == 0x86dd and pkt[Ether].src == "00:00:00:00:00:00": # on loopback
-            if core_id:
-                schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
+        if e_type == 0x86dd:
+            if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
+                if core_id: # core is identified, can answer
+                    schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
+            else:
+                print ("IPv6 not on loopback")
+                pkt.show()
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 8888:
                 print ("get tunneled SCHC packet")
