@@ -36,7 +36,8 @@ def processPkt(pkt):
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
             print ("get IPv6 packet")
-            pkt.show()
+            print ()
+            pkt.show(pkt[Ether])
             if core_id:
                 schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
         elif e_type == 0x0800:
