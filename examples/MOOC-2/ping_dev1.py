@@ -38,6 +38,8 @@ def processPkt(pkt):
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
                 if core_id: # core is identified, can answer
                     schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
+                else:
+                    print ("core not identified")
             else:
                 print ("IPv6 not on loopback")
                 pkt.show()
