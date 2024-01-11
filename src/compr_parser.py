@@ -308,7 +308,6 @@ class Unparser:
                 L4header = ICMPv6Header
                 print ("set l4 header")
                 ICMPv6Header.show()
-                else:
 
             elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
