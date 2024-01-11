@@ -287,14 +287,14 @@ class Unparser:
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
                 icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
                 print ("icm type")
-                if icmp_type == 128: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                if icmp_type == 129: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                     IPv6Src = DevStr
                     IPv6Dst = AppStr
                     ICMPv6Header = ICMPv6EchoReply(
                         id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
                         seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
                         data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
-                elif icmp_type == 129: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                elif icmp_type == 128: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
                     IPv6Src = AppStr
                     IPv6Dst = DevStr 
                     ICMPv6Header = ICMPv6EchoRequest(
