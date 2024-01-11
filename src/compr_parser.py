@@ -285,7 +285,7 @@ class Unparser:
             ipv6_next = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" )
 
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
-                for i in icmpv6_types:
+                if i in icmpv6_types:
                     icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
                     if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
@@ -301,8 +301,8 @@ class Unparser:
                             id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
                             seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
                             data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
-                        print ("*"*20)
-                        ICMPv6Header.show()
+                        #print ("*"*20)
+                        #ICMPv6Header.show()
                     L4header = ICMPv6Header
 
             elif ipv6_next == 17: # UDP
@@ -397,6 +397,6 @@ class Unparser:
             if verbose:
                 print ("Sending to ", iface)
                 hexdump(full_packet)
-            send(full_packet, iface=iface, verbose=False)
+            send(full_packet, iface=iface, verbose=False) #scapy
 
         return full_packet
