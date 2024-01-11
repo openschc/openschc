@@ -304,6 +304,8 @@ class Unparser:
                         #print ("*"*20)
                         #ICMPv6Header.show()
                     L4header = ICMPv6Header
+                    print ("set l4 header")
+                    ICMPv6Header.show()
                 else:
                     print ("ICMPv6 not covered")
 
