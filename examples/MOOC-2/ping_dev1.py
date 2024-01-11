@@ -32,6 +32,7 @@ def processPkt(pkt):
 
     scheduler.run(session=schc_machine)
 
+    pkt.show()
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
