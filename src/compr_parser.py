@@ -285,8 +285,8 @@ class Unparser:
             ipv6_next = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" )
 
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
-                if i in icmpv6_types:
-                    icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
+                icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
+                if icmp_type in icmpv6_types:
                     if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
                         IPv6Dst = AppStr
@@ -304,6 +304,8 @@ class Unparser:
                         #print ("*"*20)
                         #ICMPv6Header.show()
                     L4header = ICMPv6Header
+                else:
+                    print ("ICMPv6 not covered")
 
             elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
