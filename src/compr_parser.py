@@ -286,6 +286,7 @@ class Unparser:
 
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
                 icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
+                print (icmp_type, icmpv6_types)
                 if icmp_type in icmpv6_types:
                     if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
                         IPv6Src = DevStr
