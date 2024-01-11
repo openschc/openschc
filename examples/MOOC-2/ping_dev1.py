@@ -59,6 +59,8 @@ def processPkt(pkt):
                                    iface='lo',
                                    verbose=True)
                 print (core_id)
+    else:
+        print ("No Ethernet")
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
