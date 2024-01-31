@@ -1,0 +1,37 @@
+ {
+    "DeviceID" : "udp:10.0.0.20:8888",
+    "SoR" : [  
+	 {
+	    "RuleID": 0,
+	    "RuleIDLength": 1,
+        "Description" : "GET/POST and correct answer from the device",
+	    "Compression": [
+            {"FID": "COAP.VER", "TV": 1,                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE","TV": 0,      "DI": "DW",  "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE","TV": 2,      "DI": "UP",  "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TKL", "TV": 0,                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.CODE","TV": [1, 2], "DI": "DW",  "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.CODE","TV": [65, 67], "DI": "UP","MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.MID", "TV": 0,                   "MO": "MSB", "MO.VAL": 15, "CDA": "LSB"},
+            {"FID": "COAP.Uri-Path", "FL": "var", "FP": 1, "DI": "DW", "TV": ["foo1", "foo2", "foo3", "foo4"]
+                                                            ,"MO": "match-mapping","CDA": "mapping-sent"},
+
+            {"FID": "COAP.Accept",  "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"}
+            {"FID": "COAP.Content-Format", "DI": "UP", "TV": 30, "MO": "equal", "CDA": "not-sent"}
+      
+	    ]
+	 },	 {
+	    "RuleID": 7,
+	    "RuleIDLength": 3,
+        "Description" : "Error messages: RST and NOT Found",
+	    "Compression": [
+            {"FID": "COAP.VER", "TV": 1,                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE","TV": [2,3],      "DI": "UP",  "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.TKL", "TV": 0,                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.CODE","TV": [0, 132],   "DI": "UP",  "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.MID", "TV": 0,                   "MO": "MSB", "MO.VAL": 15, "CDA": "LSB"},
+	    ]
+	 }
+    ]
+  }
+
