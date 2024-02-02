@@ -32,25 +32,12 @@ import cbor2 as cbor
 
 # Class to process data posted on /temperature.
         
-class temperature(resource.Resource):
+class sensor_reading(resource.Resource):
     async def render_post(self, request):
 
         print (request)
 
-        # if no content_format option set the default value
-        ct = request.opt.content_format or \
-                aiocoap.numbers.media_types_rev['text/plain']
-
-        # text will just display the value
-        if ct == aiocoap.numbers.media_types_rev['text/plain']:
-            print ("text:", request.payload)
-        # cbor will be displayed and processed.
-        elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
-            print ("cbor:", cbor.loads(request.payload))
-        else:
-            print ("Unknown format")
-            return aiocoap.Message(code=aiocoap.UNSUPPORTED_MEDIA_TYPE)
-        return aiocoap.Message(code=aiocoap.CHANGED)
+  
 
 class pressure(resource.Resource):
     async def render_post(self, request):
@@ -95,9 +82,9 @@ def main():
     root = resource.Site()
 
     # add resource processing, /proxy is not used here, see comments in generic_sensor()
-    root.add_resource(['temp'], temperature())
-    root.add_resource(['pres'], pressure())
-    root.add_resource(['humi'], humidity())
+    root.add_resource(['temp'], sensor_reading())
+    root.add_resource(['pres'], sensor_reading())
+    root.add_resource(['humi'], sensor_reading())
     
     # associate resource tree and socket
     asyncio.Task(aiocoap.Context.create_server_context(root))
