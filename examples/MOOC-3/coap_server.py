@@ -35,6 +35,8 @@ import cbor2 as cbor
 class temperature(resource.Resource):
     async def render_post(self, request):
 
+        print (request)
+
         # if no content_format option set the default value
         ct = request.opt.content_format or \
                 aiocoap.numbers.media_types_rev['text/plain']
@@ -45,7 +47,6 @@ class temperature(resource.Resource):
         # cbor will be displayed and processed.
         elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
             print ("cbor:", cbor.loads(request.payload))
-            to_bbt("capteurs", "temperature", cbor.loads(request.payload), period=60, factor=0.01)
         else:
             print ("Unknown format")
             return aiocoap.Message(code=aiocoap.UNSUPPORTED_MEDIA_TYPE)
@@ -63,7 +64,6 @@ class pressure(resource.Resource):
             print ("text:", request.payload)
         elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
             print ("cbor:", cbor.loads(request.payload))
-            to_bbt("capteurs", "pressure", cbor.loads(request.payload), period=1, factor=0.01)
         else:
             print ("Unknown format")
             return aiocoap.Message(code=aiocoap.UNSUPPORTED_MEDIA_TYPE)
@@ -79,7 +79,6 @@ class humidity(resource.Resource):
             print ("text:", request.payload)
         elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
             print ("cbor:", cbor.loads(request.payload))
-            to_bbt("capteurs", "humidity", cbor.loads(request.payload), period=60, factor=1)
 
         else:
             print ("Unknown format")

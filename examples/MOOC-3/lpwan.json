@@ -24,7 +24,7 @@
             {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
 
             {"FID": "COAP.VER",  "DI": "UP", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "UP", "TV": 2,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "UP", "TV": 1,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.TKL",  "DI": "UP", "TV": 0,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.CODE", "DI": "UP", "TV": 2,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.MID",  "DI": "UP", "TV": 0,               "MO": "MSB", "MO.VAL": 13, "CDA": "LSB"},
