@@ -23,7 +23,7 @@ def coap_send_measurement(value, uri):
 
     uri_idx = KNOWN_URI.index(uri)
     print ("MID", MID, "URI index:", uri_idx )
-    
+
     schc_residue = (0x00 & 0b0000_0111) << 5 | \
                    (MID & 0b0000_0111) << 2 | \
                    (uri_idx) & 0b0000_0011
@@ -47,7 +47,7 @@ while True:
     elif m == 1:
         humi += random.randint (-10, +10)
         coap_send_measurement(humi, "/humi")
-    elif m == 3:
+    elif m == 2:
         pres += random.randint (-10, +10)
         coap_send_measurement(pres, "/pres")
 
