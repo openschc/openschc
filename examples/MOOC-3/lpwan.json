@@ -1,7 +1,7 @@
 {
     "DeviceID" : "udp:10.0.0.20:8888",
     "SoR" : [{
-        "RuleIDValue" : 5,
+        "RuleIDValue" : 0,
         "RuleIDLength": 3,
         "Compression": [	 
             {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
