@@ -347,6 +347,8 @@ class Decompressor:
         read_size = len(bin(len(rule[T_TV])-1)[2:])
         val = in_bbuf.get_bits(read_size)
 
+        print ("index =", val)
+
         if val < len(rule[T_TV]):
             value = rule[T_TV][val]
             size = len(value)*8
