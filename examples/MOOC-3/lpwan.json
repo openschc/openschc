@@ -8,7 +8,7 @@
             {"FID": "IPV6.TC",  "TV": 0, "MO": "equal", "CDA": "not-sent"},
             {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
             {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
             {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
             {"FID": "IPV6.DEV_PREFIX","TV": "AAAA::/64",
                                                 "MO": "equal","CDA": "not-sent"},
