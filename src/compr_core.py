@@ -349,14 +349,14 @@ class Decompressor:
 
         if val < len(rule[T_TV]):
             value = rule[T_TV][val]
-            size = len(value)
+            size = len(value)*8
         else:
-            print("Warning: Mapping index larger than TV size, set to None")
+            print("Warning: Mapping index ({}) larger than TV size ({}), set to None".format(val, len(rule[T_TV])))
             value = None
             size = 0
 
         #dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL]))
-
+        print ("mapping-sent:", value, size)
         return [value, size]
 
     def rx_cda_lsb(self, rule, in_bbuf):
