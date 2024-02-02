@@ -7,6 +7,7 @@ from scapy.all import *
 import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from gen_parameters import T_POSITION_CORE
+import binascii
 
 # Create a Rule Manager and upload the rules.
 
