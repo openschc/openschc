@@ -21,9 +21,12 @@ def coap_send_measurement(value, uri):
         print("unknown URI")
         return None
 
+    uri_idx = KNOWN_URI.index(uri)
+    print ("MID", MID, "URI index:", uri_idx )
+    
     schc_residue = (0x00 & 0b0000_0111) << 5 | \
                    (MID & 0b0000_0111) << 2 | \
-                   (KNOWN_URI.index(uri)-1) & 0b0000_0011
+                   (uri_idx) & 0b0000_0011
     
     if MID == 0b0000_0111:
         MID = 1
