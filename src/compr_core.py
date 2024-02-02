@@ -344,23 +344,18 @@ class Decompressor:
 
         assert (type(rule[T_TV]) is list)
 
-        in_bbuf.display(format="bin")
         read_size = len(bin(len(rule[T_TV])-1)[2:])
-        val = in_bbuf.get_bits(read_size)
-        in_bbuf.display(format="bin")
+        index = in_bbuf.get_bits(read_size)
 
-        print ("index =", val)
 
-        if val < len(rule[T_TV]):
-            value = rule[T_TV][val]
+        if index < len(rule[T_TV]):
+            value = rule[T_TV][index]
             size = len(value)*8
         else:
-            print("Warning: Mapping index ({}) larger than TV size ({}), set to None".format(val, len(rule[T_TV])))
+            print("Warning: Mapping index ({}) larger than TV size ({}), set to None".format(index, len(rule[T_TV])))
             value = None
             size = 0
 
-        #dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL]))
-        print ("mapping-sent:", value, size)
         return [value, size]
 
     def rx_cda_lsb(self, rule, in_bbuf):
