@@ -53,7 +53,7 @@ def main():
 
     # add resource processing, /proxy is not used here, see comments in generic_sensor()
     root.add_resource(['temp'], sensor_reading())
-    root.add_resource(['pres'], sensor_reading())
+    #root.add_resource(['pres'], sensor_reading())
     root.add_resource(['humi'], sensor_reading())
     
     # associate resource tree and socket
