@@ -354,6 +354,8 @@ class Decompressor:
         else:
             size = rule[T_FL]
 
+        print (val)
+
         return [rule[T_TV][val], size]
 
     def rx_cda_lsb(self, rule, in_bbuf):
