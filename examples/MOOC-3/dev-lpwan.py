@@ -20,9 +20,12 @@ def coap_send_measurement(value, uri):
     if uri not in KNOWN_URI:
         print("unknown URI")
         return None
+    
+    if type(value) is not bytes: # not cbor
+        value = cbor.dumps(value)
 
     uri_idx = KNOWN_URI.index(uri)
-    print ("MID", MID, "URI", uri, "index:", uri_idx )
+    print ("MID", MID, "URI", uri, "(index:", uri_idx, ")", "value", binascii.hexlify(value) )
 
     schc_residue = (0x00 & 0b0000_0111) << 5 | \
                    (MID & 0b0000_0111) << 2 | \
@@ -33,7 +36,7 @@ def coap_send_measurement(value, uri):
     else:
         MID += 1
     
-    schc_pkt = struct.pack("!B", schc_residue) + cbor.dumps(value)
+    schc_pkt = struct.pack("!B", schc_residue) + value
     print (binascii.hexlify(schc_pkt))
     tunnel.sendto(schc_pkt, CORE_SCHC)
 
