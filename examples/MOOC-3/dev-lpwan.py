@@ -37,7 +37,7 @@ def coap_send_measurement(value, uri):
         MID += 1
     
     schc_pkt = struct.pack("!B", schc_residue) + value
-    print (binascii.hexlify(schc_pkt))
+    print ("sending:", binascii.hexlify(schc_pkt))
     tunnel.sendto(schc_pkt, CORE_SCHC)
 
 temp = humi = pres = 0
