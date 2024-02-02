@@ -36,6 +36,9 @@ class sensor_reading(resource.Resource):
     async def render_post(self, request):
 
         print (request)
+        print ("Request URI:", request.get_request_uri())
+        for i in request.opt:
+            print (i)
 
         return aiocoap.Message(code=aiocoap.CHANGED)
   
