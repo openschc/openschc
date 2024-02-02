@@ -37,6 +37,7 @@ class sensor_reading(resource.Resource):
 
         print (request)
 
+        return aiocoap.Message(code=aiocoap.CHANGED)
   
 
 class pressure(resource.Resource):
