@@ -37,8 +37,8 @@ class sensor_reading(resource.Resource):
 
         print (request)
         print ("Request URI:", request.get_request_uri())
-        for i in request.opt:
-            print (i)
+        print ("Content-format:", request.opt.content_format)
+ 
 
         return aiocoap.Message(code=aiocoap.CHANGED)
   
