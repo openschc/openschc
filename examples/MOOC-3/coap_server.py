@@ -35,46 +35,11 @@ import cbor2 as cbor
 class sensor_reading(resource.Resource):
     async def render_post(self, request):
 
-        print (request)
         print ("Request URI:", request.get_request_uri())
         print ("Content-format:", request.opt.content_format)
         print ("Payload:", binascii.hexlify(request.payload))
  
 
-        return aiocoap.Message(code=aiocoap.CHANGED)
-  
-
-class pressure(resource.Resource):
-    async def render_post(self, request):
-
-        print (">>>>", binascii.hexlify(request.payload))
-
-        ct = request.opt.content_format or \
-                aiocoap.numbers.media_types_rev['text/plain']
-
-        if ct == aiocoap.numbers.media_types_rev['text/plain']:
-            print ("text:", request.payload)
-        elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
-            print ("cbor:", cbor.loads(request.payload))
-        else:
-            print ("Unknown format")
-            return aiocoap.Message(code=aiocoap.UNSUPPORTED_MEDIA_TYPE)
-        return aiocoap.Message(code=aiocoap.CHANGED)
-
-class humidity(resource.Resource):
-    async def render_post(self, request):
-
-        ct = request.opt.content_format or \
-                aiocoap.numbers.media_types_rev['text/plain']
-
-        if ct == aiocoap.numbers.media_types_rev['text/plain']:
-            print ("text:", request.payload)
-        elif ct == aiocoap.numbers.media_types_rev['application/cbor']:
-            print ("cbor:", cbor.loads(request.payload))
-
-        else:
-            print ("Unknown format")
-            return aiocoap.Message(code=aiocoap.UNSUPPORTED_MEDIA_TYPE)
         return aiocoap.Message(code=aiocoap.CHANGED)
 
 # logging setup
