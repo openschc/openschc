@@ -27,7 +27,7 @@
             {"FID": "COAP.TYPE", "DI": "UP", "TV": 2,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.TKL",  "DI": "UP", "TV": 0,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.CODE", "DI": "UP", "TV": 2,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.MID",  "DI": "UP", "TV": 0,               "MO": "MSB", "MO.VAL": 15, "CDA": "LSB"},
+            {"FID": "COAP.MID",  "DI": "UP", "TV": 0,               "MO": "MSB", "MO.VAL": 13, "CDA": "LSB"},
             {"FID": "COAP.Uri-Path", "FP": 1, "DI": "UP", 
                                 "TV": ["/temp", "/humi", "/pres"], 
                                 "MO": "match-mapping","CDA": "mapping-sent"},
