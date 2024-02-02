@@ -342,21 +342,22 @@ class Decompressor:
         # The number of bits sent is the minimal size for coding all the
         # possible indices.
 
+        assert (type(rule[T_TV]) is list)
 
-        size = len(bin(len(rule[T_TV])-1)[2:])
-        val = in_bbuf.get_bits(size)
+        read_size = len(bin(len(rule[T_TV])-1)[2:])
+        val = in_bbuf.get_bits(read_size)
 
-        #dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL])
- 
-
-        if rule[T_FL] == "var":
-            size = len(rule[T_TV][val]) * 8
+        if val < len(rule[T_TV]):
+            value = rule[T_TV][val]
+            size = len(value)
         else:
-            size = rule[T_FL]
+            print("Warning: Mapping index larger than TV size, set to None")
+            value = None
+            size = 0
 
-        print (val)
+        #dprint("====>", rule[T_TV][val], len(rule[T_TV][val]), rule[T_FL]))
 
-        return [rule[T_TV][val], size]
+        return [value, size]
 
     def rx_cda_lsb(self, rule, in_bbuf):
         assert rule[T_MO] == T_MO_MSB
