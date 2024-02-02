@@ -23,7 +23,7 @@ def coap_send_measurement(value, uri):
 
     schc_residue = (0x00 & 0b0000_0111) << 5 | \
                    (MID & 0b0000_0111) << 2 | \
-                   KNOWN_URI.index(uri) & 0b0000_0011
+                   (KNOWN_URI.index(uri)-1) & 0b0000_0011
     
     if MID == 0b0000_0111:
         MID = 1
