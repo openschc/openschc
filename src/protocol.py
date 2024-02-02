@@ -361,7 +361,7 @@ class SCHCProtocol:
         return frag_session
 
     def schc_recv(self, schc_packet, core_id=None,  device_id=None, iface=None, verbose=False):
-        dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
+        #dprint ("schc_recv, core_id: " , core_id, "device_id: " , device_id, "position:", self.position)
         """Receiving a SCHC packet from a lower layer."""
 
         packet_bbuf = BitBuffer(schc_packet)
@@ -370,7 +370,7 @@ class SCHCProtocol:
 
         if rule == None:
             print ("No rule found")
-            return None
+            return (None, None)
 
         if T_COMP in rule:
             if self.position == T_POSITION_DEVICE:
