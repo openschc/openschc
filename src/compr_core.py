@@ -344,8 +344,10 @@ class Decompressor:
 
         assert (type(rule[T_TV]) is list)
 
+        in_bbuf.display(format="bin")
         read_size = len(bin(len(rule[T_TV])-1)[2:])
         val = in_bbuf.get_bits(read_size)
+        in_bbuf.display(format="bin")
 
         print ("index =", val)
 
