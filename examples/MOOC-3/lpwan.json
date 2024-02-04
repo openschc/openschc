@@ -32,7 +32,7 @@
                                 "TV": ["temp", "humi", "pres"], 
                                 "MO": "match-mapping","CDA": "mapping-sent"},
             {"FID": "COAP.Content-Format", "DI": "UP", "TV": 30, "MO": "equal", "CDA": "not-sent"},        
-            {"FID": "COAP.No-Response",     "DI": "UP", "TV": 24, "MO": "equal", "CDA": "not-sent"}        
+            {"FID": "COAP.No-Response",     "DI": "UP", "TV": 2, "MO": "equal", "CDA": "not-sent"}        
         ]}
     ]
 }
