@@ -78,10 +78,14 @@ event_queue = [(temperature, start_time+10),
 
 
 while True:
-    next_wakeup = event_queue.pop(0)
+    next_event = event_queue.pop(0)
     print (next_wakeup, event_queue)
 
-    time.sleep(10)
+    wait_time = next_event[1] - int(time.time())
+    print ("wait ", wait_time)
+
+    if wait_time > 0:
+        time.sleep(10)
 
 
 
