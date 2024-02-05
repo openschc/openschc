@@ -61,10 +61,10 @@ class sensor():
         self.current_value = init_value
         self.evolution=evolution
 
-    def get_uri():
+    def get_uri(self):
         return self.uri
     
-    def get_period():
+    def get_period(self):
         return self.period
 
     def get_value(self):
