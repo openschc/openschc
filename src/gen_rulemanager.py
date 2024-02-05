@@ -875,7 +875,7 @@ class RuleManager:
                             print(r)
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
-                                print (pkt[(r[T_FID], r[T_FP])][0])
+                                #print (pkt[(r[T_FID], r[T_FP])][0])
 
                                 if T_MO_VAL in r:
                                     arg = r[T_MO_VAL]
@@ -912,8 +912,8 @@ class RuleManager:
                                 else:
                                     dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
-                            print ("->", matches)
-                    print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
+                            #print ("->", matches)
+                    #print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
                     if direction == T_DIR_UP and matches == rule[T_META][T_UP_RULES]: return rule
                     if direction == T_DIR_DW and matches == rule[T_META][T_DW_RULES]: return rule
         return None
