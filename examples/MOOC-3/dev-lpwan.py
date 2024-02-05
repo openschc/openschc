@@ -75,6 +75,9 @@ class sensor():
     
     def __str__(self):
         return "sensor "+self.uri
+    
+    def __repr__(self):
+        return "sensor "+self.uri
 
 
 temperature = sensor("temp", 60, 20, 1)
