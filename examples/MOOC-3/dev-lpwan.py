@@ -92,6 +92,8 @@ while True:
     sensor = next_event[0]
     coap_send_measurement(sensor.get_value(), sensor.get_uri())
 
+    print("add")
+
     event_queue.append((sensor, int(time.time() + sensor.get_period())))
     sorted(event_queue, key=lambda x: x[1])
     print (event_queue)
