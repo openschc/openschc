@@ -72,6 +72,9 @@ class sensor():
     def get_value(self):
         self.current_value += random.randint(-self.evolution, +self.evolution)
         return self.current_value
+    
+    def __str__(self):
+        return "sensor "+self.uri
 
 
 temperature = sensor("temp", 60, 20, 1)
