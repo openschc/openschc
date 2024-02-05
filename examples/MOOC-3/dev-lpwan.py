@@ -86,7 +86,7 @@ pressure    = sensor("pres", 90, 1000, 10)
 
 start_time = int(time.time())
 
-event_queue = [(temperature, start_time+10), 
+event_queue = [(temperature, start_time+1), 
                (humidity, start_time+40), 
                (pressure, start_time+30)]
 
