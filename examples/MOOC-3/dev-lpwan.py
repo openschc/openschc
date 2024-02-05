@@ -96,7 +96,7 @@ while True:
 
     if not wait_ack():
         event_queue.append((sensor, int(time.time() + sensor.get_period())))
-    else
+    else:
         event_queue.append((sensor, int(time.time() + 300)))
         
     sorted(event_queue, key=lambda x: x[1])
