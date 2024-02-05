@@ -10,7 +10,7 @@ import pprint
 
 CORE_SCHC = ("10.0.0.21", 0x5C4C)
 MID_LENGTH=3
-KNOWN_URI = ["/temp", "/humi", "/pres"]
+KNOWN_URI = ["temp", "humi", "pres"]
 
 MID = 1
 
