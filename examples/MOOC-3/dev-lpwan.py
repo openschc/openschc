@@ -61,14 +61,12 @@ while True:
     if m == 0:
         temp += random.randint (-5, +5)
         coap_send_measurement(temp, "/temp")
-        wait_ack()
     elif m == 1:
         humi += random.randint (-10, +10)
         coap_send_measurement(humi, "/humi")
-        wait_ack()
     elif m == 2:
         pres += random.randint (-10, +10)
         coap_send_measurement(pres, "/pres")
-        wait_ack()
 
     time.sleep(random.randint(1, 7))
+    wait_ack()
