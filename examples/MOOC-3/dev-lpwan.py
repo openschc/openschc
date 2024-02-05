@@ -68,7 +68,7 @@ class sensor():
         return self.period
 
     def get_value(self):
-        self.current_value += random.randint(-evolution, +evolution)
+        self.current_value += random.randint(-self.evolution, +self.evolution)
         return self.current_value
 
 
