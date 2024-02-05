@@ -52,9 +52,9 @@ def main():
     root = resource.Site()
 
     # add resource processing, /proxy is not used here, see comments in generic_sensor()
-    root.add_resource(['temp'], sensor_reading())
+    #root.add_resource(['temp'], sensor_reading())
     #root.add_resource(['pres'], sensor_reading())
-    root.add_resource(['humi'], sensor_reading())
+    #root.add_resource(['humi'], sensor_reading())
     
     # associate resource tree and socket
     asyncio.Task(aiocoap.Context.create_server_context(root))
