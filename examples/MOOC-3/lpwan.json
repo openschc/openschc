@@ -59,7 +59,7 @@
                 {"FID": "COAP.VER",  "DI": "DW", "TV": 1,   "MO": "equal","CDA": "not-sent"},
                 {"FID": "COAP.TYPE", "DI": "DW", "TV": 1,   "MO": "equal","CDA": "not-sent"},
                 {"FID": "COAP.TKL",  "DI": "DW", "TV": 0,   "MO": "equal","CDA": "not-sent"},
-                {"FID": "COAP.CODE", "DI": "DW", "TV": 68,   "MO": "equal","CDA": "not-sent"},
+                {"FID": "COAP.CODE", "DI": "DW", "TV": 132,   "MO": "equal","CDA": "not-sent"},
                 {"FID": "COAP.MID",  "DI": "DW", "TV": 0,   "MO": "ignore","CDA": "not-sent"}     
             ]}
     ]
