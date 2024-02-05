@@ -88,7 +88,7 @@ while True:
 
 
 
-while True
+while True:
     sensor_id = random.randint(0,2)
     if m == 0:
         temp += random.randint (-5, +5)
