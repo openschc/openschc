@@ -44,7 +44,7 @@ def coap_send_measurement(value, uri):
     tunnel.sendto(schc_pkt, CORE_SCHC)
 
 def wait_ack():
-    readable, writable, exp = select.select ([tunnel], [], [], 0.1)
+    readable, writable, exp = select.select ([tunnel], [], [], 1)
     print ("readable", readable)
     if len(readable) == 1:
         msg = tunnel.recv(1000)
