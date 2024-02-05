@@ -873,7 +873,7 @@ class RuleManager:
                     for r in rule["Compression"]:
                         if failed_field:
                             print(r)
-                        #print (pkt[(r[T_FID], r[T_FP])][0])
+                        print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
                                 if T_MO_VAL in r:
