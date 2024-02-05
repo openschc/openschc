@@ -104,9 +104,10 @@ while True:
     if not wait_ack():
         event_queue.append((sensor, int(time.time() + sensor.get_period())))
     else:
+        print ("Deep sleep for", sensor.uri)
         event_queue.append((sensor, int(time.time() + 300)))
 
     pprint.pprint (event_queue)       
-    sorted(event_queue, key=lambda x: x[1])
+    event_queue.sort(key=lambda x: x[1])
     pprint.pprint (event_queue)
 
