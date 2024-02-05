@@ -21,7 +21,7 @@ def coap_send_measurement(value, uri):
     global MID
 
     if uri not in KNOWN_URI:
-        print("unknown URI")
+        print("unknown URI", uri)
         return None
     
     if type(value) is not bytes: # not cbor
