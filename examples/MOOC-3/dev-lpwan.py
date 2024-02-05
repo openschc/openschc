@@ -46,7 +46,7 @@ def coap_send_measurement(value, uri):
 def wait_ack():
     readable, writable, exp = select.select ([tunnel], [], [], 0.1)
     print ("readable", readable)
-    if readable is not []:
+    if len(readable) == 1:
         msg = tunnel.recv(1000)
         print ("Get downlink", binascii.hexlify(msg))
         return True
