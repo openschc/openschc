@@ -55,11 +55,17 @@ def wait_ack():
         return False
 
 class sensor():
-    def __init__ (self, uri, min_period, init_value, evolution):
+    def __init__ (self, uri, period, init_value, evolution):
         self.uri = uri
-        self.min_period = min_period
+        self.period = period
         self.current_value = init_value
         self.evolution=evolution
+
+    def get_uri():
+        return self.uri
+    
+    def get_period():
+        return self.period
 
     def get_value(self):
         self.current_value += random.randint(-evolution, +evolution)
@@ -73,19 +79,24 @@ pressure    = sensor("pres", 90, 1000, 10)
 start_time = int(time.time())
 
 event_queue = [(temperature, start_time+10), 
-               (humidity, start_time+20), 
+               (humidity, start_time+40), 
                (pressure, start_time+30)]
 
 
 while True:
     next_event = event_queue.pop(0)
-    print (next_event, event_queue)
-
     wait_time = next_event[1] - int(time.time())
-    print ("wait ", wait_time)
-
     if wait_time > 0:
-        time.sleep(10)
+        time.sleep(wait_time)
+
+    sensor = next_event[0]
+    coap_send_measurement(sensor.get_value(), sensor.get_uri())
+
+    event_queue.append((sensor, int(time.time() + sensor.get_period())))
+    sorted(event_queue, key=lambda x: x[1])
+    print (event_queue)
+
+
 
 
 
