@@ -259,7 +259,7 @@ class SCHCProtocol:
         # Apply compression rule
 
 
-        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir, failed_field=False)
+        rule = self.rule_manager.FindRuleFromPacket(parsed_packet, direction=t_dir, failed_field=verbose)
         if rule is None:
             rule = self.rule_manager.FindNoCompressionRule(device_id) # /!\ SHOULD NOT WORK SINCE device_ID is not none
 
