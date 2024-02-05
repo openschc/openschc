@@ -1,4 +1,5 @@
 import socket
+import select
 import cbor2 as cbor
 import random
 import time
@@ -25,7 +26,9 @@ def coap_send_measurement(value, uri):
         value = cbor.dumps(value)
 
     uri_idx = KNOWN_URI.index(uri)
-    print ("MID", MID, "URI", uri, "(index:", uri_idx, ")", "value", binascii.hexlify(value) )
+    print ("MID", MID, "URI", uri,  
+            "(index:", uri_idx, ")", 
+            "value", binascii.hexlify(value) )
 
     schc_residue = (0x00 & 0b0000_0111) << 5 | \
                    (MID & 0b0000_0111) << 2 | \
@@ -39,6 +42,16 @@ def coap_send_measurement(value, uri):
     schc_pkt = struct.pack("!B", schc_residue) + value
     print ("sending:", binascii.hexlify(schc_pkt))
     tunnel.sendto(schc_pkt, CORE_SCHC)
+
+def wait_ack():
+    readable, writable, exp = select.select ([tunnel], [], [], 0.1)
+    if readable is not []:
+        msg = tunnel.recv(1000)
+        print ("Get downlink", binascii.hexlify(msg))
+        return True
+    else:
+        print ("No answer")
+        return False
 
 temp = humi = pres = 0
 
