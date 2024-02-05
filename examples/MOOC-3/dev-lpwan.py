@@ -6,6 +6,8 @@ import time
 import struct
 import binascii
 
+import pprint
+
 CORE_SCHC = ("10.0.0.21", 0x5C4C)
 MID_LENGTH=3
 KNOWN_URI = ["/temp", "/humi", "/pres"]
@@ -92,30 +94,11 @@ while True:
     sensor = next_event[0]
     coap_send_measurement(sensor.get_value(), sensor.get_uri())
 
-    print("add")
-
-    event_queue.append((sensor, int(time.time() + sensor.get_period())))
+    if not wait_ack():
+        event_queue.append((sensor, int(time.time() + sensor.get_period())))
+    else
+        event_queue.append((sensor, int(time.time() + 300)))
+        
     sorted(event_queue, key=lambda x: x[1])
-    print (event_queue)
+    pprint.pprint (event_queue)
 
-
-
-
-
-
-
-
-while True:
-    sensor_id = random.randint(0,2)
-    if m == 0:
-        temp += random.randint (-5, +5)
-        coap_send_measurement(temp, "/temp")
-    elif m == 1:
-        humi += random.randint (-10, +10)
-        coap_send_measurement(humi, "/humi")
-    elif m == 2:
-        pres += random.randint (-10, +10)
-        coap_send_measurement(pres, "/pres")
-
-    time.sleep(random.randint(1, 7))
-    wait_ack()
