@@ -105,7 +105,8 @@ while True:
         event_queue.append((sensor, int(time.time() + sensor.get_period())))
     else:
         event_queue.append((sensor, int(time.time() + 300)))
-        
+
+    pprint.pprint (event_queue)       
     sorted(event_queue, key=lambda x: x[1])
     pprint.pprint (event_queue)
 
