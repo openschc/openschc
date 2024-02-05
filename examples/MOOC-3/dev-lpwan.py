@@ -62,13 +62,13 @@ class sensor():
         self.evolution=evolution
 
     def get_value(self):
-        self.current_value += self.evolution()
+        self.current_value += random.randint(-evolution, +evolution)
         return self.current_value
 
 
-temperature = sensor("temp", 60, 20, random.random (-1, +1))
-humidity    = sensor("humi", 120, 50, random.random (-5, +5))
-pressure    = sensor("pres", 90, 1000, random.random (-10, +10))
+temperature = sensor("temp", 60, 20, 1)
+humidity    = sensor("humi", 120, 50, 5)
+pressure    = sensor("pres", 90, 1000, 10)
 
 start_time = int(time.time())
 
