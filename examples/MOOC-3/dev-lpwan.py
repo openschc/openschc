@@ -46,9 +46,9 @@ def coap_send_measurement(value, uri):
     tunnel.sendto(schc_pkt, CORE_SCHC)
 
 def wait_ack():
-    readable, writable, exp = select.select ([tunnel], [], [], 1)
-    print ("readable", readable)
-    if len(readable) == 1:
+    # wait a SCHC pkt for 1 second
+    readable, _, _ = select.select ([tunnel], [], [], 1)
+    if len(readable) == 1: # A message
         msg = tunnel.recv(1000)
         if msg == b"\xff": # ruleID 255/8 = server error
             print ("Server Error")
@@ -92,10 +92,14 @@ event_queue = [(temperature, start_time+1),
 
 
 while True:
+    # sort event queue on expiration time
+    event_queue.sort(key=lambda x: x[1]) 
+
+    #sleep until next event expiration
     next_event = event_queue.pop(0)
     wait_time = next_event[1] - int(time.time())
     print ("sleeping", wait_time, "sec.")
-    if wait_time > 0:
+    if wait_time > 0: # oops we are late
         time.sleep(wait_time)
 
     sensor = next_event[0]
@@ -104,10 +108,7 @@ while True:
     if not wait_ack():
         event_queue.append((sensor, int(time.time() + sensor.get_period())))
     else:
-        print ("Deep sleep for", sensor.uri)
+        print ("Long sleep for", sensor.uri)
         event_queue.append((sensor, int(time.time() + 300)))
 
-    pprint.pprint (event_queue)       
-    event_queue.sort(key=lambda x: x[1])
-    pprint.pprint (event_queue)
 
