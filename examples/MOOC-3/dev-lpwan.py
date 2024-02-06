@@ -50,11 +50,11 @@ def wait_ack():
     print ("readable", readable)
     if len(readable) == 1:
         msg = tunnel.recv(1000)
-        print ("Get downlink", binascii.hexlify(msg))
-        return True
-    else:
-        print ("No answer")
-        return False
+        if msg == b"\xff": # ruleID 255/8 = server error
+            print ("Server Error")
+            return True
+        
+    return False
 
 class sensor():
     def __init__ (self, uri, period, init_value, evolution):
