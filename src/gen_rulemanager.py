@@ -782,15 +782,22 @@ class RuleManager:
 
         ignore_bit = rlength - arg
 
-        for b in range(arg):
+        for b in range(ignore_bit, rlength):
             pos = b%8
             byte_pos = b//8
 
-            right_byte_tv = TV[byte_pos]
-            right_byte_fv = FV[byte_pos]
+            if byte_pos < len(TV):
+                right_byte_tv = TV[byte_pos]
+            else:
+                right_byte_tv = 0
 
-            bit_tv = right_byte_tv & (1 << (7 -pos))
-            bit_fv = right_byte_fv & (1 << (7 -pos))
+            if byte_pos < len (FV):
+                right_byte_fv = FV[byte_pos]
+            else:
+                right_byte_fv = 0
+
+            bit_tv = right_byte_tv & (1 << pos)
+            bit_fv = right_byte_fv & (1 << pos)
 
             #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
 
@@ -837,6 +844,9 @@ class RuleManager:
         beginning of the SCHC packet.
         """
 
+        if type(schc) is bytes:
+            schc = BitBuffer(schc)
+
         for d in self._ctxt:
             dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
@@ -863,9 +873,10 @@ class RuleManager:
                     for r in rule["Compression"]:
                         if failed_field:
                             print(r)
-                        #print (pkt[(r[T_FID], r[T_FP])][0])
                         if r[T_DI] == T_DIR_BI or r[T_DI] == direction:
                             if (r[T_FID], r[T_FP]) in pkt:
+                                #print (pkt[(r[T_FID], r[T_FP])][0])
+
                                 if T_MO_VAL in r:
                                     arg = r[T_MO_VAL]
                                 else:

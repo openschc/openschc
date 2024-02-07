@@ -167,7 +167,6 @@ class BitBuffer:
          
     def get_length (self):
         val = self.get_bits(4)
-        print ("read length =", val)
         if val == 0xF:
             val = self.get_bits(8)
             if val == 0xFF:

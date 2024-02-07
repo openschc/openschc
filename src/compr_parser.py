@@ -156,8 +156,11 @@ class Parser:
                 unused = unpack('!L', pkt[pos:pos+4])
                 self.header_fields[T_ICMPV6_UNUSED, 1]       = [adapt_value(unused[0]), 32]
                 pos += 4
+
+            if True:  # current draft propose to parse even the payload for all ICMPv6 packets
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
+
                 
         if "CoAP" in layers and next_layer == "CoAP":
             field_position = {}
@@ -236,7 +239,7 @@ class Unparser:
     def _init(self):
         pass
 
-    def unparse (self, header_d, data, direction, d_rule=None, iface=None):
+    def unparse (self, header_d, data, direction, d_rule=None, iface=None, verbose=False):
         #dprint ("unparse: ", header_d, data, direction)
 
         L2header = None
@@ -282,23 +285,29 @@ class Unparser:
             ipv6_next = int.from_bytes(header_d[(T_IPV6_NXT, 1)][0], byteorder="big" )
 
             if ipv6_next == 58 and (T_ICMPV6_TYPE, 1) in header_d: #IPv6 /  ICMPv6
-                for i in icmpv6_types:
-                    icmp_type = int.from_bytes(header_d[(ICMPV6.TYPE, 1)][0], byteorder="big" )
-                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
-                        IPv6Src = DevStr
-                        IPv6Dst = AppStr
-                        ICMPv6Header = ICMPv6EchoReply(
-                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
-                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
-                    if icmp_type == icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
-                        IPv6Src = AppStr
-                        IPv6Dst = DevStr 
-                        ICMPv6Header = ICMPv6EchoRequest(
-                            id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
-                            seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
-                            data = data)
-                    L4header = ICMPv6Header
+                icmp_type = int.from_bytes(header_d[(T_ICMPV6_TYPE, 1)][0], byteorder="big" )
+                print ("icm type")
+                if icmp_type == 129: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REPLY]:
+                    IPv6Src = DevStr
+                    IPv6Dst = AppStr
+                    ICMPv6Header = ICMPv6EchoReply(
+                        id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                        seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
+                        data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
+                elif icmp_type == 128: #icmpv6_types[T_ICMPV6_TYPE_ECHO_REQUEST]:
+                    IPv6Src = AppStr
+                    IPv6Dst = DevStr 
+                    ICMPv6Header = ICMPv6EchoRequest(
+                        id =  int.from_bytes(header_d[(T_ICMPV6_IDENT, 1)][0], byteorder="big" ),
+                        seq =   int.from_bytes(header_d[(T_ICMPV6_SEQNO, 1)][0], byteorder="big" ),
+                        data = header_d[(T_ICMPV6_PAYLOAD, 1)][0])
+                else:
+                    print ("ICMPv6 not covered")
+                    ICMPv6Header = None
+
+                L4header = ICMPv6Header
+                print ("set l4 header")
+                ICMPv6Header.show()
 
             elif ipv6_next == 17: # UDP
                 dev_port = header_d[(T_UDP_DEV_PORT, 1)][0]
@@ -384,9 +393,15 @@ class Unparser:
         if coap_h != None:
             full_packet = L3header / L4header / Raw(load=coap_h)
         elif L4header != None: 
+            print ("L4")
             full_packet = L3header / L4header / Raw(load=data)
         else:
             full_packet = L3header / Raw(load=data)
 
-        #hexdump(full_packet)
+        if full_packet and iface:
+            if verbose:
+                print ("Sending to ", iface)
+                hexdump(full_packet)
+            send(full_packet, iface=iface, verbose=False) #scapy
+
         return full_packet
