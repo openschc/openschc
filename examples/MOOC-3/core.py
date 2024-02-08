@@ -45,7 +45,9 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
 
-sniff(prn=processPkt, iface=["eth0", "eth1", "lo"]) 
+while True:
+    sniff(prn=processPkt, iface=["eth0", "eth1", "lo"], timeout=0.1) 
+    scheduler.run(session=schc_machine)
 
 
 
