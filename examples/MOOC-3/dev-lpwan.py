@@ -51,7 +51,7 @@ def wait_ack():
     if len(readable) == 1: # A message
         msg = tunnel.recv(1000)
         if msg == b"\xff": # ruleID 255/8 = server error
-            print ("Server Error")
+            print ("Rule 255/8: Server Error")
             return True
         
     return False
