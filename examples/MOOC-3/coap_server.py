@@ -45,7 +45,7 @@ class sensor_reading(resource.Resource):
 # logging setup
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger("coap-server").setLevel(logging.DEBUG)
+#logging.getLogger("coap-server").setLevel(logging.DEBUG)
 
 def main():
     # Resource tree creation
