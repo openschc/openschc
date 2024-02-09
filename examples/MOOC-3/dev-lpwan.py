@@ -70,7 +70,8 @@ class sensor():
         return self.period
 
     def get_value(self):
-        self.current_value += random.randint(-self.evolution, +self.evolution)
+        self.current_value += random.randint(-self.evolution, 
+                                             +self.evolution)
         return self.current_value
     
     def __str__(self):
@@ -106,7 +107,8 @@ while True:
     coap_send_measurement(sensor.get_value(), sensor.get_uri())
 
     if not wait_ack():
-        event_queue.append((sensor, int(time.time() + sensor.get_period())))
+        event_queue.append((sensor, int(time.time() + \
+                                        sensor.get_period())))
     else:
         print ("Long sleep for", sensor.uri)
         event_queue.append((sensor, int(time.time() + 300)))
