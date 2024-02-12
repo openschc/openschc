@@ -39,6 +39,8 @@ class sensor_reading(resource.Resource):
         print ("Content-format:", request.opt.content_format)
         print ("Payload:", binascii.hexlify(request.payload))
  
+        for o in request.opt:
+            print (o)
 
         return aiocoap.Message(code=aiocoap.CHANGED)
 
