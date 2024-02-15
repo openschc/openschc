@@ -12,7 +12,7 @@ import binascii
 # Create a Rule Manager and upload the rules.
 
 rm = RM.RuleManager()
-rm.Add(file="lpwan.json")
+rm.Add(file="underwater.json")
 rm.Print()
 
 def processPkt(pkt):
