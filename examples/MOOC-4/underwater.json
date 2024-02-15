@@ -33,7 +33,7 @@
             {"FID": "COAP.Uri-Path", "FP": 1, "DI": "DW", 
                                 "TV": ["temp", "humi", "pres"], 
                                 "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.Accept", "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"},        
+            {"FID": "COAP.ACCEPT", "DI": "DW", "TV": 30, "MO": "equal", "CDA": "not-sent"},        
             {"FID": "COAP.Content-Format", "DI": "UP", "TV": 30, "MO": "equal", "CDA": "not-sent"}        
         ]}
     ]
