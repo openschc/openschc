@@ -14,5 +14,9 @@ while True:
     data, addr = tunnel.recvfrom(1500)
     print (binascii.hexlify(data))
 
-    print (bin(data[0]))
+    schc_msg = ba.BitBuffer(data)
+    ruleID=schc_msg.get_bits(3)
+
+    print (ruleID)
+
     
