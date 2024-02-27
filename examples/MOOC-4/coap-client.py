@@ -29,4 +29,6 @@ async def main():
         print('Result: %s\n%r'%(response.code, response.payload))
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    while True:
+        asyncio.run(main())
+        await asyncio.sleep(3)
