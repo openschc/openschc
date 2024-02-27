@@ -44,7 +44,7 @@ while True:
             schc_resp.add_bits(mid, nb_bits=16) # Message ID
             schc_resp.display(format="bin")
 
-            schc_resp.add_bits(tokenize, nb_bits=16) # Token
+            schc_resp.add_bits(token, nb_bits=16) # Token
             schc_resp.display(format="bin")
 
 
