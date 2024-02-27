@@ -2,6 +2,7 @@ from re import A
 import socket
 import binascii
 import random
+import cbor2 as cbor
 
 import sys
 
