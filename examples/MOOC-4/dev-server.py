@@ -3,6 +3,7 @@ import socket
 import binascii
 
 import sys
+import tokenize
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
@@ -34,6 +35,16 @@ while True:
             pass
         else:
             schc_resp = ba.BitBuffer()
-            schc_resp.add_bits(0b0000_0001, nb_bits=3)
-
+            schc_resp.add_bits(0b0000_0001, nb_bits=3) # ruleID
             schc_resp.display(format="bin")
+
+            schc_resp.add_bits(app_port, nb_bits=16) # app port
+            schc_resp.display(format="bin")
+
+            schc_resp.add_bits(mid, nb_bits=16) # Message ID
+            schc_resp.display(format="bin")
+
+            schc_resp.add_bits(tokenize, nb_bits=16) # Token
+            schc_resp.display(format="bin")
+
+
