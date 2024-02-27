@@ -1,4 +1,3 @@
-from re import A
 import socket
 import binascii
 import random
