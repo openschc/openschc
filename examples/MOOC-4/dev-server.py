@@ -1,3 +1,4 @@
+from re import A
 import socket
 import binascii
 
@@ -17,6 +18,10 @@ while True:
     schc_msg = ba.BitBuffer(data)
     ruleID=schc_msg.get_bits(3)
 
-    print (ruleID)
+    if ruleID == 1: # rule 1/3
+        app_port = schc_msg.get_bits(16)
+        mid = schc_msg.get_bits(16)
+        token = schc_msg.get_bits(16)
+        uri_idx = schc_msg.get_bits(2)
 
-    
+        print(app_port, mid, token, uri_idx)
