@@ -24,4 +24,7 @@ while True:
         token = schc_msg.get_bits(16)
         uri_idx = schc_msg.get_bits(2)
 
-        print(app_port, mid, token, uri_idx)
+        uri = ["temp", "humi", "pres", None][uri_idx]
+
+        print(app_port, mid, token, uri_idx, uri)
+
