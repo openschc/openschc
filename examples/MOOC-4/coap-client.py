@@ -26,7 +26,6 @@ async def main():
     else: #right URI
          request = Message(code=GET, uri='coap://[aaaa::1]]/temp')
        
-
     try:
         response = await protocol.request(request).response
     except Exception as e:

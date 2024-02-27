@@ -20,8 +20,6 @@ while True:
 
     schc_msg = ba.BitBuffer(data)
 
-    schc_msg.display(format="bin")
-
     ruleID=schc_msg.get_bits(3)
 
     if ruleID == 1: # rule 1/3
