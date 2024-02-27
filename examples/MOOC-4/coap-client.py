@@ -11,6 +11,8 @@ for some more information."""
 import logging
 import asyncio
 
+import time
+
 from aiocoap import *
 
 logging.basicConfig(level=logging.INFO)
@@ -31,4 +33,4 @@ async def main():
 if __name__ == "__main__":
     while True:
         asyncio.run(main())
-        await asyncio.sleep(3)
+        time.sleep(3)
