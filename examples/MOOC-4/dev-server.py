@@ -16,6 +16,9 @@ while True:
     print (binascii.hexlify(data))
 
     schc_msg = ba.BitBuffer(data)
+
+    schc_msg.display(format="bin")
+
     ruleID=schc_msg.get_bits(3)
 
     if ruleID == 1: # rule 1/3
@@ -27,4 +30,10 @@ while True:
         uri = ["temp", "humi", "pres", None][uri_idx]
 
         print(app_port, mid, token, uri_idx, uri)
+        if uri == "temp":
+            pass
+        else:
+            schc_resp = ba.BitBuffer()
+            schc_resp.add_bits(0x30, nb_bit=3)
 
+            schc_resp.display(format="bin")
