@@ -24,7 +24,7 @@ def processPkt(pkt):
         if e_type == 0x86dd and pkt[IPv6].nh == 17: # just UDP
             print ("<----", "downlink traffic")
             hexdump(pkt)
-            schc_machine.schc_send(bytes(pkt)[14:], verbose=False)
+            schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 0x5C4C:
                 # got a packet in the socket
