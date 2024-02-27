@@ -10,6 +10,7 @@ for some more information."""
 
 import logging
 import asyncio
+import random
 
 import time
 
@@ -20,7 +21,11 @@ logging.basicConfig(level=logging.INFO)
 async def main():
     protocol = await Context.create_client_context()
 
-    request = Message(code=GET, uri='coap://[aaaa::1]]/temp', token=None)
+    if random.randint(0, 10) % 3 == 0: # wrong URI
+        request = Message(code=GET, uri='coap://[aaaa::1]]/humi')
+    else: #right URI
+         request = Message(code=GET, uri='coap://[aaaa::1]]/temp')
+       
 
     try:
         response = await protocol.request(request).response
