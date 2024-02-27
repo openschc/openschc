@@ -1,9 +1,10 @@
 from re import A
 import socket
 import binascii
+import random
 
 import sys
-import tokenize
+
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
@@ -31,24 +32,23 @@ while True:
         uri = ["temp", "humi", "pres", None][uri_idx]
 
         print(app_port, mid, token, uri_idx, uri)
+
+        schc_resp = ba.BitBuffer()
+        schc_resp.add_bits(0b0000_0001, nb_bits=3) # ruleID
+
         if uri == "temp":
-            pass
-        else:
-            schc_resp = ba.BitBuffer()
-            schc_resp.add_bits(0b0000_0001, nb_bits=3) # ruleID
-            schc_resp.display(format="bin")
-
             schc_resp.add_bits(app_port, nb_bits=16) # app port
-            schc_resp.display(format="bin")
-
-            schc_resp.add_bits(0b100_00100,nb_bits=8) # resp code
-            schc_resp.display(format="bin")
-
+            schc_resp.add_bits(0b010_00101,nb_bits=8) # 2.05
             schc_resp.add_bits(mid, nb_bits=16) # Message ID
-            schc_resp.display(format="bin")
-
             schc_resp.add_bits(token, nb_bits=16) # Token
-            schc_resp.display(format="bin")
 
+            data = cbor.dumps(random.randint(10, 100))
+            schc_resp.add_bytes(data)
 
-            tunnel.sendto(schc_resp.get_content(), addr)
+        else: # 4.04 not found
+            schc_resp.add_bits(app_port, nb_bits=16) # app port
+            schc_resp.add_bits(0b100_00100,nb_bits=8) # 4.04
+            schc_resp.add_bits(mid, nb_bits=16) # Message ID
+            schc_resp.add_bits(token, nb_bits=16) # Token
+
+        tunnel.sendto(schc_resp.get_content(), addr)
