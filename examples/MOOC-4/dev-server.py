@@ -41,6 +41,9 @@ while True:
             schc_resp.add_bits(app_port, nb_bits=16) # app port
             schc_resp.display(format="bin")
 
+            schc_resp.add_bits(0b010_00100,nb_bits=8) # resp code
+            schc_resp.display(format="bin")
+
             schc_resp.add_bits(mid, nb_bits=16) # Message ID
             schc_resp.display(format="bin")
 
