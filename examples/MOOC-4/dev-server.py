@@ -34,6 +34,6 @@ while True:
             pass
         else:
             schc_resp = ba.BitBuffer()
-            schc_resp.add_bits(0x30, nb_bit=3)
+            schc_resp.add_bits(0b0000_0001, nb_bits=3)
 
             schc_resp.display(format="bin")
