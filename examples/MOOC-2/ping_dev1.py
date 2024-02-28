@@ -48,11 +48,11 @@ def processPkt(pkt):
             else:
                 print ("IPv6 not on loopback")
  
-    in, _, _ = select.select([tunnel], null, null, 0.1)
+    s_in, _, _ = select.select([tunnel], null, null, 0.1)
  
-    prin(in)
-    
-    if in is not None: # data on the socket
+    prin(s_in)
+
+    if s_in is not None: # data on the socket
         SCHC_pkt, device = tunnel.recvfrom(1000)
 
         core_id = "udp:"+device[0]+":"+str(device[1])
