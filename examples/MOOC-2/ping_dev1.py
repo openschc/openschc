@@ -37,11 +37,12 @@ def processPkt(pkt):
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
-                pkt.show()
-                if core_id: # core is identified, can answer
-                    schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
-                else:
-                    print ("core not identified")
+                if pkt[IPv6].nh == 58: # ICMPv6 
+                    pkt.show()
+                    if core_id: # core is identified, can answer
+                        schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
+                    else:
+                        print ("core not identified")
             else:
                 print ("IPv6 not on loopback")
                 pkt.show() 
