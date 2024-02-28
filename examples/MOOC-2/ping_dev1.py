@@ -10,6 +10,9 @@ from gen_parameters import T_POSITION_DEVICE
 
 import netifaces as ni
 
+import socket
+import select
+
 addr = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
 
 PORT = 8888
@@ -44,23 +47,21 @@ def processPkt(pkt):
                         print ("core not yet identified, do not send SCHC pkt")
             else:
                 print ("IPv6 not on loopback")
-        elif e_type == 0x0800:
-            if pkt[IP].proto == 17 and pkt[UDP].dport == 8888:
-                print ("get tunneled SCHC packet")
-                # got a packet in the socket
-                SCHC_pkt, device = tunnel.recvfrom(1000)
+ 
+    in, _, _ = select.select([tunnel], null, null, 0.1)
+ 
+    prin(in)
+    
+    if in is not None: # data on the socket
+        SCHC_pkt, device = tunnel.recvfrom(1000)
 
-                core_id = "udp:"+device[0]+":"+str(device[1])
+        core_id = "udp:"+device[0]+":"+str(device[1])
 
-
-                origin, full_packet = schc_machine.schc_recv(
-                                   schc_packet=SCHC_pkt, 
-                                   device_id=deviceID, 
-                                   iface='lo',
-                                   verbose=True)
-                #print (core_id)
-    else:
-        print ("No Ethernet")
+        origin, full_packet = schc_machine.schc_recv(
+                            schc_packet=SCHC_pkt, 
+                            device_id=deviceID, 
+                            iface='lo',
+                            verbose=True)
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
@@ -70,7 +71,7 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
 
-sniff(prn=processPkt, iface=["eth0", "lo"]) 
+sniff(prn=processPkt, iface=["lo"]) 
 
 
 
