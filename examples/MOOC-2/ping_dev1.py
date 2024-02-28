@@ -50,7 +50,7 @@ def processPkt(pkt):
  
     s_in, _, _ = select.select([tunnel], [], [], 0.1)
  
-    prin(s_in)
+    print(s_in)
 
     if s_in is not None: # data on the socket
         SCHC_pkt, device = tunnel.recvfrom(1000)
