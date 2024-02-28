@@ -46,7 +46,7 @@ def processPkt(pkt):
                     pkt.show()
                     if core_id: # core is identified, can answer
                         schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id, verbose=True)
-                        time.sleep(0.2)
+                        time.sleep(1)
                     else:
                         print ("core not yet identified, do not send SCHC pkt")
             else:
