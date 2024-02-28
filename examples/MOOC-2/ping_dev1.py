@@ -35,7 +35,6 @@ def processPkt(pkt):
     global core_id
 
     print("+", end="")
-    scheduler.run(session=schc_machine)
 
     if pkt.getlayer(Ether) != None: 
         print ("-", end="")
@@ -77,7 +76,22 @@ tunnel = schc_machine.get_tunnel()
 
 t = AsyncSniffer(prn=processPkt, iface=["lo"], store=False) 
 t.start()
-time.sleep (120)
+print ("sniff started")
+while True:
+    scheduler.run(session=schc_machine)
+
+    s_in, _, _ = select.select([tunnel], [], [])
+    if len(s_in) > 0: # data on the socket
+        SCHC_pkt, device = tunnel.recvfrom(1000)
+
+        core_id = "udp:"+device[0]+":"+str(device[1])
+
+        origin, full_packet = schc_machine.schc_recv(
+                            schc_packet=SCHC_pkt, 
+                            device_id=deviceID, 
+                            iface='lo',
+                            verbose=True)
+
 t.stop()
 
 
