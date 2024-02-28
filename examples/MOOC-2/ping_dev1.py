@@ -37,6 +37,7 @@ def processPkt(pkt):
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
+                pkt.show()
                 if core_id: # core is identified, can answer
                     schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id)
                 else:
@@ -50,7 +51,7 @@ def processPkt(pkt):
                 # got a packet in the socket
                 SCHC_pkt, device = tunnel.recvfrom(1000)
 
-                core_id = "udp:"+device[0]+":"+str(device[1])
+                #core_id = "udp:"+device[0]+":"+str(device[1])
 
 
                 origin, full_packet = schc_machine.schc_recv(
@@ -58,7 +59,7 @@ def processPkt(pkt):
                                    device_id=deviceID, 
                                    iface='lo',
                                    verbose=True)
-                print (core_id)
+                #print (core_id)
     else:
         print ("No Ethernet")
 
