@@ -45,7 +45,6 @@ def processPkt(pkt):
                         print ("core not identified")
             else:
                 print ("IPv6 not on loopback")
-                pkt.show() 
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 8888:
                 print ("get tunneled SCHC packet")
