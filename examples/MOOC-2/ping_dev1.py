@@ -40,6 +40,7 @@ def processPkt(pkt):
     if pkt.getlayer(Ether) != None: 
         print ("-", end="")
         e_type = pkt.getlayer(Ether).type
+        pkt.show()
         if e_type == 0x86dd:
             print ("*", end="")
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
