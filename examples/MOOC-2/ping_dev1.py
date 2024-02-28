@@ -42,10 +42,10 @@ def processPkt(pkt):
         if e_type == 0x86dd:
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
                 if pkt[IPv6].nh == 58: # ICMPv6 
+                    print("get from sniff")
                     pkt.show()
                     if core_id: # core is identified, can answer
                         schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id, verbose=True)
-                        time.sleep(1)
                     else:
                         print ("core not yet identified, do not send SCHC pkt")
             else:
