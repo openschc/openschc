@@ -36,8 +36,6 @@ def processPkt(pkt):
 
     scheduler.run(session=schc_machine)
 
-    print(pkt[Ether].type)
-
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
@@ -52,10 +50,8 @@ def processPkt(pkt):
             else:
                 print ("IPv6 not on loopback")
  
-    s_in, _, _ = select.select([tunnel], [], [], 0.01)
+    s_in, _, _ = select.select([tunnel], [], [])
  
-    print(s_in)
-
     if len(s_in) > 0: # data on the socket
         SCHC_pkt, device = tunnel.recvfrom(1000)
 
