@@ -71,8 +71,10 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
 
-sniff(prn=processPkt, iface=["lo"]) 
-
+t = AsyncSniffer(prn=processPkt, iface=["lo"]) 
+t.start()
+time.sleep (120)
+t.stop()
 
 
 
