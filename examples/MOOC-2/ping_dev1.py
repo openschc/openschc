@@ -91,6 +91,7 @@ while True:
                             device_id=deviceID, 
                             iface='lo',
                             verbose=True)
+    time.sleep(0.1)
 
 t.stop()
 
