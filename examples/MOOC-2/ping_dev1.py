@@ -41,6 +41,7 @@ def processPkt(pkt):
         print ("-", end="")
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
+            print ("*", end="")
             if pkt[Ether].src == "00:00:00:00:00:00": # on loopback
                 if pkt[IPv6].nh == 58: # ICMPv6 
                     print("get from sniff")
