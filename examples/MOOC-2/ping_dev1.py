@@ -41,7 +41,7 @@ def processPkt(pkt):
                     if core_id: # core is identified, can answer
                         schc_machine.schc_send(bytes(pkt)[14:], core_id = core_id, verbose=True)
                     else:
-                        print ("core not identified")
+                        print ("core not yet identified, do not send SCHC pkt")
             else:
                 print ("IPv6 not on loopback")
         elif e_type == 0x0800:
@@ -50,7 +50,7 @@ def processPkt(pkt):
                 # got a packet in the socket
                 SCHC_pkt, device = tunnel.recvfrom(1000)
 
-                #core_id = "udp:"+device[0]+":"+str(device[1])
+                core_id = "udp:"+device[0]+":"+str(device[1])
 
 
                 origin, full_packet = schc_machine.schc_recv(
