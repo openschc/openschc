@@ -34,6 +34,7 @@ core_id = None
 def processPkt(pkt):
     global core_id
 
+    print(.)
     scheduler.run(session=schc_machine)
 
     if pkt.getlayer(Ether) != None: 
