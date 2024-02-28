@@ -52,7 +52,7 @@ def processPkt(pkt):
  
     print(s_in)
 
-    if s_in is not None: # data on the socket
+    if len(s_in) > 0: # data on the socket
         SCHC_pkt, device = tunnel.recvfrom(1000)
 
         core_id = "udp:"+device[0]+":"+str(device[1])
