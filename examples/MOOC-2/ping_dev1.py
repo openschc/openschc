@@ -50,7 +50,7 @@ def processPkt(pkt):
             else:
                 print ("IPv6 not on loopback")
  
-    s_in, _, _ = select.select([tunnel], [], [], 0.1)
+    s_in, _, _ = select.select([tunnel], [], [], 0.01)
  
     print(s_in)
 
