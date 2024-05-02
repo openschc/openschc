@@ -141,8 +141,12 @@ class Parser:
 
         if "ESP" in layers and next_layer == "ESP":
             espBytes = unpack('!LL', pkt[pos:pos+8])
+#            print( f"ESP: espBytes: [{type(espBytes)}] {espBytes}" )
+#            print( f"adapt_value(espBytes[0]): {adapt_value(espBytes[0])}")
             self.header_fields[T_ESP_SPI, 1]   = [adapt_value(espBytes[0]), 32]
             self.header_fields[T_ESP_SEQ, 1]   = [adapt_value(espBytes[1]), 32]
+#            self.header_fields[T_ESP_SPI, 1]   = [pkt[pos:pos+4], 32]
+#            self.header_fields[T_ESP_SEQ, 1]   = [pkt[pos+4:pos+8], 32]
             pos += 8
 
             next_layer = "NONE"

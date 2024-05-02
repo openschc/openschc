@@ -839,11 +839,23 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        #print ("MSB")
-        #print (TV, FV, rlength, flength, arg)
+        print (f" MO_MSB: TV: {TV}, FV: {FV} , rlength: {rlength}, "\
+               f"flength: {flength}, arg: {arg}")
 
         if rlength == T_FUNCTION_VAR:
             rlength = flength
+        
+        if isinstance( TV, int ):
+          TV = value.to_bytes(rlength/8, byteorder='big')
+        if isinstance( FV, int ):
+          FV = value.to_bytes(flength/8, byteorder='big')
+        if len( TV ) != rlength:
+          for i in range( rlength - len( TV )):
+            TV = b'\x00' + TV
+        if len( FV ) != flength:
+          for i in range( flength - len( FV )):
+            FV = b'\x00' + FV
+
 
         ignore_bit = rlength - arg
 

@@ -1,0 +1,43 @@
+[{
+    "RuleIDValue" : 1,
+    "RuleIDLength": 8,
+    "Compression": [
+      {"FID": "ESP.SPI", 
+       "TV": 5, "MO": "equal",     
+       "CDA": "not-sent"},
+       {"FID": "ESP.SEQ", 
+       "TV": 1, "MO": "MSB", "MO.VAL" : 16,    
+       "CDA": "LSB"}
+      ]          
+  },
+  {
+    "RuleIDValue" : 2,
+    "RuleIDLength": 8,
+    "Compression": [
+       {"FID": "UDP.DEV_PORT",         
+       "MO": "ignore", 
+       "CDA": "value-sent"},
+
+      {"FID": "UDP.APP_PORT",  
+       "TV": 5680,"MO": "MSB", 
+       "MO.VAL": 12, "CDA" : "LSB"},
+
+      {"FID": "UDP.LEN",       
+       "TV": 0, "MO": "ignore",
+       "CDA": "compute-length"},
+
+      {"FID": "UDP.CKSUM",     
+       "TV": 0, "MO": "ignore", 
+       "CDA": "compute-checksum"}
+      ]          
+  },{
+    "RuleIDValue" : 0,
+    "RuleIDLength": 0,    
+    "schc_header": [
+       {"FID": "SCHC.NXT",  
+       "TV": [17, 50],       
+       "MO": "match-mapping", 
+       "CDA": "mapping-sent"}
+      ]          
+  }
+]          
