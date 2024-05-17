@@ -93,6 +93,8 @@ while True:
                             verbose=True)
         
         print ("RESULT", full_packet)
+        if ICMPV6 in full_packet:
+            print ("icmp")
     time.sleep(0.1)
 
 t.stop()
