@@ -111,6 +111,11 @@ while True:
                 data = full_packet.data)
 
             Echoreply = IPv6Header / ICMPv6Header
+
+            origin, full_packet = schc_machine.schc_recv(
+                    schc_packet=bytes(Echoreply), 
+                    device_id=deviceID, 
+                    verbose=True)
         
             print (Echoreply)
     time.sleep(0.1)
