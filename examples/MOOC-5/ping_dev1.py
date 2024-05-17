@@ -1,3 +1,4 @@
+import binascii
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
@@ -63,8 +64,8 @@ def processPkt(pkt):
         origin, full_packet = schc_machine.schc_recv(
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
-                            iface='lo',
                             verbose=True)
+        print(full_packet)
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
