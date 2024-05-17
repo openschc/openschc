@@ -90,8 +90,9 @@ while True:
         origin, full_packet = schc_machine.schc_recv(
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
-                            iface='lo',
                             verbose=True)
+        
+        print ("RESULT", full_packet)
     time.sleep(0.1)
 
 t.stop()
