@@ -95,6 +95,24 @@ while True:
         print ("RESULT", full_packet)
         if ICMPv6EchoRequest in full_packet:
             print ("icmp")
+                IPv6Header = IPv6 (
+                    version= full_packet.version ,
+                    tc     = full_packet.tc,
+                    fl     = full_packet.fl,
+                    nh     = full_packet.nh,
+                    hlim   = full_packet.hlim,
+                    src    = full_packet.dst, 
+                    dst    = full_packet.src
+                ) 
+
+                ICMPv6Header = ICMPv6EchoReply(
+                    id = full_packet.id,
+                    seq =  full_packet.seq,
+                    data = full_packet.data)
+
+                Echoreply = IPv6Header / ICMPv6Header
+            
+                print (Echoreply)
     time.sleep(0.1)
 
 t.stop()
