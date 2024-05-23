@@ -114,7 +114,6 @@ while True:
 
             origin, full_packet = schc_machine.schc_send(
                     schc_packet=bytes(Echoreply), 
-                    device_id=deviceID, 
                     verbose=True)
         
             print (Echoreply)
