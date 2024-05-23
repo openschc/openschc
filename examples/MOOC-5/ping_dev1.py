@@ -114,6 +114,7 @@ while True:
 
             schc_machine.schc_send(
                     bytes(Echoreply), 
+                    core_id = core_id,
                     verbose=True)
         
             print (Echoreply)
