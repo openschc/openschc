@@ -112,7 +112,7 @@ while True:
 
             Echoreply = IPv6Header / ICMPv6Header
 
-            origin, full_packet = schc_machine.schc_send(
+            schc_machine.schc_send(
                     bytes(Echoreply), 
                     verbose=True)
         
