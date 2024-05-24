@@ -435,7 +435,7 @@ class SCHCProtocol:
                                     dtag=dtag, 
                                     protocol=self, 
                                     core_id=core_id, 
-                                    device_id=device_id), None
+                                    device_id=device_id)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
 

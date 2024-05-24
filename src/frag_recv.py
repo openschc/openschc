@@ -234,7 +234,7 @@ class ReassemblerNoAck(ReassembleBase):
                 print("----------------------- Decompression -----------------------")
 
                 dev_id  = None 
-                pkt = None
+                pkt = False
                 rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
                 print("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
                 dev_id, pkt = self.protocol.decompress_only(schc_packet, rule, device_id)
