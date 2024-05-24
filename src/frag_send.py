@@ -57,6 +57,7 @@ class FragmentBase():
         self.number_of_ack_waits = 0
         self.sender_abort_sent = False
         self.last_send_time = None
+        self.verbose = None
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
@@ -198,11 +199,11 @@ class FragmentNoAck(FragmentBase):
         #                                                       |<- L2 Word
         mtu = self.protocol.connectivity_manager.get_mtu("toto")
         mtu = self.protocol.layer2.get_mtu_size()
-        print("MTU = ", mtu)
+        #print("MTU = ", mtu)
         payload_size = (mtu - frag_msg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
         if remaining_data_size >= payload_size:
-            dprint("----------------------- Fragmentation process -----------------------")
+            #dprint("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
 
@@ -215,7 +216,7 @@ class FragmentNoAck(FragmentBase):
                 Statsct.set_msg_type("SCHC_FRAG")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         elif remaining_data_size < payload_size:
-            dprint("----------------------- Fragmentation process -----------------------")
+            #dprint("----------------------- Fragmentation process -----------------------")
             if remaining_data_size <= (
                     payload_size - frag_msg.get_mic_size(self.rule)):
                 tile = None
@@ -284,20 +285,21 @@ class FragmentNoAck(FragmentBase):
         else:
             w_fcn = schc_frag.fcn
 
-        dtrace ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            self.rule[T_RULEID],
-            self.rule[T_RULEIDLENGTH],
-            w_dtag,
-            w_w,
-            w_fcn
-            ))
-        dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        print("frag_send.py, NoAck, args: ", args)
-        print("frag_send.py, _session_id: ", self._session_id)
-        print("FCN size=", fcn)
-        print('dtag', frag_msg.get_max_dtag(self.rule))
-        print('dtag', frag_msg.get_max_fcn(self.rule))
-        print("session_id", self._session_id)
+        if self.verbose:
+            print ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                self.rule[T_RULEID],
+                self.rule[T_RULEIDLENGTH],
+                w_dtag,
+                w_w,
+                w_fcn
+                ))
+            print ("|----{:3}------------->".format(len(schc_frag.packet._content)))
+        # print("frag_send.py, NoAck, args: ", args)
+        # print("frag_send.py, _session_id: ", self._session_id)
+        # print("FCN size=", fcn)
+        # print('dtag', frag_msg.get_max_dtag(self.rule))
+        # print('dtag', frag_msg.get_max_fcn(self.rule))
+        # print("session_id", self._session_id)
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
 
