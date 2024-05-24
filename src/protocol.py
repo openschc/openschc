@@ -283,7 +283,7 @@ class SCHCProtocol:
 
         return schc_packet, device_id
 
-    def _make_frag_session(self, core_id, device_id, direction):
+    def _make_frag_session(self, core_id, device_id, direction, verbose=None):
         print("make_frag_session, device_id: ", device_id, "core_id", core_id, "direction", direction)
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
@@ -293,7 +293,8 @@ class SCHCProtocol:
             self._log("fragmentation rule not found")
             return None
         
-        print("rule_id found :", frag_rule[T_RULEID])
+        if verbose:       
+            print("rule_id found :", frag_rule[T_RULEID])
         # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
@@ -353,7 +354,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return 
 
-        frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
+        frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction, verbose=verbose)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending() 
