@@ -122,6 +122,8 @@ while True:
                         verbose=True)
             
                 print (Echoreply)
+            else:
+                print ("Received fragment, reassembly buffer incomplete.")
 
     time.sleep(0.1)
 
