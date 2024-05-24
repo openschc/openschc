@@ -162,7 +162,7 @@ class ReassemblerNoAck(ReassembleBase):
                 print ("aborting, removing state")
                 protocol.session_manager.delete_session(self._session_id)
                 print(protocol.session_manager.session_table)
-            return False
+            return device_id, False
         else:
             print ("frag data")
         
@@ -203,7 +203,7 @@ class ReassemblerNoAck(ReassembleBase):
             if schc_frag.abort == True:
                 dprint("----------------------- Sender-Abort ---------------------------")
                 # XXX needs to release all resources.
-                return False
+                return device_id, False
             self.tile_list.append(schc_frag.payload)
             print (self.tile_list)
             #
@@ -246,7 +246,7 @@ class ReassemblerNoAck(ReassembleBase):
             #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
             #        self.inactive_timer, self.event_inactive, tuple())
             dprint("---", schc_frag.fcn)
-            return None
+            return device_id, None
 
 
     def get_state_info(self, **kw):
