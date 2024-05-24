@@ -172,10 +172,10 @@ class FragmentNoAck(FragmentBase):
         # because draft-18 requires that in No-ACK mode, each fragment must
         # contain exactly one tile and the tile size must be at least the size
         # of an L2 Word.
-        print(self.rule)
+        #print(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
                         frag_msg.get_mic_size(self.rule) + self.l2word)   
-        print ('MTU = ', self.protocol.connectivity_manager.get_mtu("toto"), min_size)
+        #print ('MTU = ', self.protocol.connectivity_manager.get_mtu("toto"), min_size)
         if self.protocol.connectivity_manager.get_mtu("toto") < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.mtu, min_size))
 
@@ -265,8 +265,8 @@ class FragmentNoAck(FragmentBase):
             dest = self._session_id[1] # device address
 
         args = (schc_frag.packet.get_content(), dest)
-        dprint ("dbug: frag_send.py: Fragment args", args)
-        dprint("frag sent:", schc_frag.__dict__)
+        #dprint ("dbug: frag_send.py: Fragment args", args)
+        #dprint("frag sent:", schc_frag.__dict__)
         if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
             w_dtag = '-'
         else:
@@ -306,7 +306,7 @@ class FragmentNoAck(FragmentBase):
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
         print("event_sent_frag")
         # delay = 10 #self.protocol.config.get("tx_interval", 0)
-        delay = self.protocol.config.get("tx_interval", 0)
+        delay = self.protocol.config.get("tx_interval", 10)
         self.protocol.scheduler.add_event(delay, self.send_frag, {})
 
     def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
