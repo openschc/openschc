@@ -35,6 +35,8 @@ def processPkt(pkt):
                                    iface='eth1',
                                    verbose=True)
 
+                print (full_packet)
+
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
