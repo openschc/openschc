@@ -104,7 +104,7 @@ class SessionManager:
         print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
-    def create_fragmentation_session(self, core_id, device_id, context, rule):
+    def create_fragmentation_session(self, core_id, device_id, context, rule,verbose=None):
         print("create frag session: core_id, device_id", core_id, device_id )
         if self.unique_peer:
             l2_address = None #TODO
@@ -139,6 +139,9 @@ class SessionManager:
             # see above for param order
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
+        
+        session.verbose = verbose
+
         self._add_session(session_id, session)        
         setattr(session, "_session_id", session_id)
         return session
@@ -301,7 +304,7 @@ class SCHCProtocol:
         self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
 
         session = self.session_manager.create_fragmentation_session(
-            core_id, device_id, context, rule)
+            core_id, device_id, context, rule, verbose=verbose)
         if session is None:
             self._log("fragmentation session could not be created") # XXX warning
             return None
