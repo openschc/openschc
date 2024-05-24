@@ -87,10 +87,13 @@ while True:
 
         core_id = "udp:"+device[0]+":"+str(device[1])
 
-        origin, full_packet = schc_machine.schc_recv(
+        resp = schc_machine.schc_recv(
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
                             verbose=True)
+        
+        origin = resp[0]
+        full_packet = resp[1]
         
         #print ("---->", type(origin), origin, full_packet)
 
