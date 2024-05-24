@@ -92,7 +92,7 @@ while True:
                             device_id=deviceID, 
                             verbose=True)
         
-        print (type(origin), origin)
+        print ("---->", type(origin), origin)
         
         print ("RESULT", full_packet)
         if ICMPv6EchoRequest in full_packet:
