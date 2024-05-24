@@ -438,7 +438,7 @@ class SCHCProtocol:
                                     device_id=device_id,
                                     iface = iface)
 
-    def decompress_only (self, packet_bbuf, rule, device_id=None, iface=iface): # called after reassembly      
+    def decompress_only (self, packet_bbuf, rule, device_id=None, iface=None): # called after reassembly      
 
         dprint ("debug: protocol.py, decompress_only : ", packet_bbuf, rule, device_id)
         if rule == None:
