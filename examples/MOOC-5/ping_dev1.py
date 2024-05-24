@@ -92,34 +92,36 @@ while True:
                             device_id=deviceID, 
                             verbose=True)
         
-        print ("---->", type(origin), origin)
+        print ("---->", type(origin), origin, full_packet)
+
+        if full_packet != None:
         
-        print ("RESULT", full_packet)
-        if ICMPv6EchoRequest in full_packet:
-            print ("icmp")
-            IPv6Header = IPv6 (
-                version= full_packet.version ,
-                tc     = full_packet.tc,
-                fl     = full_packet.fl,
-                nh     = full_packet.nh,
-                hlim   = full_packet.hlim,
-                src    = full_packet.dst, 
-                dst    = full_packet.src
-            ) 
+            print ("RESULT", full_packet)
+            if ICMPv6EchoRequest in full_packet:
+                print ("icmp")
+                IPv6Header = IPv6 (
+                    version= full_packet.version ,
+                    tc     = full_packet.tc,
+                    fl     = full_packet.fl,
+                    nh     = full_packet.nh,
+                    hlim   = full_packet.hlim,
+                    src    = full_packet.dst, 
+                    dst    = full_packet.src
+                ) 
 
-            ICMPv6Header = ICMPv6EchoReply(
-                id = full_packet.id,
-                seq =  full_packet.seq,
-                data = full_packet.data)
+                ICMPv6Header = ICMPv6EchoReply(
+                    id = full_packet.id,
+                    seq =  full_packet.seq,
+                    data = full_packet.data)
 
-            Echoreply = IPv6Header / ICMPv6Header
+                Echoreply = IPv6Header / ICMPv6Header
 
-            schc_machine.schc_send(
-                    bytes(Echoreply), 
-                    core_id = core_id,
-                    verbose=True)
-        
-            print (Echoreply)
+                schc_machine.schc_send(
+                        bytes(Echoreply), 
+                        core_id = core_id,
+                        verbose=True)
+            
+                print (Echoreply)
 
     time.sleep(0.1)
 
