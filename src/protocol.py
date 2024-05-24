@@ -435,9 +435,10 @@ class SCHCProtocol:
                                     dtag=dtag, 
                                     protocol=self, 
                                     core_id=core_id, 
-                                    device_id=device_id)
+                                    device_id=device_id,
+                                    iface = iface)
 
-    def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
+    def decompress_only (self, packet_bbuf, rule, device_id=None, iface=iface): # called after reassembly      
 
         dprint ("debug: protocol.py, decompress_only : ", packet_bbuf, rule, device_id)
         if rule == None:
@@ -460,7 +461,7 @@ class SCHCProtocol:
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
-            pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
+            pkt = unparser.unparse(header_d, pkt_data,  direction, rule, iface=iface)
             return device_id, pkt
 
 
