@@ -92,7 +92,7 @@ while True:
                             device_id=deviceID, 
                             verbose=True)
         
-        print ("---->", type(origin), origin, full_packet)
+        #print ("---->", type(origin), origin, full_packet)
 
         if full_packet != None:
         
