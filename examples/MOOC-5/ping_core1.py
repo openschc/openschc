@@ -21,7 +21,7 @@ def processPkt(pkt):
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd:
-            schc_machine.schc_send(bytes(pkt)[14:])
+            schc_machine.schc_send(bytes(pkt)[14:], verbose=True)
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 0x5C4C:
                 # got a packet in the socket
@@ -35,7 +35,7 @@ def processPkt(pkt):
                                    iface='eth1',
                                    verbose=True)
 
-                print (full_packet)
+                print (full_packet )
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
