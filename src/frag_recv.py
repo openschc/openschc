@@ -234,16 +234,16 @@ class ReassemblerNoAck(ReassembleBase):
                 dev_id  = None 
                 pkt = False
                 rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
-                print("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
+                #print("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
                 dev_id, pkt = self.protocol.decompress_only(schc_packet, rule, device_id, iface=iface)
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
-                print('@', self.state)
+                #print('@', self.state)
                 return dev_id, pkt  # all-1 return the packet reassembled and fragmented or False
             # set inactive timer.
             #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
             #        self.inactive_timer, self.event_inactive, tuple())
-            dprint("---", schc_frag.fcn)
+            #dprint("---", schc_frag.fcn)
             return device_id, None
 
 
