@@ -304,7 +304,7 @@ class FragmentNoAck(FragmentBase):
                                           args, session_id = self._session_id) # Add session_id
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
-        print("event_sent_frag")
+        #print("event_sent_frag")
         # delay = 10 #self.protocol.config.get("tx_interval", 0)
         delay = self.protocol.config.get("tx_interval", 0)
         self.protocol.scheduler.add_event(delay, self.send_frag, {})
