@@ -151,7 +151,7 @@ class ReassemblerNoAck(ReassembleBase):
         - False if abort is received
         
         """
-        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
+        #dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
                                                                      bbuf, self.rule))
         assert (T_FRAG in self.rule)
 
@@ -215,7 +215,7 @@ class ReassemblerNoAck(ReassembleBase):
                 schc_packet = BitBuffer()
                 for i in self.tile_list:
                     schc_packet += i
-                dtrace (binascii.hexlify(schc_packet.get_content()))
+                #dtrace (binascii.hexlify(schc_packet.get_content()))
 
                 mic_calced = self.get_mic(schc_packet.get_content())
                 if schc_frag.mic != mic_calced:
