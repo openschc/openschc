@@ -461,7 +461,7 @@ class SCHCProtocol:
             decomp = Decompressor()
             unparser = Unparser()
             header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
-            dprint("header_d:", header_d)
+            #dprint("header_d:", header_d)
             pkt_data = bytearray()
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
