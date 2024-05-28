@@ -121,7 +121,7 @@ class ReassembleBase:
         // TODO : Redaction (here is frag_recv.py)
 
         """
-        print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
+        #print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
         if self.event_id_inactive_timer is None:
             return
 
@@ -163,9 +163,7 @@ class ReassemblerNoAck(ReassembleBase):
                 protocol.session_manager.delete_session(self._session_id)
                 print(protocol.session_manager.session_table)
             return device_id, False
-        else:
-            print ("frag data")
-        
+        else:        
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
             dprint("receiver frag received:", schc_frag.__dict__)
 
