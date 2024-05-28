@@ -229,7 +229,7 @@ class ReassemblerNoAck(ReassembleBase):
                         schc_frag.mic, mic_calced))
                     #return schc_packet.get_content()
                 # decompression
-                print("----------------------- Decompression -----------------------")
+                #print("----------------------- Decompression -----------------------")
 
                 dev_id  = None 
                 pkt = False
