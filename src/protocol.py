@@ -423,9 +423,10 @@ class SCHCProtocol:
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
-            print("{} session found".format(
-                session.get_session_type().capitalize()),
-                session.__class__.__name__)
+            #print("{} session found".format(
+            #    session.get_session_type().capitalize()),
+            #    session.__class__.__name__)
+            pass
         else:
             context = None
             session = self.session_manager.create_reassembly_session(
