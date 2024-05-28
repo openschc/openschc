@@ -165,7 +165,7 @@ class ReassemblerNoAck(ReassembleBase):
             return device_id, False
         else:        
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-            dprint("receiver frag received:", schc_frag.__dict__)
+            #dprint("receiver frag received:", schc_frag.__dict__)
 
             if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
                 w_dtag = '-'
@@ -185,13 +185,13 @@ class ReassemblerNoAck(ReassembleBase):
             else:
                 w_fcn = schc_frag.fcn
 
-            dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-                schc_frag.rule[T_RULEID],
-                schc_frag.rule[T_RULEIDLENGTH],
-                w_dtag,
-                w_w,
-                w_fcn
-                ))
+            #dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
+            #    schc_frag.rule[T_RULEID],
+            #    schc_frag.rule[T_RULEIDLENGTH],
+            #    w_dtag,
+            #    w_w,
+            #    w_fcn
+            #    ))
 
             # XXX how to authenticate the message from the peer. without
             # authentication, any nodes can cancel the invactive timer.
