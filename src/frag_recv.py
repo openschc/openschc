@@ -152,7 +152,7 @@ class ReassemblerNoAck(ReassembleBase):
         
         """
         #dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
-                                                                     bbuf, self.rule))
+        #                                                             bbuf, self.rule))
         assert (T_FRAG in self.rule)
 
         if (protocol.position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
