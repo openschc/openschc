@@ -105,7 +105,7 @@ class SessionManager:
         return session
 
     def create_fragmentation_session(self, core_id, device_id, context, rule,verbose=None):
-        print("create frag session: core_id, device_id", core_id, device_id )
+        #print("create frag session: core_id, device_id", core_id, device_id )
         if self.unique_peer:
             l2_address = None #TODO
 
@@ -124,7 +124,7 @@ class SessionManager:
             self.protocol.log("cannot create session, no dtag available")
             return None
         
-        dprint("protocol.py: creating frag_session with session_id: ", session_id)
+        #dprint("protocol.py: creating frag_session with session_id: ", session_id)
 
         mode = rule[T_FRAG][T_FRAG_MODE]
         #print ('fragmentation mode:' , mode)
