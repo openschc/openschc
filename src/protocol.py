@@ -419,7 +419,7 @@ class SCHCProtocol:
         rule_id = frag_rule[T_RULEID]
         rule_id_length = frag_rule[T_RULEIDLENGTH]
         session_id = (core_id, device_id, rule_id, rule_id_length, dtag) 
-        print ("protocol.py: session_id ", session_id)
+        #print ("protocol.py: session_id ", session_id)
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
