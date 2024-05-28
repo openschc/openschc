@@ -124,7 +124,7 @@ while True:
                         core_id = core_id,
                         verbose=True)
             
-                print (Echoreply)
+                #print (Echoreply)
 
     time.sleep(0.1)
 

@@ -127,7 +127,7 @@ class SessionManager:
         dprint("protocol.py: creating frag_session with session_id: ", session_id)
 
         mode = rule[T_FRAG][T_FRAG_MODE]
-        print ('fragmentation mode:' , mode)
+        #print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
         elif mode == T_FRAG_ACK_ALWAYS:
