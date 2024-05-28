@@ -62,7 +62,7 @@ class FragmentBase():
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
         return dtag for the packet """
-        packet_bbuf.display()
+        #packet_bbuf.display()
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.copy()
         # XXX:remove - dtag management is in protocol.py:

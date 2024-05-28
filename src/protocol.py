@@ -301,7 +301,7 @@ class SCHCProtocol:
         # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
-        self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
+        #self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
 
         session = self.session_manager.create_fragmentation_session(
             core_id, device_id, context, rule, verbose=verbose)
