@@ -99,9 +99,8 @@ while True:
 
         if full_packet != None:
         
-            print ("RESULT", full_packet)
+            #print ("RESULT", full_packet)
             if ICMPv6EchoRequest in full_packet:
-                print ("icmp")
                 IPv6Header = IPv6 (
                     version= full_packet.version ,
                     tc     = full_packet.tc,
