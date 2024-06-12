@@ -118,7 +118,8 @@ while True:
 
                 Echoreply = IPv6Header / ICMPv6Header
 
-                print (Echoreply)
+                print ("response is:")
+                Echoreply.show()
 
                 schc_machine.schc_send(
                         bytes(Echoreply), 
