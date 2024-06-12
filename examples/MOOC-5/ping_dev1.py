@@ -116,7 +116,9 @@ while True:
                     seq =  full_packet.seq,
                     data = full_packet.data)
 
-                Echoreply = IPv6Header / ICMPv6Header
+                Echoreply = IPv6Header / ICMPv6Heade
+
+                print (Echoreply)
 
                 schc_machine.schc_send(
                         bytes(Echoreply), 
