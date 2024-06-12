@@ -116,7 +116,7 @@ while True:
                     seq =  full_packet.seq,
                     data = full_packet.data)
 
-                Echoreply = IPv6Header / ICMPv6Heade
+                Echoreply = IPv6Header / ICMPv6Header
 
                 print (Echoreply)
 
