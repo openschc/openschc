@@ -185,13 +185,13 @@ class ReassemblerNoAck(ReassembleBase):
             else:
                 w_fcn = schc_frag.fcn
 
-            #dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            #    schc_frag.rule[T_RULEID],
-            #    schc_frag.rule[T_RULEIDLENGTH],
-            #    w_dtag,
-            #    w_w,
-            #    w_fcn
-            #    ))
+            print ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                schc_frag.rule[T_RULEID],
+                schc_frag.rule[T_RULEIDLENGTH],
+                w_dtag,
+                w_w,
+                w_fcn
+                ))
 
             # XXX how to authenticate the message from the peer. without
             # authentication, any nodes can cancel the invactive timer.
