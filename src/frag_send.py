@@ -286,20 +286,15 @@ class FragmentNoAck(FragmentBase):
             w_fcn = schc_frag.fcn
 
         if self.verbose:
-            print ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+            print ("r:{}/{} (noA) DTAG={} W={} FCN={}  |--{:3}-->".format(
                 self.rule[T_RULEID],
                 self.rule[T_RULEIDLENGTH],
                 w_dtag,
                 w_w,
-                w_fcn
+                w_fcn,
+                len(schc_frag.packet._content)
                 ))
-            print ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        # print("frag_send.py, NoAck, args: ", args)
-        # print("frag_send.py, _session_id: ", self._session_id)
-        # print("FCN size=", fcn)
-        # print('dtag', frag_msg.get_max_dtag(self.rule))
-        # print('dtag', frag_msg.get_max_fcn(self.rule))
-        # print("session_id", self._session_id)
+
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
 
