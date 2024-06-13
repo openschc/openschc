@@ -408,7 +408,6 @@ class SCHCProtocol:
 
         frag_rule = rule
 
-        #dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         if dtag_length > 0:
@@ -441,7 +440,8 @@ class SCHCProtocol:
                                     protocol=self, 
                                     core_id=core_id, 
                                     device_id=device_id,
-                                    iface = iface)
+                                    iface = iface
+                                    verbose = verbose)
 
     def decompress_only (self, packet_bbuf, rule, device_id=None, iface=None): # called after reassembly      
 
