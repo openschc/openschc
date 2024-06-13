@@ -36,7 +36,7 @@ def processPkt(pkt):
                                    verbose=True)
 
                 print (full_packet )
-                full_packet.show()
+                hexdump(full_packet)
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
