@@ -142,7 +142,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None, verbose=False):
         """
         return 
         - None if fragmentation is not finished
@@ -167,32 +167,41 @@ class ReassemblerNoAck(ReassembleBase):
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
             #dprint("receiver frag received:", schc_frag.__dict__)
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
-                w_dtag = '-'
-            else:
-                w_dtag = schc_frag.dtag
+            if verbose:
+                if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
+                    w_dtag = '-'
+                else:
+                    w_dtag = schc_frag.dtag
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
-                w_w = '-'
-            else:
-                w_w = schc_frag.win
+                if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
+                    w_w = '-'
+                else:
+                    w_w = schc_frag.win
 
-            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-            if schc_frag.fcn == all1:
-                w_fcn = "All-1"
-            elif schc_frag.fcn == 0:
-                w_fcn = "All-0"
-            else:
-                w_fcn = schc_frag.fcn
+                all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+                if schc_frag.fcn == all1:
+                    w_fcn = "All-1"
+                elif schc_frag.fcn == 0:
+                    w_fcn = "All-0"
+                else:
+                    w_fcn = schc_frag.fcn
 
-            print ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-                schc_frag.rule[T_RULEID],
-                schc_frag.rule[T_RULEIDLENGTH],
-                w_dtag,
-                w_w,
-                w_fcn
-                ))
-
+                if protocol.position == T_POSITION_CORE:
+                    print ("|----> r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                        schc_frag.rule[T_RULEID],
+                        schc_frag.rule[T_RULEIDLENGTH],
+                        w_dtag,
+                        w_w,
+                        w_fcn
+                        ))
+                elif protocol.position == T_POSITION_CORE:
+                    print ("r:{}/{} (noA) DTAG={} W={} FCN={}|<----".format(
+                        schc_frag.rule[T_RULEID],
+                        schc_frag.rule[T_RULEIDLENGTH],
+                        w_dtag,
+                        w_w,
+                        w_fcn
+                        ))
             # XXX how to authenticate the message from the peer. without
             # authentication, any nodes can cancel the invactive timer.
             self.cancel_inactive_timer()

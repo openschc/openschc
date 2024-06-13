@@ -408,7 +408,7 @@ class SCHCProtocol:
 
         frag_rule = rule
 
-        dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
+        #dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         if dtag_length > 0:
