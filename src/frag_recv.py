@@ -194,7 +194,7 @@ class ReassemblerNoAck(ReassembleBase):
                         w_w,
                         w_fcn
                         ))
-                elif protocol.position == T_POSITION_CORE:
+                elif protocol.position == T_POSITION_DEVICE:
                     print ("r:{}/{} (noA) DTAG={} W={} FCN={}|<----".format(
                         schc_frag.rule[T_RULEID],
                         schc_frag.rule[T_RULEIDLENGTH],
@@ -202,6 +202,8 @@ class ReassemblerNoAck(ReassembleBase):
                         w_w,
                         w_fcn
                         ))
+                else:
+                    print ("Unknown position to display fragment.")
             # XXX how to authenticate the message from the peer. without
             # authentication, any nodes can cancel the invactive timer.
             self.cancel_inactive_timer()
