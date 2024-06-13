@@ -267,33 +267,48 @@ class FragmentNoAck(FragmentBase):
         args = (schc_frag.packet.get_content(), dest)
         #dprint ("dbug: frag_send.py: Fragment args", args)
         #dprint("frag sent:", schc_frag.__dict__)
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
-            w_dtag = '-'
-        else:
-            w_dtag = schc_frag.dtag
-
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
-            w_w = '-'
-        else:
-            w_w = schc_frag.win
-
-        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-        if schc_frag.fcn == all1:
-            w_fcn = "All-1"
-        elif schc_frag.fcn == 0:
-            w_fcn = "All-0"
-        else:
-            w_fcn = schc_frag.fcn
+    
 
         if self.verbose:
-            print ("r:{}/{} (noA) DTAG={} W={} FCN={}  |--{:3}-->".format(
-                self.rule[T_RULEID],
-                self.rule[T_RULEIDLENGTH],
-                w_dtag,
-                w_w,
-                w_fcn,
-                len(schc_frag.packet._content)
-                ))
+            if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
+                w_dtag = '-'
+            else:
+                w_dtag = schc_frag.dtag
+
+            if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
+                w_w = '-'
+            else:
+                w_w = schc_frag.win
+
+            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+            if schc_frag.fcn == all1:
+                w_fcn = "All-1"
+            elif schc_frag.fcn == 0:
+                w_fcn = "All-0"
+            else:
+                w_fcn = schc_frag.fcn
+
+            if self.protocol.position == T_POSITION_CORE:
+                print ("<--{:3}--| r:{}/{} (noA) DTAG={} W={} FCN={}  ".format(
+                    len(schc_frag.packet._content),
+                    self.rule[T_RULEID],
+                    self.rule[T_RULEIDLENGTH],
+                    w_dtag,
+                    w_w,
+                    w_fcn
+                    ))
+            elif self.protocol.position == T_POSITION_DEVICE:
+                print ("r:{}/{} (noA) DTAG={} W={} FCN={}  |--{:3}-->".format(
+                    self.rule[T_RULEID],
+                    self.rule[T_RULEIDLENGTH],
+                    w_dtag,
+                    w_w,
+                    w_fcn,
+                    len(schc_frag.packet._content)
+                    ))
+            else:
+                print("Unknown position to display frag")
+
 
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
