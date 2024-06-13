@@ -295,7 +295,7 @@ class FragmentNoAck(FragmentBase):
                 len(schc_frag.packet._content)
                 ))
 
-        self.protocol.scheduler.add_event(10, self.protocol.layer2.send_packet,
+        self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
