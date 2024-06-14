@@ -35,10 +35,6 @@ def processPkt(pkt):
                                    iface='eth1',
                                    verbose=True)
 
-                if full_packet != None:
-                    print (full_packet )
-                    hexdump(full_packet)
-
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
