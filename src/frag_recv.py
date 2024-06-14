@@ -187,7 +187,8 @@ class ReassemblerNoAck(ReassembleBase):
                     w_fcn = schc_frag.fcn
 
                 if protocol.position == T_POSITION_CORE:
-                    print ("|----> r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                    print ("|--{:3}--> r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                        len(schc_frag.packet_bbuf._content),
                         schc_frag.rule[T_RULEID],
                         schc_frag.rule[T_RULEIDLENGTH],
                         w_dtag,
@@ -195,12 +196,13 @@ class ReassemblerNoAck(ReassembleBase):
                         w_fcn
                         ))
                 elif protocol.position == T_POSITION_DEVICE:
-                    print ("r:{}/{} (noA) DTAG={} W={} FCN={}|<----".format(
+                    print ("r:{}/{} (noA) DTAG={} W={} FCN={}|<--{:3}--".format(
                         schc_frag.rule[T_RULEID],
                         schc_frag.rule[T_RULEIDLENGTH],
                         w_dtag,
                         w_w,
-                        w_fcn
+                        w_fcn, 
+                        len(schc_frag.packet_bbuf._content)                        
                         ))
                 else:
                     print ("Unknown position to display fragment.")
