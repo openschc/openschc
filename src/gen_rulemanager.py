@@ -483,7 +483,7 @@ class RuleManager:
                 if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG_SIZE, 2)
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 0)
-                    _default_value (arule, nrule, T_FRAG_FCN, 3)
+                    _default_value (arule, nrule, T_FRAG_FCN, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ALWAYS:
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 1)
