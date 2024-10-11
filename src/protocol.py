@@ -257,6 +257,7 @@ class SCHCProtocol:
         #self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
+            print ("schc_send:", parsing_error)
             return BitBuffer(raw_packet), None
 
         # Apply compression rule
