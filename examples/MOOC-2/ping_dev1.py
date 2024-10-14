@@ -92,8 +92,21 @@ while True:
                             device_id=deviceID, 
                             verbose=True)
         
-        if full_packet is not None:
+        if full_packet is not None and ICMPv6EchoRequest in full_packet:
             print ("ici", origin, full_packet)
+            response =             IPv6Header = IPv6 (
+                version= full_packet[IPv6].version,
+                tc     = full_packet[IPv6].tc,
+                fl     = full_packet[IPv6].fl,
+                hlim   = 64,
+                src    = full_packet[IPv6].dst,
+                dst    = full_packet[IPv6].src
+            ) | ICMPv6EchoReply (
+                id = full_packet[ICMPv6EchoRequest].id,
+                seq = full_packet[ICMPv6EchoRequest].req,
+                data = full_packet[ICMPv6EchoRequest].data
+            )
+            response.show()
     time.sleep(0.1)
 
 t.stop()
