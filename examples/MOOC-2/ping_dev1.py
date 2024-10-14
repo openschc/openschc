@@ -65,7 +65,7 @@ def processPkt(pkt):
                             device_id=deviceID, 
                             verbose=True)
         
-        print(full_packet)
+        print("ici", full_packet)
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
