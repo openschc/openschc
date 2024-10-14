@@ -31,7 +31,6 @@ POSITION = T_POSITION_DEVICE
 schc_machine = SCHCProtocol(role=POSITION)           
 schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
-tunnel = schc_machine.get_tunnel()
  
 def processPkt(pkt):
 
