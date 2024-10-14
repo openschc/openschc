@@ -2,6 +2,7 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
+from regex import F
 from scapy.all import *
 
 import gen_rulemanager as RM
@@ -90,8 +91,9 @@ while True:
         origin, full_packet = schc_machine.schc_recv(
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
-                            iface='lo',
                             verbose=True)
+        
+        print ("ici", origin, full_packet)
     time.sleep(0.1)
 
 t.stop()
