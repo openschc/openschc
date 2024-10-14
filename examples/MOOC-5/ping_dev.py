@@ -37,31 +37,33 @@ def processPkt(pkt):
 
     scheduler.run(session=schc_machine)
 
-    SCHC_pkt, device = tunnel.recvfrom(1000)
+    e_type = pkt.getlayer(Ether).type
+    if e_type == 0x0800 and pkt[IP].proto == 17 and pkt[UDP].sport == 0x5C4C:
+        SCHC_pkt, device = tunnel.recvfrom(1000)
 
-    core_id = "udp:"+device[0]+":"+str(device[1])
+        core_id = "udp:"+device[0]+":"+str(device[1])
 
-    origin, full_packet = schc_machine.schc_recv(
-                        schc_packet=SCHC_pkt, 
-                        device_id=deviceID, 
-                        verbose=True)
-    
-    if full_packet is not None and ICMPv6EchoRequest in full_packet:
-        print ("ici", origin, full_packet)
-        response =             IPv6Header = IPv6 (
-            version= full_packet[IPv6].version,
-            tc     = full_packet[IPv6].tc,
-            fl     = full_packet[IPv6].fl,
-            hlim   = 64,
-            src    = full_packet[IPv6].dst,
-            dst    = full_packet[IPv6].src
-        ) / ICMPv6EchoReply (
-            id = full_packet[ICMPv6EchoRequest].id,
-            seq = full_packet[ICMPv6EchoRequest].seq,
-            data = full_packet[ICMPv6EchoRequest].data
-        )
-        response.show()
-        schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
+        origin, full_packet = schc_machine.schc_recv(
+                            schc_packet=SCHC_pkt, 
+                            device_id=deviceID, 
+                            verbose=True)
+        
+        if full_packet is not None and ICMPv6EchoRequest in full_packet:
+            print ("ici", origin, full_packet)
+            response =             IPv6Header = IPv6 (
+                version= full_packet[IPv6].version,
+                tc     = full_packet[IPv6].tc,
+                fl     = full_packet[IPv6].fl,
+                hlim   = 64,
+                src    = full_packet[IPv6].dst,
+                dst    = full_packet[IPv6].src
+            ) / ICMPv6EchoReply (
+                id = full_packet[ICMPv6EchoRequest].id,
+                seq = full_packet[ICMPv6EchoRequest].seq,
+                data = full_packet[ICMPv6EchoRequest].data
+            )
+            response.show()
+            schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
 
 while True:
     sniff(prn=processPkt, iface=["eth0", "lo"], timeout=0.1) 
