@@ -3,6 +3,8 @@ import sys
 sys.path.insert(1, '../../src/')
 import gen_rulemanager as RM
 from gen_parameters import *
+from protocol import SCHCProtocol
+from gen_parameters import T_POSITION_DEVICE
 
 from scapy.all import *
 
@@ -24,7 +26,7 @@ print("device ID is", deviceID)
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind (("0.0.0.0", PORT)) # same port as in the DeviceID
 
-POSITION = T_POSITION_CORE
+POSITION = T_POSITION_DEVICE
 
 schc_machine = SCHCProtocol(role=POSITION)           
 schc_machine.set_rulemanager(rm)
