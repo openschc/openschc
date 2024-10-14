@@ -60,6 +60,6 @@ def processPkt():
         response.show()
         schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
 
-sniff(prn=processPkt, iface=["eth0", "eth1", "lo"]) 
+sniff(prn=processPkt, iface=["eth0", "lo"]) 
 
 
