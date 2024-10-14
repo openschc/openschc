@@ -33,7 +33,7 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
  
-def processPkt():
+def processPkt(pkt):
     SCHC_pkt, device = tunnel.recvfrom(1000)
 
     core_id = "udp:"+device[0]+":"+str(device[1])
