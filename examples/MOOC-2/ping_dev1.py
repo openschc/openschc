@@ -92,7 +92,8 @@ while True:
                             device_id=deviceID, 
                             verbose=True)
         
-        print ("ici", origin, full_packet)
+        if full_packet not None:
+            print ("ici", origin, full_packet)
     time.sleep(0.1)
 
 t.stop()
