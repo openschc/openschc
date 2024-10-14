@@ -103,7 +103,7 @@ while True:
                 dst    = full_packet[IPv6].src
             ) | ICMPv6EchoReply (
                 id = full_packet[ICMPv6EchoRequest].id,
-                seq = full_packet[ICMPv6EchoRequest].req,
+                seq = full_packet[ICMPv6EchoRequest].seq,
                 data = full_packet[ICMPv6EchoRequest].data
             )
             response.show()
