@@ -32,9 +32,8 @@ schc_machine = SCHCProtocol(role=POSITION)
 schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
-
-
-while True:
+ 
+def processPkt():
     SCHC_pkt, device = tunnel.recvfrom(1000)
 
     core_id = "udp:"+device[0]+":"+str(device[1])
@@ -61,5 +60,6 @@ while True:
         response.show()
         schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
 
+sniff(prn=processPkt, iface=["eth0", "eth1", "lo"]) 
 
- 
+
