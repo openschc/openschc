@@ -101,7 +101,7 @@ while True:
                 hlim   = 64,
                 src    = full_packet[IPv6].dst,
                 dst    = full_packet[IPv6].src
-            ) | ICMPv6EchoReply (
+            ) / ICMPv6EchoReply (
                 id = full_packet[ICMPv6EchoRequest].id,
                 seq = full_packet[ICMPv6EchoRequest].seq,
                 data = full_packet[ICMPv6EchoRequest].data
