@@ -24,6 +24,14 @@ print("device ID is", deviceID)
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind (("0.0.0.0", PORT)) # same port as in the DeviceID
 
+POSITION = T_POSITION_CORE
+
+schc_machine = SCHCProtocol(role=POSITION)           
+schc_machine.set_rulemanager(rm)
+scheduler = schc_machine.system.get_scheduler()
+tunnel = schc_machine.get_tunnel()
+
+
 while True:
     SCHC_pkt, device = tunnel.recvfrom(1000)
 
