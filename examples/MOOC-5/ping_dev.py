@@ -65,9 +65,7 @@ def processPkt(pkt):
             response.show()
             schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
 
-while True:
-    sniff(prn=processPkt, iface=["eth0", "lo"], timeout=0.1) 
-    scheduler.run(session=schc_machine)
+sniff(prn=processPkt, iface=["eth0", "lo"]) 
 
 
 
