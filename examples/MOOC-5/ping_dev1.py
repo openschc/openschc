@@ -39,7 +39,7 @@ schc_machine.set_rulemanager(rm)
 scheduler = schc_machine.system.get_scheduler()
 tunnel = schc_machine.get_tunnel()
 
-t = AsyncSniffer(store=False) 
+t = AsyncSniffer(iface="eth0", store=False) 
 t.start()
 print ("sniff started")
 while True:
@@ -57,7 +57,6 @@ while True:
                             verbose=True)
         
         if full_packet is not None and ICMPv6EchoRequest in full_packet:
-            print ("ici", origin, full_packet)
             response =             IPv6Header = IPv6 (
                 version= full_packet[IPv6].version,
                 tc     = full_packet[IPv6].tc,
@@ -70,12 +69,5 @@ while True:
                 seq = full_packet[ICMPv6EchoRequest].seq,
                 data = full_packet[ICMPv6EchoRequest].data
             )
-            response.show()
             schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
     time.sleep(0.1)
-
-t.stop()
-
-
-
- 
