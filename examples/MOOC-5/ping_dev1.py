@@ -1,4 +1,3 @@
-import binascii
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
@@ -65,7 +64,8 @@ def processPkt(pkt):
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
                             verbose=True)
-        print("result", full_packet)
+        
+        print("ici", full_packet)
 
 # Start SCHC Machine
 POSITION = T_POSITION_DEVICE
@@ -87,44 +87,27 @@ while True:
 
         core_id = "udp:"+device[0]+":"+str(device[1])
 
-        resp = schc_machine.schc_recv(
+        origin, full_packet = schc_machine.schc_recv(
                             schc_packet=SCHC_pkt, 
                             device_id=deviceID, 
                             verbose=True)
         
-        origin = resp[0]
-        full_packet = resp[1]
-        
-        #print ("---->", type(origin), origin, full_packet)
-
-        if full_packet != None:
-        
-            #print ("RESULT", full_packet)
-            if ICMPv6EchoRequest in full_packet:
-                IPv6Header = IPv6 (
-                    version= full_packet.version ,
-                    tc     = full_packet.tc,
-                    fl     = full_packet.fl,
-                    nh     = full_packet.nh,
-                    hlim   = full_packet.hlim,
-                    src    = full_packet.dst, 
-                    dst    = full_packet.src
-                ) 
-
-                ICMPv6Header = ICMPv6EchoReply(
-                    id = full_packet.id,
-                    seq =  full_packet.seq,
-                    data = full_packet.data)
-
-                Echoreply = IPv6Header / ICMPv6Header
-
-                schc_machine.schc_send(
-                        bytes(Echoreply), 
-                        core_id = core_id,
-                        verbose=True)
-            
-                #print (Echoreply)
-
+        if full_packet is not None and ICMPv6EchoRequest in full_packet:
+            print ("ici", origin, full_packet)
+            response =             IPv6Header = IPv6 (
+                version= full_packet[IPv6].version,
+                tc     = full_packet[IPv6].tc,
+                fl     = full_packet[IPv6].fl,
+                hlim   = 64,
+                src    = full_packet[IPv6].dst,
+                dst    = full_packet[IPv6].src
+            ) / ICMPv6EchoReply (
+                id = full_packet[ICMPv6EchoRequest].id,
+                seq = full_packet[ICMPv6EchoRequest].seq,
+                data = full_packet[ICMPv6EchoRequest].data
+            )
+            response.show()
+            schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
     time.sleep(0.1)
 
 t.stop()
