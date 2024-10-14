@@ -107,7 +107,7 @@ while True:
                 data = full_packet[ICMPv6EchoRequest].data
             )
             response.show()
-            schc_machine.schc_send(bytes(response), verbose=True)
+            schc_machine.schc_send(bytes(response), core_id = core_id, verbose=True)
     time.sleep(0.1)
 
 t.stop()
