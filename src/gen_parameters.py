@@ -56,26 +56,26 @@ T_COAP_CODE = "COAP.CODE"
 T_COAP_MID = "COAP.MID"
 T_COAP_TOKEN = "COAP.TOKEN"
 # CoAP options string (written exactly as in standards)
-T_COAP_OPT_IF_MATCH =  "COAP.If-Match"
-T_COAP_OPT_URI_HOST = "COAP.Uri-Host"
-T_COAP_OPT_ETAG = "COAP.ETag"
-T_COAP_OPT_IF_NONE_MATCH =  "COAP.If-None-Match"
-T_COAP_OPT_OBS =  "COAP.Observe"
-T_COAP_OPT_URI_PORT =  "COAP.Uri-Port"
-T_COAP_OPT_LOC_PATH = "COAP.Location-Path"
-T_COAP_OPT_URI_PATH =  "COAP.Uri-Path"
-T_COAP_OPT_CONT_FORMAT =  "COAP.Content-Format"
-T_COAP_OPT_MAX_AGE =  "COAP.Max-Age"
-T_COAP_OPT_URI_QUERY =  "COAP.Uri-Query"
-T_COAP_OPT_ACCEPT =  "COAP.Accept"
-T_COAP_OPT_LOC_QUERY =  "COAP.Location-Query"
-T_COAP_OPT_BLOCK2 =  "COAP.Block2"
-T_COAP_OPT_BLOCK1 =  "COAP.Block1"
-T_COAP_OPT_SIZE2 =  "COAP.Size2"
-T_COAP_OPT_PROXY_URI =  "COAP.Proxy-Uri"
-T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
-T_COAP_OPT_SIZE1 =  "COAP.Size1"
-T_COAP_OPT_NO_RESP = "COAP.No-Response"
+T_COAP_OPT_IF_MATCH =  "COAP.IF-MATCH"
+T_COAP_OPT_URI_HOST = "COAP.URI-HOST"
+T_COAP_OPT_ETAG = "COAP.ETAG"
+T_COAP_OPT_IF_NONE_MATCH =  "COAP.IF-NONE-MATCH"
+T_COAP_OPT_OBS =  "COAP.OBSERVE"
+T_COAP_OPT_URI_PORT =  "COAP.URI-PORT"
+T_COAP_OPT_LOC_PATH = "COAP.LOCATION-PATH"
+T_COAP_OPT_URI_PATH =  "COAP.URI-PATH"
+T_COAP_OPT_CONT_FORMAT =  "COAP.CONTENT-FORMAT"
+T_COAP_OPT_MAX_AGE =  "COAP.MAX-AGE"
+T_COAP_OPT_URI_QUERY =  "COAP.URI-QUERY"
+T_COAP_OPT_ACCEPT =  "COAP.ACCEPT"
+T_COAP_OPT_LOC_QUERY =  "COAP.LOCATION-QUERY"
+T_COAP_OPT_BLOCK2 =  "COAP.BLOCK2"
+T_COAP_OPT_BLOCK1 =  "COAP.BLOCK1"
+T_COAP_OPT_SIZE2 =  "COAP.SIZE2"
+T_COAP_OPT_PROXY_URI =  "COAP.PROXY-URI"
+T_COAP_OPT_PROXY_SCHEME =  "COAP.PROXY-SCHEME"
+T_COAP_OPT_SIZE1 =  "COAP.SIZE1"
+T_COAP_OPT_NO_RESP = "COAP.NO-RESPONSE"
 T_COAP_OPT_END = "COAP.End"
 
 T_FUNCTION_VAR = "var"
@@ -295,6 +295,14 @@ import ipaddress
 def adapt_value(value, length=None, FID=None): 
     """transform any value of any type in the smallest bytearray.
     FID allows to convert properly the string to IPv6 address."""
+
+    if type(value) is list:
+        result = []
+        for e in value:
+            result.append(adapt_value(e, length, FID))
+
+        return value
+    
     if type(value) is int:
 
         if FID in [T_IPV6_APP_IID, T_IPV6_APP_PREFIX, T_IPV6_DEV_IID, T_IPV6_DEV_PREFIX] and length != None:
@@ -333,5 +341,7 @@ def adapt_value(value, length=None, FID=None):
             return value.encode()              
     elif type(value) is bytes:
         return value
+    elif value == None:
+        return None
     else:
         raise ValueError("Unknown type", type(value))

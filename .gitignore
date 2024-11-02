@@ -138,3 +138,4 @@ src/tests/__pycache__
 src/test_failed/__pycache__
 src/.pytest_cache
 src/tests/test_compress_main.py
+openschc.code-workspace

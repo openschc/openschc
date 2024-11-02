@@ -121,7 +121,7 @@ class ReassembleBase:
         // TODO : Redaction (here is frag_recv.py)
 
         """
-        print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
+        #print ("CANCEL Inactivity Timer", self.event_id_inactive_timer)
         if self.event_id_inactive_timer is None:
             return
 
@@ -142,7 +142,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None, verbose=False):
         """
         return 
         - None if fragmentation is not finished
@@ -151,8 +151,8 @@ class ReassemblerNoAck(ReassembleBase):
         - False if abort is received
         
         """
-        dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
-                                                                     bbuf, self.rule))
+        #dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
+        #                                                             bbuf, self.rule))
         assert (T_FRAG in self.rule)
 
         if (protocol.position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
@@ -162,39 +162,50 @@ class ReassemblerNoAck(ReassembleBase):
                 print ("aborting, removing state")
                 protocol.session_manager.delete_session(self._session_id)
                 print(protocol.session_manager.session_table)
-            return False
-        else:
-            print ("frag data")
-        
+            return device_id, False
+        else:        
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
-            dprint("receiver frag received:", schc_frag.__dict__)
+            #dprint("receiver frag received:", schc_frag.__dict__)
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
-                w_dtag = '-'
-            else:
-                w_dtag = schc_frag.dtag
+            if verbose:
+                if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
+                    w_dtag = '-'
+                else:
+                    w_dtag = schc_frag.dtag
 
-            if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
-                w_w = '-'
-            else:
-                w_w = schc_frag.win
+                if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
+                    w_w = '-'
+                else:
+                    w_w = schc_frag.win
 
-            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-            if schc_frag.fcn == all1:
-                w_fcn = "All-1"
-            elif schc_frag.fcn == 0:
-                w_fcn = "All-0"
-            else:
-                w_fcn = schc_frag.fcn
+                all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+                if schc_frag.fcn == all1:
+                    w_fcn = "All-1"
+                elif schc_frag.fcn == 0:
+                    w_fcn = "All-0"
+                else:
+                    w_fcn = schc_frag.fcn
 
-            dtrace ("\t\t\tr:{}/{} (noA) DTAG={} W={} FCN={}".format(
-                schc_frag.rule[T_RULEID],
-                schc_frag.rule[T_RULEIDLENGTH],
-                w_dtag,
-                w_w,
-                w_fcn
-                ))
-
+                if protocol.position == T_POSITION_CORE:
+                    print ("|--{:3}--> r:{}/{} (noA) DTAG={} W={} FCN={}".format(
+                        len(schc_frag.packet_bbuf._content),
+                        schc_frag.rule[T_RULEID],
+                        schc_frag.rule[T_RULEIDLENGTH],
+                        w_dtag,
+                        w_w,
+                        w_fcn
+                        ))
+                elif protocol.position == T_POSITION_DEVICE:
+                    print ("r:{}/{} (noA) DTAG={} W={} FCN={}|<--{:3}--".format(
+                        schc_frag.rule[T_RULEID],
+                        schc_frag.rule[T_RULEIDLENGTH],
+                        w_dtag,
+                        w_w,
+                        w_fcn, 
+                        len(schc_frag.packet_bbuf._content)                        
+                        ))
+                else:
+                    print ("Unknown position to display fragment.")
             # XXX how to authenticate the message from the peer. without
             # authentication, any nodes can cancel the invactive timer.
             self.cancel_inactive_timer()
@@ -203,9 +214,9 @@ class ReassemblerNoAck(ReassembleBase):
             if schc_frag.abort == True:
                 dprint("----------------------- Sender-Abort ---------------------------")
                 # XXX needs to release all resources.
-                return False
+                return device_id, False
             self.tile_list.append(schc_frag.payload)
-            print (self.tile_list)
+            #print (self.tile_list)
             #
             if schc_frag.fcn == frag_msg.get_fcn_all_1(self.rule):
                 dprint("----------------------- Final Reassembly -----------------------")
@@ -217,7 +228,7 @@ class ReassemblerNoAck(ReassembleBase):
                 schc_packet = BitBuffer()
                 for i in self.tile_list:
                     schc_packet += i
-                dtrace (binascii.hexlify(schc_packet.get_content()))
+                #dtrace (binascii.hexlify(schc_packet.get_content()))
 
                 mic_calced = self.get_mic(schc_packet.get_content())
                 if schc_frag.mic != mic_calced:
@@ -231,28 +242,22 @@ class ReassemblerNoAck(ReassembleBase):
                         schc_frag.mic, mic_calced))
                     #return schc_packet.get_content()
                 # decompression
-                print("----------------------- Decompression -----------------------")
+                #print("----------------------- Decompression -----------------------")
 
-                args = False 
-                if not self.protocol.config.get("debug-fragment"):
-                    # XXX
-                    # XXX in hack105, we have separate databases for C/D and F/R.
-                    # XXX need to merge them into one.  Then, here searching database will
-                    # XXX be moved into somewhere.
-                    # XXX
-                    rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
-                    dprint("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
-                    args = self.protocol.decompress_only(schc_packet, rule, device_id)
-                print("Packet decompressed at receive_frag: ", args)
+                dev_id  = None 
+                pkt = False
+                rule = self.protocol.rule_manager.FindRuleFromSCHCpacket(schc=schc_packet, device=device_id)
+                #print("debug: No-ack FindRuleFromSCHCpacket", rule, device_id)
+                dev_id, pkt = self.protocol.decompress_only(schc_packet, rule, device_id, iface=iface)
                 self.state = 'DONE_NO_ACK'
                 self.protocol.session_manager.delete_session(self._session_id)
-                dprint(self.state)
-                return args  # all-1 return the packet reassembled and fragmented or False
+                #print('@', self.state)
+                return dev_id, pkt  # all-1 return the packet reassembled and fragmented or False
             # set inactive timer.
             #self.event_id_inactive_timer = self.protocol.scheduler.add_event(
             #        self.inactive_timer, self.event_inactive, tuple())
-            dprint("---", schc_frag.fcn)
-            return None
+            #dprint("---", schc_frag.fcn)
+            return device_id, None
 
 
     def get_state_info(self, **kw):

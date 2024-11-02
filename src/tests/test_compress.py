@@ -53,3 +53,4 @@ def test_compress():
             pbis = D.decompress(schc_packet, rbis, direction=T_DIR_UP)
             pprint.pprint (v[0])
             pprint.pprint(pbis)
+

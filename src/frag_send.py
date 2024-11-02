@@ -57,11 +57,12 @@ class FragmentBase():
         self.number_of_ack_waits = 0
         self.sender_abort_sent = False
         self.last_send_time = None
+        self.verbose = None
 
     def set_packet(self, packet_bbuf):
         """ store the packet of bitbuffer for later use,
         return dtag for the packet """
-        packet_bbuf.display()
+        #packet_bbuf.display()
         self.packet_bbuf = packet_bbuf.copy()
         self.mic_base = packet_bbuf.copy()
         # XXX:remove - dtag management is in protocol.py:
@@ -171,10 +172,10 @@ class FragmentNoAck(FragmentBase):
         # because draft-18 requires that in No-ACK mode, each fragment must
         # contain exactly one tile and the tile size must be at least the size
         # of an L2 Word.
-        print(self.rule)
+        #print(self.rule)
         min_size = (frag_msg.get_sender_header_size(self.rule) +
                         frag_msg.get_mic_size(self.rule) + self.l2word)   
-        print ('MTU = ', self.protocol.connectivity_manager.get_mtu("toto"), min_size)
+        #print ('MTU = ', self.protocol.connectivity_manager.get_mtu("toto"), min_size)
         if self.protocol.connectivity_manager.get_mtu("toto") < min_size:
             raise ValueError("the MTU={} is not enough to carry the SCHC fragment of No-ACK mode={}".format(self.mtu, min_size))
 
@@ -198,11 +199,11 @@ class FragmentNoAck(FragmentBase):
         #                                                       |<- L2 Word
         mtu = self.protocol.connectivity_manager.get_mtu("toto")
         mtu = self.protocol.layer2.get_mtu_size()
-        print("MTU = ", mtu)
+        #print("MTU = ", mtu)
         payload_size = (mtu - frag_msg.get_sender_header_size(self.rule))
         remaining_data_size = self.packet_bbuf.count_remaining_bits()
         if remaining_data_size >= payload_size:
-            dprint("----------------------- Fragmentation process -----------------------")
+            #dprint("----------------------- Fragmentation process -----------------------")
             # put remaining_size of bits of packet into the tile.
             tile = self.packet_bbuf.get_bits_as_buffer(payload_size)
 
@@ -215,7 +216,7 @@ class FragmentNoAck(FragmentBase):
                 Statsct.set_msg_type("SCHC_FRAG")
                 Statsct.set_header_size(frag_msg.get_sender_header_size(self.rule))
         elif remaining_data_size < payload_size:
-            dprint("----------------------- Fragmentation process -----------------------")
+            #dprint("----------------------- Fragmentation process -----------------------")
             if remaining_data_size <= (
                     payload_size - frag_msg.get_mic_size(self.rule)):
                 tile = None
@@ -264,45 +265,56 @@ class FragmentNoAck(FragmentBase):
             dest = self._session_id[1] # device address
 
         args = (schc_frag.packet.get_content(), dest)
-        dprint ("dbug: frag_send.py: Fragment args", args)
-        dprint("frag sent:", schc_frag.__dict__)
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
-            w_dtag = '-'
-        else:
-            w_dtag = schc_frag.dtag
+        #dprint ("dbug: frag_send.py: Fragment args", args)
+        #dprint("frag sent:", schc_frag.__dict__)
+    
 
-        if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
-            w_w = '-'
-        else:
-            w_w = schc_frag.win
+        if self.verbose:
+            if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
+                w_dtag = '-'
+            else:
+                w_dtag = schc_frag.dtag
 
-        all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
-        if schc_frag.fcn == all1:
-            w_fcn = "All-1"
-        elif schc_frag.fcn == 0:
-            w_fcn = "All-0"
-        else:
-            w_fcn = schc_frag.fcn
+            if self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_W_SIZE] == 0:
+                w_w = '-'
+            else:
+                w_w = schc_frag.win
 
-        dtrace ("r:{}/{} (noA) DTAG={} W={} FCN={}".format(
-            self.rule[T_RULEID],
-            self.rule[T_RULEIDLENGTH],
-            w_dtag,
-            w_w,
-            w_fcn
-            ))
-        dtrace ("|----{:3}------------->".format(len(schc_frag.packet._content)))
-        print("frag_send.py, NoAck, args: ", args)
-        print("frag_send.py, _session_id: ", self._session_id)
-        print("FCN size=", fcn)
-        print('dtag', frag_msg.get_max_dtag(self.rule))
-        print('dtag', frag_msg.get_max_fcn(self.rule))
-        print("session_id", self._session_id)
+            all1 = 2**self.rule[T_FRAG][T_FRAG_PROF][T_FRAG_FCN]-1
+            if schc_frag.fcn == all1:
+                w_fcn = "All-1"
+            elif schc_frag.fcn == 0:
+                w_fcn = "All-0"
+            else:
+                w_fcn = schc_frag.fcn
+
+            if self.protocol.position == T_POSITION_CORE:
+                print ("<--{:3}--| r:{}/{} (noA) DTAG={} W={} FCN={}  ".format(
+                    len(schc_frag.packet._content),
+                    self.rule[T_RULEID],
+                    self.rule[T_RULEIDLENGTH],
+                    w_dtag,
+                    w_w,
+                    w_fcn
+                    ))
+            elif self.protocol.position == T_POSITION_DEVICE:
+                print ("r:{}/{} (noA) DTAG={} W={} FCN={}  |--{:3}-->".format(
+                    self.rule[T_RULEID],
+                    self.rule[T_RULEIDLENGTH],
+                    w_dtag,
+                    w_w,
+                    w_fcn,
+                    len(schc_frag.packet._content)
+                    ))
+            else:
+                print("Unknown position to display frag")
+
+
         self.protocol.scheduler.add_event(0, self.protocol.layer2.send_packet,
                                           args, session_id = self._session_id) # Add session_id
 
     def event_sent_frag(self, status=0): # status == nb actually sent (for now)
-        print("event_sent_frag")
+        #print("event_sent_frag")
         # delay = 10 #self.protocol.config.get("tx_interval", 0)
         delay = self.protocol.config.get("tx_interval", 0)
         self.protocol.scheduler.add_event(delay, self.send_frag, {})
