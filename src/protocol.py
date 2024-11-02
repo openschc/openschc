@@ -104,8 +104,8 @@ class SessionManager:
         print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
-    def create_fragmentation_session(self, core_id, device_id, context, rule):
-        print("create frag session: core_id, device_id", core_id, device_id )
+    def create_fragmentation_session(self, core_id, device_id, context, rule,verbose=None):
+        #print("create frag session: core_id, device_id", core_id, device_id )
         if self.unique_peer:
             l2_address = None #TODO
 
@@ -124,10 +124,10 @@ class SessionManager:
             self.protocol.log("cannot create session, no dtag available")
             return None
         
-        dprint("protocol.py: creating frag_session with session_id: ", session_id)
+        #dprint("protocol.py: creating frag_session with session_id: ", session_id)
 
         mode = rule[T_FRAG][T_FRAG_MODE]
-        print ('fragmentation mode:' , mode)
+        #print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
             session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
         elif mode == T_FRAG_ACK_ALWAYS:
@@ -139,6 +139,9 @@ class SessionManager:
             # see above for param order
         else:
             raise ValueError("invalid FRMode: {}".format(mode))
+        
+        session.verbose = verbose
+
         self._add_session(session_id, session)        
         setattr(session, "_session_id", session_id)
         return session
@@ -254,6 +257,7 @@ class SCHCProtocol:
         #self._log("parser {} {} {}".format(parsed_packet, residue, parsing_error))
 
         if parsed_packet is None:
+            print ("schc_send:", parsing_error)
             return BitBuffer(raw_packet), None
 
         # Apply compression rule
@@ -283,7 +287,7 @@ class SCHCProtocol:
 
         return schc_packet, device_id
 
-    def _make_frag_session(self, core_id, device_id, direction):
+    def _make_frag_session(self, core_id, device_id, direction, verbose=None):
         print("make_frag_session, device_id: ", device_id, "core_id", core_id, "direction", direction)
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
@@ -293,14 +297,15 @@ class SCHCProtocol:
             self._log("fragmentation rule not found")
             return None
         
-        print("rule_id found :", frag_rule[T_RULEID])
+        if verbose:       
+            print("rule_id found :", frag_rule[T_RULEID])
         # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
-        self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
+        #self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
 
         session = self.session_manager.create_fragmentation_session(
-            core_id, device_id, context, rule)
+            core_id, device_id, context, rule, verbose=verbose)
         if session is None:
             self._log("fragmentation session could not be created") # XXX warning
             return None
@@ -353,7 +358,7 @@ class SCHCProtocol:
             self.scheduler.add_event(0, self.layer2.send_packet, args) # XXX: what about directly send?            
             return 
 
-        frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction)
+        frag_session = self._make_frag_session(core_id=core_id, device_id=device_id, direction=direction, verbose=verbose)
         if frag_session is not None:
             frag_session.set_packet(packet_bbuf)
             frag_session.start_sending() 
@@ -404,7 +409,6 @@ class SCHCProtocol:
 
         frag_rule = rule
 
-        dtrace ('\t\t\t-----------{:3}--------->|'.format(len(packet_bbuf._content)))
 
         dtag_length = frag_rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE]
         if dtag_length > 0:
@@ -415,13 +419,14 @@ class SCHCProtocol:
         rule_id = frag_rule[T_RULEID]
         rule_id_length = frag_rule[T_RULEIDLENGTH]
         session_id = (core_id, device_id, rule_id, rule_id_length, dtag) 
-        print ("protocol.py: session_id ", session_id)
+        #print ("protocol.py: session_id ", session_id)
         session = self.session_manager.find_session(session_id)
 
         if session is not None:
-            print("{} session found".format(
-                session.get_session_type().capitalize()),
-                session.__class__.__name__)
+            #print("{} session found".format(
+            #    session.get_session_type().capitalize()),
+            #    session.__class__.__name__)
+            pass
         else:
             context = None
             session = self.session_manager.create_reassembly_session(
@@ -431,9 +436,15 @@ class SCHCProtocol:
         dprint("core_id, device_id:", core_id , device_id)
         dprint("device or core?", self.role) 
 
-        return session.receive_frag(bbuf=packet_bbuf, dtag=dtag, protocol=self, core_id=core_id, device_id=device_id)
+        return session.receive_frag(bbuf=packet_bbuf, 
+                                    dtag=dtag, 
+                                    protocol=self, 
+                                    core_id=core_id, 
+                                    device_id=device_id,
+                                    iface = iface,
+                                    verbose = verbose)
 
-    def decompress_only (self, packet_bbuf, rule, device_id=None): # called after reassembly      
+    def decompress_only (self, packet_bbuf, rule, device_id=None, iface=None): # called after reassembly      
 
         dprint ("debug: protocol.py, decompress_only : ", packet_bbuf, rule, device_id)
         if rule == None:
@@ -451,12 +462,12 @@ class SCHCProtocol:
             decomp = Decompressor()
             unparser = Unparser()
             header_d = decomp.decompress(schc=packet_bbuf, rule=rule, direction=direction)
-            dprint("header_d:", header_d)
+            #dprint("header_d:", header_d)
             pkt_data = bytearray()
             while (packet_bbuf._wpos - packet_bbuf._rpos) >= 8:
                 octet = packet_bbuf.get_bits(nb_bits=8)
                 pkt_data.append(octet)
-            pkt = unparser.unparse(header_d, pkt_data,  direction, rule,)
+            pkt = unparser.unparse(header_d, pkt_data,  direction, rule, iface=iface)
             return device_id, pkt
 
 

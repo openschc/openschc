@@ -324,6 +324,7 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_URI_HOST    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_ACCEPT      : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_NO_RESP     : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"}
 }
@@ -482,7 +483,7 @@ class RuleManager:
                 if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG_SIZE, 2)
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 0)
-                    _default_value (arule, nrule, T_FRAG_FCN, 3)
+                    _default_value (arule, nrule, T_FRAG_FCN, 1)
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ALWAYS:
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 1)

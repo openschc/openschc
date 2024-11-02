@@ -12,7 +12,7 @@ import binascii
 # Create a Rule Manager and upload the rules.
 
 rm = RM.RuleManager()
-rm.Add(file="lpwan.json")
+rm.Add(file="underwater.json")
 rm.Print()
 
 def processPkt(pkt):
@@ -22,8 +22,6 @@ def processPkt(pkt):
     if pkt.getlayer(Ether) != None: 
         e_type = pkt.getlayer(Ether).type
         if e_type == 0x86dd and pkt[IPv6].nh == 17: # just UDP
-            print ("<----", "downlink traffic")
-            hexdump(pkt)
             schc_machine.schc_send(bytes(pkt)[14:], verbose=False)
         elif e_type == 0x0800:
             if pkt[IP].proto == 17 and pkt[UDP].dport == 0x5C4C:
@@ -31,12 +29,12 @@ def processPkt(pkt):
                 SCHC_pkt, device = tunnel.recvfrom(1000)
 
                 other_end = 'udp:'+device[0]+':'+str(device[1])
-                print ("from:", other_end, binascii.hexlify(SCHC_pkt))
+                #print ("from:", other_end, binascii.hexlify(SCHC_pkt))
                 origin, full_packet = schc_machine.schc_recv(
                                    schc_packet=SCHC_pkt, 
                                    device_id=other_end, 
                                    iface='eth1',
-                                   verbose=True)
+                                   verbose=False)
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE

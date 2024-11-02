@@ -39,13 +39,12 @@ class sensor_reading(resource.Resource):
         print ("Content-format:", request.opt.content_format)
         print ("Payload:", binascii.hexlify(request.payload))
  
-
         return aiocoap.Message(code=aiocoap.CHANGED)
 
 # logging setup
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger("coap-server").setLevel(logging.DEBUG)
+#logging.getLogger("coap-server").setLevel(logging.DEBUG)
 
 def main():
     # Resource tree creation
