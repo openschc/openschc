@@ -485,7 +485,7 @@ class Decompressor:
             KEY = T_SCHC_HEADER
 
         for r in rule[KEY]:
-            #dprint(r)
+            ##dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
                 #dprint("<<<", full_field)

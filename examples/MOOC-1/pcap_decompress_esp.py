@@ -57,8 +57,8 @@ for packet in packets:
                            layers=["UDP"],
                            start="UDP")
     
-    print (ulp_parsed)
-
+    print (f"uld_parsed: {ulp_parsed}")
+    print( "---" )
     if ulp_parsed[0] is not None:
         # packet parsed, find a matching rule.
         rule_ulp = RM.FindRuleFromPacket(pkt=ulp_parsed[0], 
@@ -66,8 +66,26 @@ for packet in packets:
                                      failed_field=True)
         print ("Compression rule for UDP")
         print (rule_ulp)
+        print( "---" )
 
         if rule_ulp:
+### strat testinf udp compression
+#            test_udp_pkt = compress.compress(rule=rule_ulp,
+#                                         parsed_packet=ulp_parsed[0],
+#                                         data= ulp_parsed[1],
+#                                         direction=direction,
+#                                         )
+#            print( f"Printing UDP without SCHC" ) 
+#            tt = "0140dc9a100cf751f5b9e3ab9b2b91730b1b5b61734b7c23a34b6b28/221"
+#            print( test_udp_pkt.display() )
+#            print( test_udp_pkt.display() == tt )
+#            print ( tt )
+#            print( "---" )
+## stop testing udp compression
+
+#                                         verbose=True,
+#                                         append=SCHC_header) # append add to the buffer
+
             # matching rule found
 
             # form the SCHC pseudo header and compress it 
@@ -86,6 +104,7 @@ for packet in packets:
 
             print("SCHC Header rule")
             print (SCHC_header_rule)
+            print( "---" )
 
             print("Compress SCHC Header")
             SCHC_header = compress.compress(rule=SCHC_header_rule,
@@ -103,8 +122,11 @@ for packet in packets:
             
             print("Full compressed SCHC message:")
             SCHC_pkt.display(format="bin")
+            print( "---" )
             SCHC_pkt.display()
-
+            print( "---" )
+            print( SCHC_pkt.get_content() )
+            print( "===" )
 
             # Create IPv6 packet with SCHC protocol IPv6|SCHC
 
@@ -184,6 +206,7 @@ for packet in packets:
             if SCHC_header_rule is not None:
                 print("Sender added SCHC header")
 
+            print( f"SCHC_pkt" )
             SCHC_header = decompress.decompress(rule=SCHC_header_rule,
                                                 schc=SCHC_pkt, 
                                                 direction=direction,
