@@ -6,7 +6,6 @@ Upcoming hackathons
 
 `IETF108 Hackathon wiki <https://trac.ietf.org/trac/ietf/meeting/wiki/108hackathon>`_
 
-
 Quick links
 ===========
 
@@ -15,7 +14,7 @@ Resource
 ===================== ======================================================================
 openschc code         https://github.com/openschc/openschc
 SCHC (RFC8724)        https://www.rfc-editor.org/info/rfc8724
-Etherpad (live notes) https://etherpad.tools.ietf.org/p/openschc                
+Etherpad (live notes) https://etherpad.tools.ietf.org/p/openschc
 ===================== ======================================================================
 
 Write-ups of OpenSCHC work at previous hackathons

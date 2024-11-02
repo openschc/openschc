@@ -12,9 +12,10 @@ What is OpenSCHC ?
 OpenSCHC
 --------
 
-OpenSCHC is a OpenSource Implementation of SCHC (Static Context Header Compression) standardized at the IETF by the `LPWAN Working Group <https://tools.ietf.org/wg/lpwan/>`_ as `RFC8724 <https://www.rfc-editor.org/info/rfc8724>`_. Oversimplifying, this is essentially IP protocol headers compression and fragmentation so that they can be transported by low datarate, long range IoT networks.
+OpenSCHC is an open-source implementation of SCHC (Static Context Header Compression) standardized at the IETF by the `LPWAN Working Group <https://tools.ietf.org/wg/lpwan/>`_ as `RFC8724 <https://www.rfc-editor.org/info/rfc8724>`_.
+Oversimplifying, this is essentially IP protocol header compression and fragmentation so that they can be transported by low datarate, long range IoT networks.
 
-The long term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.
+The long-term goal is to have a stable, open-source, reference Python3 codebase for the SCHC protocol.
 
 .. OpenSCHC is developed to be compatible with micropython, on the device side.
 
@@ -23,19 +24,19 @@ OpenSCHC is licensed under the `MIT License <https://github.com/openschc/opensch
 Understanding the architecture
 ------------------------------
 
-A global architecture of openSCHC implementation is shown below:
+A global architecture of the OpenSCHC implementation is shown below:
 
 .. image:: _static/openSCHC_arch.png
    :alt: OpenSCHC Architecture
 
-The **Rule Manager** stores a set of Rules and provides methods to install or retreive Rules.
+The **Rule Manager** stores a set of Rules and provides methods to install or retrieve Rules.
 
 Rules are composed of two elements:
 
 * A **RuleID** which identifies the Rule by its number, and
 * A **content** which contains an array of fields. For details, refer to the `SCHC context data model <https://datatracker.ietf.org/doc/draft-ietf-lpwan-schc-yang-data-model/?include_text=1>`_.
 
-The **App 1 ... App n** are the applications that invoke the **SCHC Orchestrator** to run the necessary SCHC operations, which are briefly defined below:
+**App 1 ... App n** are the applications that invoke the **SCHC Orchestrator** to run the necessary SCHC operations, which are briefly defined below:
 
 **Compression** is used on the sender side to compress the header of a packet provided by the App, using a specific rule (identified by its RuleID).
 **Decompression**: on the receiver side, upon receiving a compressed packet, the Decompresser is invoked to rebuild the original packet, using the Rule identified by the RuleID carried in the compressed packet.
@@ -46,7 +47,7 @@ The **App 1 ... App n** are the applications that invoke the **SCHC Orchestrator
 Fragmentation modes and the associated parameters are described in the `SCHC protocol <https://www.rfc-editor.org/info/rfc8724>`_ .
 
 **Network Connector** interfaces to a physical model to a real LPWAN network such as LoRa or Sigfox,
-or to a link layer simulator.
+or to a link-layer simulator.
 
 Using OpenSCHC
 ==============
@@ -75,4 +76,3 @@ Table of contents
 -----------------
 
 .. include:: toc.rst
-

@@ -42,7 +42,7 @@ def AnalyzePkt(packet):
     dpprint(fields)
     dprint(data)
     
-    rule = RM.FindRuleFromPacket(fields, direction=T_DIR_DW)
+    rule,dev_id = RM.FindRuleFromPacket(fields, direction=T_DIR_DW)
     pprint.pprint (rule)
 
     if rule == None:

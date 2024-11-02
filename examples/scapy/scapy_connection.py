@@ -15,6 +15,7 @@ class ScapyLowerLayer:
         self.protocol = None
         self.position = position
         self.other_end = other_end
+        self.sender_delay = 0
         self.sock = socket
 
     # ----- AbstractLowerLayer interface (see: architecture.py)
@@ -42,7 +43,8 @@ class ScapyLowerLayer:
         if transmit_callback is not None:
             print ("OLD BEHAVIOR", transmit_callback)
             transmit_callback(1)
-        #time.sleep(5)
+        print (self.protocol.sender_delay)
+        time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
         return 400 # XXX

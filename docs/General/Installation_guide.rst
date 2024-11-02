@@ -4,7 +4,8 @@ Installation Guide
 Setting up the environment using Python3
 ++++++++++++++++++++++++++++++++++++++++
 
-Step 1 : Make sure you have a Python3 version installed. Check your python version with the following command and update the python version, if necessary::
+Step 1 : Make sure you have a Python3 version installed.
+Check your Python version with the following command and update the Python version, if necessary:
 
    python --version
 
@@ -20,25 +21,24 @@ On csh:
 
     $ setenv PYTHONPATH <YOUR_PATH_TO_SCHC_SRC>
 
-
 Step 3: For experimenting with SCHC on simple examples, see the :doc:`../General/User_guide`. For performing extensive tests of the SCHC functionnalities, see :doc:`../Testing/testing`.
 
-.. Setting up the environment using micropython
+.. Setting up the environment using MicroPython
 .. ++++++++++++++++++++++++++++++++++++++++++++
 
-.. Micropython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machine. Ues this to test your code on a computer before trying on an embedded device.
+.. MicroPython is Python3 for microcontrollers, but it also runs on Windows/Linux/Unix machines. Use this to test your code on a computer before trying on an embedded device.
 
-.. Step 1: install micropython. Some pointers are indicated below. For more details, please refer to the relevant documentation.
+.. Step 1: install MicroPython. Some pointers are indicated below. For more details, please refer to the relevant documentation.
 
-.. * Micropython GitHub project: (`https://github.com/micropython/micropython <https://github.com/micropython/micropython>`_ .
-.. * For Linux distribs, specific instructions for the Unix port of micropython can be found at (it should be noted that this has not been tested on all Linux distribs): `https://github.com/micropython/micropython#the-unix-version <https://github.com/micropython/micropython#the-unix-version>`_
+.. * MicroPython GitHub project: (`https://github.com/micropython/micropython <https://github.com/micropython/micropython>`_ .
+.. * For Linux distributions, specific instructions for the Unix port of MicroPython can be found at (it should be noted that this has not been tested on all Linux distributions): `https://github.com/micropython/micropython#the-unix-version <https://github.com/micropython/micropython#the-unix-version>`_
 .. * On OSX
 
    * either recompile from the GitHub project, see `https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX <https://github.com/micropython/micropython/wiki/Micro-Python-on-Mac-OSX>`_ .
    * or install with Brew: ``brew install micropython``
-   * Note: on OS X, if you get an error message about missing libffi, try the fix described in `https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749 <https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749>`_
+   * Note: on OSX, if you get an error message about missing libffi, try the fix described in `https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749 <https://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed/25854749#25854749>`_
 
-.. Step 2: download the needed micropython modules.
+.. Step 2: download the needed MicroPython modules.
 
 .. Modules to be installed in order to run SCHC are:
 
@@ -69,4 +69,3 @@ Step 3: For experimenting with SCHC on simple examples, see the :doc:`../General
 ..   example/frag-rule-102.json --data-file test/icmpv6.dmp \
 
 ..   --loss-mode list --loss-param 1,2
-

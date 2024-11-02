@@ -8,6 +8,7 @@ import gen_rulemanager as RM
 from protocol import SCHCProtocol
 from scapy_connection import *
 from gen_utils import dprint, sanitize_value
+from compr_parser import Unparser
 from scapy.layers.inet import IP
 #from scapy.layers.inet6 import IPv6
 
@@ -19,8 +20,12 @@ import ipaddress
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
-rm.Add(file="icmp2.json")
+rm.Add(file="coap_gw_LP1.json")
+rm.Add(file="coap_gw_LP2.json")
+rm.Add(file="coap_gw_LP3.json")
 rm.Print()
+
+unparser = Unparser()
 
 def processPkt(pkt):
     """ called when scapy receives a packet, since this function takes only one argument,
@@ -38,26 +43,22 @@ def processPkt(pkt):
                 if udp_dport == socket_port: # tunnel SCHC msg to be decompressed
                     print ("tunneled SCHC msg")                    
                     schc_pkt, addr = tunnel.recvfrom(2000)
-                    other_end = "udp:"+addr[0]+":"+str(addr[1])
+                    print("SCHC packet contents:", schc_pkt)
+                    devEUI = binascii.hexlify(schc_pkt[:8]).decode("utf-8")
+                    other_end = "lorawan:" + devEUI
                     print("other end =", other_end)
-                    uncomp_pkt = schc_machine.schc_recv(core_id=core_id, device_id=other_end, schc_packet=schc_pkt)
-                    print("uncomp_pkt", uncomp_pkt, "type", (type(uncomp_pkt)))                    
+                    uncomp_pkt = schc_machine.schc_recv(device_id=other_end, schc_packet=schc_pkt[9:])                       
                     if uncomp_pkt != None:
                         uncomp_pkt[1].show()
-                        send(uncomp_pkt[1], iface="he-ipv6") 
+                        print("RRRRR", uncomp_pkt)
+                        send(uncomp_pkt, iface="he-ipv6") 
             elif ip_proto==41:
-                schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id, device_id = device_id, sender_delay=0)
-
+                schc_machine.schc_send(bytes(pkt)[34:])
 
 # Start SCHC Machine
 POSITION = T_POSITION_CORE
 
-from requests import get
-
-socket_port = 0x5C4C
-ip = get('https://api.ipify.org').text
-core_id = 'udp:'+ip+":"+str(socket_port)
-device_id = rm._ctxt[0]["DeviceID"]
+socket_port = 35584
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
 
@@ -71,5 +72,5 @@ schc_machine = SCHCProtocol(
     verbose = True)         
 schc_machine.set_rulemanager(rm)
 
-sniff(prn=processPkt, iface="ens3") # scappy cannot read multiple interfaces
+sniff(prn=processPkt, iface="lo") # scappy cannot read multiple interfaces
 

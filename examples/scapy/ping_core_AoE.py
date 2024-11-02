@@ -23,6 +23,7 @@ class Sniffer(Thread):
         super().__init__()
 
         self.interface = interface
+        self.sender_delay = 5
         #self.stop_sniffer = Event()
 
     def run(self):
@@ -52,7 +53,11 @@ class Sniffer(Thread):
                             uncomp_pkt[1].show()
                             send(uncomp_pkt[1], iface="he-ipv6") 
                 elif ip_proto==41:
-                    contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], core_id=core_id)])) # device_id is retrieved later from the rule
+                    # call schc_send and get the context, device_id is retrieved later from the rule
+                    contexts.append(tuple([ time.time(), schc_machine.schc_send(raw_packet=bytes(pkt)[34:], 
+                                                                                core_id=core_id,
+                                                                                device_id=device_id, 
+                                                                                sender_delay=self.sender_delay)]))                                  
                     print ("frag_context at ping_core", contexts[-1])
                     pkt.show2() 
 
@@ -67,13 +72,20 @@ class Loop_on_contexts(Thread):
                 print("Context added time : ", contexts[ctx][0])
                 print("Session type at ping_core: ", contexts[ctx][1].get_session_type())
                 last_time = contexts[ctx][1].last_send_time - init_time
-                abort = contexts[ctx][1].sender_abort_sent
+                abort_sent = contexts[ctx][1].sender_abort_sent
                 all1_send = contexts[ctx][1].all1_send
-                print("last time: ", last_time, "abort : ", abort)
-                if all1_send == False and last_time > 7 and abort == False:
+                print("last time: ", last_time, "abort_sent : ", abort_sent)
+                if all1_send == False and last_time > 7 and not abort_sent:
                     print("Sending Abort")
                     abort = contexts[ctx][1].send_sender_abort()
-                time.sleep(5)
+
+            old_contexts = [i for i, x in enumerate(contexts) if contexts[ctx][1].sender_abort_sent or contexts[ctx][1].all1_send]
+            new_contexts = [i for j, i in enumerate(contexts) if j not in old_contexts]
+            contexts.clear()
+            for ctx in range(len(new_contexts)):
+                contexts.append(new_contexts[ctx])
+
+            time.sleep(5)
 
 # Create a Rule Manager and upload the rules.
 rm = RM.RuleManager()
@@ -86,6 +98,7 @@ POSITION = T_POSITION_CORE
 socket_port = 0x5C4C
 ip = get('https://api.ipify.org').text
 core_id = 'udp:'+ip+":"+str(socket_port)
+device_id = rm._ctxt[0]["DeviceID"]
 
 tunnel = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tunnel.bind(("0.0.0.0", socket_port))
