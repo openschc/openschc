@@ -117,6 +117,23 @@ T_COAP_OPT_PROXY_SCHEME =  "COAP.Proxy-Scheme"
 T_COAP_OPT_SIZE1 =  "COAP.Sizel"
 T_COAP_OPT_NO_RESP = "COAP.No-Response"
 
+T_BACNET_VLC_TYPE = "BACnet.type"
+T_BACNET_VLC_FUN = "BACnet.fun"
+T_BACNET_VLC_LEN = "BACnet.len"
+
+T_BACNET_NPDU_VER = "BACnet.NPDU.ver"
+T_BACNET_NPDU_CTRL = "BACnet.NPDU.ctrl"
+
+T_BACNET_APDU_TYPE = "BACnet.APDU.type"
+T_BACNET_APDU_SER = "BACnet.APDU.ser"
+T_BACNET_APDU_PID = "BACnet.APDU.pid"
+T_BACNET_APDU_DEV_CON = "BACnet.APDU.dev.context"
+T_BACNET_APDU_DEV_TYPE = "BACnet.APDU.dev.type"
+T_BACNET_APDU_DEV_ID = "BACnet.APDU.dev.id"
+T_BACNET_APDU_OBJ_CON = "BACnet.APDU.obj.context"
+T_BACNET_APDU_OBJ_INS = "BACnet.APDU.obj.instance"
+T_BACNET_APDU_TRE = "BACnet.APDU.tre"
+
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
 
