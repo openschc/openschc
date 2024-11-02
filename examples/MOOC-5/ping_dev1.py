@@ -45,7 +45,7 @@ print ("sniff started")
 while True:
     scheduler.run(session=schc_machine)
 
-    s_in, _, _ = select.select([tunnel], [], [])
+    s_in, _, _ = select.select([tunnel], [], [], 0.1)
     if len(s_in) > 0: # data on the socket
         SCHC_pkt, device = tunnel.recvfrom(1000)
 
