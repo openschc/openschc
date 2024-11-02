@@ -290,47 +290,76 @@ class IPv6address:
     addr = b''
 
 FIELD__DEFAULT_PROPERTY = {
-    T_IPV4_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
-    T_IPV4_IHL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
-    T_IPV4_DF              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV4_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV4_ID              : {"FL": 1, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV4_FLAG            : {"FL": 3, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV4_OFF             : {"FL": 21, "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV4_TTL             : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV4_PROTO           : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV4_CKSUM           : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV4_DEV_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV4_APP_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV6_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
-    T_IPV6_TC              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV6_FL              : {"FL": 20, "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV6_NXT             : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV6_HOP_LMT         : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"   },
-    T_IPV6_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_IPV6_DEV_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
-    T_IPV6_DEV_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"  },
-    T_IPV6_APP_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
-    T_IPV6_APP_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"   },
-    T_UDP_DEV_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
-    T_UDP_APP_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
-    T_UDP_LEN              : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
-    T_UDP_CKSUM            : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"   },
-    T_ICMPV6_TYPE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_ICMPV6_CODE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_ICMPV6_CKSUM         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_ICMPV6_IDENT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_ICMPV6_SEQNO         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_VERSION         : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_TYPE            : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_TKL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_CODE            : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_MID             : {"FL": 16,  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_TOKEN           : {"FL": "tkl",  "TYPE": int, "ALGO": "DIRECT"  },
-    T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
+    T_IPV4_VER             : {"FL": 4, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_IHL             : {"FL": 4, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_DF              : {"FL": 8, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_ID              : {"FL": 1, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_FLAG            : {"FL": 3, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_OFF             : {"FL": 21, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_TTL             : {"FL": 8, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_PROTO           : {"FL": 8, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_CKSUM           : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_DEV_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV4_APP_ADDR        : {"FL": 32, "TYPE": int, "ALGO": "DIRECT"},
+    T_BACNET_VLC_TYPE  : {"FL": 1, "TYPE": int, "ALGO": "DIRECT"},
+    T_BACNET_VLC_FUN : {"FL": 1, "TYPE": int, "ALGO": "DIRECT"},
+    T_BACNET_VLC_LEN : {"FL": 2, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_VER             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_TC              : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_FL              : {"FL": 20, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_NXT             : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_HOP_LMT         : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_LEN             : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_IPV6_DEV_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"},
+    T_IPV6_DEV_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"},
+    T_IPV6_APP_PREFIX      : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"},
+    T_IPV6_APP_IID         : {"FL": 64, "TYPE": bytes, "ALGO": "DIRECT"},
+    T_UDP_DEV_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_UDP_APP_PORT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_UDP_LEN              : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_UDP_CKSUM            : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_ICMPV6_TYPE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_ICMPV6_CODE          : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_ICMPV6_CKSUM         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_ICMPV6_IDENT         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_ICMPV6_SEQNO         : {"FL": 16, "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_VERSION         : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_TYPE            : {"FL": 2,  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_TKL             : {"FL": 4,  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_CODE            : {"FL": 8,  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_MID             : {"FL": 16,  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_TOKEN           : {"FL": "tkl",  "TYPE": int, "ALGO": "DIRECT"},
+    T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION"},
 }
+
+   # T_PROTO_BACNET = "BACNET"
+   # T_BACNET_FID = "BACNET.FID"
+   # T_BACNET_FL = "BACNET.FL"
+   # T_BACNET_FP = "BACNET.FP"
+   # T_BACNET_DI = "BACNET.DI"
+   # T_BACNET_TV = "BACNET.TV"
+   # T_BACNET_MO = "BACNET.MO"
+   # T_BACNET_MO_VAL = "BACNET.MO.VAL"
+   # T_BACNET_CDA = "BACNET.CDA"
+   # T_BACNET_SB = "BACNET.SB"
+   #
+   # T_BACNET_VLC_TYPE = "BACnet.type"
+   # T_BACNET_VLC_FUN = "BACnet.fun"
+   # T_BACNET_VLC_LEN = "BACnet.len"
+   #
+   # T_BACNET_NPDU_VER = "BACnet.NPDU.ver"
+   # T_BACNET_NPDU_CTRL = "BACnet.NPDU.ctrl"
+   #
+   # T_BACNET_APDU_TYPE = "BACnet.APDU.type"
+   # T_BACNET_APDU_SER = "BACnet.APDU.ser"
+   # T_BACNET_APDU_PID = "BACnet.APDU.pid"
+   # T_BACNET_APDU_DEVID = "BACnet.APDU.devid"
+   # T_BACNET_APDU_OBJID = "BACnet.APDU.objid"
+   # T_BACNET_APDU_TRE = "BACnet.APDU.tre"
+   # T_BACNET_APDU_VALS = "BACnet.APDU.vals"
 
 class DictToAttrDeep:
 

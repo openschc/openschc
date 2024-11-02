@@ -153,11 +153,10 @@ class Parser:
 
             if self.header_fields[T_UDP_DEV_PORT, 1]  == 5683 or self.header_fields[T_UDP_DEV_PORT, 1] == 5683:
                 next_layer = "COAP"
+
             # elif self.header_fields[T_UDP_DEV_PORT, 1]  == 0xBAC0 or self.header_fields[T_UDP_DEV_PORT, 1] == 0xBAC0:
             elif (unpack("!B",pkt[pos:pos+1])[0]==129): #129)
                 next_layer = "BACNET"
-                
-        #if "BACNET" in layer and next_layer == "ICMP":
 
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
