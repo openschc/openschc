@@ -16,7 +16,7 @@ rule001100 =   {
   "RuleID" : 12,
   "RuleIDLength" : 6,
   "Fragmentation" :  {
-    "FRMode" : "noAck",
+    "FRMode" : "NoAck",
     "FRDirection" : "UP"
   }
 }
