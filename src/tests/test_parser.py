@@ -15,7 +15,7 @@ EXPECTED_RESULTS_IPv6_UDP = ({('IPV6.VER', 1): [b'\x06', 4], ('IPV6.TC', 1): [b'
     ('UDP.LEN', 1): [b' ', 16], ('UDP.CKSUM', 1): [b'\xed\\', 16], 
     ('COAP.VER', 1): [b'\x01', 2], ('COAP.TYPE', 1): [b'\x00', 2], ('COAP.TKL', 1): [b'\x02', 4], 
     ('COAP.CODE', 1): [b'\x01', 8], ('COAP.MID', 1): [b'\x81B', 16], ('COAP.TOKEN', 1): [b'\xdd\xad', 16], 
-    ('COAP.Uri-Host', 1): [b'user.ackl.io', 96, 'variable'], ('COAP.Uri-Path', 1): [b'time', 32, 'variable']},
+    ('COAP.URI-HOST', 1): [b'user.ackl.io', 96, 'variable'], ('COAP.URI-PATH', 1): [b'time', 32, 'variable']},
     b'', None)
 
 EXPECTED_RESULTS_ICMP = ({('IPV6.VER', 1): [b'\x06', 4], ('IPV6.TC', 1): [b'\x00', 8], 
@@ -48,8 +48,13 @@ def test_parse():
     parsed_IP_UDP_COAP = parser.parse(
         pkt       = packet,
         direction = 'UP',
-        layers    = ["IPv6", "ICMP", "UDP", "COAP"]
+        layers    = ["IPv6", "ICMP", "UDP", "CoAP"]
     )
+
+    # parsed object contains 3 parts: 
+    # [0] : parsed fields
+    # [1] : payload data (unparsed)
+    # [2] : any error message
 
     assert (parsed_IP_UDP_COAP[2] == None) # no error during parsing
 
@@ -64,7 +69,7 @@ def test_parse():
     parsed_ICMP = parser.parse(
         pkt       = packet,
         direction = 'UP',
-        layers    = ["IPv6", "ICMP", "UDP", "COAP"]
+        layers    = ["IPv6", "ICMP", "UDP", "CoAP"]
     )
 
     assert (parsed_ICMP[2] == None) # no error during parsing
