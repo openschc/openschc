@@ -1618,7 +1618,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
                 if s+delta in self.sid_key_mapping: # A list we have keys, look for specific entry
                     # Raise an err if the number of SID keys are not the same as the number of keys in self.sid_key_mapping
-                    if len(self.sid_key_mapping[s+delta]) != len(keys):
+                    if len(self.sid_key_mapping[s+delta]) > len(keys):
                         raise ValueError ("Not enough keys values to locate the SID")
 
                     key_search = {}
