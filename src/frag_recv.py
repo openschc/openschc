@@ -276,7 +276,7 @@ class ReassemblerAckOnError(ReassembleBase):
     # So, here just appends a fragment into the tile_list like No-ACK.
     """
 
-    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None, verbose=False):
         """
         return 
         - None if fragmentation is not finished

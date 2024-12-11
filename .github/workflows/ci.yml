@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Pytest
+    runs-on: ubuntu-latest
+    strategy: 
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v4
+        with:
+          path: "requirements.txt"
+
+      - name: Install dependencies
+        run: |
+          pip install pytest
+          pip install cbor2
+          pip install colorama
+
+      - name: Run tests
+        run: |
+          cd src
+          pytest 
