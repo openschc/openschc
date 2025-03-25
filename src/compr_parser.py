@@ -77,6 +77,24 @@ class Parser:
 
         next_header = start
 
+        if next_header == "GEONW":
+            # Extract the first byte of the packet
+            firstByte = unpack('!B', pkt[:1])
+            
+            # Check if first 4 bits are 0001
+            versionNibble = firstByte[0] >> 4
+            if versionNibble != 1:
+                errMessage = "This Geonetworking packet is not version 1"
+                return None, None, errMessage
+            
+            self.header_fields[T_GEONW_VER, 1] = [adapt_value(firstByte[0]>>4), 4]
+
+
+            # Check if next 4 bits are 0000
+            # TRy to compress the packet with just one rule now
+            pos = 40
+
+
         if  next_header == "IPv6" :
             version = unpack ("!B", pkt[:1])
             #assert version[0]>>4 == 6                 # only IPv6

@@ -13,12 +13,13 @@ from compr_core import Compressor
 import pprint
 
 # rdpcap comes from scapy and loads in our pcap file
-packets = rdpcap('trace_coap.pcap')
+absolutePath = "/home/vicharak/projects/openschc/examples/MOOC-1/"
+packets = rdpcap(absolutePath + 'trace_coap.pcap')
 
 parser = Parser()
 
 RM = RuleManager()
-RM.Add(file="ipv6-sol-bi-fl.json")
+RM.Add(file=absolutePath +"ipv6-sol-bi-fl.json")
 RM.Print()
 
 compress = Compressor()
