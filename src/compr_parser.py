@@ -110,16 +110,21 @@ class Parser:
                 return None, None, "CH nextheader packet is not a BTPB header, hence not implemented"
             
             self.header_fields[T_GEONW_CH_NH, 1] = [adapt_value(chNextheaderValue), 4]
-            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[4] >> 4), 4]
-            self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5]), 8]
+            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[4] & 0X0F), 4]
+            self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5] >> 4) , 4]
+            self.header_fields[T_GEONW_CH_HST, 1] = [adapt_value(firstBytes[5] & 0x0F) , 4]
+            
             self.header_fields[T_GEONW_CH_TC, 1] = [adapt_value(firstBytes[6]), 8]
-            self.header_fields[T_GEONW_CH_FLAGS, 1] = [adapt_value(firstBytes[7]), 8]
+            # Ignore the rest 7 bits as they're reserved
+            self.header_fields[T_GEONW_CH_FLAGS, 1] = [adapt_value(firstBytes[7] >> 7), 1]
             self.header_fields[T_GEONW_CH_PL, 1] = [adapt_value(firstBytes[8]), 16]
             self.header_fields[T_GEONW_CH_MHL, 1] = [adapt_value(firstBytes[9]), 8]
             self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[10]), 8]
 
             # Extract Long Position Vector header
+            # TODO NEED To break this down to bitfields to elide reserved bits
             self.header_fields[T_GEONW_LP_SRC_POS, 1] = [adapt_value(firstBytes[11]), 64]
+
             self.header_fields[T_GEONW_LP_TS, 1] = [adapt_value(firstBytes[12]), 32]
             self.header_fields[T_GEONW_LP_LAT, 1] = [adapt_value(firstBytes[13]), 32]
             self.header_fields[T_GEONW_LP_LON, 1] = [adapt_value(firstBytes[14]), 32]

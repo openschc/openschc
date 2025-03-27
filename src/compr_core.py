@@ -203,7 +203,7 @@ class Compressor:
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            #print("rule item:", r)
+            print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
@@ -212,6 +212,8 @@ class Compressor:
                                                 rule = r,
                                                 output= output_bbuf,
                                                 device_id=device_id)
+                    output_bbuf.display(format="bin")
+
                 else: # not find in packet, but is variable length can be coded as 0
                     #dprint("send variable length")
                     self.__func_tx_cda[T_CDA_VAL_SENT](field = [0, 0, "Null Field"], rule = r, output = output_bbuf)
