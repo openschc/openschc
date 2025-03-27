@@ -329,6 +329,7 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_NO_RESP     : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
 
     T_GEONW_VER: {"FL": 4,  "TYPE": int, "ALGO": "DIRECT" },
+    ## Register all GEONW flags
 }
 
 

@@ -87,7 +87,46 @@ class Parser:
                 errMessage = "This Geonetworking packet is not version 1"
                 return None, None, errMessage
             
-            self.header_fields[T_GEONW_VER, 1] = [adapt_value(firstByte[0]>>4), 4]
+
+            if len(pkt) < 40:
+                return None, None, "packet too short"
+            
+            firstBytes = unpack('!BBBBBBBBHBBQIIIHHI', pkt[:40]) 
+            self.header_fields[T_GEONW_VER, 1] = [adapt_value(firstBytes[0]>>4), 4]
+            bhNextheaderValue = firstBytes[0] & 0X0F
+            self.header_fields[T_GEONW_BH_NXT, 1] = [adapt_value(bhNextheaderValue), 4]
+
+            # Check if the next 4 bits are 0X01 aka common header
+            if bhNextheaderValue != T_GEONW_COMMON_HEADER_NIBBLE:
+                return None, None, "BH nextheader packet is not a common header, hence not implemented"
+
+            self.header_fields[T_GEONW_BH_RES, 1] = [adapt_value(firstBytes[1]), 8]
+            self.header_fields[T_GEONW_BH_LT, 1] = [adapt_value(firstBytes[2]), 8]
+            self.header_fields[T_GEONW_BH_RHL, 1] = [adapt_value(firstBytes[3]), 8]
+
+            # Extract Common Header subfields
+            chNextheaderValue = firstBytes[4] >> 4
+            if chNextheaderValue != T_GEONW_BTPB_NIBBLE:
+                return None, None, "CH nextheader packet is not a BTPB header, hence not implemented"
+            
+            self.header_fields[T_GEONW_CH_NH, 1] = [adapt_value(chNextheaderValue), 4]
+            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[4] >> 4), 4]
+            self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5]), 8]
+            self.header_fields[T_GEONW_CH_TC, 1] = [adapt_value(firstBytes[6]), 8]
+            self.header_fields[T_GEONW_CH_FLAGS, 1] = [adapt_value(firstBytes[7]), 8]
+            self.header_fields[T_GEONW_CH_PL, 1] = [adapt_value(firstBytes[8]), 16]
+            self.header_fields[T_GEONW_CH_MHL, 1] = [adapt_value(firstBytes[9]), 8]
+            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[10]), 8]
+
+            # Extract Long Position Vector header
+            self.header_fields[T_GEONW_LP_SRC_POS, 1] = [adapt_value(firstBytes[11]), 64]
+            self.header_fields[T_GEONW_LP_TS, 1] = [adapt_value(firstBytes[12]), 32]
+            self.header_fields[T_GEONW_LP_LAT, 1] = [adapt_value(firstBytes[13]), 32]
+            self.header_fields[T_GEONW_LP_LON, 1] = [adapt_value(firstBytes[14]), 32]
+            self.header_fields[T_GEONW_LP_PAI, 1] = [adapt_value(firstBytes[15] >> 15 ), 1]
+            self.header_fields[T_GEONW_LP_SPD, 1] = [adapt_value(firstBytes[15] & 0x7FFF), 15]
+            self.header_fields[T_GEONW_LP_HDG, 1] = [adapt_value(firstBytes[16]), 16]
+            self.header_fields[T_GEONW_LP_RES, 1] = [adapt_value(firstBytes[17]), 32]
 
 
             # Check if next 4 bits are 0000
