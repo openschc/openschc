@@ -111,8 +111,8 @@ class Parser:
             
             self.header_fields[T_GEONW_CH_NH, 1] = [adapt_value(chNextheaderValue), 4]
             self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[4] & 0X0F), 4]
-            self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5] >> 4) , 4]
-            self.header_fields[T_GEONW_CH_HST, 1] = [adapt_value(firstBytes[5] & 0x0F) , 4]
+            self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5] >> 4 & 0X07) , 3]
+            self.header_fields[T_GEONW_CH_HST, 1] = [adapt_value(firstBytes[5] & 0x03) , 2]
             
             self.header_fields[T_GEONW_CH_TC, 1] = [adapt_value(firstBytes[6]), 8]
             # Ignore the rest 7 bits as they're reserved
@@ -121,9 +121,13 @@ class Parser:
             self.header_fields[T_GEONW_CH_MHL, 1] = [adapt_value(firstBytes[9]), 8]
             self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[10]), 8]
 
-            # Extract Long Position Vector header
-            # TODO NEED To break this down to bitfields to elide reserved bits
-            self.header_fields[T_GEONW_LP_SRC_POS, 1] = [adapt_value(firstBytes[11]), 64]
+            # Extract Long Position Vector header | GN_ADDR
+            # Manual flag at first bit of the 64 bits value
+            self.header_fields[T_GEONW_LP_GN_ADDR_M, 1] = [adapt_value(firstBytes[11] >> 63), 1]
+            self.header_fields[T_GEONW_LP_GN_ADDR_TPT, 1] = [adapt_value(firstBytes[11] >> 58 & 0X1F), 5]
+            self.header_fields[T_GEONW_LP_GN_ADDR_RES, 1] = [adapt_value(firstBytes[11]>> 48 & 0X3FF), 10]
+            # Get the last 48 bits of the 64 bits value
+            self.header_fields[T_GEONW_LP_GN_ADDR_MAC, 1] = [adapt_value(firstBytes[11] & 0XFFFFFFFFFFFF), 48]
 
             self.header_fields[T_GEONW_LP_TS, 1] = [adapt_value(firstBytes[12]), 32]
             self.header_fields[T_GEONW_LP_LAT, 1] = [adapt_value(firstBytes[13]), 32]

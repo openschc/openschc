@@ -345,8 +345,11 @@ FIELD__DEFAULT_PROPERTY = {
     T_GEONW_CH_MHL: {"FL": 8,  "TYPE": int, "ALGO": "DIRECT" },
     T_GEONW_CH_RES: {"FL": 8,  "TYPE": int, "ALGO": "DIRECT" },
 
+    T_GEONW_LP_GN_ADDR_M : {"FL": 1 , "TYPE": int, "ALGO": "DIRECT" },
+    T_GEONW_LP_GN_ADDR_TPT : {"FL": 5,  "TYPE": int, "ALGO": "DIRECT" },
+    T_GEONW_LP_GN_ADDR_RES : {"FL": 10,  "TYPE": int, "ALGO": "DIRECT" },
+    T_GEONW_LP_GN_ADDR_MAC : {"FL": 48,  "TYPE": int, "ALGO": "DIRECT" },
 
-    T_GEONW_LP_SRC_POS: {"FL": 64,  "TYPE": int, "ALGO": "DIRECT" },
     T_GEONW_LP_TS: {"FL": 32,  "TYPE": int, "ALGO": "DIRECT" },
     T_GEONW_LP_LAT: {"FL": 32,  "TYPE": int, "ALGO": "DIRECT" },
     T_GEONW_LP_LON: {"FL": 32,  "TYPE": int, "ALGO": "DIRECT" },
