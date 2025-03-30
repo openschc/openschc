@@ -127,7 +127,7 @@ class Parser:
             self.header_fields[T_GEONW_LP_GN_ADDR_TPT, 1] = [adapt_value(firstBytes[11] >> 58 & 0X1F), 5]
             self.header_fields[T_GEONW_LP_GN_ADDR_RES, 1] = [adapt_value(firstBytes[11]>> 48 & 0X3FF), 10]
             # Get the last 48 bits of the 64 bits value
-            self.header_fields[T_GEONW_LP_GN_ADDR_MAC, 1] = [adapt_value(firstBytes[11] & 0XFFFFFFFFFFFF), 48]
+            self.header_fields[T_GEONW_LP_GN_ADDR_MID, 1] = [adapt_value(firstBytes[11] & 0XFFFFFFFFFFFF), 48]
 
             self.header_fields[T_GEONW_LP_TS, 1] = [adapt_value(firstBytes[12]), 32]
             self.header_fields[T_GEONW_LP_LAT, 1] = [adapt_value(firstBytes[13]), 32]
