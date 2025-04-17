@@ -326,7 +326,8 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_ACCEPT      : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
-    T_COAP_OPT_NO_RESP     : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"}
+    T_COAP_OPT_NO_RESP     : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_OBS         : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"}
 }
 
 
@@ -775,39 +776,16 @@ class RuleManager:
         return True
 
     def MO_MSB (self, TV, FV, rlength, flength, arg, direction=None):
-        #print ("MSB")
-        #print (TV, FV, rlength, flength, arg)
-
         if rlength == T_FUNCTION_VAR:
             rlength = flength
 
-        ignore_bit = rlength - arg
-
-        for b in range(ignore_bit, rlength):
-            pos = b%8
-            byte_pos = b//8
-
-            if byte_pos < len(TV):
-                right_byte_tv = TV[byte_pos]
-            else:
-                right_byte_tv = 0
-
-            if byte_pos < len (FV):
-                right_byte_fv = FV[byte_pos]
-            else:
-                right_byte_fv = 0
-
-            bit_tv = right_byte_tv & (1 << pos)
-            bit_fv = right_byte_fv & (1 << pos)
-
-            #print (b, pos, ignore_bit,'|', TV, FV, '|', right_byte_tv, right_byte_fv, '-',bit_tv, bit_fv)
-
-            if bit_tv != bit_fv:
-                #print ("comparison failed")
-                return False
-                
-        #print ("comparison succeeded")
-        return True
+        nb_bit_to_shift: int = rlength - arg
+        
+        # Shift both values right by (rlength - arg) bits
+        tv_shifted: int = int.from_bytes(bytes=TV, byteorder="big") >> nb_bit_to_shift
+        fv_shifted: int = int.from_bytes(bytes=FV, byteorder="big") >> nb_bit_to_shift
+        
+        return tv_shifted == fv_shifted
 
 
     def MO_MMAP (self, TV, FV,  rlength, flength, arg, direction=None):
