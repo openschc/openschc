@@ -3,8 +3,8 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '../../src/')
 
-from gen_utils import dprint, sanitize_value
-from compr_core import *
+from .gen_utils import dprint, sanitize_value
+from .compr_core import *
 import frag_send # to get types
 import frag_recv
 

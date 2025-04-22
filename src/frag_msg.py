@@ -3,11 +3,11 @@
    :platform: Python, Micropython
 """
 #---------------------------------------------------------------------------
-from gen_base_import import *  # used for now for differing modules in py/upy
-from compr_core import *
-import gen_bitarray
-from compr_core import *
-from gen_utils import dprint
+from .gen_base_import import *  # used for now for differing modules in py/upy
+from .compr_core import *
+import src.gen_bitarray
+from .compr_core import *
+from .gen_utils import dprint
 
 #---------------------------------------------------------------------------
 
