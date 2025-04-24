@@ -958,6 +958,7 @@ class RuleManager:
         elif direction is not None and deviceID is None:
             for d in self._ctxt:
                 for r in d["SoR"]:
+                    print(r[T_FRAG][T_FRAG_DIRECTION])
                     if T_FRAG in r and r[T_FRAG][T_FRAG_DIRECTION] == direction:
                         # return the 1st one.
                         return r

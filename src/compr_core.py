@@ -2,9 +2,9 @@
 .. module:: compr_core
    :platform: Python, Micropython
 """
-from .gen_base_import import *
-from .gen_utils import dprint
-from .gen_parameters import *
+from gen_base_import import *
+from gen_utils import dprint
+from gen_parameters import *
 
 import pprint
 

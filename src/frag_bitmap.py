@@ -4,10 +4,10 @@
 """
 #---------------------------------------------------------------------------
 
-from .gen_base_import import b2hex
-from .gen_utils import dprint
+from gen_base_import import b2hex
+from gen_utils import dprint
 
-import src.frag_msg
+import frag_msg
 
 #---------------------------------------------------------------------------
 
