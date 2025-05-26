@@ -334,46 +334,38 @@ def test_make_bit_list_3Windows_5Tiles() -> None:
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
             2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
         }
     assert make_bit_list(tile_list,3,7) == expected_bit_list
     
-def test_make_bit_list_1Windows_9Tiles() -> None:
+def test_make_bit_list_2Windows_9Tiles() -> None:
     """Test that make bit list returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0,1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: []
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
     assert make_bit_list(tile_list,5,17) == expected_bit_list
 
 #-------------------Tests--Function--make_bit_list_no_all_1----------------------------------------------------
 def test_make_bit_list_no_all_1_3Windows_5Tiles() -> None:
-    """Test that make bit list returns the correct list."""
+    """Test that make bit list no all 1 returns the correct list."""
     tile_list = list_3W_5T
     expected_bit_list = {
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
-            2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
+            2: [0, 1, 0, 0, 0, 0]
         }
-    assert make_bit_list(tile_list,3,7) == expected_bit_list
+    assert make_bit_list_no_all_1(tile_list,3,7) == expected_bit_list
     
-def test_make_bit_list_no_all_1_1Windows_9Tiles() -> None:
-    """Test that make bit list returns the correct list."""
+def test_make_bit_list_no_all_1_2Windows_9Tiles() -> None:
+    """Test that make bit list no all 1 returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
-    assert make_bit_list(tile_list,5,17) == expected_bit_list
-    
+    assert make_bit_list_no_all_1(tile_list,5,17) == expected_bit_list
+
 #-------------------Tests--Function--make_bit_list_mic_ko----------------------------------------------------
 def test_make_bit_list_mic_ko_3Windows_5Tiles() -> None:
     """Test that make bit list returns the correct list."""
@@ -382,22 +374,18 @@ def test_make_bit_list_mic_ko_3Windows_5Tiles() -> None:
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
             2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
         }
-    assert make_bit_list(tile_list,3,7) == expected_bit_list
+    assert make_bit_list_mic_ko(tile_list,3,7) == expected_bit_list
     
-def test_make_bit_list_mic_ko_1Windows_9Tiles() -> None:
+def test_make_bit_list_mic_ko_2Windows_9Tiles() -> None:
     """Test that make bit list returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0,1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: []
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
-    assert make_bit_list(tile_list,5,17) == expected_bit_list
-    
+    assert make_bit_list_mic_ko(tile_list,5,17) == expected_bit_list
+
 #-------------------Tests--Function--find_missing_tiles----------------------------------------------------
 def test_find_missing_tiles_3Windows_5Tiles() -> None:
     """Test that make bit list returns the correct list."""
@@ -406,22 +394,18 @@ def test_find_missing_tiles_3Windows_5Tiles() -> None:
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
             2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
         }
-    assert make_bit_list(tile_list,3,7) == expected_bit_list
+    assert find_missing_tiles(tile_list,3,7) == expected_bit_list
     
-def test_find_missing_tiles_1Windows_9Tiles() -> None:
+def test_find_missing_tiles_2Windows_9Tiles() -> None:
     """Test that make bit list returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0,1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: []
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
-    assert make_bit_list(tile_list,5,17) == expected_bit_list
-    
+    assert find_missing_tiles(tile_list,5,17) == expected_bit_list
+
 #-------------------Tests--Function--find_missing_tiles_no_all_1----------------------------------------------------
 def test_find_missing_tiles_no_all_1_3Windows_5Tiles() -> None:
     """Test that make bit list returns the correct list."""
@@ -430,21 +414,17 @@ def test_find_missing_tiles_no_all_1_3Windows_5Tiles() -> None:
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
             2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
         }
-    assert make_bit_list(tile_list,3,7) == expected_bit_list
+    assert find_missing_tiles_no_all_1(tile_list,3,7) == expected_bit_list
     
-def test_find_missing_tiles_no_all_1_1Windows_9Tiles() -> None:
+def test_find_missing_tiles_no_all_1_2Windows_9Tiles() -> None:
     """Test that make bit list returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0,1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: []
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
-    assert make_bit_list(tile_list,5,17) == expected_bit_list
+    assert find_missing_tiles_no_all_1(tile_list,5,17) == expected_bit_list
     
 #-------------------Tests--Function--find_missing_tiles_mic_ko_yes_all_1----------------------------------------------------
 def test_find_missing_tiles_mic_ko_yes_all_1_3Windows_5Tiles() -> None:
@@ -454,18 +434,14 @@ def test_find_missing_tiles_mic_ko_yes_all_1_3Windows_5Tiles() -> None:
             0: [0, 0, 1, 1, 0, 0, 0],
             1: [1, 0, 0, 0, 1, 0, 0],
             2: [0, 1]
-            #2: [0, 1, 0, 0, 0, 0, 0]
         }
-    assert make_bit_list(tile_list,3,7) == expected_bit_list
+    assert find_missing_tiles_mic_ko_yes_all_1(tile_list,3,7) == expected_bit_list
     
-def test_find_missing_tiles_mic_ko_yes_all_1_1Windows_9Tiles() -> None:
+def test_find_missing_tiles_mic_ko_yes_all_1_2Windows_9Tiles() -> None:
     """Test that make bit list returns the correct list."""
     tile_list = list_1W_9T
     expected_bit_list = {
-            #0: [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1]
-            0: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1]
+            0: [0,1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1], 
+            1: []
         }
-    print(make_bit_list(tile_list,4,15))
-    print(make_bit_list(tile_list,4,16))
-    print(make_bit_list(tile_list,5,17))
-    assert make_bit_list(tile_list,5,17) == expected_bit_list
+    assert find_missing_tiles_mic_ko_yes_all_1(tile_list,5,17) == expected_bit_list
