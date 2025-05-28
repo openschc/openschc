@@ -110,7 +110,7 @@ class Parser:
                 return None, None, "CH nextheader packet is not a BTPB header, hence not implemented"
             
             self.header_fields[T_GEONW_CH_NH, 1] = [adapt_value(chNextheaderValue), 4]
-            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[4] & 0X0F), 4]
+            self.header_fields[T_GEONW_CH_RES1, 1] = [adapt_value(firstBytes[4] & 0X0F), 4]
             self.header_fields[T_GEONW_CH_HT, 1] = [adapt_value(firstBytes[5] >> 4 & 0X07) , 3]
             self.header_fields[T_GEONW_CH_HST, 1] = [adapt_value(firstBytes[5] & 0x03) , 2]
             
@@ -119,7 +119,7 @@ class Parser:
             self.header_fields[T_GEONW_CH_FLAGS, 1] = [adapt_value(firstBytes[7] >> 7), 1]
             self.header_fields[T_GEONW_CH_PL, 1] = [adapt_value(firstBytes[8]), 16]
             self.header_fields[T_GEONW_CH_MHL, 1] = [adapt_value(firstBytes[9]), 8]
-            self.header_fields[T_GEONW_CH_RES, 1] = [adapt_value(firstBytes[10]), 8]
+            self.header_fields[T_GEONW_CH_RES2, 1] = [adapt_value(firstBytes[10]), 8]
 
             # Extract Long Position Vector header | GN_ADDR
             # Manual flag at first bit of the 64 bits value
