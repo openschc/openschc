@@ -8,6 +8,7 @@ from gen_parameters import *
 
 import pprint
 
+from field_descriptions import FIELD__DEFAULT_PROPERTY, estimateSCHCPacketLength
 
 
 # from gen_rulemanager import *
@@ -213,6 +214,7 @@ class Compressor:
                                                 output= output_bbuf,
                                                 device_id=device_id)
                     output_bbuf.display(format="bin")
+                    output_bbuf.display(format="hex")
 
                 else: # not find in packet, but is variable length can be coded as 0
                     #dprint("send variable length")
@@ -222,6 +224,7 @@ class Compressor:
                 pass
             if verbose:
                 output_bbuf.display(format="bin")
+                #output_bbuf.display(format="hex")
 
         output_bbuf.add_bytes(data)
 
@@ -245,8 +248,12 @@ class Compressor:
 
 class Decompressor:
 
-    def __init__(self, protocol=None):
+    def __init__(self, protocol=None, ruleJSON=None):
+        
         self.protocol = protocol
+
+        self.schcPacketLength = None
+        self.ruleIDLength = None
         self.__func_rx_cda = {
             T_CDA_NOT_SENT : self.rx_cda_not_sent,
             T_CDA_VAL_SENT : self.rx_cda_val_sent,
@@ -257,6 +264,13 @@ class Decompressor:
             T_CDA_DEVIID : self.rx_cda_not_sent,
             T_CDA_APPIID : self.rx_cda_not_sent,
             }
+        # Note not to be confused with self.packetLength, which is the estimated length of just SCHC residues
+        # While this, counts all the payload and BTP/CAM layer info
+        self.totalPacketLength = 0
+        if ruleJSON:
+            self.ruleJSON = ruleJSON
+            if "Compression" in ruleJSON:
+                self.schcPacketLength = estimateSCHCPacketLength(self.ruleJSON)
 
 
     # def cal_checksum(self, packet):
@@ -392,7 +406,25 @@ class Decompressor:
 
     def rx_cda_comp_len(self, rule, in_bbuf):
         # will update the length field later.
-        return ("LL"*(rule[T_FL]//8), rule[T_FL] )
+        # Compute the length of payload
+        # step 1 : calculate the length of schc packet
+            # = all the value-sent take the fieldlength 
+            # + minimum bits required to represent map-matching
+            # + rule length
+        
+        # Get packet length from the rule
+        if self.schcPacketLength is None:
+            raise ValueError("Packet length not set, cannot compute compression length")
+
+        # Get payload length by subtracting the packet length, and rule id length from schc length , in bits
+        payloadLength = self.totalPacketLength - self.schcPacketLength - self.ruleIDLength
+        # in bytes
+        payloadLengthBytes =  int(payloadLength / 8) & 0xFFFF
+
+        #print(payloadLengthBytes.to_bytes(2, byteorder='big'), rule[T_FL])  # return as bytes and length in bits
+        return (payloadLengthBytes.to_bytes(2, byteorder='big'), rule[T_FL])  # return as bytes and length in bits
+
+
 
     def rx_cda_comp_cksum(self, rule, in_bbuf):
         # will update the length field later.
@@ -467,13 +499,16 @@ class Decompressor:
     #         packet_bbuf, output_bbuf))
     #     return output_bbuf
 
-    def decompress(self, schc, rule, direction):
+    def decompress(self, schc, rule, direction,):
+        self.totalPacketLength = schc.count_added_bits()
+        self.ruleIDLength = rule[T_RULEIDLENGTH]
         assert ("Compression" in rule)
         schc.set_read_position(0)
 
         self.parsed_packet = {}
 
         rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:

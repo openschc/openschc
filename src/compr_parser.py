@@ -16,6 +16,10 @@ import ipaddress
 from scapy.all import *
 import binascii
 
+from field_descriptions import FIELD__DEFAULT_PROPERTY
+
+# Required for geonetworking packet
+from bitarray import bitarray
 
 option_names = {
     1: T_COAP_OPT_IF_MATCH,
@@ -115,11 +119,12 @@ class Parser:
             self.header_fields[T_GEONW_CH_HST, 1] = [adapt_value(firstBytes[5] & 0x03) , 2]
             
             self.header_fields[T_GEONW_CH_TC, 1] = [adapt_value(firstBytes[6]), 8]
-            # Ignore the rest 7 bits as they're reserved
+            # Although CH_RES2 is 7 bits of 0s, still parse it so we can calculate the packet length correctly
             self.header_fields[T_GEONW_CH_FLAGS, 1] = [adapt_value(firstBytes[7] >> 7), 1]
+            self.header_fields[T_GEONW_CH_RES2, 1] = [adapt_value(firstBytes[7] & 0x7F), 7]
             self.header_fields[T_GEONW_CH_PL, 1] = [adapt_value(firstBytes[8]), 16]
             self.header_fields[T_GEONW_CH_MHL, 1] = [adapt_value(firstBytes[9]), 8]
-            self.header_fields[T_GEONW_CH_RES2, 1] = [adapt_value(firstBytes[10]), 8]
+            self.header_fields[T_GEONW_CH_RES3, 1] = [adapt_value(firstBytes[10]), 8]
 
             # Extract Long Position Vector header | GN_ADDR
             # Manual flag at first bit of the 64 bits value
@@ -137,9 +142,7 @@ class Parser:
             self.header_fields[T_GEONW_LP_HDG, 1] = [adapt_value(firstBytes[16]), 16]
             self.header_fields[T_GEONW_LP_RES, 1] = [adapt_value(firstBytes[17]), 32]
 
-
-            # Check if next 4 bits are 0000
-            # TRy to compress the packet with just one rule now
+            # Geonetworking header is fully parsed
             pos = 40
 
 
@@ -300,6 +303,26 @@ class Parser:
         return self.header_fields, pkt[pos:], None
 
 
+def getFL(field_id):
+    """
+    Returns the length of a field in bits
+    """
+    if field_id in FIELD__DEFAULT_PROPERTY:
+        return FIELD__DEFAULT_PROPERTY[field_id]["FL"]
+    else:
+        raise ValueError("Field ID {} not found".format(field_id))
+
+def buildPacket(bitarrayPacket, fieldDescription, *fields):
+    for field in fields:
+        fieldValue, _ = fieldDescription[(field, 1)]
+        fieldLength = getFL(field)
+        targetValue = bitarray()
+        targetValue.frombytes(fieldValue)
+        targetValue = targetValue[-fieldLength:]  # take the last bits
+        bitarrayPacket.extend(targetValue)
+
+    return bitarrayPacket
+
 class Unparser:
 
     def _init(self):
@@ -313,6 +336,96 @@ class Unparser:
         L4header = None
         L7header = None
         coap_h   = None
+
+        if (T_GEONW_VER, 1) in header_d: # doing GEONW
+            packet = bitarray()
+            # Version nibble
+
+            packet = buildPacket(packet, header_d, T_GEONW_VER,
+                                 T_GEONW_BH_NXT, T_GEONW_BH_RES,
+                                 T_GEONW_BH_LT, T_GEONW_BH_RHL,
+                                    T_GEONW_CH_NH, T_GEONW_CH_RES1,
+                                    T_GEONW_CH_HT, T_GEONW_CH_HST,
+                                    T_GEONW_CH_TC, T_GEONW_CH_FLAGS,T_GEONW_CH_RES2,
+                                    T_GEONW_CH_PL, T_GEONW_CH_MHL, 
+                                    
+            )
+            print("Packet ", packet)
+            # print bitarray packet in hex
+            print("Packet in hex: ", hexlify(packet.tobytes()))
+
+            """
+            packet = buildPacket()
+            fieldValue, _ = header_d[(T_GEONW_VER, 1)]
+            fieldLength = getFL(T_GEONW_VER)
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]  # take the last bits
+            packet.extend(targetValue)
+        
+            # Next header nibble
+            fieldValue, _ = header_d[(T_GEONW_BH_NXT, 1)]
+            fieldLength = getFL(T_GEONW_BH_NXT)
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Reserved nibble
+            fieldValue, _ = header_d[(T_GEONW_BH_RES, 1)]
+            fieldLength = getFL(T_GEONW_BH_RES)
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Length nibble
+            fieldValue, _ = header_d[(T_GEONW_BH_LT, 1)]
+            fieldLength = getFL(T_GEONW_BH_LT)
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # RHL (remaining header length) nibble
+            fieldValue, _ = header_d[(T_GEONW_BH_RHL, 1)]
+            fieldLength = getFL(T_GEONW_BH_RHL)
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Common Header next header nibble
+            fieldValue, fieldLength = header_d[(T_GEONW_CH_NH, 1)]
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Reserved nibble
+            fieldValue, fieldLength = header_d[(T_GEONW_CH_RES1, 1)]
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Header type nibble
+            fieldValue, fieldLength = header_d[(T_GEONW_CH_HT, 1)]
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+
+            # Header sub-type nibble
+            fieldValue, fieldLength = header_d[(T_GEONW_CH_HST, 1)]
+            targetValue = bitarray()
+            targetValue.frombytes(fieldValue)
+            targetValue = targetValue[-fieldLength:]
+            packet.extend(targetValue)
+            """
+
+
+            
 
         if (T_IPV6_VER, 1) in header_d: # doing IPv6 and UDP
 
