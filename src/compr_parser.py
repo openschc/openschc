@@ -319,6 +319,13 @@ def buildPacket(bitarrayPacket, fieldDescription, *fields):
         targetValue = bitarray()
         targetValue.frombytes(fieldValue)
         targetValue = targetValue[-fieldLength:]  # take the last bits
+        # Bit of a hack, we need to extend the bitarray targetValue to match the field length by adding leading zeros
+        # Correct way to fix it would be to parse the field-value properly as bits and not as bytes
+        if len(targetValue) < fieldLength:
+            print("Warning: Field {} value {} with length {} is shorter than expected length {}, padding with leading zeros".format(field, fieldValue,   
+                                                                                                                     len(targetValue), fieldLength))
+            targetValue = bitarray('0' * (fieldLength - len(targetValue))) + targetValue
+
         bitarrayPacket.extend(targetValue)
 
     return bitarrayPacket
@@ -347,84 +354,16 @@ class Unparser:
                                     T_GEONW_CH_NH, T_GEONW_CH_RES1,
                                     T_GEONW_CH_HT, T_GEONW_CH_HST,
                                     T_GEONW_CH_TC, T_GEONW_CH_FLAGS,T_GEONW_CH_RES2,
-                                    T_GEONW_CH_PL, T_GEONW_CH_MHL, 
-                                    
+                                    T_GEONW_CH_PL, T_GEONW_CH_MHL, T_GEONW_CH_RES3,
+                                    T_GEONW_LP_GN_ADDR_M, T_GEONW_LP_GN_ADDR_TPT,
+                                    T_GEONW_LP_GN_ADDR_RES, T_GEONW_LP_GN_ADDR_MID,
+                                    T_GEONW_LP_TS, T_GEONW_LP_LAT,
+                                    T_GEONW_LP_LON, T_GEONW_LP_PAI,
+                                    T_GEONW_LP_SPD, T_GEONW_LP_HDG, T_GEONW_LP_RES
+
             )
-            print("Packet ", packet)
-            # print bitarray packet in hex
-            print("Packet in hex: ", hexlify(packet.tobytes()))
-
-            """
-            packet = buildPacket()
-            fieldValue, _ = header_d[(T_GEONW_VER, 1)]
-            fieldLength = getFL(T_GEONW_VER)
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]  # take the last bits
-            packet.extend(targetValue)
-        
-            # Next header nibble
-            fieldValue, _ = header_d[(T_GEONW_BH_NXT, 1)]
-            fieldLength = getFL(T_GEONW_BH_NXT)
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Reserved nibble
-            fieldValue, _ = header_d[(T_GEONW_BH_RES, 1)]
-            fieldLength = getFL(T_GEONW_BH_RES)
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Length nibble
-            fieldValue, _ = header_d[(T_GEONW_BH_LT, 1)]
-            fieldLength = getFL(T_GEONW_BH_LT)
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # RHL (remaining header length) nibble
-            fieldValue, _ = header_d[(T_GEONW_BH_RHL, 1)]
-            fieldLength = getFL(T_GEONW_BH_RHL)
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Common Header next header nibble
-            fieldValue, fieldLength = header_d[(T_GEONW_CH_NH, 1)]
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Reserved nibble
-            fieldValue, fieldLength = header_d[(T_GEONW_CH_RES1, 1)]
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Header type nibble
-            fieldValue, fieldLength = header_d[(T_GEONW_CH_HT, 1)]
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-
-            # Header sub-type nibble
-            fieldValue, fieldLength = header_d[(T_GEONW_CH_HST, 1)]
-            targetValue = bitarray()
-            targetValue.frombytes(fieldValue)
-            targetValue = targetValue[-fieldLength:]
-            packet.extend(targetValue)
-            """
-
-
+       
+            return packet
             
 
         if (T_IPV6_VER, 1) in header_d: # doing IPv6 and UDP

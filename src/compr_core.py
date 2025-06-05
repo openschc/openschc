@@ -419,7 +419,7 @@ class Decompressor:
         # Get payload length by subtracting the packet length, and rule id length from schc length , in bits
         payloadLength = self.totalPacketLength - self.schcPacketLength - self.ruleIDLength
         # in bytes
-        payloadLengthBytes =  int(payloadLength / 8) & 0xFFFF
+        payloadLengthBytes =  int(payloadLength / 8) 
 
         #print(payloadLengthBytes.to_bytes(2, byteorder='big'), rule[T_FL])  # return as bytes and length in bits
         return (payloadLengthBytes.to_bytes(2, byteorder='big'), rule[T_FL])  # return as bytes and length in bits
