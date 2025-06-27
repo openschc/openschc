@@ -40,7 +40,7 @@ print(dm.ascii_tree(no_types=True, val_count=True), end='')
 
 
 print ("FULL SET OF RULES")
-sor=rm.manipulate_coreconf(device="test:device1", sid=1000095) # get full conf
+sor=rm.manipulate_coreconf(device="test:device1", sid=5095) # get full conf
 pprint.pprint (sor)
 
 print ("RULE 5/3")
@@ -49,23 +49,23 @@ pprint.pprint (rule_5_3)
 
 print ("IPv6 VERSION TV")
 ipv6_version_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
-                                        keys= [5, 3, 1000068, 1, 1000018]) 
+                                        keys= [5, 3, 5068, 1, 5018]) 
 pprint.pprint (ipv6_version_tv)
 
 
 print ("IPv6 VERSION VALUE")
 ipv6_version_value = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value/value", 
-                                        keys= [5, 3, 1000068, 1, 1000018, 0]) 
+                                        keys= [5, 3, 5068, 1, 5018, 0]) 
 pprint.pprint (ipv6_version_value)
 
 print ("APP PREFIX TV")
 app_prefix_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value", 
-                                        keys= [5, 3, 1000057, 1, 1000018,]) 
+                                        keys= [5, 3, 5057, 1, 5018, 0]) 
 pprint.pprint (app_prefix_tv)
 
 print ("APP PREFIX VALUE 1")
 app_prefix_tv = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule/entry/target-value/value", 
-                                        keys= [5, 3, 1000057, 1, 1000018, 1]) 
+                                        keys= [5, 3, 5057, 1, 5018, 1]) 
 pprint.pprint (app_prefix_tv)
 
 print ("URI QUERY MSB VAL")
@@ -119,12 +119,12 @@ print ("CHANGE AN EXISTING RULE")
 
 intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule", 
                                         keys=[6, 3],
-                                        value={33: 3, 34: 6, 35: 1000090})
+                                        value={33: 3, 34: 6, 35: 5090})
 rm.Print()
 
 print ("ADD A RULE")
 
 intermediary_result = rm.manipulate_coreconf(device="test:device1", sid="/ietf-schc:schc/rule", 
                                         keys=[10, 8],
-                                        value={33: 8, 34: 10, 35: 1000090}, validate=dm) # 33: and 34: useless since in key
+                                        value={33: 8, 34: 10, 35: 5090}, validate=dm) # 33: and 34: useless since in key
 rm.Print()

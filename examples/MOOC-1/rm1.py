@@ -1,6 +1,6 @@
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '../../src/')
+sys.path.insert(0,'../../src/')
 
 from gen_rulemanager import *
 

@@ -29,7 +29,7 @@ class ConnectivityManager:
     """
 
     def __init__(self):
-        self.mtu = 5000
+        self.mtu = 30
 
     def get_mtu (self, device):
         """
@@ -79,7 +79,7 @@ class SessionManager:
 
     def delete_session(self, session_id):
         self.session_table.pop(session_id)
-        print("SessionManager: deleted", session_id)
+        #print("SessionManager: deleted", session_id)
 
     def create_reassembly_session(self, context, rule, session_id): #TODO
         session_id = self._filter_session_id(session_id)  
@@ -104,7 +104,7 @@ class SessionManager:
         print("protocol.py : create_reassembly_session, core_id, device_id", core_id, device_id)
         return session
 
-    def create_fragmentation_session(self, core_id, device_id, context, rule,verbose=None):
+    def create_fragmentation_session(self, core_id, device_id, context, rule,verbose=None, fecrule = None):
         #print("create frag session: core_id, device_id", core_id, device_id )
         if self.unique_peer:
             l2_address = None #TODO
@@ -129,7 +129,10 @@ class SessionManager:
         mode = rule[T_FRAG][T_FRAG_MODE]
         #print ('fragmentation mode:' , mode)
         if mode == T_FRAG_NO_ACK:
-            session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
+            if not fecrule:
+                session = FragmentNoAck(rule, 12, self.protocol, context, dtag) #TODO : refactor MTU
+            else:
+                session = FragmentNoAck(rule, 12, self.protocol, context, dtag, fecrule)
         elif mode == T_FRAG_ACK_ALWAYS:
             raise NotImplementedError(
                 "{} is not implemented yet.".format(mode))
@@ -292,20 +295,30 @@ class SCHCProtocol:
         """Search a fragmentation rule, create a session for it, return None if not found"""
         frag_rule = self.rule_manager.FindFragmentationRule(
                 deviceID=device_id, direction=direction)
-
+        
         if frag_rule is None:
             self._log("fragmentation rule not found")
             return None
-        
+
+        fec_rule = []                                   #only if it exists
+        for dev in self.rule_manager._ctxt:
+            for f in dev["SoR"]:
+                    if "ForwardErrorCorrection" in f:
+                        fec_rule.append(f)
+
+                    
         if verbose:       
             print("rule_id found :", frag_rule[T_RULEID])
         # Perform fragmentation
         rule = frag_rule
         context = None  # LT: don't know why context is needed, should be self.rule_manager which handle the context
         #self._log("fragmentation rule_id={}".format(rule[T_RULEID]))
-
-        session = self.session_manager.create_fragmentation_session(
-            core_id, device_id, context, rule, verbose=verbose)
+        if not fec_rule:
+            session = self.session_manager.create_fragmentation_session(
+                core_id, device_id, context, rule, verbose=verbose)
+        else:
+            session = self.session_manager.create_fragmentation_session(
+                core_id, device_id, context, rule, verbose=verbose, fecrule= fec_rule)
         if session is None:
             self._log("fragmentation session could not be created") # XXX warning
             return None

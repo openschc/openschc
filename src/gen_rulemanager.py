@@ -426,6 +426,9 @@ class RuleManager:
                 elif T_FRAG in n_rule:
                     r = self._create_fragmentation_rule(n_rule)
                     d["SoR"].append(r)
+                elif T_FRAG_FEC in n_rule :
+                    r = self._create_forwarderrorcorrection_rule(n_rule)
+                    d["SoR"].append(r)
                 elif T_NO_COMP in n_rule:
                     already_exists = self.FindNoCompressionRule(deviceID=device)
                     if already_exists == None:
@@ -439,6 +442,55 @@ class RuleManager:
                 else:
                     raise ValueError ("Rule type undefined")
                 #print (n_rule)
+
+    def _create_forwarderrorcorrection_rule(self, nrule):       #creation de nouvelle regle de FEC
+        arule = {}
+        if T_RULEID in nrule:
+            arule[T_RULEID] = nrule[T_RULEID]
+        elif T_RULEIDVALUE in nrule:
+            arule[T_RULEID] = nrule[T_RULEIDVALUE]
+        else:
+            raise ValueError("Rule ID missing.")
+        
+        arule[T_RULEIDLENGTH] = nrule[T_RULEIDLENGTH]
+
+        arule[T_FRAG_FEC] = {}
+
+        fec_params = nrule.get(T_FRAG_FEC, {})
+        for required in [T_FRAG_FEC_BOUNDTO_ID, T_FRAG_FEC_BOUNDTO_LENGTH, T_FRAG_FEC_XORFRAGS]:        #paramètres obligatoires pour la FEC
+            if required not in fec_params:
+                raise ValueError(f"Missing required parameter '{required}' in ForwardErrorCorrection rule.")
+
+        bound_id = fec_params[T_FRAG_FEC_BOUNDTO_ID]
+        bound_len = fec_params[T_FRAG_FEC_BOUNDTO_LENGTH]
+        
+        frag_rule = None
+        for dev in self._ctxt:              # on retrouve la règle de frag classique, a laquelle la regle de FEC est attachée
+            for rule in dev["SoR"]:
+                if rule[T_RULEID] == bound_id and rule[T_RULEIDLENGTH] == bound_len and T_FRAG in rule:
+                    frag_rule = rule
+                    break
+            if frag_rule:
+                break
+        
+        if frag_rule is None:
+            raise ValueError(f"Forward error correction rule initialization : the associated fragmentation rule {bound_id}/{bound_len} doesnt exist.")
+        
+        # On sécurise l'acces a la FEC seulement au mode no-ack pour l'instant, TODO autoriser autres modes plus tard (AoE...)
+        if frag_rule[T_FRAG][T_FRAG_MODE] != T_FRAG_NO_ACK:
+            raise ValueError(f"You can use Forward Error Correction, only in No-ACK fragmentation mode")
+
+        arule[T_FRAG_FEC][T_FRAG_FEC_BOUNDTO_ID] = bound_id
+        arule[T_FRAG_FEC][T_FRAG_FEC_BOUNDTO_LENGTH] = bound_len
+        arule[T_FRAG_FEC][T_FRAG_FEC_XORFRAGS] = fec_params[T_FRAG_FEC_XORFRAGS]
+
+        # a partir d'ici, je peux copier des infos de la regle de frag originelle, par exemple comme ca :
+        # arule[T_FRAG_FEC]["FRMode"] = frag_rule[T_FRAG][T_FRAG_MODE]
+        arule[T_FRAG_FEC]["FRDirection"] = frag_rule[T_FRAG][T_FRAG_DIRECTION]
+        # TODO surement necessaire de rajouter des champs, surtout pour d'autre modes que NoACK
+        #arule[T_FRAG_FEC]["FRMode"] = frag_rule[T_FRAG][T_FRAG_MODE]
+
+        return arule
 
     def _create_fragmentation_rule (self, nrule):
         arule = {}
@@ -468,7 +520,6 @@ class RuleManager:
 
         arule[T_FRAG][T_FRAG_DIRECTION] = nrule[T_FRAG][T_FRAG_DIRECTION] 
 
-
         if  T_FRAG_MODE in nrule[T_FRAG]:
             if not T_FRAG_PROF in nrule[T_FRAG]:
                 arule[T_FRAG][T_FRAG_MODE] = {}
@@ -484,7 +535,11 @@ class RuleManager:
                 if nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_NO_ACK:
                     _default_value(arule, nrule, T_FRAG_DTAG_SIZE, 2)
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 0)
-                    _default_value (arule, nrule, T_FRAG_FCN, 1)
+                    if T_FRAG in nrule and T_FRAG_FCN in nrule[T_FRAG]:
+                        raise ValueError ("Don't specify FCN Size for NoAck Fragmentation rule")
+                    else:
+                        _default_value (arule, nrule, T_FRAG_FCN, 1)
+
                     _default_value(arule, nrule, T_FRAG_L2WORDSIZE, 8)
                 elif nrule[T_FRAG][T_FRAG_MODE] == T_FRAG_ACK_ALWAYS:
                     _default_value (arule, nrule, T_FRAG_W_SIZE, 1)
@@ -546,8 +601,6 @@ class RuleManager:
         if T_ACTION in nrule:
              print ("Warning: using experimental Action")
              arule[T_ACTION] = nrule[T_ACTION]
-
-
 
         arule[T_COMP] = []
 
@@ -752,6 +805,24 @@ class RuleManager:
                         ))
 
                     print ("\\" + "="*87 +"/")
+                elif T_FRAG_FEC in rule:                               # affiche de regle de FEC par le rule manager           vvv
+                    if rule[T_FRAG_FEC][T_FRAG_DIRECTION] == T_DIR_UP: # un peu ecrit en dur, quelques modif a faire pour rendre ca propre
+                        dir_c = "^"
+                    else:
+                        dir_c = "v"
+
+                    print ("!" + "="*25 + "+" + "="*61 +"\\")
+                    print ("!{} Forward Error Correction {:<58} {}!"
+                        .format(
+                            dir_c,
+                            "",
+                            dir_c
+                        ))
+                    print ("!{} Bound to the Fragmentation rule : {}/{} {:<45} {}!".format(dir_c, rule[T_FRAG_FEC][T_FRAG_FEC_BOUNDTO_ID],
+                            rule[T_FRAG_FEC][T_FRAG_FEC_BOUNDTO_LENGTH], "", dir_c))
+                    print ("!{} XorFrags : {} {:<71}{}!".format(dir_c, rule[T_FRAG_FEC][T_FRAG_FEC_XORFRAGS],"", dir_c))
+                    print ("\\" + "="*87 +"/")
+
                 elif T_NO_COMP in rule:
                     print ("+"+ "~"*25 + "+")
                     print ("|     NO COMPRESSION      |")
@@ -1596,7 +1667,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
 
                 if s+delta in self.sid_key_mapping: # A list we have keys, look for specific entry
                     # Raise an err if the number of SID keys are not the same as the number of keys in self.sid_key_mapping
-                    if len(self.sid_key_mapping[s+delta]) != len(keys):
+                    if len(self.sid_key_mapping[s+delta]) > len(keys):
                         raise ValueError ("Not enough keys values to locate the SID")
 
                     key_search = {}

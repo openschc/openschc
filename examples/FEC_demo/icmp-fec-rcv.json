@@ -1,0 +1,37 @@
+{
+  "DeviceID" : "udp:127.0.0.1:8888",
+  "SoR": [
+    {
+    "RuleID" : 28,
+    "RuleIDLength": 8,
+    "Compression": [
+      {"FID": "IPV6.VER", 
+       "TV": 6, "MO": "equal",     
+       "CDA": "not-sent"},
+
+      {"FID": "IPV6.TC",  
+       "TV": 0, "MO": "ignore",     
+       "CDA": "not-sent"},
+
+      {"FID": "IPV6.FL", 
+       "TV": 0, "MO": "ignore",
+       "CDA": "not-sent"}
+      ]
+    },{
+	"RuleID" : 8,
+	"RuleIDLength" : 4,
+	"Fragmentation" : {
+		"FRMode": "NoAck" ,
+		"FRDirection": "DW"
+		} 
+	},{
+	"RuleID" : 9,
+	"RuleIDLength" : 5,
+	"ForwardErrorCorrection" : {
+		"BoundToID": 8 ,
+    "BoundToLength" : 4,
+    "XorFrags" : 3
+	  	} 
+	  }
+  ]
+}

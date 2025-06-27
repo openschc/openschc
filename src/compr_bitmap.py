@@ -92,7 +92,7 @@ if __name__ == "__main__":
                     b.set_bit(0)
                     b.add_bits(pow(2,p-i)-1, p-i)
                     yield b
-                b = BitBuffer()
+                b = ()
                 b.add_bits(pow(2,p+1)-1, p+1)
                 yield b
 

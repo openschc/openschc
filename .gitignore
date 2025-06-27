@@ -2,6 +2,7 @@ src/__pycache__
 docs/Makefile
 .venv
 venv
+bin
 interop/dut
 
 # Created by https://www.gitignore.io/api/python,visualstudiocode

@@ -142,7 +142,7 @@ class ReassemblerNoAck(ReassembleBase):
     // Todo : Redaction
 
     """
-    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None, verbose=False):
+    def receive_frag(self, bbuf, dtag, protocol, core_id=None, device_id=None, iface=None, verbose=True):
         """
         return 
         - None if fragmentation is not finished
@@ -154,7 +154,7 @@ class ReassemblerNoAck(ReassembleBase):
         #dprint('state: {}, received fragment -> {}, rule-> {}'.format(self.state,
         #                                                             bbuf, self.rule))
         assert (T_FRAG in self.rule)
-
+        
         if (protocol.position == T_POSITION_CORE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_DW) or\
             (protocol.position == T_POSITION_DEVICE and self.rule[T_FRAG][T_FRAG_DIRECTION] == T_DIR_UP):
             schc_abort = frag_msg.frag_sender_rx(self.rule, bbuf)
@@ -165,8 +165,9 @@ class ReassemblerNoAck(ReassembleBase):
             return device_id, False
         else:        
             schc_frag = frag_msg.frag_receiver_rx(self.rule, bbuf)
+            print("test")
             #dprint("receiver frag received:", schc_frag.__dict__)
-
+            
             if verbose:
                 if schc_frag.rule[T_FRAG][T_FRAG_PROF][T_FRAG_DTAG_SIZE] == 0:
                     w_dtag = '-'

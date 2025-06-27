@@ -376,9 +376,31 @@ if __name__ == "__main__":
     bb.add_bits(1, 2)
     bb.ensure_padding()
 
+
+    bb.add_bits(1, 2)
+    bb.add_bits(1, 2)
     bb.display()
 
-    for i in range(0, 13):
-        dprint(bb.get_bits(8))
+    test_fec = []
+    test_fec.append(bb)
+    print(test_fec)
+
+    bb2 = bb.get_content()
+    bb3 = bb.get_content()
+
+
+    print("test : ", bb2 )
+    print("test2 : ", bb3 )
+
+    def xor_bytes(a: bytearray, b: bytearray) -> bytearray:
+        if len(a) != len(b):
+            raise ValueError("Les bytearrays doivent avoir la même taille pour le XOR.")
+        return bytearray(x ^ y for x, y in zip(a, b))
+
+    res = BitBuffer(xor_bytes(bb2, bb3))
+    #res.ensure_padding()
+
+    print("Résultat :", res)
+    #print("Hex :", res.hex())
 
 #---------------------------------------------------------------------------

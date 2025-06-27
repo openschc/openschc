@@ -68,7 +68,7 @@ class ScapyLowerLayer:
         time.sleep(self.protocol.sender_delay)
 
     def get_mtu_size(self):
-        return 400 # XXX
+        return 50 # XXX
 
     # ----- end AbstractLowerLayer interface
 

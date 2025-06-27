@@ -145,6 +145,15 @@ T_FRAG_L2WORDSIZE = "L2WordSize"     #YANG l2-word-size
 T_FRAG_LAST_TILE_IN_ALL1 = "lastTileInAll1" #YANG tile-in-all-1
 T_FRAG_RFC8724 = "RCS_CRC32"
 
+# --------------------- FEC section !!
+
+T_FRAG_FEC = "ForwardErrorCorrection"           #TypeRule  
+T_FRAG_FEC_BOUNDTO_ID = "BoundToID"             #Corresponds to the rule ID the FEC rule is bound to 
+T_FRAG_FEC_BOUNDTO_LENGTH = "BoundToLength"     #Corresponds to the rule Length the FEC rule is bound to 
+T_FRAG_FEC_XORFRAGS = "XorFrags"                #The number of fragments to be sent before sending the redondent frag
+
+# --------------------- end of FEC section !!
+
 T_POSITION_CORE = "core"
 T_POSITION_DEVICE = "device"
 
