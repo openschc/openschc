@@ -9,6 +9,8 @@ from contextlib import redirect_stdout
 import sys
 # micropython doesn't have fromhex()
 from binascii import unhexlify
+#from get_bit_c import *
+#libgb = lib
 
 BITS_PER_BYTE = 8
 
@@ -184,6 +186,31 @@ class BitBuffer:
         self._rpos = value
 
     def get_bits(self, nb_bits=1, position=None):
+        if position is None:
+            bitpos = self._rpos
+        else:
+            bitpos = position
+        if bitpos + nb_bits > self._wpos:
+            raise ValueError("data out of buffer")
+        value = 0
+        byte_offset = bitpos // 8
+        bit_offset = bitpos % 8
+        bits_left = nb_bits
+        while bits_left > 0:
+            current_byte = self._content[byte_offset]
+            bits_in_this_byte = min(8 - bit_offset, bits_left)
+            mask = ((1 << bits_in_this_byte) - 1) << (8 - bit_offset - bits_in_this_byte)
+            value = (value << bits_in_this_byte) | ((current_byte & mask) >> (8 - bit_offset - bits_in_this_byte))
+            bits_left -= bits_in_this_byte
+            byte_offset += 1
+            bit_offset = 0
+        if position is None:
+            self._rpos += nb_bits
+        return value
+
+
+
+    def get_bits_o(self, nb_bits=1, position=None):
         """ return an integer containinng nb_bits from the position.
         The most left bit is 0.
         if position is not specified, _rpos is incremented so that next

@@ -7,6 +7,7 @@ from gen_utils import dprint
 from gen_parameters import *
 
 import pprint
+import time
 
 from field_descriptions import FIELD__DEFAULT_PROPERTY, estimateSCHCPacketLength
 
@@ -65,9 +66,9 @@ class Compressor:
         pass
 
     def tx_cda_val_sent(self, field, rule, output, device_id=None):
-        dprint(field)
+        #dprint(field)
         if rule[T_FL] == "var":
-            dprint("VARIABLE")
+            #dprint("VARIABLE")
             assert (field[1]%8 == 0)
             size = field[1]//8 # var unit is bytes
             output.add_length(size)
@@ -76,12 +77,12 @@ class Compressor:
                 return
 
         if type(field[0]) is int:
-            dprint("+++", bin(field[0]), field[1])
+            #dprint("+++", bin(field[0]), field[1])
             output.add_bits(field[0], field[1])
         elif type(field[0]) is str:
             assert (field[1] % 8 == 0) # string is a number of bytes
             for i in range(field[1]//8):
-                dprint(i, field[0][i])
+                #dprint(i, field[0][i])
                 output.add_bytes(field[0][i].encode("utf-8"))
         elif type(field[0]) is bytes:
             output.add_bits(int.from_bytes(field[0], "big"), field[1])
@@ -98,7 +99,7 @@ class Compressor:
 
         size = len(bin(len(target_value)-1)[2:])
 
-        dprint("size of ", target_value, "is ", size)
+        #dprint("size of ", target_value, "is ", size)
 
         pos = 0
         for tv in target_value:
@@ -148,7 +149,7 @@ class Compressor:
 
         for i in range (0, len(compr_payload)):
             output.add_bits(compr_payload[i], 8)
-            output.display()
+            #output.display()
 
 
     def tx_cda_notyet(self, field, rule, output, device_id=None):
@@ -204,7 +205,7 @@ class Compressor:
             #output_bbuf.display(format="bin")
 
         for r in rule["Compression"]:
-            print("rule item:", r)
+            #print("rule item:", r)
 
             if r[T_DI] in [T_DIR_BI, direction]:
                 if (r[T_FID], r[T_FP]) in parsed_packet:
@@ -213,8 +214,8 @@ class Compressor:
                                                 rule = r,
                                                 output= output_bbuf,
                                                 device_id=device_id)
-                    output_bbuf.display(format="bin")
-                    output_bbuf.display(format="hex")
+                    #output_bbuf.display(format="bin")
+                    #output_bbuf.display(format="hex")
 
                 else: # not find in packet, but is variable length can be coded as 0
                     #dprint("send variable length")
@@ -223,7 +224,8 @@ class Compressor:
                 #dprint("rule skipped, bad direction")
                 pass
             if verbose:
-                output_bbuf.display(format="bin")
+                pass
+                #output_bbuf.display(format="bin")
                 #output_bbuf.display(format="hex")
 
         output_bbuf.add_bytes(data)
@@ -239,8 +241,8 @@ class Compressor:
         # set ruleID first.
         if rule[T_RULEID] is not None and rule[T_RULEIDLENGTH] is not None:
             output_bbuf.add_bits(rule[T_RULEID], rule[T_RULEIDLENGTH])
-            dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
-            output_bbuf.display(format="bin")
+            #dprint("rule {}/{}".format(rule[T_RULEID], rule[T_RULEIDLENGTH]))
+            #output_bbuf.display(format="bin")
 
         output_bbuf.add_bytes(data)
 
@@ -335,7 +337,7 @@ class Decompressor:
 
         if rule[T_FL] == "var":
             size = in_bbuf.get_length()*8
-            dprint("siZE = ", size)
+            #dprint("siZE = ", size)
             if size == 0:
                 return (None, 0)
         elif rule[T_FL] == "tkl":
@@ -508,15 +510,54 @@ class Decompressor:
         self.parsed_packet = {}
 
         rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
-
         assert (rule_send == rule["RuleID"])
 
         for r in rule["Compression"]:
             #dprint(r)
             if r[T_DI] in [T_DIR_BI, direction]:
                 full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
+
                 #dprint("<<<", full_field)
                 self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
+
+                #pprint.pprint (self.parsed_packet)
+
+        return self.parsed_packet
+
+
+    def decompress_time(self, schc, rule, direction,):
+        self.totalPacketLength = schc.count_added_bits()
+        self.ruleIDLength = rule[T_RULEIDLENGTH]
+        assert ("Compression" in rule)
+        schc.set_read_position(0)
+
+        self.parsed_packet = {}
+
+        input()
+        startTime = time.time()
+        rule_send = schc.get_bits(nb_bits=rule[T_RULEIDLENGTH])
+        endTime = time.time() - startTime
+        print("getBits: ", endTime*1000)
+
+        startTime = time.time()
+        assert (rule_send == rule["RuleID"])
+        endTime = time.time() - startTime
+        print("assert ", endTime)
+
+        for r in rule["Compression"]:
+            #dprint(r)
+            if r[T_DI] in [T_DIR_BI, direction]:
+                startTime = time.time()
+                full_field = self.__func_rx_cda[r[T_CDA]](r, schc)
+                endTime = time.time() - startTime
+                print("FullField ", endTime)
+
+                #dprint("<<<", full_field)
+                startTime = time.time()
+                self.parsed_packet[(r[T_FID], r[T_FP])] = full_field
+                endTime = time.time() - startTime
+                print("PP ", endTime)
+
                 #pprint.pprint (self.parsed_packet)
 
         return self.parsed_packet

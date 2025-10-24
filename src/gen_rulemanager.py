@@ -377,7 +377,7 @@ class RuleManager:
             for e_rule in d["SoR"]: # check no overlaps on RuleID
                 left_aligned_e_ruleID = e_rule[T_RULEID] << (32 - e_rule[T_RULEIDLENGTH])
                 if left_aligned_e_ruleID == left_aligned_n_ruleID:
-                    dprint ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
+                    #dprint ("Warning; Rule {}/{} exists not inserted".format(bin(n_ruleID), n_ruleLength) )
                     overlap = True
                     break
 
@@ -812,7 +812,7 @@ class RuleManager:
             schc = BitBuffer(schc)
 
         for d in self._ctxt:
-            dprint (d["DeviceID"])
+            #dprint (d["DeviceID"])
             if d["DeviceID"] == device: #look for a specific device
                 for r in d["SoR"]:
                     ruleID = r[T_RULEID]
@@ -820,7 +820,7 @@ class RuleManager:
 
                     tested_rule = schc.get_bits(ruleLength, position=0)
 
-                    dprint (tested_rule, ruleID)
+                    #dprint (tested_rule, ruleID)
                     if tested_rule == ruleID:
                         return r
 
@@ -872,9 +872,9 @@ class RuleManager:
                             else:
                                 if r[T_FL] == "var":  # entry not found, but variable length => accept
                                     matches += 1      # residue size set to 0
-                                    dprint("Suboptimal rule")
+                                    #dprint("Suboptimal rule")
                                 else:
-                                    dprint("field from rule not found in pkt")
+                                    #dprint("field from rule not found in pkt")
                                     break # field from rule not found in pkt, go to next
                             #print ("->", matches)
                     #print("-"*10, "matches:", matches, len(pkt), rule[T_META][T_UP_RULES], rule[T_META][T_DW_RULES])
@@ -1355,7 +1355,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                     cbor.dumps(r)
 
 
-            tv_array = self.cbor_header(0b100_00000, len(val)) + tv_array
+            tv_array = self.cbor_header(0b10000000, len(val)) + tv_array
             return tv_array
  
         module_sid = self.sid_search_for(name="/ietf-schc:schc", space="data")
@@ -1435,12 +1435,12 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                             tv_cbor
                             nb_elm += 1
  
-                        entry_cbor = self.cbor_header (0b101_00000, nb_elm) + entry_cbor # header MAP and size
+                        entry_cbor = self.cbor_header (0b10100000, nb_elm) + entry_cbor # header MAP and size
                         rule_content += entry_cbor
 
                     rule_content = b'\xA4' + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/entry", space="data") - rule_sid) + \
-                        self.cbor_header(0b100_00000, nb_entry) + rule_content + \
+                        self.cbor_header(0b10000000, nb_entry) + rule_content + \
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
@@ -1488,9 +1488,9 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
                         cbor.dumps(self.sid_search_for(name= YANG_ID[rule[T_FRAG][T_FRAG_MODE]][1], space="identity")) 
                     nb_elm += 1
                     
-                    rule_content = self.cbor_header(0b101_00000, nb_elm) + rule_content
+                    rule_content = self.cbor_header(0b10100000, nb_elm) + rule_content
                 elif T_NO_COMP in rule:
-                    rule_content = rule_content = self.cbor_header(0b101_00000, 3) +\
+                    rule_content = rule_content = self.cbor_header(0b10100000, 3) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-value", space="data") - rule_sid) +\
                         cbor.dumps(rule[T_RULEID]) +\
                         cbor.dumps(self.sid_search_for(name="/ietf-schc:schc/rule/rule-id-length", space="data") - rule_sid) +\
@@ -1504,7 +1504,7 @@ Some conversion capabilities may not works. see http://github.com/ltn22/pyang"""
             
         coreconf = b'\xA1' + cbor.dumps(module_sid) + b'\xA1' + cbor.dumps(rule_sid - module_sid) 
 
-        array_header = self.cbor_header(0b100_00000, rule_count) # array
+        array_header = self.cbor_header(0b10000000, rule_count) # array
 
         coreconf +=  array_header+full_rules
         return coreconf
