@@ -4,7 +4,7 @@
 """
 #---------------------------------------------------------------------------
 
-from gen_base_import import *
+from gen_base_import import b2hex
 from gen_utils import dprint
 
 import frag_msg

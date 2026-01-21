@@ -34,12 +34,16 @@ EXPECTED_RESULTS_ICMP = ({('IPV6.VER', 1): [b'\x06', 4], ('IPV6.TC', 1): [b'\x00
 #============================ tests ===========================================
 
 def test_import():
-    import compr_parser
+    import sys
+    sys.path.insert(0,'../src')
+    import src.compr_parser as cp
 
 def test_parse():
-    import compr_parser
+    import sys
+    sys.path.insert(0,'../src')
+    import src.compr_parser as cp
     
-    parser = compr_parser.Parser(None)
+    parser = cp.Parser(None)
     
     packets = []
     pcapngScanner = rdpcap("tests/coap_icmp.pcap")

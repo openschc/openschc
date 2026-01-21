@@ -231,6 +231,7 @@ class FragmentNoAck(FragmentBase):
                             frag_msg.get_mic_size(self.rule) +
                             remaining_data_size)
                 self.mic_sent = self.get_mic(self.mic_base, last_frag_base_size)
+                protocol.SessionManager.delete_session(self.session_id)
                 self.protocol.session_manager.delete_session(self._session_id)
                 print('MIC Size = ', frag_msg.get_mic_size(self.rule))
                 fcn = frag_msg.get_fcn_all_1(self.rule)

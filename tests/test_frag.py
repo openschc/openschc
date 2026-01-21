@@ -1,5 +1,5 @@
-import io
 import pytest
+import io
 import sys
 import tempfile
 
@@ -223,7 +223,8 @@ def frag_generic(rules_filename, packet_loss):
 
 #============================ tests ===========================================
 
-#@pytest.mark.skip(reason="no way of currently testing this") 
+#@pytest.mark.skip(reason="no way of currently testing this")
+@pytest 
 def test_frag_ack_on_error_no_loss(rule_ack_on_error):
     stdout = frag_generic(rule_ack_on_error, packet_loss=False)
     assert "msg_type_queue -> ['SCHC_ACK_OK']" in stdout
