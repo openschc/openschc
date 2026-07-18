@@ -323,9 +323,14 @@ FIELD__DEFAULT_PROPERTY = {
     T_COAP_TOKEN           : {"FL": "tkl",  "TYPE": int, "ALGO": "DIRECT"  },
     T_COAP_OPT_URI_HOST    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_URI_PATH    : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
+    T_COAP_OPT_OSCORE_FLAGS: {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_OSCORE_PIV  : {"FL": "var", "TYPE": bytes, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_OSCORE_KIDCTX:{"FL": "var", "TYPE": bytes, "ALGO": "COAP_OPTION"},
+    T_COAP_OPT_OSCORE_KID:   {"FL": "var", "TYPE": bytes, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_CONT_FORMAT : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_ACCEPT      : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_URI_QUERY   : {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
+    T_COAP_OPT_PROXY_SCHEME: {"FL": "var", "TYPE": str, "ALGO": "COAP_OPTION" },
     T_COAP_OPT_NO_RESP     : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"},
     T_COAP_OPT_OBS         : {"FL": "var", "TYPE": int, "ALGO": "COAP_OPTION"}
 }

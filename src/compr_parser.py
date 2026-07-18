@@ -25,6 +25,7 @@ option_names = {
     6: T_COAP_OPT_OBS,
     7: T_COAP_OPT_URI_PORT,
     8: T_COAP_OPT_URI_PATH,
+    9: T_COAP_OPT_OSCORE,
     11: T_COAP_OPT_URI_PATH,
     12: T_COAP_OPT_CONT_FORMAT,
     14: T_COAP_OPT_MAX_AGE,
@@ -205,26 +206,77 @@ class Parser:
                     pos += 1
                 # /!\ Larger value not implemented
 
-                # create a field_position counter if a field is repeated in the header
-                if option_number in field_position:
-                    field_position[option_number] += 1
+                if option_names.get(option_number) == T_COAP_OPT_OSCORE:
+                    if L > 0:
+                        piv_len = pkt[pos] & 0b00000111
+                        if piv_len in [6, 7]:
+                            raise ValueError("Reserved PIV length")
+                        has_kidctx = bool(pkt[pos] & 0b00010000)
+                        has_kid = bool(pkt[pos] & 0b00001000)
+                        kid_len = L
+
+                        if pkt[pos] & 0b10000000:
+                            # TBD add KUDOS support
+                            raise ValueError("OSCORE Extension 1 flag not supported")
+                        self.header_fields[T_COAP_OPT_OSCORE_FLAGS, 1] = [adapt_value(pkt[pos]), 8, "variable"]
+                        pos += 1
+                        kid_len -= 1
+                    else:
+                        piv_len = 0
+                        has_kidctx = False
+                        has_kid = False
+                        kid_len = 0
+                        self.header_fields[T_COAP_OPT_OSCORE_FLAGS, 1] = [b"", 0, "variable"]
+
+                    piv = []
+                    for i in range (0, piv_len):
+                        piv.append(pkt[pos])
+                        pos += 1
+                        kid_len -= 1
+                    self.header_fields[T_COAP_OPT_OSCORE_PIV, 1] = [bytes(piv), piv_len*8]
+
+                    kidctx_len = 0
+                    kidctx = []
+                    if has_kidctx:
+                        kidctx_len = pkt[pos]
+                        pos += 1
+                        kid_len -= 1
+
+                        for i in range (0, kidctx_len):
+                            kidctx.append(pkt[pos])
+                            pos += 1
+                            kid_len -= 1
+                    self.header_fields[T_COAP_OPT_OSCORE_KIDCTX, 1] = [bytes(kidctx), kidctx_len*8, "variable"]
+
+                    kid = []
+                    if has_kid:
+                        for i in range (0, kid_len):
+                            kid.append(pkt[pos])
+                            pos += 1
+                    else:
+                        assert kid_len == 0
+                    self.header_fields[T_COAP_OPT_OSCORE_KID, 1] = [bytes(kid), kid_len*8, "variable"]
                 else:
-                    field_position[option_number] = 1
+                    # create a field_position counter if a field is repeated in the header
+                    if option_number in field_position:
+                        field_position[option_number] += 1
+                    else:
+                        field_position[option_number] = 1
 
-                option_value = bytearray()
+                    option_value = bytearray()
 
-                for i in range (0, L):
-                    option_value.append(pkt[pos])
-                    pos += 1
-                    # /!\ check if max length is reached
+                    for i in range (0, L):
+                        option_value.append(pkt[pos])
+                        pos += 1
+                        # /!\ check if max length is reached
 
-                try:
-                    self.header_fields[option_names[option_number], field_position[option_number]] = [bytes(option_value), L*8,  "variable"]
-                except:
-                    print (binascii.hexlify(pkt))
-                    print ("position:", pos)
-                    print (self.header_fields)
-                    raise ValueError("CoAP Option {} not found".format(option_number))
+                    try:
+                        self.header_fields[option_names[option_number], field_position[option_number]] = [bytes(option_value), L*8,  "variable"]
+                    except:
+                        print (binascii.hexlify(pkt))
+                        print ("position:", pos)
+                        print (self.header_fields)
+                        raise ValueError("CoAP Option {} not found".format(option_number))
 
             if(pos < len(pkt)):
                 assert int(pkt[pos]) == 0xFF # if data reamins, an 0xFF must be present
@@ -342,6 +394,13 @@ class Unparser:
 
                 cumul_t = 0
                 # /!\ should sort the options before recontructing them
+                oscore_flags = None
+                oscore_piv_len = 0
+                oscore_piv = b""
+                oscore_has_kidctx = 0
+                oscore_kidctx = b""
+                oscore_has_kid = 0
+                oscore_kid = b""
                 for opt in header_d.items():
                     if not ("COAP" in opt[0][0]) or (opt[0][0] in [T_COAP_VERSION, T_COAP_TYPE, T_COAP_TKL, T_COAP_CODE, T_COAP_MID, T_COAP_TOKEN]):  
                         continue
@@ -349,35 +408,98 @@ class Unparser:
                     opt_name = opt[0][0].replace("COAP.", "")
                     opt_val  = opt[1][0]
                     opt_len  = opt[1][1]//8
-                    
-                    delta_t = coap_options["COAP."+opt_name] - cumul_t
-                    cumul_t = coap_options["COAP."+opt_name]
-                    #print (opt_name, coap_options[opt_name], delta_t)
-                    
-                    if delta_t < 13:
-                        dt = delta_t
+
+                    if "OSCORE." in opt_name:
+                        opt_name = T_COAP_OPT_OSCORE.replace("COAP.", "")
+                        oscore_field_name = opt[0][0]
                     else:
-                        dt = 13
-                        
+                        oscore_field_name = None
+
                     #print (opt_len, opt_val)
 
-                    if opt_len < 13:
-                        ol = opt_len
-                    else:
-                        ol = 13
+                    # Collect any OSCORE option fields
+                    if oscore_field_name == T_COAP_OPT_OSCORE_FLAGS:
+                        if opt_len > 0:
+                            oscore_flags = opt_val[0]
+
+                            if oscore_flags & 0b10000000:
+                                # TBD add KUDOS support
+                                raise ValueError("OSCORE Extension 1 flag not supported")
+
+                            oscore_piv_len = oscore_flags & 0b00000111
+                            if oscore_piv_len in [6, 7]:
+                                raise ValueError("Reserved PIV length")
+                            oscore_has_kidctx = bool(oscore_flags & 0b00010000)
+                            oscore_has_kid = bool(oscore_flags & 0b00001000)
+                    elif oscore_field_name == T_COAP_OPT_OSCORE_PIV:
+                        assert opt_len == oscore_piv_len and opt_len < 6
+                        for i in range(0, oscore_piv_len):
+                            oscore_piv += struct.pack("!B", opt_val[i])
+                    elif oscore_field_name == T_COAP_OPT_OSCORE_KIDCTX:
+                        assert not oscore_has_kidctx or opt_len > 0 and opt_len <= 0xff
+                        kidctx_len = opt_len
+                        if oscore_has_kidctx:
+                            oscore_kidctx += struct.pack("!B", kidctx_len)
+                            for i in range(0, kidctx_len):
+                                oscore_kidctx += struct.pack("!B", opt_val[i])
+                    elif oscore_field_name == T_COAP_OPT_OSCORE_KID:
+                        assert not oscore_has_kid or opt_len > 0 and opt_len <= 0xff
+                        kid_len = opt_len
+                        if oscore_has_kid:
+                            for i in range(0, kid_len):
+                                oscore_kid += struct.pack("!B", opt_val[i])
+
+                        # we have all OSCORE fields collected (KID is always last)
+                        # now reconstruct the OSCORE option
+                        if oscore_flags is None:
+                            opt_len = 0
+                        else:
+                            opt_val = struct.pack("!B", oscore_flags)
+                            opt_len = 1
+                            for i in range(0, oscore_piv_len):
+                                opt_val += struct.pack("!B", oscore_piv[i])
+                                opt_len += 1
+                            if oscore_has_kidctx:
+                                opt_val += struct.pack("!B", len(oscore_kidctx))
+                                for i in range(0, len(oscore_kidctx)):
+                                    opt_val += struct.pack("!B", oscore_kidctx[i])
+                                    opt_len += 1
+                            if oscore_has_kid:
+                                for i in range(0, len(oscore_kid)):
+                                    opt_val += struct.pack("!B", oscore_kid[i])
+                                    opt_len += 1
+
+                    # either we are not in an OSCORE field
+                    # or we just parsed the OSCORE KID field
+                    if (
+                        oscore_field_name is None
+                        or oscore_field_name == T_COAP_OPT_OSCORE_KID
+                    ):
+                        delta_t = coap_options["COAP."+opt_name] - cumul_t
+                        cumul_t = coap_options["COAP."+opt_name]
+                        #print (opt_name, coap_options[opt_name], delta_t)
                         
-                    coap_h += struct.pack("!B", (dt <<4) | ol)
+                        if delta_t < 13:
+                            dt = delta_t
+                        else:
+                            dt = 13
 
-                    if dt == 13:
-                        coap_h += struct.pack("!B", delta_t - 13)
+                        if opt_len < 13:
+                            ol = opt_len
+                        else:
+                            ol = 13
 
-                    if ol == 13:
-                        coap_h += struct.pack("!B", opt_len - 13)
+                        coap_h += struct.pack("!B", (dt <<4) | ol)
 
-                    #print (binascii.hexlify(coap_h))
+                        if dt == 13:
+                            coap_h += struct.pack("!B", delta_t - 13)
 
-                    for i in range (0, opt_len):
-                        coap_h += struct.pack("!B", opt_val[i])
+                        if ol == 13:
+                            coap_h += struct.pack("!B", opt_len - 13)
+
+                        #print (binascii.hexlify(coap_h))
+                        for i in range (0, opt_len):
+                            coap_h += struct.pack("!B", opt_val[i])
 
 
                 if len(data) > 0:

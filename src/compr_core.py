@@ -296,6 +296,12 @@ class Decompressor:
     #     self.protocol._log("MO {}: copy {}".format(rule[T_MO], tv))
     #     return tv
 
+    def _osc_piv(self):
+        oscore_flags = self.parsed_packet[(T_COAP_OPT_OSCORE_FLAGS, 1)][0]
+        if oscore_flags:
+            size_byte = oscore_flags[0] & 0b111
+            return size_byte * 8
+        return 0
 
     def rx_cda_not_sent(self, rule, in_bbuf):
         if rule[T_FL] == "var":
@@ -309,6 +315,8 @@ class Decompressor:
                     v >>=8
             else:
                 size="var" # should never happend
+        elif rule[T_FL] == T_FUNCTION_OSC_PIV:
+            size = self._osc_piv()
         else:
             size = rule[T_FL]
         
@@ -326,6 +334,8 @@ class Decompressor:
             size_byte = self.parsed_packet[(T_COAP_TKL, 1)][0]
             size = int.from_bytes(size_byte, "big")*8
             #print("token size", size)
+        elif rule[T_FL] == T_FUNCTION_OSC_PIV:
+            size = self._osc_piv()
         elif type (rule[T_FL]) == int:
             size = rule[T_FL]
         else:
@@ -373,6 +383,9 @@ class Decompressor:
         if rule[T_FL] == "var":
             send_length = in_bbuf.get_length()
             total_size = rule[T_MO_VAL] + send_length
+        elif rule[T_FL] == T_FUNCTION_OSC_PIV:
+            total_size  = self._osc_piv()
+            send_length = total_size - rule[T_MO_VAL]
         elif type(rule[T_TV]) is bytes:
             total_size = rule[T_FL]
             send_length = rule[T_FL] - rule[T_MO_VAL]

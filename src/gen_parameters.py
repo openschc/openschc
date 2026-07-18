@@ -63,6 +63,7 @@ T_COAP_OPT_IF_NONE_MATCH =  "COAP.IF-NONE-MATCH"
 T_COAP_OPT_OBS =  "COAP.OBSERVE"
 T_COAP_OPT_URI_PORT =  "COAP.URI-PORT"
 T_COAP_OPT_LOC_PATH = "COAP.LOCATION-PATH"
+T_COAP_OPT_OSCORE = "COAP.OSCORE"
 T_COAP_OPT_URI_PATH =  "COAP.URI-PATH"
 T_COAP_OPT_CONT_FORMAT =  "COAP.CONTENT-FORMAT"
 T_COAP_OPT_MAX_AGE =  "COAP.MAX-AGE"
@@ -78,12 +79,14 @@ T_COAP_OPT_SIZE1 =  "COAP.SIZE1"
 T_COAP_OPT_NO_RESP = "COAP.NO-RESPONSE"
 T_COAP_OPT_END = "COAP.End"
 
-T_FUNCTION_VAR = "var"
-T_FUNCTION_TKL = "tkl"
+T_COAP_OPT_OSCORE_FLAGS = "COAP.OSCORE.FLAGS"
+T_COAP_OPT_OSCORE_PIV = "COAP.OSCORE.PIV"
+T_COAP_OPT_OSCORE_KIDCTX = "COAP.OSCORE.KIDCTX"
+T_COAP_OPT_OSCORE_KID = "COAP.OSCORE.KID"
 
 T_FUNCTION_VAR = "var"
 T_FUNCTION_TKL = "tkl"
-
+T_FUNCTION_OSC_PIV = "osc.piv"
 
 T_DIR_UP = "UP"
 T_DIR_DW = "DW"
@@ -195,10 +198,10 @@ YANG_ID = {
     T_COAP_OPT_MAX_AGE : [SID+37, "fid-coap-option-max-age"],
     T_COAP_OPT_NO_RESP : [SID+38, "fid-coap-option-no-response"],
     T_COAP_OPT_OBS : [SID+39, "fid-coap-option-observe"],
-    "TBD":                    [SID+40, "fid-coap-option-oscore-flags"],
-    "TBD" : [SID+41, "fid-coap-option-oscore-kid"],
-    "TBD" : [SID+42, "fid-coap-option-oscore-kidctx"],
-    "TBD" : [SID+43, "fid-coap-option-oscore-piv"],
+    T_COAP_OPT_OSCORE_FLAGS : [SID+40, "fid-coap-option-oscore-flags"],
+    T_COAP_OPT_OSCORE_KID : [SID+41, "fid-coap-option-oscore-kid"],
+    T_COAP_OPT_OSCORE_KIDCTX : [SID+42, "fid-coap-option-oscore-kidctx"],
+    T_COAP_OPT_OSCORE_PIV : [SID+43, "fid-coap-option-oscore-piv"],
     T_COAP_OPT_PROXY_SCHEME : [SID+44, "fid-coap-option-proxy-scheme"],
     T_COAP_OPT_PROXY_URI : [SID+45, "fid-coap-option-proxy-uri"],
     T_COAP_OPT_SIZE1 : [SID+46, "fid-coap-option-size1"],
