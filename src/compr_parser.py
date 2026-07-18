@@ -56,9 +56,8 @@ class Parser:
         self.protocol = protocol
         self.header_fields = {}
 
-    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "CoAP"], 
-              coap_port = 5683,
-              start="IPv6"):
+    def parse(self, pkt, direction, layers=["IPv6", "ICMP", "UDP", "DTLS", "CoAP"],
+              coap_port = 5683, dtls_port = 5684, start="IPv6"):
         """
         Parsing a byte array:
         - pkt is the bytearray to be parsed
@@ -139,6 +138,9 @@ class Parser:
             if udpBytes[0] == coap_port or udpBytes[1] == coap_port:
                 next_layer = "CoAP"
 
+            if udpBytes[0] == dtls_port or udpBytes[1] == dtls_port:
+                next_layer = "DTLS"
+
         if "ICMP" in layers and next_layer == "ICMP":
             icmpBytes = unpack('!BBH', pkt[pos:pos+4])
 
@@ -161,7 +163,150 @@ class Parser:
                 self.header_fields[T_ICMPV6_PAYLOAD, 1]       = [adapt_value(pkt[pos:]), (len(pkt)- pos)*8]
                 pos = len(pkt)
 
-                
+        if "DTLS" in layers and next_layer == "DTLS":
+            dtlsRecBytes = unpack('!BHH6sH', pkt[pos:pos+13])
+            pos += 13
+
+            rec_type = dtlsRecBytes[0]
+            rec_epoch = dtlsRecBytes[2]
+            rec_len = dtlsRecBytes[4]
+            self.header_fields[T_DTLS_REC_CONTENT_TYPE, 1]   = [adapt_value(dtlsRecBytes[0]), 8]
+            self.header_fields[T_DTLS_REC_VERSION, 1]        = [adapt_value(dtlsRecBytes[1]), 16]
+            self.header_fields[T_DTLS_REC_EPOCH, 1]          = [adapt_value(rec_epoch), 16]
+            self.header_fields[T_DTLS_REC_SEQ, 1]            = [adapt_value(dtlsRecBytes[3]), 48]
+            self.header_fields[T_DTLS_REC_LEN, 1]            = [adapt_value(rec_len), 16]
+
+            if rec_type == 20:
+                self.header_fields[T_DTLS_CHANGE_CIPHER_SPEC, 1]  = [adapt_value(pkt[pos]), 8]
+                pos += 1
+            elif rec_type == 22 and rec_epoch == 0:
+                dtlsHsHdr = unpack('!B3sH3s3s', pkt[pos:pos+12])
+                pos += 12
+
+                hs_type = dtlsHsHdr[0]
+
+                self.header_fields[T_DTLS_HS_TYPE, 1]        = [adapt_value(hs_type), 8]
+                self.header_fields[T_DTLS_HS_LEN, 1]         = [adapt_value(dtlsHsHdr[1]), 24]
+                self.header_fields[T_DTLS_HS_MSG_SEQ, 1]     = [adapt_value(dtlsHsHdr[2]), 16]
+                self.header_fields[T_DTLS_HS_FRAG_OFFSET, 1] = [adapt_value(dtlsHsHdr[3]), 24]
+                self.header_fields[T_DTLS_HS_FRAG_LEN, 1]    = [adapt_value(dtlsHsHdr[4]), 24]
+
+                # TODO verify frag_len and lengths in general
+
+                if hs_type in [1, 2]:
+                    fields = {
+                        1: {
+                            "version": T_DTLS_HS_CH_VERSION,
+                            "random": T_DTLS_HS_CH_RANDOM,
+                            "session_id": T_DTLS_HS_CH_SESSION_ID,
+                            "cookie": T_DTLS_HS_CH_COOKIE,
+                            "cipher_suites": T_DTLS_HS_CH_CIPHER_SUITES,
+                            "comp_methods": T_DTLS_HS_CH_COMP_METHODS,
+                            "exts": T_DTLS_HS_CH_EXTS,
+                        },
+                        2: {
+                            "version": T_DTLS_HS_SH_VERSION,
+                            "random": T_DTLS_HS_SH_RANDOM,
+                            "session_id": T_DTLS_HS_SH_SESSION_ID,
+                            "cipher_suites": T_DTLS_HS_SH_CIPHER_SUITE,
+                            "comp_methods": T_DTLS_HS_SH_COMP_METHOD,
+                            "exts": T_DTLS_HS_SH_EXTS,
+                        },
+                    }
+
+                    (
+                        version,
+                        random,
+                        session_id_len,
+) = unpack("!H32sB", pkt[pos:pos+35])
+                    pos += 35
+
+                    self.header_fields[fields[hs_type]["version"], 1]       = [adapt_value(version), 16]
+                    self.header_fields[fields[hs_type]["random"], 1]        = [adapt_value(random), 256]
+
+                    session_id = b''
+
+                    for _ in range(session_id_len):
+                        session_id += pkt[pos:pos+1]
+                        pos += 1
+
+                    self.header_fields[fields[hs_type]["session_id"], 1]    = [adapt_value(session_id), session_id_len * 8, "variable"]
+
+                    if hs_type == 1:  # cookie and multiple cipher suites and compression methods only appears in Client Hello
+                        cookie_len = pkt[pos]
+                        pos += 1
+
+                        cookie = b''
+                        for _ in range(cookie_len):
+                            cookie += pkt[pos:pos+1]
+                            pos += 1
+
+                        self.header_fields[fields[hs_type]["cookie"], 1]        = [adapt_value(cookie), cookie_len * 8, "variable"]
+
+                        (cipher_suite_len,) = unpack("!H", pkt[pos:pos+2])
+                        pos += 2
+
+                        cipher_suites = b''
+                        for _ in range(cipher_suite_len):
+                            cipher_suites += pkt[pos:pos+1]
+                            pos += 1
+
+                        self.header_fields[fields[hs_type]["cipher_suites"], 1] = [adapt_value(cipher_suites), cipher_suite_len * 8, "variable"]
+
+                        comp_meth_len = pkt[pos]
+                        pos += 1
+
+                        comp_methods = b''
+                        for _ in range(comp_meth_len):
+                            comp_methods += pkt[pos:pos+1]
+                            pos += 1
+
+                        self.header_fields[fields[hs_type]["comp_methods"], 1]  = [adapt_value(comp_methods), comp_meth_len * 8, "variable"]
+                    else:
+                        cipher_suites, comp_methods = unpack('!HB', pkt[pos:pos+3])
+                        pos += 3
+
+                        self.header_fields[fields[hs_type]["cipher_suites"], 1] = [adapt_value(cipher_suites), 16, "variable"]
+                        self.header_fields[fields[hs_type]["comp_methods"], 1]  = [adapt_value(comp_methods), 8, "variable"]
+
+
+                    if pos < len(pkt):
+                        (ext_len,) = unpack("!H", pkt[pos:pos+2])
+                        pos += 2
+
+                        extensions = b''
+                        for _ in range(ext_len):
+                            extensions += pkt[pos:pos+1]
+                            pos += 1
+
+                        self.header_fields[fields[hs_type]["exts"], 1]      = [adapt_value(extensions), ext_len * 8, "variable"]
+                    assert pos == len(pkt), f"pos = {pos} != {len(pkt)} = len(pkt)"  # TODO remove
+                elif hs_type == 3:
+                    (
+                        server_version,
+                        cookie_len,
+                    ) = unpack("!HB", pkt[pos:pos+3])
+                    pos += 3
+
+                    self.header_fields[T_DTLS_HS_SVR_VERSION, 1]            = [adapt_value(server_version), 16]
+
+                    cookie = b''
+                    for _ in range(cookie_len):
+                        cookie += pkt[pos:pos+1]
+                        pos += 1
+
+                    self.header_fields[T_DTLS_HS_SVR_COOKIE, 1]             = [adapt_value(cookie), cookie_len * 8, "variable"]
+                elif hs_type == 16:
+                    (identity_len,) = unpack("!H", pkt[pos:pos+2])
+                    pos += 2
+
+                    identity = b''
+                    for _ in range(identity_len):
+                        identity += pkt[pos:pos+1]
+                        pos += 1
+
+                    self.header_fields[T_DTLS_HS_CKE_IDENTITY, 1]           = [adapt_value(identity), identity_len * 8, "variable"]
+
         if "CoAP" in layers and next_layer == "CoAP":
             field_position = {}
             coapBytes = unpack('!BBH', pkt[pos:pos+4])
@@ -246,6 +391,7 @@ class Unparser:
         L3header = None
         L4header = None
         L7header = None
+        dtls_h   = None
         coap_h   = None
 
         if (T_IPV6_VER, 1) in header_d: # doing IPv6 and UDP
@@ -322,6 +468,161 @@ class Unparser:
 #            else:
 #                raise ValueError("TBD")
 
+            if (T_DTLS_REC_VERSION, 1) in header_d: # IPv6 / UDP /DTLS
+                dtls_h = b""
+                dtls_rec_ct = int.from_bytes(
+                    header_d[(T_DTLS_REC_CONTENT_TYPE, 1)][0],
+                    byteorder="big",
+                )
+                dtls_rec_ver = int.from_bytes(
+                    header_d[(T_DTLS_REC_VERSION, 1)][0],
+                    byteorder="big",
+                )
+                dtls_rec_epoch = int.from_bytes(
+                    header_d[(T_DTLS_REC_EPOCH, 1)][0],
+                    byteorder="big",
+                )
+                dtls_rec_seq = header_d[(T_DTLS_REC_SEQ, 1)][0]
+                if header_d[(T_DTLS_REC_LEN, 1)][0] != "LLLL":
+                    dtls_rec_len = int.from_bytes(
+                        header_d[(T_DTLS_REC_LEN, 1)][0],
+                        byteorder="big",
+                    )
+
+                if dtls_rec_ct == 20 and (T_DTLS_CHANGE_CIPHER_SPEC, 1) in header_d:
+                    dtls_record = header_d[(T_DTLS_CHANGE_CIPHER_SPEC, 1)][0]
+                    dtls_record += data
+                elif dtls_rec_ct == 22 and (T_DTLS_HS_TYPE, 1) in header_d:
+                    dtls_hs_type = int.from_bytes(
+                        header_d[(T_DTLS_HS_TYPE, 1)][0],
+                        byteorder="big",
+                    )
+                    dtls_hs_msg_seq = int.from_bytes(
+                        header_d[(T_DTLS_HS_MSG_SEQ, 1)][0],
+                        byteorder="big",
+                    )
+                    dtls_hs_frag_offset = int.from_bytes(
+                        header_d[(T_DTLS_HS_FRAG_OFFSET, 1)][0],
+                        byteorder="big",
+                    )
+                    if header_d[(T_DTLS_HS_LEN, 1)][0] != "LLLLLL":
+                        dtls_hs_len = int.from_bytes(
+                            header_d[(T_DTLS_HS_LEN, 1)][0],
+                            byteorder="big",
+                        )
+                    if header_d[(T_DTLS_HS_FRAG_LEN, 1)][0] != "LLLLLL":
+                        dtls_hs_frag_len = int.from_bytes(
+                            header_d[(T_DTLS_HS_FRAG_LEN, 1)][0],
+                            byteorder="big",
+                        )
+
+                    if dtls_hs_type in [1, 2]:
+                        fields = {
+                            1: {
+                                "version": T_DTLS_HS_CH_VERSION,
+                                "random": T_DTLS_HS_CH_RANDOM,
+                                "session_id": T_DTLS_HS_CH_SESSION_ID,
+                                "cookie": T_DTLS_HS_CH_COOKIE,
+                                "cipher_suites": T_DTLS_HS_CH_CIPHER_SUITES,
+                                "comp_methods": T_DTLS_HS_CH_COMP_METHODS,
+                                "exts": T_DTLS_HS_CH_EXTS,
+                            },
+                            2: {
+                                "version": T_DTLS_HS_SH_VERSION,
+                                "random": T_DTLS_HS_SH_RANDOM,
+                                "session_id": T_DTLS_HS_SH_SESSION_ID,
+                                "cipher_suites": T_DTLS_HS_SH_CIPHER_SUITE,
+                                "comp_methods": T_DTLS_HS_SH_COMP_METHOD,
+                                "exts": T_DTLS_HS_SH_EXTS,
+                            },
+                        }
+                        dtls_hs_version = int.from_bytes(
+                            header_d[(fields[dtls_hs_type]["version"], 1)][0],
+                            byteorder="big",
+                        )
+                        dtls_hs_random = header_d[(fields[dtls_hs_type]["random"], 1)][0]
+                        dtls_hs_session_id = header_d[(fields[dtls_hs_type]["session_id"], 1)][0]
+                        dtls_hs_cipher_suite = header_d[(fields[dtls_hs_type]["cipher_suites"], 1)][0]
+                        dtls_hs_comp_methods = header_d[(fields[dtls_hs_type]["comp_methods"], 1)][0]
+                        if (fields[dtls_hs_type]["exts"], 1) in header_d:
+                            dtls_hs_exts = header_d[(fields[dtls_hs_type]["exts"], 1)][0]
+                        else:
+                            dtls_hs_exts = None
+
+                        dtls_fragment = struct.pack(
+                            "!H32s", dtls_hs_version, dtls_hs_random,
+                        )
+                        dtls_fragment += struct.pack("!B", len(dtls_hs_session_id))
+                        dtls_fragment += dtls_hs_session_id
+
+                        if dtls_hs_type == 1:
+                            dtls_hs_cookie = header_d[(fields[dtls_hs_type]["cookie"], 1)][0]
+                            if dtls_hs_cookie:
+                                dtls_fragment += struct.pack("!B", len(dtls_hs_cookie))
+                                dtls_fragment += dtls_hs_cookie
+                            else:
+                                dtls_fragment += b"\x00"
+
+                        if dtls_hs_type == 1:
+                            dtls_fragment += struct.pack("!H", len(dtls_hs_cipher_suite))
+                        dtls_fragment += dtls_hs_cipher_suite
+
+                        if dtls_hs_type == 1:
+                            dtls_fragment += struct.pack("!B", len(dtls_hs_comp_methods))
+                        dtls_fragment += dtls_hs_comp_methods
+
+                        if dtls_hs_exts:
+                            dtls_fragment += struct.pack("!H", len(dtls_hs_exts))
+                            dtls_fragment += dtls_hs_exts
+                    elif dtls_hs_type == 3:
+                        dtls_hs_version = int.from_bytes(
+                            header_d[(T_DTLS_HS_SVR_VERSION, 1)][0],
+                            byteorder="big",
+                        )
+                        dtls_hs_cookie = header_d[(T_DTLS_HS_SVR_COOKIE, 1)][0]
+
+                        dtls_fragment = struct.pack("!H", dtls_hs_version)
+
+                        dtls_fragment += struct.pack("!B", len(dtls_hs_cookie))
+                        dtls_fragment += dtls_hs_cookie
+                    elif dtls_hs_type == 16:
+                        dtls_hs_identity = header_d[(T_DTLS_HS_CKE_IDENTITY, 1)][0]
+
+                        dtls_fragment = struct.pack("!H", len(dtls_hs_identity))
+                        dtls_fragment += dtls_hs_identity
+                    else:
+                        dtls_fragment = b""
+                    dtls_fragment += data
+                    if header_d[(T_DTLS_HS_LEN, 1)][0] == "LLLLLL":
+                        dtls_hs_len = len(dtls_fragment)
+                    if header_d[(T_DTLS_HS_FRAG_LEN, 1)][0] == "LLLLLL":
+                        dtls_hs_frag_len = len(dtls_fragment)
+
+                    dtls_record = struct.pack(
+                        "!B3sH3s3s",
+                        dtls_hs_type,
+                        dtls_hs_len.to_bytes(3, "big"),
+                        dtls_hs_msg_seq,
+                        dtls_hs_frag_offset.to_bytes(3, "big"),
+                        dtls_hs_frag_len.to_bytes(3, "big"),
+                    )
+                    dtls_record += dtls_fragment
+                else:
+                    dtls_record = data
+
+                if header_d[(T_DTLS_REC_LEN, 1)][0] == "LLLL":
+                    dtls_rec_len = len(dtls_record)
+
+                dtls_h += struct.pack(
+                    "!BHH6sH",
+                    dtls_rec_ct,
+                    dtls_rec_ver,
+                    dtls_rec_epoch,
+                    dtls_rec_seq,
+                    dtls_rec_len,
+                )
+                dtls_h += dtls_record
+
             if (T_COAP_VERSION, 1) in header_d: # IPv6 / UDP / COAP
                 #print ("CoAP Inside")
 
@@ -387,8 +688,9 @@ class Unparser:
                 #print (binascii.hexlify(coap_h))
 
 
-
-        if coap_h != None:
+        if dtls_h != None:
+            full_packet = L3header / L4header / Raw(load=dtls_h)
+        elif coap_h != None:
             full_packet = L3header / L4header / Raw(load=coap_h)
         elif L4header != None: 
             full_packet = L3header / L4header / Raw(load=data)

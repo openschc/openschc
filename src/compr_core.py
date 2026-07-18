@@ -332,7 +332,7 @@ class Decompressor:
             raise ValueError("cannot read field length")
         #in_bbuf.display("bin")
         val = in_bbuf.get_bits(size)
-        val_ba = adapt_value(val)
+        val_ba = adapt_value(val, size, rule[T_FID].upper())
 
         return [val_ba, size]
 
